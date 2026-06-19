@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hans & Czay — The Wedding Invitation</title>
+    <link rel="icon" type="image/svg+xml" href="hansandczay.svg">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        wedding: {
+                            cream: '#FCFAF6',
+                            ivory: '#F7F4EB',
+                            champagne: '#EFEAE0',
+                            beige: '#E4DCCE',
+                            burgundy: '#800020',
+                            burgundydark: '#4D0013',
+                            burgundylight: '#B53351',
+                            dark: '#1C1917',
+                            softdark: '#2A2421',
+                            deepburgundy: '#3A000E',
+                            charcoal: '#44403C'
+                        }
+                    },
+                    fontFamily: {
+                        cinzel: ['Cinzel', 'serif'],
+                        cormorant: ['Cormorant Garamond', 'serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FCFAF6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #800020;
+            border-radius: 3px;
+        }
+
+        /* Luxury Scroll Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Ken Burns Effect for Hero Background */
+        @keyframes kenburns {
+            0% { transform: scale(1.02) translate(0, 0); }
+            50% { transform: scale(1.08) translate(-1%, -0.5%); }
+            100% { transform: scale(1.02) translate(0, 0); }
+        }
+        .animate-kenburns {
+            animation: kenburns 24s ease-in-out infinite;
+        }
+
+        /* Golden Glow Hover Transition */
+        .burgundy-glow {
+            transition: all 0.5s ease;
+        }
+        .burgundy-glow:hover {
+            box-shadow: 0 0 20px rgba(128, 0, 32, 0.25);
+            border-color: rgba(128, 0, 32, 0.6);
+        }
+
+        /* Subtle Line Animation */
+        @keyframes drawLine {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        .animated-line {
+            height: 1px;
+            background-color: #C5A880;
+            opacity: 0.4;
+            animation: drawLine 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        /* Image Overlay */
+        .image-overlay::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(28, 25, 23, 0.15), rgba(28, 25, 23, 0.45));
+            transition: opacity 0.5s ease;
+        }
+
+        /* Floating Animation */
+        @keyframes floatEffect {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: floatEffect 6s ease-in-out infinite;
+        }
+
+        /* FAQ Accordion Transitions */
+        .faq-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+        }
+        .faq-item.active .faq-content {
+            opacity: 1;
+        }
+        .faq-icon {
+            transition: transform 0.4s ease;
+        }
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body class="bg-wedding-softdark text-wedding-cream font-inter antialiased  selection:bg-wedding-cream/10 selection:text-wedding-cream overflow-hidden overflow-hidden">
+
+    <!-- ================= SECTION 1: PASSWORD ENTRY SCREEN ================= -->
+    <div id="password-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-wedding-dark overflow-hidden transition-all duration-1000 ease-out opacity-0 pointer-events-none hidden">
+        <!-- Add a subtle dark gradient overlay to make text more readable against any background -->
+        <div class="absolute inset-0 bg-cover bg-center opacity-100 scale-105 animate-kenburns" style="background-image: url('https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=1920');"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-wedding-dark/80 via-wedding-dark/30 to-transparent z-0"></div>
+
+        <!-- Floating Particles Animation CSS -->
+        <style>
+            .particle { position: absolute; border-radius: 50%; background: #F4EBE8; opacity: 0.3; pointer-events: none; }
+            @keyframes float-up {
+                0% { transform: translateY(100vh) scale(0); opacity: 0; }
+                50% { opacity: 0.4; }
+                100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+            }
+            .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        </style>
+        
+        <!-- Ink Reveal Canvas -->
+        <canvas class="ink-canvas absolute inset-0 z-10 w-full h-full pointer-events-auto"></canvas>
+
+        <!-- Decorative corner elements removed as requested -->
+
+        <!-- Password Card -->
+        <div class="relative z-20 w-[95%] max-w-lg p-10 md:p-14 bg-wedding-dark/80 backdrop-blur-xl rounded-2xl border-t border-l border-wedding-cream/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(128,0,32,0.15)] group">
+            
+            <!-- Shimmer effect on hover -->
+            <div class="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
+                <div class="absolute -inset-[100%] top-0 bg-gradient-to-r from-transparent via-wedding-cream/5 to-transparent transform -rotate-45 translate-x-[-100%] group-hover:animate-[shimmer_3s_infinite]"></div>
+            </div>
+
+            <style>
+                @keyframes shimmer {
+                    100% { transform: translateX(100%) rotate(-45deg); }
+                }
+            </style>
+
+            <!-- Monogram / Emblem -->
+            <div class="mb-8 flex justify-center relative">
+                <div class="absolute inset-0 bg-wedding-burgundy/20 blur-xl rounded-full animate-pulse-slow"></div>
+                <div class="w-28 h-28 flex items-center justify-center animate-float relative z-10">
+                    <img src="hansandczay.svg" alt="Hans and Czay Logo" class="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(244,235,232,0.3)]">
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div class="text-center">
+                <span class="inline-block text-[10px] uppercase tracking-[0.4em] text-wedding-cream/80 font-medium mb-3 border-b border-wedding-burgundy/30 pb-1">The Royal Invitation</span>
+                <h1 class="text-4xl md:text-5xl font-cinzel text-wedding-cream font-light tracking-widest mb-4 drop-shadow-md">Hans & Czay</h1>
+                <p class="text-sm font-cormorant text-wedding-cream/90 italic tracking-widest mb-10 flex items-center justify-center gap-2">
+                    <span class="w-4 h-[1px] bg-wedding-burgundy/50"></span>
+                    December 20, 2026 • Paniqui, Tarlac
+                    <span class="w-4 h-[1px] bg-wedding-burgundy/50"></span>
+                </p>
+            </div>
+
+            <!-- Password Input Form -->
+            <div class="max-w-xs mx-auto relative z-20">
+                <p class="text-[11px] text-wedding-cream/70 tracking-widest mb-4 text-center uppercase">Awaiting your royal key</p>
+                <div class="relative mb-8 group/input">
+                    <!-- Glow behind input -->
+                    <div class="absolute -inset-1 bg-gradient-to-r from-wedding-burgundy/0 via-wedding-burgundylight/20 to-wedding-burgundy/0 rounded-lg blur opacity-0 group-focus-within/input:opacity-100 transition duration-500"></div>
+                    
+                    <input type="password" id="wedding-pass" placeholder="ENTER CODE" class="relative w-full bg-wedding-dark/60 border border-wedding-burgundy/30 rounded-sm text-wedding-cream text-center tracking-[0.4em] placeholder:tracking-widest placeholder:text-wedding-cream/30 py-4 px-4 focus:outline-none focus:border-wedding-burgundylight focus:bg-wedding-dark/80 text-sm font-bold uppercase transition-all duration-300 shadow-inner">
+                    
+                    <div id="password-error" class="absolute -bottom-6 left-0 right-0 text-[10px] text-red-400 tracking-wider text-center opacity-0 transition-opacity duration-300 font-medium">Incorrect access code. Please try again.</div>
+                </div>
+                
+                <button onclick="unlockInvitation()" class="relative w-full overflow-hidden bg-wedding-burgundy/90 text-wedding-cream hover:bg-wedding-burgundy hover:text-white px-6 py-4 text-xs tracking-[0.3em] font-medium transition-all duration-500 uppercase rounded-sm group/btn shadow-lg hover:shadow-wedding-burgundy/40">
+                    <span class="relative z-10">Open Invitation</span>
+                    <!-- Button hover light sweep -->
+                    <div class="absolute inset-0 h-full w-0 bg-white/10 group-hover/btn:w-full transition-all duration-500 ease-out z-0"></div>
+                </button>
+                
+                <div class="mt-8 text-center animate-pulse-slow">
+                    <p class="text-[9px] text-wedding-cream/50 tracking-[0.2em] border border-wedding-cream/10 rounded-full px-4 py-1.5 inline-block bg-wedding-dark/30">HINT: USE CODE "FOREVER2026"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add particles logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const screen = document.getElementById('password-screen');
+            if(screen) {
+                for(let i = 0; i < 20; i++) {
+                    let p = document.createElement('div');
+                    p.className = 'particle';
+                    p.style.width = Math.random() * 4 + 1 + 'px';
+                    p.style.height = p.style.width;
+                    p.style.left = Math.random() * 100 + 'vw';
+                    p.style.animation = `float-up ${Math.random() * 10 + 10}s linear infinite`;
+                    p.style.animationDelay = `${Math.random() * 10}s`;
+                    screen.appendChild(p);
+                }
+            }
+        });
+    </script>
+
+    <!-- ================= MAIN SITE CONTENT ================= -->
+    <div id="main-content" class="transition-opacity duration-1000 relative w-full h-screen overflow-hidden bg-wedding-dark">
+
+    <!-- Floating Wizard Controls -->
+    <div id="wizard-controls" class="fixed top-0 left-0 right-0 z-50 pointer-events-none opacity-0 transition-opacity duration-1000 hidden">
+        <!-- Back Button -->
+        <button id="wizard-back-btn" onclick="prevWizardStep()" class="absolute top-6 left-6 w-10 h-10 rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:bg-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300 pointer-events-auto opacity-0 translate-x-[-20px]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+
+        <!-- Hamburger Menu Button -->
+        <button onclick="toggleCanvasMenu()" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:bg-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300 pointer-events-auto">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
+
+    <!-- Off-Canvas Menu -->
+    <div id="canvas-menu" class="fixed inset-0 z-[60] bg-wedding-dark/95 backdrop-blur-md transition-all duration-500 opacity-0 pointer-events-none flex justify-center items-center">
+        <button onclick="toggleCanvasMenu()" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-transparent border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:text-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        
+        <div class="text-center w-full max-w-md px-6">
+            <div class="w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                <img src="hansandczay.svg" alt="Hans and Czay Logo" class="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(244,235,232,0.3)]">
+            </div>
+            <div class="w-12 h-[1px] bg-wedding-cream/20 mx-auto mb-8"></div>
+            
+            <ul id="menu-list" class="space-y-6 font-cormorant text-xl tracking-wider">
+                <!-- Links will be injected by JS -->
+            </ul>
+
+
+        </div>
+    </div>
+
+
+        <!-- ================= SECTION 2: HERO SECTION ================= -->
+        <header class="flex flex-col justify-between items-center text-center overflow-hidden bg-wedding-dark wizard-step absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden transition-all duration-1000 ease-in-out opacity-0 translate-y-8 scale-95 pointer-events-none z-0">
+            <div class="absolute inset-0 overflow-hidden z-0">
+                <div class="absolute inset-0 bg-cover bg-center animate-kenburns scale-100 image-overlay" style="background-image: url('https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=1920');"></div>
+                <!-- Add a dark gradient overlay for better text readability -->
+                <div class="absolute inset-0 bg-gradient-to-b from-wedding-dark/60 via-wedding-dark/40 to-wedding-dark/80"></div>
+            </div>
+
+            <!-- Top Header Detail -->
+            <div class="relative z-10 pt-16 md:pt-20 w-full">
+                <p class="text-[11px] uppercase tracking-[0.4em] text-wedding-cream/80 font-medium">Join us in celebrating</p>
+                <div class="w-12 h-[1px] bg-wedding-cream/40 mx-auto mt-3"></div>
+            </div>
+
+            <!-- Center Names & Romance Block -->
+            <div class="relative z-10 px-4 w-full max-w-4xl py-12">
+                <span class="text-sm font-cormorant italic text-wedding-cream/90 tracking-widest block mb-4">Together with their Families</span>
+                <h2 class="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-cinzel text-wedding-cream font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
+                    Hans <span class="text-wedding-burgundylight italic font-serif text-3xl sm:text-4xl md:text-6xl font-light">&</span> Czay
+                </h2>
+                <div class="w-24 h-[1px] bg-wedding-cream/20 mx-auto my-8"></div>
+                <p class="text-xs uppercase tracking-[0.3em] text-wedding-cream/90 mb-3">Request the honor of your presence</p>
+                <p class="text-lg md:text-2xl font-cormorant italic text-wedding-cream tracking-wider drop-shadow-md">On Sunday, the twentieth of December, two thousand twenty-six</p>
+            </div>
+
+            <!-- Bottom Info & Countdown -->
+            <div class="relative z-10 pb-8 w-full max-w-3xl px-4 flex flex-col items-center">
+                <div class="grid grid-cols-4 gap-2 md:gap-8 bg-wedding-dark/50 backdrop-blur-md px-4 md:px-6 py-4 rounded-xl border border-wedding-burgundylight/20 w-full max-w-md mb-6 shadow-xl">
+                    <div class="text-center">
+                        <span id="days" class="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">00</span>
+                        <span class="text-[9px] uppercase tracking-widest text-wedding-cream/70">Days</span>
+                    </div>
+                    <div class="text-center border-l border-wedding-burgundylight/20">
+                        <span id="hours" class="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">00</span>
+                        <span class="text-[9px] uppercase tracking-widest text-wedding-cream/70">Hours</span>
+                    </div>
+                    <div class="text-center border-l border-wedding-burgundylight/20">
+                        <span id="minutes" class="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">00</span>
+                        <span class="text-[9px] uppercase tracking-widest text-wedding-cream/70">Min</span>
+                    </div>
+                    <div class="text-center border-l border-wedding-burgundylight/20">
+                        <span id="seconds" class="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">00</span>
+                        <span class="text-[9px] uppercase tracking-widest text-wedding-cream/70">Sec</span>
+                    </div>
+                </div>
+
+                <p class="text-xs uppercase tracking-[0.25em] text-wedding-cream/90 mb-4">Paniqui, Tarlac</p>
+                
+                <div class="w-full flex justify-center mt-2 relative z-20">
+                    <button onclick="nextWizardStep()" class="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none animate-bounce">
+                        <span class="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/90 group-hover:text-wedding-burgundylight transition-colors duration-300 drop-shadow-md">Continue</span>
+                        <div class="w-10 h-10 rounded-full border border-wedding-cream/50 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-burgundylight/20 group-hover:border-wedding-burgundylight shadow-lg bg-wedding-dark/30 backdrop-blur-sm">
+                            <svg class="w-4 h-4 text-wedding-cream group-hover:text-wedding-burgundylight transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ================= SECTION 3: OUR STORY ================= -->
+        <section id="our-story" class="py-24 px-4 bg-gradient-to-b from-wedding-softdark to-wedding-deepburgundy/80 wizard-step absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden transition-all duration-1000 ease-in-out opacity-0 translate-y-8 scale-95 pointer-events-none z-0 flex flex-col justify-between">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-20 reveal">
+                    <span class="text-xs uppercase tracking-[0.4em] text-wedding-cream/80 block mb-2">Our Journey</span>
+                    <h2 class="text-3xl md:text-5xl font-cinzel font-light text-wedding-cream tracking-wide">The Chapters of Us</h2>
+                    <div class="w-16 h-[1px] bg-wedding-cream/20 mx-auto mt-4"></div>
+                    <p class="text-base font-cormorant italic text-wedding-cream/70 mt-3 max-w-md mx-auto">Every love story is beautiful, but ours is our favorite editorial masterpiece.</p>
+                </div>
+
+                <div class="relative border-l border-wedding-burgundy/20 ml-4 md:border-l-0 md:ml-0 md:flex md:flex-col md:items-center">
+                    <div class="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-[1px] bg-wedding-cream/10"></div>
+
+                    <!-- Timeline Item 1 -->
+                    <div class="relative mb-16 md:mb-24 w-full md:w-1/2 pl-8 md:pl-0 md:pr-16 md:mr-auto reveal">
+                        <div class="absolute -left-4 md:left-auto md:-right-4 top-0 w-8 h-8 rounded-full bg-wedding-dark border border-wedding-burgundylight/50 flex items-center justify-center z-10">
+                            <div class="w-2.5 h-2.5 rounded-full bg-wedding-burgundy"></div>
+                        </div>
+                        <div class="bg-wedding-dark/40 p-6 md:p-8 rounded-lg shadow-sm border border-wedding-burgundylight/30 burgundy-glow">
+                            <span class="text-xs uppercase tracking-widest text-wedding-cream/70 font-semibold block mb-1">September 2020</span>
+                            <h3 class="text-2xl font-cinzel text-wedding-cream font-light mb-3">A Serendipitous Encounter</h3>
+                            <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=800" alt="Cafe de Flore" class="w-full h-48 object-cover rounded-md mb-4 brightness-[0.95]">
+                            <p class="text-sm font-cormorant text-wedding-cream leading-relaxed">
+                                Our eyes first met across the crowded terrace of Cafe de Flore in Paris. It took just one shared look, an accidental spill of a coffee cup, and an hour of endless laughter to realize our worlds had shifted permanently.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 2 -->
+                    <div class="relative mb-16 md:mb-24 w-full md:w-1/2 pl-8 md:pl-16 md:ml-auto reveal">
+                        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-wedding-dark border border-wedding-burgundylight/50 flex items-center justify-center z-10">
+                            <div class="w-2.5 h-2.5 rounded-full bg-wedding-burgundy"></div>
+                        </div>
+                        <div class="bg-wedding-dark/40 p-6 md:p-8 rounded-lg shadow-sm border border-wedding-burgundylight/30 burgundy-glow">
+                            <span class="text-xs uppercase tracking-widest text-wedding-cream/70 font-semibold block mb-1">December 2020</span>
+                            <h3 class="text-2xl font-cinzel text-wedding-cream font-light mb-3">An Evening of Whispers</h3>
+                            <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=800" alt="First Date" class="w-full h-48 object-cover rounded-md mb-4 brightness-[0.95]">
+                            <p class="text-sm font-cormorant text-wedding-cream leading-relaxed">
+                                Our first formal date was under the soft winter haze of London. We strolled along the banks of the Seine, talking about dreams, philosophies, and music. By midnight, we knew this was no ordinary courtship.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 3 -->
+                    <div class="relative mb-16 md:mb-24 w-full md:w-1/2 pl-8 md:pl-0 md:pr-16 md:mr-auto reveal">
+                        <div class="absolute -left-4 md:left-auto md:-right-4 top-0 w-8 h-8 rounded-full bg-wedding-dark border border-wedding-burgundylight/50 flex items-center justify-center z-10">
+                            <div class="w-2.5 h-2.5 rounded-full bg-wedding-burgundy"></div>
+                        </div>
+                        <div class="bg-wedding-dark/40 p-6 md:p-8 rounded-lg shadow-sm border border-wedding-burgundylight/30 burgundy-glow">
+                            <span class="text-xs uppercase tracking-widest text-wedding-cream/70 font-semibold block mb-1">June 2025</span>
+                            <h3 class="text-2xl font-cinzel text-wedding-cream font-light mb-3">By the Cliffs of Amalfi</h3>
+                            <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800" alt="The Proposal" class="w-full h-48 object-cover rounded-md mb-4 brightness-[0.95]">
+                            <p class="text-sm font-cormorant text-wedding-cream leading-relaxed">
+                                Under the golden dusk of Positano, perched on a private terrace hanging between the blue heavens and quiet waves, Hans bent his knee and asked the question that would seal our destinies.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 4 -->
+                    <div class="relative w-full md:w-1/2 pl-8 md:pl-16 md:ml-auto reveal">
+                        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-wedding-dark border border-wedding-burgundylight/50 flex items-center justify-center z-10">
+                            <div class="w-2.5 h-2.5 rounded-full bg-wedding-burgundy"></div>
+                        </div>
+                        <div class="bg-wedding-dark/40 p-6 md:p-8 rounded-lg shadow-sm border border-wedding-burgundylight/30 burgundy-glow">
+                            <span class="text-xs uppercase tracking-widest text-wedding-cream/70 font-semibold block mb-1">October 2026</span>
+                            <h3 class="text-2xl font-cinzel text-wedding-cream font-light mb-3">The Path to Forever</h3>
+                            <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=800" alt="Engagement Session" class="w-full h-48 object-cover rounded-md mb-4 brightness-[0.95]">
+                            <p class="text-sm font-cormorant text-wedding-cream leading-relaxed">
+                                As we prepare to declare our eternal promises, we are filled with boundless joy to gather those who have walked beside us on our journeys. Our final chapter as two is closing, and a lifetime as one is about to begin.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+                <div class="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
+                    <button onclick="nextWizardStep()" class="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none animate-bounce mt-4">
+                        <span class="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-cream transition-colors duration-300">Continue</span>
+                        <div class="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-cream/10 group-hover:border-wedding-cream/60">
+                            <svg class="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:translate-y-1 group-hover:text-wedding-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Embedded Footer -->
+                <div class="w-[calc(100%+2rem)] -mx-4 -mb-24 py-8 text-center border-t border-wedding-cream/20 mt-6 md:mt-16 shrink-0 relative z-20 flex flex-col justify-center">
+                    <div class="max-w-md mx-auto px-4">
+                        <div class="text-xl font-cinzel tracking-[0.4em] text-wedding-cream/80 mb-4">H & C</div>
+                        <p class="text-xs font-cormorant italic text-wedding-cream/80 mb-4">"Together is a beautiful place to be"</p>
+                        <div class="flex items-center justify-center space-x-3 mb-6">
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                            <span class="text-[10px] uppercase tracking-[0.25em] text-wedding-cream/70 font-medium">20.12.2026</span>
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                        </div>
+                        <p class="text-[9px] uppercase tracking-widest text-wedding-cream/60">Designed with modern elegance & love.</p>
+                    </div>
+                </div>
+</section>
+
+        <!-- ================= SECTION 3.5: WEDDING ENTOURAGE ================= -->
+        <section id="entourage" class="py-24 px-4 bg-wedding-deepburgundy/50 border-t border-wedding-burgundylight/20 wizard-step absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden transition-all duration-1000 ease-in-out opacity-0 translate-y-8 scale-95 pointer-events-none z-0 flex flex-col justify-between">
+            <div class="max-w-6xl mx-auto">
+                <!-- Section Header -->
+                <div class="text-center mb-20 reveal">
+                    <span class="text-xs uppercase tracking-[0.4em] text-wedding-cream/80 block mb-2">With love and gratitude</span>
+                    <h2 class="text-3xl md:text-5xl font-cinzel font-light text-wedding-cream tracking-wide">Wedding Entourage</h2>
+                    <div class="w-16 h-[1px] bg-wedding-cream/20 mx-auto mt-4"></div>
+                </div>
+
+                <!-- Principal Sponsors -->
+                <div class="mb-16 reveal">
+                    <h3 class="font-cinzel text-xs uppercase tracking-[0.3em] text-wedding-cream/60 text-center mb-8 flex items-center justify-center gap-3">
+                        <span class="w-8 h-[1px] bg-wedding-cream/20"></span> Principal Sponsors <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Sponsor 1 -->
+                        <div class="p-8 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-burgundylight/30 rounded-xl shadow-xs hover:shadow-md hover:border-wedding-burgundy/60 hover:-translate-y-1.5 transition-all duration-500 ease-out text-center flex flex-col justify-center items-center group">
+                            <span class="text-[9px] uppercase tracking-[0.25em] text-wedding-cream/60 font-medium mb-2 block">Principal Sponsor</span>
+                            <div class="w-1.5 h-1.5 rounded-full bg-wedding-cream/20 mb-4 group-hover:bg-wedding-cream/30 transition-colors duration-500"></div>
+                            <h4 class="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">Sponsor Name 1</h4>
+                        </div>
+                        <!-- Sponsor 2 -->
+                        <div class="p-8 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-burgundylight/30 rounded-xl shadow-xs hover:shadow-md hover:border-wedding-burgundy/60 hover:-translate-y-1.5 transition-all duration-500 ease-out text-center flex flex-col justify-center items-center group">
+                            <span class="text-[9px] uppercase tracking-[0.25em] text-wedding-cream/60 font-medium mb-2 block">Principal Sponsor</span>
+                            <div class="w-1.5 h-1.5 rounded-full bg-wedding-cream/20 mb-4 group-hover:bg-wedding-cream/30 transition-colors duration-500"></div>
+                            <h4 class="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">Sponsor Name 2</h4>
+                        </div>
+                        <!-- Sponsor 3 -->
+                        <div class="p-8 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-burgundylight/30 rounded-xl shadow-xs hover:shadow-md hover:border-wedding-burgundy/60 hover:-translate-y-1.5 transition-all duration-500 ease-out text-center flex flex-col justify-center items-center group">
+                            <span class="text-[9px] uppercase tracking-[0.25em] text-wedding-cream/60 font-medium mb-2 block">Principal Sponsor</span>
+                            <div class="w-1.5 h-1.5 rounded-full bg-wedding-cream/20 mb-4 group-hover:bg-wedding-cream/30 transition-colors duration-500"></div>
+                            <h4 class="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">Sponsor Name 3</h4>
+                        </div>
+                        <!-- Sponsor 4 -->
+                        <div class="p-8 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-burgundylight/30 rounded-xl shadow-xs hover:shadow-md hover:border-wedding-burgundy/60 hover:-translate-y-1.5 transition-all duration-500 ease-out text-center flex flex-col justify-center items-center group">
+                            <span class="text-[9px] uppercase tracking-[0.25em] text-wedding-cream/60 font-medium mb-2 block">Principal Sponsor</span>
+                            <div class="w-1.5 h-1.5 rounded-full bg-wedding-cream/20 mb-4 group-hover:bg-wedding-cream/30 transition-colors duration-500"></div>
+                            <h4 class="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">Sponsor Name 4</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Honor Attendants -->
+                <div class="mb-16 reveal">
+                    <h3 class="font-cinzel text-xs uppercase tracking-[0.3em] text-wedding-cream/60 text-center mb-8 flex items-center justify-center gap-3">
+                        <span class="w-8 h-[1px] bg-wedding-cream/20"></span> Honor Attendants <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto gap-6">
+                        <!-- Maid of Honor -->
+                        <div class="p-8 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-burgundylight/30 rounded-xl shadow-xs hover:shadow-md hover:border-wedding-burgundy/60 hover:-translate-y-1.5 transition-all duration-500 ease-out text-center flex flex-col justify-center items-center group">
+                            <span class="text-[9px] uppercase tracking-[0.25em] text-wedding-cream/60 font-semibold mb-2 block">Maid of Honor</span>
+                            <div class="w-1.5 h-1.5 rounded-full bg-wedding-cream/20 mb-4 group-hover:bg-wedding-cream/30 transition-colors duration-500"></div>
+                            <h4 class="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">Jane Doe</h4>
+                        </div>
+                        <!-- Best Man -->
+                        <div class="p-8 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-burgundylight/30 rounded-xl shadow-xs hover:shadow-md hover:border-wedding-burgundy/60 hover:-translate-y-1.5 transition-all duration-500 ease-out text-center flex flex-col justify-center items-center group">
+                            <span class="text-[9px] uppercase tracking-[0.25em] text-wedding-cream/60 font-semibold mb-2 block">Best Man</span>
+                            <div class="w-1.5 h-1.5 rounded-full bg-wedding-cream/20 mb-4 group-hover:bg-wedding-cream/30 transition-colors duration-500"></div>
+                            <h4 class="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">John Smith</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bridesmaids and Groomsmen -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 max-w-4xl mx-auto mb-8 reveal">
+                    <!-- Bridesmaids -->
+                    <div class="flex flex-col">
+                        <h3 class="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.3em] text-wedding-cream/60 text-center mb-4 md:mb-8 flex items-center justify-center gap-1 md:gap-3">
+                            <span class="hidden md:block w-8 h-[1px] bg-wedding-cream/20"></span> Bridesmaids <span class="hidden md:block w-8 h-[1px] bg-wedding-cream/20"></span>
+                        </h3>
+                        <div class="flex-1 p-6 md:p-10 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-burgundylight/30 rounded-xl shadow-xs hover:shadow-md hover:border-wedding-burgundy/60 transition-all duration-500 ease-out text-center">
+                            <ul class="font-cormorant text-lg md:text-2xl text-wedding-cream font-medium tracking-wide space-y-3 md:space-y-4">
+                                <li>Anna Cruz</li>
+                                <li>Maria Santos</li>
+                                <li>Liza Garcia</li>
+                                <li>Kim Reyes</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Groomsmen -->
+                    <div class="flex flex-col">
+                        <h3 class="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.3em] text-wedding-cream/60 text-center mb-4 md:mb-8 flex items-center justify-center gap-1 md:gap-3">
+                            <span class="hidden md:block w-8 h-[1px] bg-wedding-cream/20"></span> Groomsmen <span class="hidden md:block w-8 h-[1px] bg-wedding-cream/20"></span>
+                        </h3>
+                        <div class="flex-1 p-6 md:p-10 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-burgundylight/30 rounded-xl shadow-xs hover:shadow-md hover:border-wedding-burgundy/60 transition-all duration-500 ease-out text-center">
+                            <ul class="font-cormorant text-lg md:text-2xl text-wedding-cream font-medium tracking-wide space-y-3 md:space-y-4">
+                                <li>Mark Dela Cruz</li>
+                                <li>Paulo Rivera</li>
+                                <li>Jason Lim</li>
+                                <li>Carlo Mendoza</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+                <div class="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
+                    <button onclick="nextWizardStep()" class="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none animate-bounce mt-4">
+                        <span class="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-cream transition-colors duration-300">Continue</span>
+                        <div class="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-cream/10 group-hover:border-wedding-cream/60">
+                            <svg class="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:translate-y-1 group-hover:text-wedding-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Embedded Footer -->
+                <div class="w-[calc(100%+2rem)] -mx-4 -mb-24 py-8 text-center border-t border-wedding-cream/20 mt-6 md:mt-16 shrink-0 relative z-20 flex flex-col justify-center">
+                    <div class="max-w-md mx-auto px-4">
+                        <div class="text-xl font-cinzel tracking-[0.4em] text-wedding-cream/80 mb-4">H & C</div>
+                        <p class="text-xs font-cormorant italic text-wedding-cream/80 mb-4">"Together is a beautiful place to be"</p>
+                        <div class="flex items-center justify-center space-x-3 mb-6">
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                            <span class="text-[10px] uppercase tracking-[0.25em] text-wedding-cream/70 font-medium">20.12.2026</span>
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                        </div>
+                        <p class="text-[9px] uppercase tracking-widest text-wedding-cream/60">Designed with modern elegance & love.</p>
+                    </div>
+                </div>
+</section>
+
+        <!-- ================= SECTION 4: WEDDING DETAILS ================= -->
+        <section id="details" class="py-24 px-4 bg-wedding-softdark wizard-step absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden transition-all duration-1000 ease-in-out opacity-0 translate-y-8 scale-95 pointer-events-none z-0 flex flex-col justify-between">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-20 reveal">
+                    <span class="text-xs uppercase tracking-[0.4em] text-wedding-cream/80 block mb-2">The Celebration</span>
+                    <h2 class="text-3xl md:text-5xl font-cinzel font-light text-wedding-cream tracking-wide">Where & When</h2>
+                    <div class="w-16 h-[1px] bg-wedding-cream/20 mx-auto mt-4"></div>
+                    <p class="text-base font-cormorant italic text-wedding-cream/70 mt-3 max-w-lg mx-auto">A breathtaking romance in Paniqui, Tarlac.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+                    <!-- Ceremony Details -->
+                    <div class="bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-burgundylight/30 hover:shadow-xl transition-all duration-500 reveal flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-6">
+                                <span class="text-[10px] uppercase tracking-[0.3em] bg-wedding-champagne text-wedding-burgundydark px-3 py-1 font-semibold rounded-full">The Vows</span>
+                                <span class="text-sm font-cinzel text-wedding-cream/70">3:00 PM</span>
+                            </div>
+                            <h3 class="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">The Ceremony</h3>
+                            <div class="w-12 h-[1px] bg-wedding-cream/30 mb-6"></div>
+                            <p class="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
+                                Witness our union in the majestic glass sanctuary. Soft harp melodies, cascading white roses, and gentle tropical breeze will frame our exchange of vows.
+                            </p>
+                            <div class="space-y-3 text-sm text-wedding-cream mb-8 font-cormorant tracking-wide">
+                                <p class="flex items-center"><span class="text-wedding-cream/70 mr-3">✦</span> <strong>Location:</strong> Iglesia Ni Cristo [Paniqui, Tarlac] - Nagserialan</p>
+                                <p class="flex items-center"><span class="text-wedding-cream/70 mr-3">✦</span> <strong>Address:</strong> Nagserialan camiling, Paniqui - Camiling Rd, Paniqui, Tarlac</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-wedding-burgundylight/30">
+                            <button onclick="openMapModal('https://maps.google.com/maps?q=Iglesia%20Ni%20Cristo%20%5BPaniqui,%20Tarlac%5D%20-%20Nagserialan&t=&z=15&ie=UTF8&output=embed')" class="text-center py-3 bg-transparent border border-wedding-cream/50 text-wedding-cream/90 hover:bg-wedding-cream/10 hover:border-wedding-cream/80 hover:text-wedding-cream text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
+                                View Location
+                            </button>
+                            <button onclick="addToCalendar('Wedding Ceremony', 'Hans and Czay Union - Paniqui, Tarlac', 'https://maps.app.goo.gl/yBdxdLkEZMgYQyo8A', '2026-12-20T15:00:00')" class="text-center py-3 bg-wedding-burgundy border border-wedding-burgundy text-wedding-cream hover:bg-wedding-burgundydark hover:border-wedding-burgundydark text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
+                                Add To Calendar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Reception Details -->
+                    <div class="bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-burgundylight/30 hover:shadow-xl transition-all duration-500 reveal flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-6">
+                                <span class="text-[10px] uppercase tracking-[0.3em] bg-wedding-champagne text-wedding-burgundydark px-3 py-1 font-semibold rounded-full">The Dinner & Ball</span>
+                                <span class="text-sm font-cinzel text-wedding-cream/70">6:30 PM</span>
+                            </div>
+                            <h3 class="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">The Reception</h3>
+                            <div class="w-12 h-[1px] bg-wedding-cream/30 mb-6"></div>
+                            <p class="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
+                                Following the ceremony, join us for premium cocktails on the terrace, followed by a formal dinner and grand ballroom dancing under crystal chandeliers.
+                            </p>
+                            <div class="space-y-3 text-sm text-wedding-cream mb-8 font-cormorant tracking-wide">
+                                <p class="flex items-center"><span class="text-wedding-cream/70 mr-3">✦</span> <strong>Location:</strong> DokNWellness Natural Health Care Center</p>
+                                <p class="flex items-center"><span class="text-wedding-cream/70 mr-3">✦</span> <strong>Address:</strong> Purok 1, San Isidro, Camiling, 2306 Tarlac</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-wedding-burgundylight/30">
+                            <button onclick="openMapModal('https://maps.google.com/maps?q=DokNWellness%20Natural%20Health%20Care%20Center,%20Camiling,%20Tarlac&t=&z=15&ie=UTF8&output=embed')" class="text-center py-3 bg-transparent border border-wedding-cream/50 text-wedding-cream/90 hover:bg-wedding-cream/10 hover:border-wedding-cream/80 hover:text-wedding-cream text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
+                                View Location
+                            </button>
+                            <button onclick="addToCalendar('Wedding Reception', 'Dinner, Cocktails, & Dance - DokNWellness Natural Health Care Center', 'https://maps.app.goo.gl/XZg1ByDqMjzxiP5UA', '2026-12-20T18:30:00')" class="text-center py-3 bg-wedding-burgundy border border-wedding-burgundy text-wedding-cream hover:bg-wedding-burgundydark hover:border-wedding-burgundydark text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
+                                Add To Calendar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+                <div class="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
+                    <button onclick="nextWizardStep()" class="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none animate-bounce mt-4">
+                        <span class="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-cream transition-colors duration-300">Continue</span>
+                        <div class="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-cream/10 group-hover:border-wedding-cream/60">
+                            <svg class="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:translate-y-1 group-hover:text-wedding-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Embedded Footer -->
+                <div class="w-[calc(100%+2rem)] -mx-4 -mb-24 py-8 text-center border-t border-wedding-cream/20 mt-6 md:mt-16 shrink-0 relative z-20 flex flex-col justify-center">
+                    <div class="max-w-md mx-auto px-4">
+                        <div class="text-xl font-cinzel tracking-[0.4em] text-wedding-cream/80 mb-4">H & C</div>
+                        <p class="text-xs font-cormorant italic text-wedding-cream/80 mb-4">"Together is a beautiful place to be"</p>
+                        <div class="flex items-center justify-center space-x-3 mb-6">
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                            <span class="text-[10px] uppercase tracking-[0.25em] text-wedding-cream/70 font-medium">20.12.2026</span>
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                        </div>
+                        <p class="text-[9px] uppercase tracking-widest text-wedding-cream/60">Designed with modern elegance & love.</p>
+                    </div>
+                </div>
+</section>
+
+        <!-- ================= SECTION 5: THINGS YOU MIGHT WANT TO KNOW (FAQ) ================= -->
+        <section id="faq" class="py-24 px-4 bg-gradient-to-b from-wedding-softdark to-wedding-deepburgundy/80 wizard-step absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden transition-all duration-1000 ease-in-out opacity-0 translate-y-8 scale-95 pointer-events-none z-0 flex flex-col justify-between">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-16 reveal">
+                    <span class="text-xs uppercase tracking-[0.4em] text-wedding-cream/80 block mb-2">Guest Information</span>
+                    <h2 class="text-3xl md:text-5xl font-cinzel font-light text-wedding-cream tracking-wide">Things You Might Want to Know</h2>
+                    <div class="w-16 h-[1px] bg-wedding-cream/20 mx-auto mt-4"></div>
+                    <p class="text-base font-cormorant italic text-wedding-cream/70 mt-3 max-w-md mx-auto">Quick answers for our beloved guests</p>
+                </div>
+
+                <!-- Custom Card Accordion Frame -->
+                <div class="space-y-4 reveal">
+                    <!-- Q1 -->
+                    <div class="faq-item bg-wedding-dark/40 border border-wedding-burgundylight/30 rounded-lg overflow-hidden transition-all duration-300 burgundy-glow">
+                        <button onclick="toggleFaq(this)" class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="font-cinzel text-sm md:text-base tracking-wider text-wedding-cream font-medium">Can I bring a plus one?</span>
+                            <span class="faq-icon text-wedding-cream/70 font-light text-2xl">+</span>
+                        </button>
+                        <div class="faq-content">
+                            <p class="p-6 pt-5 text-sm md:text-base font-cormorant text-wedding-cream leading-relaxed border-t border-wedding-burgundylight/20">
+                                Due to the intimate nature of our chosen venue in Tarlac, our guest list is strictly personalized. Your digital invitation card indicates the specific number of reserved places in your honor. We kindly ask that only those specified on the envelope attend.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="faq-item bg-wedding-dark/40 border border-wedding-burgundylight/30 rounded-lg overflow-hidden transition-all duration-300 burgundy-glow">
+                        <button onclick="toggleFaq(this)" class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="font-cinzel text-sm md:text-base tracking-wider text-wedding-cream font-medium">Can I bring my children?</span>
+                            <span class="faq-icon text-wedding-cream/70 font-light text-2xl">+</span>
+                        </button>
+                        <div class="faq-content">
+                            <p class="p-6 pt-5 text-sm md:text-base font-cormorant text-wedding-cream leading-relaxed border-t border-wedding-burgundylight/20">
+                                To allow all our guests—including parents—a night of relaxation and uninhibited celebration, we have chosen for our wedding weekend to be an adults-only affair. We thank you in advance for your understanding and hope you can join us to raise a glass in comfort.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Q3 -->
+                    <div class="faq-item bg-wedding-dark/40 border border-wedding-burgundylight/30 rounded-lg overflow-hidden transition-all duration-300 burgundy-glow">
+                        <button onclick="toggleFaq(this)" class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="font-cinzel text-sm md:text-base tracking-wider text-wedding-cream font-medium">What time should I arrive?</span>
+                            <span class="faq-icon text-wedding-cream/70 font-light text-2xl">+</span>
+                        </button>
+                        <div class="faq-content">
+                            <p class="p-6 pt-5 text-sm md:text-base font-cormorant text-wedding-cream leading-relaxed border-t border-wedding-burgundylight/20">
+                                The ceremony will commence promptly at 3:00 PM. We recommend arriving 30 to 60 minutes prior (between 2:00 PM and 2:30 PM) to comfortably enjoy a welcome refreshment and find your seats.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Q4 -->
+                    <div class="faq-item bg-wedding-dark/40 border border-wedding-burgundylight/30 rounded-lg overflow-hidden transition-all duration-300 burgundy-glow">
+                        <button onclick="toggleFaq(this)" class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="font-cinzel text-sm md:text-base tracking-wider text-wedding-cream font-medium">Is there a dress code?</span>
+                            <span class="faq-icon text-wedding-cream/70 font-light text-2xl">+</span>
+                        </button>
+                        <div class="faq-content">
+                            <p class="p-6 pt-5 text-sm md:text-base font-cormorant text-wedding-cream leading-relaxed border-t border-wedding-burgundylight/20">
+                                Yes, the style guidelines are Formal Black Tie Optional. Gentlemen are encouraged to wear classic dinner suits (tuxedos) or tailored coordinates in charcoal, taupe, or deep gray. Ladies are invited to wear floor-length or refined midi dresses matching our neutral palette of burgundy, soft blush, rose ash, or deep wine.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Q5 -->
+                    <div class="faq-item bg-wedding-dark/40 border border-wedding-burgundylight/30 rounded-lg overflow-hidden transition-all duration-300 burgundy-glow">
+                        <button onclick="toggleFaq(this)" class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="font-cinzel text-sm md:text-base tracking-wider text-wedding-cream font-medium">Can I take photos or videos?</span>
+                            <span class="faq-icon text-wedding-cream/70 font-light text-2xl">+</span>
+                        </button>
+                        <div class="faq-content">
+                            <p class="p-6 pt-5 text-sm md:text-base font-cormorant text-wedding-cream leading-relaxed border-t border-wedding-burgundylight/20">
+                                We have arranged an exceptionally talented team of photographers and cinematographers to record our ceremony. We respectfully request an "unplugged" ceremony where all phones and cameras remain off so that you can be fully present with us. You are more than welcome to capture memories during the cocktail hour and reception dinner!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Q6 -->
+                    <div class="faq-item bg-wedding-dark/40 border border-wedding-burgundylight/30 rounded-lg overflow-hidden transition-all duration-300 burgundy-glow">
+                        <button onclick="toggleFaq(this)" class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="font-cinzel text-sm md:text-base tracking-wider text-wedding-cream font-medium">Where is the venue and is parking available?</span>
+                            <span class="faq-icon text-wedding-cream/70 font-light text-2xl">+</span>
+                        </button>
+                        <div class="faq-content">
+                            <p class="p-6 pt-5 text-sm md:text-base font-cormorant text-wedding-cream leading-relaxed border-t border-wedding-burgundylight/20">
+                                All celebrations take place within our designated venues in Paniqui, Tarlac. Secure valet and open parking spaces are fully accommodated at the entrance of both properties for all driving guests. Map coordinates and coordinates for nearby hotels are provided under our maps links.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Q7 -->
+                    <div class="faq-item bg-wedding-dark/40 border border-wedding-burgundylight/30 rounded-lg overflow-hidden transition-all duration-300 burgundy-glow">
+                        <button onclick="toggleFaq(this)" class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="font-cinzel text-sm md:text-base tracking-wider text-wedding-cream font-medium">Will there be food restrictions or meal options?</span>
+                            <span class="faq-icon text-wedding-cream/70 font-light text-2xl">+</span>
+                        </button>
+                        <div class="faq-content">
+                            <p class="p-6 pt-5 text-sm md:text-base font-cormorant text-wedding-cream leading-relaxed border-t border-wedding-burgundylight/20">
+                                A curated multi-course fine dining buffet of classical and modern gourmet fare will be served. We collect all dietary requirements and main course preferences directly within the interactive RSVP form below. Please submit your specifications when confirming.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Q8 -->
+                    <div class="faq-item bg-wedding-dark/40 border border-wedding-burgundylight/30 rounded-lg overflow-hidden transition-all duration-300 burgundy-glow">
+                        <button onclick="toggleFaq(this)" class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="font-cinzel text-sm md:text-base tracking-wider text-wedding-cream font-medium">Can I give gifts or cash?</span>
+                            <span class="faq-icon text-wedding-cream/70 font-light text-2xl">+</span>
+                        </button>
+                        <div class="faq-content">
+                            <p class="p-6 pt-5 text-sm md:text-base font-cormorant text-wedding-cream leading-relaxed border-t border-wedding-burgundylight/20">
+                                Your love, laughter, and presence on our special day are the greatest gifts we could receive. Should you wish to honor us with a contribution towards our new life together, details of our wishing well, direct bank details, and home registry can be found in the registry section directly below.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Q9 -->
+                    <div class="faq-item bg-wedding-dark/40 border border-wedding-burgundylight/30 rounded-lg overflow-hidden transition-all duration-300 burgundy-glow">
+                        <button onclick="toggleFaq(this)" class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="font-cinzel text-sm md:text-base tracking-wider text-wedding-cream font-medium">What if I cannot attend?</span>
+                            <span class="faq-icon text-wedding-cream/70 font-light text-2xl">+</span>
+                        </button>
+                        <div class="faq-content">
+                            <p class="p-6 pt-5 text-sm md:text-base font-cormorant text-wedding-cream leading-relaxed border-t border-wedding-burgundylight/20">
+                                You will be deeply missed! If you are unable to make it, please let us know by selecting "Regretfully Declines" in our RSVP section as early as possible so we can organize our final seating numbers. You are still warmly welcome to leave a loving digital message.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Q10 -->
+                    <div class="faq-item bg-wedding-dark/40 border border-[#E4DCCE]/50 rounded-lg overflow-hidden transition-all duration-300 burgundy-glow">
+                        <button onclick="toggleFaq(this)" class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="font-cinzel text-sm md:text-base tracking-wider text-wedding-cream font-medium">Who can I contact for questions?</span>
+                            <span class="faq-icon text-wedding-cream/70 font-light text-2xl">+</span>
+                        </button>
+                        <div class="faq-content">
+                            <p class="p-6 pt-5 text-sm md:text-base font-cormorant text-wedding-cream leading-relaxed border-t border-wedding-burgundylight/20">
+                                For any additional logistics, hotel recommendations, or questions on the day of the event, please reach out directly to our wonderful Wedding Concierge & Planner, Bella Vita Events, at planning@bellavita-events.com, or directly message our Maid of Honor, Sofia, at +63 917 123 4567.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+                <div class="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
+                    <button onclick="nextWizardStep()" class="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none animate-bounce mt-4">
+                        <span class="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-cream transition-colors duration-300">Continue</span>
+                        <div class="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-cream/10 group-hover:border-wedding-cream/60">
+                            <svg class="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:translate-y-1 group-hover:text-wedding-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Embedded Footer -->
+                <div class="w-[calc(100%+2rem)] -mx-4 -mb-24 py-8 text-center border-t border-wedding-cream/20 mt-6 md:mt-16 shrink-0 relative z-20 flex flex-col justify-center">
+                    <div class="max-w-md mx-auto px-4">
+                        <div class="text-xl font-cinzel tracking-[0.4em] text-wedding-cream/80 mb-4">H & C</div>
+                        <p class="text-xs font-cormorant italic text-wedding-cream/80 mb-4">"Together is a beautiful place to be"</p>
+                        <div class="flex items-center justify-center space-x-3 mb-6">
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                            <span class="text-[10px] uppercase tracking-[0.25em] text-wedding-cream/70 font-medium">20.12.2026</span>
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                        </div>
+                        <p class="text-[9px] uppercase tracking-widest text-wedding-cream/60">Designed with modern elegance & love.</p>
+                    </div>
+                </div>
+</section>
+
+        <!-- ================= SECTION 6: DRESS CODE ================= -->
+        <section id="dress-code" class="py-24 px-4 bg-wedding-softdark wizard-step absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden transition-all duration-1000 ease-in-out opacity-0 translate-y-8 scale-95 pointer-events-none z-0 flex flex-col justify-between">
+            <div class="max-w-4xl mx-auto text-center w-full">
+                <div class="mb-16 reveal">
+                    <span class="text-xs uppercase tracking-[0.4em] text-wedding-cream/80 block mb-2">The Style Guideline</span>
+                    <h2 class="text-3xl md:text-5xl font-cinzel font-light text-wedding-cream tracking-wide">La Palette de l'Amour</h2>
+                    <div class="w-16 h-[1px] bg-wedding-cream/20 mx-auto mt-4"></div>
+                </div>
+
+                <div class="bg-wedding-dark/60 p-8 md:p-12 rounded-xl border border-wedding-burgundylight/30 shadow-md reveal">
+                    <p class="text-sm uppercase tracking-[0.2em] text-wedding-cream/80 font-semibold mb-3">Dress Code: Formal Black Tie Optional</p>
+                    <p class="text-base font-cormorant italic text-wedding-cream max-w-2xl mx-auto leading-relaxed mb-10">
+                        To honor our vision of a beautiful, cohesive atmosphere in Tarlac, we respectfully request our guests to dress in harmony with our neutral color story.
+                    </p>
+
+                    <!-- Suggested Color Swatches -->
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-10">
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 rounded-full bg-[#F4EBE8] border border-wedding-burgundy/20 shadow-inner mb-2 flex items-center justify-center">
+                                <div class="w-14 h-14 rounded-full border border-dashed border-white/40"></div>
+                            </div>
+                            <span class="text-[11px] uppercase tracking-wider text-wedding-cream/80">Soft Blush</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 rounded-full bg-[#DCAEAA] border border-wedding-burgundy/20 shadow-inner mb-2 flex items-center justify-center">
+                                <div class="w-14 h-14 rounded-full border border-dashed border-white/40"></div>
+                            </div>
+                            <span class="text-[11px] uppercase tracking-wider text-wedding-cream/80">Rose Ash</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 rounded-full bg-[#800020] border border-wedding-burgundy/20 shadow-inner mb-2 flex items-center justify-center">
+                                <div class="w-14 h-14 rounded-full border border-dashed border-white/40"></div>
+                            </div>
+                            <span class="text-[11px] uppercase tracking-wider text-wedding-cream/80">Classic Burgundy</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 rounded-full bg-[#5C1A24] border border-wedding-burgundy/20 shadow-inner mb-2 flex items-center justify-center">
+                                <div class="w-14 h-14 rounded-full border border-dashed border-white/40"></div>
+                            </div>
+                            <span class="text-[11px] uppercase tracking-wider text-wedding-cream/80">Deep Wine</span>
+                        </div>
+                        <div class="flex flex-col items-center col-span-2 sm:col-span-1">
+                            <div class="w-16 h-16 rounded-full bg-[#3B0918] border border-wedding-burgundy/20 shadow-inner mb-2 flex items-center justify-center mx-auto">
+                                <div class="w-14 h-14 rounded-full border border-dashed border-white/40"></div>
+                            </div>
+                            <span class="text-[11px] uppercase tracking-wider text-wedding-cream/80 text-center">Midnight Maroon</span>
+                        </div>
+                    </div>
+
+                                        <!-- Attire Guidelines -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left border-t border-wedding-burgundylight/30 pt-8 mb-10">
+                        <div>
+                            <h4 class="text-xs uppercase tracking-[0.25em] text-wedding-cream/70 font-bold mb-3">For Ladies</h4>
+                            <p class="text-sm font-cormorant text-wedding-cream leading-relaxed">
+                                Floor-length gowns or refined midi-cocktail dresses in shades of champagne, soft cream, sand, or warm neutrals. Flowing silhouettes and romantic laces are highly welcomed.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs uppercase tracking-[0.25em] text-wedding-cream/70 font-bold mb-3">For Gentlemen</h4>
+                            <p class="text-sm font-cormorant text-wedding-cream leading-relaxed">
+                                Classic dinner suit (Tuxedo) or tailored suit with crisp white dress shirts. Deep charcoal, warm gray, or warm taupe tailored coordinates. Bowties or neutral silk ties are preferred.
+                            </p>
+                        </div>
+                    </div>
+
+                                        <!-- Outfit Inspiration Slider -->
+                    <div class="border-t border-wedding-burgundylight/30 pt-8 mt-4 overflow-hidden">
+                        <h4 class="text-xs uppercase tracking-[0.25em] text-wedding-cream/70 font-bold mb-6 text-center">Outfit Inspiration</h4>
+                        
+                        <div class="relative w-full max-w-full">
+                            <!-- CSS Animation for the slider -->
+                            <style>
+                                @keyframes scroll-outfits {
+                                    0% { transform: translateX(0); }
+                                    100% { transform: translateX(calc(-50% - 0.5rem)); }
+                                }
+                                .animate-outfit-slider {
+                                    animation: scroll-outfits 30s linear infinite;
+                                }
+                                .outfit-slider-wrapper:hover .animate-outfit-slider {
+                                    animation-play-state: paused;
+                                }
+                            </style>
+
+                            <!-- Gradient Masks for smooth edges -->
+                            <div class="absolute inset-y-0 left-0 w-8 md:w-16 bg-gradient-to-r from-wedding-dark/80 to-transparent z-10 pointer-events-none"></div>
+                            <div class="absolute inset-y-0 right-0 w-8 md:w-16 bg-gradient-to-l from-wedding-dark/80 to-transparent z-10 pointer-events-none"></div>
+
+                            <div class="outfit-slider-wrapper w-full overflow-hidden mask-edges py-4">
+                                <div class="flex w-max gap-4 animate-outfit-slider">
+                                    <!-- Duplicated twice for infinite scroll effect -->
+                                    <!-- First Set -->
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1572804013309-82a89b47afc2?auto=format&fit=crop&q=80&w=400" alt="Ladies Dress 1" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Ladies</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=400" alt="Gentlemen Suit 1" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Gentlemen</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400" alt="Ladies Dress 2" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Ladies</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=400" alt="Gentlemen Suit 2" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Gentlemen</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1566160980112-9c98ba8b4b10?auto=format&fit=crop&q=80&w=400" alt="Ladies Dress 3" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Ladies</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?auto=format&fit=crop&q=80&w=400" alt="Gentlemen Suit 3" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Gentlemen</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Second Set (Duplicate) -->
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1572804013309-82a89b47afc2?auto=format&fit=crop&q=80&w=400" alt="Ladies Dress 1" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Ladies</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=400" alt="Gentlemen Suit 1" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Gentlemen</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400" alt="Ladies Dress 2" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Ladies</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=400" alt="Gentlemen Suit 2" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Gentlemen</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1566160980112-9c98ba8b4b10?auto=format&fit=crop&q=80&w=400" alt="Ladies Dress 3" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Ladies</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-burgundylight/20 flex-shrink-0">
+                                            <img src="https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?auto=format&fit=crop&q=80&w=400" alt="Gentlemen Suit 3" class="w-full h-full object-cover transform duration-500 group-hover:scale-105">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                                <span class="text-[9px] uppercase tracking-widest text-wedding-cream/90">Gentlemen</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+                <div class="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
+                    <button onclick="nextWizardStep()" class="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none animate-bounce mt-4">
+                        <span class="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-cream transition-colors duration-300">Continue</span>
+                        <div class="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-cream/10 group-hover:border-wedding-cream/60">
+                            <svg class="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:translate-y-1 group-hover:text-wedding-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Embedded Footer -->
+                <div class="w-[calc(100%+2rem)] -mx-4 -mb-24 py-8 text-center border-t border-wedding-cream/20 mt-6 md:mt-16 shrink-0 relative z-20 flex flex-col justify-center">
+                    <div class="max-w-md mx-auto px-4">
+                        <div class="text-xl font-cinzel tracking-[0.4em] text-wedding-cream/80 mb-4">H & C</div>
+                        <p class="text-xs font-cormorant italic text-wedding-cream/80 mb-4">"Together is a beautiful place to be"</p>
+                        <div class="flex items-center justify-center space-x-3 mb-6">
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                            <span class="text-[10px] uppercase tracking-[0.25em] text-wedding-cream/70 font-medium">20.12.2026</span>
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                        </div>
+                        <p class="text-[9px] uppercase tracking-widest text-wedding-cream/60">Designed with modern elegance & love.</p>
+                    </div>
+                </div>
+</section>
+
+        <!-- ================= SECTION 7: THE GALLERY ================= -->
+        <section id="gallery" class="py-24 px-4 bg-wedding-deepburgundy/50 wizard-step absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden transition-all duration-1000 ease-in-out opacity-0 translate-y-8 scale-95 pointer-events-none z-0 flex flex-col justify-between">
+            <div class="max-w-7xl mx-auto text-center w-full">
+                <div class="mb-16 reveal">
+                    <span class="text-xs uppercase tracking-[0.4em] text-wedding-cream/80 block mb-2">Our Memories</span>
+                    <h2 class="text-3xl md:text-5xl font-cinzel font-light text-wedding-cream tracking-wide">The Gallery</h2>
+                    <div class="w-16 h-[1px] bg-wedding-cream/20 mx-auto mt-4"></div>
+                </div>
+
+                <style>
+                @keyframes scroll-left {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(calc(-50% - 0.5rem)); }
+                }
+                @keyframes scroll-right {
+                    0% { transform: translateX(calc(-50% - 0.5rem)); }
+                    100% { transform: translateX(0); }
+                }
+                .animate-infinite-slider {
+                    animation: scroll-left 35s linear infinite;
+                }
+                .animate-infinite-slider-reverse {
+                    animation: scroll-right 35s linear infinite;
+                }
+                .slider-wrapper:hover .animate-infinite-slider,
+                .slider-wrapper:hover .animate-infinite-slider-reverse {
+                    animation-play-state: paused;
+                }
+                .mask-edges {
+                    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+                    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+                }
+                </style>
+
+                <!-- Infinite Sliders -->
+                <div class="flex flex-col justify-center gap-6 w-full max-w-[100vw] overflow-hidden px-0 sm:-mx-8 reveal">
+                    
+                    <!-- Row 1 -->
+                    <div class="slider-wrapper w-full overflow-hidden mask-edges py-2">
+                        <div class="flex w-max gap-4 animate-infinite-slider">
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(0)">
+                        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600" alt="Gallery 1" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(1)">
+                        <img src="https://images.unsplash.com/photo-1520854221256-17451cc35953?auto=format&fit=crop&q=80&w=600" alt="Gallery 2" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(2)">
+                        <img src="https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=600" alt="Gallery 3" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(3)">
+                        <img src="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=600" alt="Gallery 4" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(4)">
+                        <img src="https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=600" alt="Gallery 5" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(0)">
+                        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600" alt="Gallery 1" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(1)">
+                        <img src="https://images.unsplash.com/photo-1520854221256-17451cc35953?auto=format&fit=crop&q=80&w=600" alt="Gallery 2" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(2)">
+                        <img src="https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=600" alt="Gallery 3" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(3)">
+                        <img src="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=600" alt="Gallery 4" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(4)">
+                        <img src="https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=600" alt="Gallery 5" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2 (Reverse) -->
+                    <div class="slider-wrapper w-full overflow-hidden mask-edges py-2">
+                        <div class="flex w-max gap-4 animate-infinite-slider-reverse">
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(5)">
+                        <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=600" alt="Gallery 6" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(6)">
+                        <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=600" alt="Gallery 7" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(7)">
+                        <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=600" alt="Gallery 8" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(8)">
+                        <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=600" alt="Gallery 9" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(9)">
+                        <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=600" alt="Gallery 10" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(5)">
+                        <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=600" alt="Gallery 6" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(6)">
+                        <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=600" alt="Gallery 7" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(7)">
+                        <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=600" alt="Gallery 8" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(8)">
+                        <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=600" alt="Gallery 9" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                    <div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0" onclick="openLightbox(9)">
+                        <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=600" alt="Gallery 10" class="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75">
+                        <div class="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                            <span class="text-wedding-cream text-[10px] uppercase tracking-[0.3em] border border-wedding-cream/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm">View Image</span>
+                        </div>
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
+                <button onclick="nextWizardStep()" class="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none animate-bounce mt-4">
+                    <span class="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-cream transition-colors duration-300">Continue</span>
+                    <div class="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-cream/10 group-hover:border-wedding-cream/60">
+                        <svg class="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:translate-y-1 group-hover:text-wedding-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Embedded Footer -->
+            <div class="w-[calc(100%+2rem)] -mx-4 -mb-24 py-8 text-center border-t border-wedding-cream/20 mt-16 shrink-0 relative z-20 flex flex-col justify-center">
+                <div class="max-w-md mx-auto px-4">
+                    <div class="text-xl font-cinzel tracking-[0.4em] text-wedding-cream/80 mb-4">H & C</div>
+                    <p class="text-xs font-cormorant italic text-wedding-cream/80 mb-4">"Together is a beautiful place to be"</p>
+                    <div class="flex items-center justify-center space-x-3 mb-6">
+                        <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                        <span class="text-[10px] uppercase tracking-[0.25em] text-wedding-cream/70 font-medium">20.12.2026</span>
+                        <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                    </div>
+                    <p class="text-[9px] uppercase tracking-widest text-wedding-cream/60">Designed with modern elegance & love.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 8: GIFT PREFERENCES ================= -->
+        <section id="registry" class="py-24 px-4 bg-wedding-softdark wizard-step absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden transition-all duration-1000 ease-in-out opacity-0 translate-y-8 scale-95 pointer-events-none z-0 flex flex-col justify-between">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-16 reveal">
+                    <span class="text-xs uppercase tracking-[0.4em] text-wedding-cream/80 block mb-2">Wishing Well</span>
+                    <h2 class="text-3xl md:text-5xl font-cinzel font-light text-wedding-cream tracking-wide">Registry & Contributions</h2>
+                    <div class="w-16 h-[1px] bg-wedding-cream/20 mx-auto mt-4"></div>
+                    <p class="text-base font-cormorant italic text-wedding-cream/70 mt-3 max-w-md mx-auto">Your presence is our ultimate gift, but should you wish to honor us, we have provided options below.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Card 1 -->
+                    <div class="bg-wedding-dark/60 p-8 rounded-xl border border-wedding-burgundylight/30 shadow-sm reveal flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 bg-wedding-champagne rounded-full flex items-center justify-center mb-6">
+                                <svg class="w-6 h-6 text-wedding-burgundy" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-cinzel text-wedding-cream font-light mb-3">Bank Transfer</h3>
+                            <p class="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
+                                Directly support our honeymoon adventures or first home goals with an elegant direct bank contribution.
+                            </p>
+                            <div class="bg-wedding-dark/40 p-4 rounded-lg border border-wedding-burgundylight/30 text-xs font-inter space-y-3 mb-6">
+                                <div class="flex justify-between border-b border-wedding-burgundylight/20 pb-2">
+                                    <span class="text-wedding-cream/60 uppercase">Bank:</span>
+                                    <span class="font-medium text-wedding-cream">Lombard Odier Private Bank</span>
+                                </div>
+                                <div class="flex justify-between border-b border-wedding-burgundylight/20 pb-2">
+                                    <span class="text-wedding-cream/60 uppercase">Beneficiary:</span>
+                                    <span class="font-medium text-wedding-cream">Hans & Czay</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-wedding-burgundylight/20 pb-2">
+                                    <span class="text-wedding-cream/60 uppercase">IBAN:</span>
+                                    <span class="font-medium text-wedding-cream">CH89 0023 9482 1042 8111 0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-wedding-cream/60 uppercase">SWIFT:</span>
+                                    <span class="font-medium text-wedding-cream">LOMDCH22XXX</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="copyToClipboard('CH89 0023 9482 1042 8111 0', this)" class="w-full text-center py-3 bg-transparent border border-wedding-cream/50 text-wedding-cream/90 hover:bg-wedding-cream/10 hover:border-wedding-cream/80 hover:text-wedding-cream text-xs tracking-[0.2em] font-medium uppercase transition-all duration-300 rounded-sm">
+                            Copy IBAN Details
+                        </button>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="bg-wedding-dark/60 p-8 rounded-xl border border-wedding-burgundylight/30 shadow-sm reveal flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 bg-wedding-champagne rounded-full flex items-center justify-center mb-6">
+                                <svg class="w-6 h-6 text-wedding-burgundy" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-cinzel text-wedding-cream font-light mb-3">Curated Registry</h3>
+                            <p class="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
+                                We have lovingly curated a wedding registry featuring beautiful, elegant keepsakes and lifestyle pieces from our favorite boutiques.
+                            </p>
+                            <p class="text-xs text-wedding-cream/60 leading-relaxed mb-8">
+                                Options include premium vintage collection tablewares, designer home accents, and art contributions for our newly renovated residence.
+                            </p>
+                        </div>
+                        <a href="https://www.williams-sonoma.com" target="_blank" class="w-full text-center py-3 bg-wedding-burgundy text-wedding-cream hover:bg-wedding-burgundydark hover:text-wedding-cream text-xs tracking-[0.2em] font-medium uppercase transition-all duration-300 rounded-sm">
+                            Visit Wedding Registry
+                        </a>
+                    </div>
+                </div>
+            </div>
+        
+                <div class="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
+                    <button onclick="nextWizardStep()" class="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none animate-bounce mt-4">
+                        <span class="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-cream transition-colors duration-300">Continue</span>
+                        <div class="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-cream/10 group-hover:border-wedding-cream/60">
+                            <svg class="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:translate-y-1 group-hover:text-wedding-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Embedded Footer -->
+                <div class="w-[calc(100%+2rem)] -mx-4 -mb-24 py-8 text-center border-t border-wedding-cream/20 mt-6 md:mt-16 shrink-0 relative z-20 flex flex-col justify-center">
+                    <div class="max-w-md mx-auto px-4">
+                        <div class="text-xl font-cinzel tracking-[0.4em] text-wedding-cream/80 mb-4">H & C</div>
+                        <p class="text-xs font-cormorant italic text-wedding-cream/80 mb-4">"Together is a beautiful place to be"</p>
+                        <div class="flex items-center justify-center space-x-3 mb-6">
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                            <span class="text-[10px] uppercase tracking-[0.25em] text-wedding-cream/70 font-medium">20.12.2026</span>
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                        </div>
+                        <p class="text-[9px] uppercase tracking-widest text-wedding-cream/60">Designed with modern elegance & love.</p>
+                    </div>
+                </div>
+</section>
+
+        <!-- ================= SECTION 9: RSVP CTA ================= -->
+        <section class="py-24 px-4 bg-wedding-dark text-wedding-cream overflow-hidden wizard-step absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden transition-all duration-1000 ease-in-out opacity-0 translate-y-8 scale-95 pointer-events-none z-0 flex flex-col justify-center items-center">
+            <div class="absolute inset-0 bg-cover bg-center opacity-100" style="background-image: url('https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=1920');"></div>
+            
+            <!-- Ink Reveal Canvas -->
+            <canvas class="ink-canvas absolute inset-0 z-10 w-full h-full pointer-events-auto"></canvas>
+            
+            <div class="relative z-20 max-w-3xl mx-auto text-center reveal">
+                <span class="text-xs uppercase tracking-[0.4em] text-wedding-cream/80 block mb-2">Join Our Day</span>
+                <h2 class="text-3xl md:text-5xl font-cinzel font-light text-wedding-cream tracking-wide mb-6">Kindly RSVP</h2>
+                <div class="w-16 h-[1px] bg-wedding-cream/20 mx-auto mb-6"></div>
+                <p class="text-lg font-cormorant italic text-wedding-burgundylight mb-10 leading-relaxed">
+                    "We would be deeply honored by your presence as we pledge our lives, hearts, and dreams under the beautiful Tarlac skies. Please secure your response before November 1, 2026."
+                </p>
+                <button onclick="nextWizardStep()" class="px-8 py-4 bg-wedding-burgundy text-wedding-cream hover:bg-wedding-cream hover:text-wedding-burgundy text-xs tracking-[0.25em] font-medium uppercase transition-all duration-500 rounded-sm shadow-lg">
+                    Confirm Your Attendance
+                </button>
+            </div>
+</section>
+
+        <!-- ================= SECTION 10: RSVP PREVIEW FORM ================= -->
+        <section id="rsvp-section" class="py-24 px-4 bg-gradient-to-b from-wedding-softdark to-wedding-deepburgundy/80 wizard-step absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden transition-all duration-1000 ease-in-out opacity-0 translate-y-8 scale-95 pointer-events-none z-0 flex flex-col justify-between">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-wedding-dark/40 p-8 md:p-12 rounded-xl border border-wedding-burgundylight/30 shadow-lg reveal">
+                    <div class="text-center mb-12">
+                        <span class="text-xs uppercase tracking-[0.3em] text-wedding-cream/70 block mb-1">R.S.V.P</span>
+                        <h2 class="text-3xl font-cinzel font-light text-wedding-cream tracking-wide">The Response</h2>
+                        <div class="w-12 h-[1px] bg-wedding-cream/20 mx-auto mt-3"></div>
+                    </div>
+
+                    <!-- Interactive RSVP Form -->
+                    <form id="rsvpForm" onsubmit="handleRSVPSubmit(event)" class="space-y-8 font-inter">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Full Name -->
+                            <div class="relative col-span-2 md:col-span-1">
+                                <label for="fullname" class="block text-xs uppercase tracking-widest text-wedding-cream/70 font-semibold mb-2">Full Name</label>
+                                <input type="text" id="fullname" required class="w-full bg-transparent border-b border-wedding-burgundylight/30 focus:border-wedding-burgundy py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300">
+                            </div>
+
+                            <!-- Email Address -->
+                            <div class="relative col-span-2 md:col-span-1">
+                                <label for="email" class="block text-xs uppercase tracking-widest text-wedding-cream/70 font-semibold mb-2">Email Address</label>
+                                <input type="email" id="email" required class="w-full bg-transparent border-b border-wedding-burgundylight/30 focus:border-wedding-burgundy py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Phone -->
+                            <div class="relative">
+                                <label for="phone" class="block text-xs uppercase tracking-widest text-wedding-cream/70 font-semibold mb-2">Phone Number</label>
+                                <input type="tel" id="phone" required class="w-full bg-transparent border-b border-wedding-burgundylight/30 focus:border-wedding-burgundy py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300">
+                            </div>
+
+                            <!-- Attendance Choice -->
+                            <div>
+                                <span class="block text-xs uppercase tracking-widest text-wedding-cream/70 font-semibold mb-3">Will you attend?</span>
+                                <div class="flex space-x-8 mt-1">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" name="attendance" value="accept" checked class="sr-only peer">
+                                        <div class="w-5 h-5 rounded-full border border-wedding-burgundy flex items-center justify-center mr-3 peer-checked:bg-wedding-burgundy transition-all duration-300">
+                                            <div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
+                                        </div>
+                                        <span class="text-sm font-cormorant italic text-wedding-cream">Joyfully Accepts</span>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" name="attendance" value="decline" class="sr-only peer">
+                                        <div class="w-5 h-5 rounded-full border border-wedding-burgundy flex items-center justify-center mr-3 peer-checked:bg-wedding-burgundy transition-all duration-300">
+                                            <div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
+                                        </div>
+                                        <span class="text-sm font-cormorant italic text-wedding-cream">Regretfully Declines</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Special Message -->
+                        <div>
+                            <label for="message" class="block text-xs uppercase tracking-widest text-wedding-cream/70 font-semibold mb-2">Message for Hans & Czay</label>
+                            <textarea id="message" rows="4" placeholder="Share your warm thoughts..." class="w-full bg-transparent border-b border-wedding-burgundylight/30 focus:border-wedding-burgundy py-2 text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-all duration-300 resize-none"></textarea>
+                        </div>
+
+                        <!-- ================= OPTIONAL GIFT SELECTION TOGGLE & EXPANSION ================= -->
+                        <div class="pt-8 text-center">
+                            <button type="button" onclick="toggleGiftSuggestions()" id="gift-toggle-btn" class="inline-flex items-center gap-3 px-6 py-3 bg-transparent border border-wedding-cream/50 text-wedding-cream/90 hover:bg-wedding-cream/10 hover:border-wedding-cream/80 hover:text-wedding-cream text-xs tracking-[0.2em] font-medium uppercase transition-all duration-300 rounded-sm">
+                                <span>View Gift Suggestions (Optional)</span>
+                                <svg id="gift-toggle-icon" class="w-4 h-4 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Collapsible Selection Wrapper -->
+                        <div id="gift-selection-container" class="max-h-0 opacity-0 overflow-hidden transition-all duration-700 ease-in-out mt-0">
+                            <div class="pt-8 border-t border-dashed border-wedding-burgundylight/30 mt-6">
+                                <span class="block text-xs uppercase tracking-[0.2em] text-wedding-cream/70 font-semibold mb-2 text-center">Curated Registry Suggestions</span>
+                                <p class="text-xs text-wedding-cream/60 mb-8 font-cormorant italic text-center max-w-lg mx-auto">Should you wish to send a specific home keepsake, please choose one below to select it.</p>
+                                
+                                <!-- State Selector input tracker -->
+                                <input type="hidden" id="selected-gift" name="selectedGift" value="">
+
+                                <!-- Balanced 5-Column Luxury Grid on Desktop -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                    
+                                    <!-- Card 1 -->
+                                    <div id="gift-card-1" onclick="selectGiftCard(1)" class="gift-card relative border border-wedding-burgundylight/30 rounded-xl p-4 cursor-pointer bg-wedding-dark/30 transition-all duration-300 hover:border-wedding-burgundy hover:shadow-md flex flex-col items-center justify-center space-y-4 text-center min-h-[220px]">
+                                        <div>
+                                            <div class="flex justify-center mb-3 text-wedding-cream/70">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+                                                    <path d="M6 3h12l-2 12H8L6 3z" />
+                                                    <path d="M10 15v5a2 2 0 002 2h0a2 2 0 002-2v-5" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="font-cinzel text-[11px] font-semibold text-wedding-cream tracking-wider mb-3 truncate">Kitchen Appliance</h4>
+                                                                                    </div>
+                                        <div class="space-y-1.5 w-full">
+                                            <a href="https://shopee.ph" target="_blank" onclick="event.stopPropagation()" class="block text-center py-1.5 border border-wedding-cream/30 text-[9px] tracking-widest font-medium text-wedding-cream/80 hover:border-wedding-cream/80 hover:text-wedding-cream uppercase transition-all duration-300 rounded">
+                                                View Item
+                                            </a>
+                                            <button type="button" class="select-btn w-full text-center py-1.5 bg-transparent border border-wedding-burgundy text-wedding-cream/70 text-[9px] tracking-widest font-medium uppercase transition-all duration-300 rounded">
+                                                Select This Gift
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 2 -->
+                                    <div id="gift-card-2" onclick="selectGiftCard(2)" class="gift-card relative border border-wedding-burgundylight/30 rounded-xl p-4 cursor-pointer bg-wedding-dark/30 transition-all duration-300 hover:border-wedding-burgundy hover:shadow-md flex flex-col items-center justify-center space-y-4 text-center min-h-[220px]">
+                                        <div>
+                                            <div class="flex justify-center mb-3 text-wedding-cream/70">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="9" />
+                                                    <circle cx="12" cy="12" r="5" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="font-cinzel text-[11px] font-semibold text-wedding-cream tracking-wider mb-3 truncate">Dinnerware Set</h4>
+                                                                                    </div>
+                                        <div class="space-y-1.5 w-full">
+                                            <a href="https://shopee.ph" target="_blank" onclick="event.stopPropagation()" class="block text-center py-1.5 border border-wedding-cream/30 text-[9px] tracking-widest font-medium text-wedding-cream/80 hover:border-wedding-cream/80 hover:text-wedding-cream uppercase transition-all duration-300 rounded">
+                                                View Item
+                                            </a>
+                                            <button type="button" class="select-btn w-full text-center py-1.5 bg-transparent border border-wedding-burgundy text-wedding-cream/70 text-[9px] tracking-widest font-medium uppercase transition-all duration-300 rounded">
+                                                Select This Gift
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 3 -->
+                                    <div id="gift-card-3" onclick="selectGiftCard(3)" class="gift-card relative border border-wedding-burgundylight/30 rounded-xl p-4 cursor-pointer bg-wedding-dark/30 transition-all duration-300 hover:border-wedding-burgundy hover:shadow-md flex flex-col items-center justify-center space-y-4 text-center min-h-[220px]">
+                                        <div>
+                                            <div class="flex justify-center mb-3 text-wedding-cream/70">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+                                                    <path d="M6 19v2h12v-2M12 5h6M6 5h3m-3 0a3 3 0 013 3v8h6V8a3 3 0 013-3h0a2 2 0 012 2v4a4 4 0 01-4 4H9" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="font-cinzel text-[11px] font-semibold text-wedding-cream tracking-wider mb-3 truncate">Coffee Machine</h4>
+                                                                                    </div>
+                                        <div class="space-y-1.5 w-full">
+                                            <a href="https://shopee.ph" target="_blank" onclick="event.stopPropagation()" class="block text-center py-1.5 border border-wedding-cream/30 text-[9px] tracking-widest font-medium text-wedding-cream/80 hover:border-wedding-cream/80 hover:text-wedding-cream uppercase transition-all duration-300 rounded">
+                                                View Item
+                                            </a>
+                                            <button type="button" class="select-btn w-full text-center py-1.5 bg-transparent border border-wedding-burgundy text-wedding-cream/70 text-[9px] tracking-widest font-medium uppercase transition-all duration-300 rounded">
+                                                Select This Gift
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 4 -->
+                                    <div id="gift-card-4" onclick="selectGiftCard(4)" class="gift-card relative border border-wedding-burgundylight/30 rounded-xl p-4 cursor-pointer bg-wedding-dark/30 transition-all duration-300 hover:border-wedding-burgundy hover:shadow-md flex flex-col items-center justify-center space-y-4 text-center min-h-[220px]">
+                                        <div>
+                                            <div class="flex justify-center mb-3 text-wedding-cream/70">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+                                                    <path d="M12 3a4 4 0 014 4c0 3-4 6-4 9s-4-3-4-6a4 4 0 014-4z" />
+                                                    <path d="M8 16h8v4H8z" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="font-cinzel text-[11px] font-semibold text-wedding-cream tracking-wider mb-3 truncate">Home Decor Piece</h4>
+                                                                                    </div>
+                                        <div class="space-y-1.5 w-full">
+                                            <a href="https://shopee.ph" target="_blank" onclick="event.stopPropagation()" class="block text-center py-1.5 border border-wedding-cream/30 text-[9px] tracking-widest font-medium text-wedding-cream/80 hover:border-wedding-cream/80 hover:text-wedding-cream uppercase transition-all duration-300 rounded">
+                                                View Item
+                                            </a>
+                                            <button type="button" class="select-btn w-full text-center py-1.5 bg-transparent border border-wedding-burgundy text-wedding-cream/70 text-[9px] tracking-widest font-medium uppercase transition-all duration-300 rounded">
+                                                Select This Gift
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 5 -->
+                                    <div id="gift-card-5" onclick="selectGiftCard(5)" class="gift-card relative border border-wedding-burgundylight/30 rounded-xl p-4 cursor-pointer bg-wedding-dark/30 transition-all duration-300 hover:border-wedding-burgundy hover:shadow-md flex flex-col items-center justify-center space-y-4 text-center min-h-[220px]">
+                                        <div>
+                                            <div class="flex justify-center mb-3 text-wedding-cream/70">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+                                                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                                                    <path d="M3 12h18M7 8h4" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="font-cinzel text-[11px] font-semibold text-wedding-cream tracking-wider mb-3 truncate">Bedding Set</h4>
+                                                                                    </div>
+                                        <div class="space-y-1.5 w-full">
+                                            <a href="https://shopee.ph" target="_blank" onclick="event.stopPropagation()" class="block text-center py-1.5 border border-wedding-cream/30 text-[9px] tracking-widest font-medium text-wedding-cream/80 hover:border-wedding-cream/80 hover:text-wedding-cream uppercase transition-all duration-300 rounded">
+                                                View Item
+                                            </a>
+                                            <button type="button" class="select-btn w-full text-center py-1.5 bg-transparent border border-wedding-burgundy text-wedding-cream/70 text-[9px] tracking-widest font-medium uppercase transition-all duration-300 rounded">
+                                                Select This Gift
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 6 -->
+                                    <div id="gift-card-6" onclick="selectGiftCard(6)" class="gift-card relative border border-wedding-burgundylight/30 rounded-xl p-4 cursor-pointer bg-wedding-dark/30 transition-all duration-300 hover:border-wedding-burgundy hover:shadow-md flex flex-col items-center justify-center space-y-4 text-center min-h-[220px]">
+                                        <div>
+                                            <div class="flex justify-center mb-3 text-wedding-cream/70">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="8" />
+                                                    <path d="M12 9v6M9 12h6" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="font-cinzel text-[11px] font-semibold text-wedding-cream tracking-wider mb-3 truncate">Smart Home Device</h4>
+                                                                                    </div>
+                                        <div class="space-y-1.5 w-full">
+                                            <a href="https://shopee.ph" target="_blank" onclick="event.stopPropagation()" class="block text-center py-1.5 border border-wedding-cream/30 text-[9px] tracking-widest font-medium text-wedding-cream/80 hover:border-wedding-cream/80 hover:text-wedding-cream uppercase transition-all duration-300 rounded">
+                                                View Item
+                                            </a>
+                                            <button type="button" class="select-btn w-full text-center py-1.5 bg-transparent border border-wedding-burgundy text-wedding-cream/70 text-[9px] tracking-widest font-medium uppercase transition-all duration-300 rounded">
+                                                Select This Gift
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 7 -->
+                                    <div id="gift-card-7" onclick="selectGiftCard(7)" class="gift-card relative border border-wedding-burgundylight/30 rounded-xl p-4 cursor-pointer bg-wedding-dark/30 transition-all duration-300 hover:border-wedding-burgundy hover:shadow-md flex flex-col items-center justify-center space-y-4 text-center min-h-[220px]">
+                                        <div>
+                                            <div class="flex justify-center mb-3 text-wedding-cream/70">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+                                                    <path d="M4 10h12v4a4 4 0 01-4 4H8a4 4 0 01-4-4v-4z" />
+                                                    <path d="M16 12h4" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="font-cinzel text-[11px] font-semibold text-wedding-cream tracking-wider mb-3 truncate">Cookware Set</h4>
+                                                                                    </div>
+                                        <div class="space-y-1.5 w-full">
+                                            <a href="https://shopee.ph" target="_blank" onclick="event.stopPropagation()" class="block text-center py-1.5 border border-wedding-cream/30 text-[9px] tracking-widest font-medium text-wedding-cream/80 hover:border-wedding-cream/80 hover:text-wedding-cream uppercase transition-all duration-300 rounded">
+                                                View Item
+                                            </a>
+                                            <button type="button" class="select-btn w-full text-center py-1.5 bg-transparent border border-wedding-burgundy text-wedding-cream/70 text-[9px] tracking-widest font-medium uppercase transition-all duration-300 rounded">
+                                                Select This Gift
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 8 -->
+                                    <div id="gift-card-8" onclick="selectGiftCard(8)" class="gift-card relative border border-wedding-burgundylight/30 rounded-xl p-4 cursor-pointer bg-wedding-dark/30 transition-all duration-300 hover:border-wedding-burgundy hover:shadow-md flex flex-col items-center justify-center space-y-4 text-center min-h-[220px]">
+                                        <div>
+                                            <div class="flex justify-center mb-3 text-wedding-cream/70">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+                                                    <path d="M9 3h6l-1 10H10L9 3z" />
+                                                    <rect x="8" y="15" width="8" height="6" rx="1" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="font-cinzel text-[11px] font-semibold text-wedding-cream tracking-wider mb-3 truncate">Blender Premium</h4>
+                                                                                    </div>
+                                        <div class="space-y-1.5 w-full">
+                                            <a href="https://shopee.ph" target="_blank" onclick="event.stopPropagation()" class="block text-center py-1.5 border border-wedding-cream/30 text-[9px] tracking-widest font-medium text-wedding-cream/80 hover:border-wedding-cream/80 hover:text-wedding-cream uppercase transition-all duration-300 rounded">
+                                                View Item
+                                            </a>
+                                            <button type="button" class="select-btn w-full text-center py-1.5 bg-transparent border border-wedding-burgundy text-wedding-cream/70 text-[9px] tracking-widest font-medium uppercase transition-all duration-300 rounded">
+                                                Select This Gift
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 9 -->
+                                    <div id="gift-card-9" onclick="selectGiftCard(9)" class="gift-card relative border border-wedding-burgundylight/30 rounded-xl p-4 cursor-pointer bg-wedding-dark/30 transition-all duration-300 hover:border-wedding-burgundy hover:shadow-md flex flex-col items-center justify-center space-y-4 text-center min-h-[220px]">
+                                        <div>
+                                            <div class="flex justify-center mb-3 text-wedding-cream/70">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+                                                    <path d="M8 4h8v6a4 4 0 01-8 0V4z" />
+                                                    <path d="M12 14v6M9 20h6" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="font-cinzel text-[11px] font-semibold text-wedding-cream tracking-wider mb-3 truncate">Wine Glass Set</h4>
+                                                                                    </div>
+                                        <div class="space-y-1.5 w-full">
+                                            <a href="https://shopee.ph" target="_blank" onclick="event.stopPropagation()" class="block text-center py-1.5 border border-wedding-cream/30 text-[9px] tracking-widest font-medium text-wedding-cream/80 hover:border-wedding-cream/80 hover:text-wedding-cream uppercase transition-all duration-300 rounded">
+                                                View Item
+                                            </a>
+                                            <button type="button" class="select-btn w-full text-center py-1.5 bg-transparent border border-wedding-burgundy text-wedding-cream/70 text-[9px] tracking-widest font-medium uppercase transition-all duration-300 rounded">
+                                                Select This Gift
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 10 -->
+                                    <div id="gift-card-10" onclick="selectGiftCard(10)" class="gift-card relative border border-wedding-burgundylight/30 rounded-xl p-4 cursor-pointer bg-wedding-dark/30 transition-all duration-300 hover:border-wedding-burgundy hover:shadow-md flex flex-col items-center justify-center space-y-4 text-center min-h-[220px]">
+                                        <div>
+                                            <div class="flex justify-center mb-3 text-wedding-cream/70">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+                                                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                                                    <circle cx="7" cy="12" r="1" />
+                                                    <circle cx="17" cy="12" r="1" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="font-cinzel text-[11px] font-semibold text-wedding-cream tracking-wider mb-3 truncate">Toaster Oven Deluxe</h4>
+                                                                                    </div>
+                                        <div class="space-y-1.5 w-full">
+                                            <a href="https://shopee.ph" target="_blank" onclick="event.stopPropagation()" class="block text-center py-1.5 border border-wedding-cream/30 text-[9px] tracking-widest font-medium text-wedding-cream/80 hover:border-wedding-cream/80 hover:text-wedding-cream uppercase transition-all duration-300 rounded">
+                                                View Item
+                                            </a>
+                                            <button type="button" class="select-btn w-full text-center py-1.5 bg-transparent border border-wedding-burgundy text-wedding-cream/70 text-[9px] tracking-widest font-medium uppercase transition-all duration-300 rounded">
+                                                Select This Gift
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center pt-4">
+                            <button type="submit" class="w-full md:w-auto md:px-12 py-4 bg-wedding-burgundy text-wedding-cream hover:bg-wedding-burgundydark hover:text-wedding-cream text-xs tracking-[0.25em] font-medium uppercase transition-all duration-300 rounded-sm">
+                                Send RSVP Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        
+                <!-- Embedded Footer -->
+                <div class="w-[calc(100%+2rem)] -mx-4 -mb-24 py-8 text-center border-t border-wedding-cream/20 mt-16 md:mt-24 shrink-0 relative z-20 flex flex-col justify-center">
+                    <div class="max-w-md mx-auto px-4">
+                        <div class="text-xl font-cinzel tracking-[0.4em] text-wedding-cream/80 mb-4">H & C</div>
+                        <p class="text-xs font-cormorant italic text-wedding-cream/80 mb-4">"Together is a beautiful place to be"</p>
+                        <div class="flex items-center justify-center space-x-3 mb-6">
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                            <span class="text-[10px] uppercase tracking-[0.25em] text-wedding-cream/70 font-medium">20.12.2026</span>
+                            <span class="w-8 h-[1px] bg-wedding-cream/20"></span>
+                        </div>
+                        <p class="text-[9px] uppercase tracking-widest text-wedding-cream/60">Designed with modern elegance & love.</p>
+                    </div>
+                </div>
+</section>
+
+        
+
+    </div>
+
+    <!-- ================= MODALS & LIGHTBOX POPUPS ================= -->
+    
+    <!-- Responsive Google Map Modal -->
+    <div id="map-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-wedding-dark/80 backdrop-blur-xs hidden transition-opacity duration-300">
+        <div class="bg-wedding-dark/80 backdrop-blur-xl border-wedding-burgundylight/30 w-[95%] max-w-4xl rounded-xl overflow-hidden shadow-2xl border border-wedding-burgundy/20 flex flex-col h-[80vh] md:h-[600px]">
+            <div class="p-4 border-b border-wedding-burgundylight/30 flex justify-between items-center">
+                <h3 class="font-cinzel text-sm tracking-widest text-wedding-cream">Wedding Location Map</h3>
+                <button onclick="closeMapModal()" class="text-wedding-cream/60 hover:text-wedding-cream">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="grow relative bg-wedding-dark/40">
+                <iframe id="map-iframe" class="absolute inset-0 w-full h-full border-0" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Lightbox Modal -->
+    <div id="lightbox-modal" class="fixed inset-0 z-50 flex flex-col justify-between bg-wedding-dark/95 backdrop-blur-md hidden transition-all duration-300">
+        <div class="p-6 flex justify-end">
+            <button onclick="closeLightbox()" class="text-wedding-cream/80 hover:text-wedding-cream transition-colors duration-300 p-2">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <div class="grow flex items-center justify-between px-4 md:px-12 relative">
+            <button onclick="prevImage()" class="text-wedding-cream/60 hover:text-wedding-cream transition-colors duration-300 p-3 bg-wedding-dark/40 rounded-full select-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+
+            <div class="max-w-4xl max-h-[70vh] flex items-center justify-center overflow-hidden mx-4">
+                <img id="lightbox-image" src="" alt="Viewing Image" class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl transition-transform duration-500">
+            </div>
+
+            <button onclick="nextImage()" class="text-wedding-cream/60 hover:text-wedding-cream transition-colors duration-300 p-3 bg-wedding-dark/40 rounded-full select-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </div>
+
+        <div class="p-8 text-center text-wedding-cream/80 font-cormorant text-lg tracking-wider">
+            Image <span id="lightbox-counter">1 of 6</span>
+        </div>
+    </div>
+
+    <!-- RSVP Elegant Feedback Popup Modal -->
+    <div id="rsvp-success-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-wedding-dark/80 backdrop-blur-xs hidden transition-opacity duration-300">
+        <div class="bg-wedding-dark/60 p-8 md:p-12 rounded-xl max-w-md w-[90%] text-center shadow-2xl border border-wedding-burgundy/20">
+            <div class="w-16 h-16 bg-wedding-champagne rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8 text-wedding-cream/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h3 class="text-2xl font-cinzel text-wedding-cream font-light mb-3">RSVP Confirmed</h3>
+            <div class="w-12 h-[1px] bg-wedding-cream/20 mx-auto mb-6"></div>
+            <p class="text-sm font-cormorant text-wedding-cream leading-relaxed mb-8">
+                Your response has been elegantly collected. Hans and Czay are overjoyed at the prospect of sharing these sacred memories with you in beautiful Paniqui.
+            </p>
+            <button onclick="closeRSVPModal()" class="w-full py-3 bg-wedding-burgundy text-wedding-cream hover:bg-wedding-burgundydark hover:text-wedding-cream text-xs tracking-[0.2em] font-medium uppercase transition-all duration-300 rounded-sm">
+                Close View
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        const galleryImages = [
+            "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1200",
+            "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=1200",
+            "https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=1200",
+            "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=1200",
+            "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=1200",
+            "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=1200",
+            "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=1200",
+            "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=1200",
+            "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=1200",
+            "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=1200"
+        ];
+        let currentLightboxIndex = 0;
+
+        // On Page Load: Initialize immediately, password screen is only for RSVP
+        window.onload = function() {
+            initCountdown();
+            initScrollObserver();
+        };
+
+        // Unlock Access
+        function unlockInvitation() {
+            const passInput = document.getElementById("wedding-pass").value.trim().toUpperCase();
+            const passScreen = document.getElementById("password-screen");
+            const errElem = document.getElementById("password-error");
+
+            if (passInput === "FOREVER2026") {
+                // User wants login to be saved, so use localStorage
+                localStorage.setItem("wedding_unlocked_2026", "true");
+                window.isWeddingUnlocked = true;
+                
+                // Fade out lockscreen
+                passScreen.classList.remove("opacity-100", "pointer-events-auto");
+                passScreen.classList.add("opacity-0", "pointer-events-none");
+                
+                setTimeout(() => {
+                    passScreen.classList.add("hidden");
+                    // Force navigation to RSVP Form
+                    highestVisitedStep = 9;
+                    goToWizardStep(9);
+                }, 1000);
+            } else {
+                errElem.classList.remove("opacity-0");
+                errElem.classList.add("opacity-100");
+                
+                const inputBlock = document.getElementById("wedding-pass");
+                inputBlock.classList.add("border-red-400");
+                setTimeout(() => {
+                    inputBlock.classList.remove("border-red-400");
+                }, 1500);
+            }
+        }
+
+        // Support unlocking invitation using "Enter" Key
+        document.getElementById("wedding-pass").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                unlockInvitation();
+            }
+        });
+
+        // Initialize Countdown Clock
+        function initCountdown() {
+            const targetDate = new Date("December 20, 2026 16:00:00").getTime();
+
+            const interval = setInterval(function() {
+                const now = new Date().getTime();
+                const difference = targetDate - now;
+
+                if (difference < 0) {
+                    clearInterval(interval);
+                    document.getElementById("days").innerText = "00";
+                    document.getElementById("hours").innerText = "00";
+                    document.getElementById("minutes").innerText = "00";
+                    document.getElementById("seconds").innerText = "00";
+                    return;
+                }
+
+                const d = Math.floor(difference / (1000 * 60 * 60 * 24));
+                const h = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((difference % (1000 * 60)) / 1000);
+
+                document.getElementById("days").innerText = d < 10 ? "0" + d : d;
+                document.getElementById("hours").innerText = h < 10 ? "0" + h : h;
+                document.getElementById("minutes").innerText = m < 10 ? "0" + m : m;
+                document.getElementById("seconds").innerText = s < 10 ? "0" + s : s;
+            }, 1000);
+        }
+
+        
+        // Intersection Observer for Smooth Scrolling Fade-in
+        
+        let currentWizardStep = 0;
+        let highestVisitedStep = 0;
+        let wizardSteps = [];
+        
+        const stepNames = [
+            "Welcome",           // 0
+            "Our Story",         // 1
+            "Entourage",         // 2
+            "Details",           // 3
+            "FAQs",              // 4
+            "Dress Code",        // 5
+            "Gallery",           // 6
+            "Registry",          // 7
+            null,                // 8 - Kindly RSVP CTA
+            "RSVP Form"          // 9
+        ];
+
+        function initScrollObserver() {
+            // New Wizard Logic Initialization
+            wizardSteps = document.querySelectorAll('.wizard-step');
+            if(wizardSteps.length > 0) {
+                showWizardStep(0);
+                buildMenu();
+            }
+
+            // Original Intersection Observer for .reveal elements
+            const reveals = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px"
+            });
+
+            reveals.forEach(reveal => {
+                observer.observe(reveal);
+            });
+        }
+
+        function showWizardStep(index) {
+            // Curtain exit effect for Welcome Screen
+            const step0 = wizardSteps[0];
+            if (index > 0 && step0.classList.contains('opacity-100')) {
+                if (!document.getElementById('curtain-left')) {
+                    const leftHalf = step0.cloneNode(true);
+                    const rightHalf = step0.cloneNode(true);
+                    
+                    leftHalf.id = 'curtain-left';
+                    rightHalf.id = 'curtain-right';
+                    
+                    const setupHalf = (half, isLeft) => {
+                        half.style.position = 'fixed';
+                        half.style.inset = '0';
+                        half.style.zIndex = '50'; // Above next step, below menu
+                        half.style.pointerEvents = 'none';
+                        half.style.overflow = 'hidden'; // Ensure folds don't overflow
+                        half.style.transition = 'transform 2.2s cubic-bezier(0.25, 1, 0.3, 1), opacity 2.2s cubic-bezier(0.25, 1, 0.3, 1), filter 2.2s ease';
+                        half.style.transformOrigin = isLeft ? 'left center' : 'right center';
+                        half.style.clipPath = isLeft ? 'polygon(0 0, 50% 0, 50% 100%, 0 100%)' : 'polygon(50% 0, 100% 0, 100% 100%, 50% 100%)';
+                        half.style.opacity = '1';
+                        half.style.transform = 'scaleX(1)';
+                        half.classList.remove('transition-all', 'duration-1000', 'ease-in-out');
+                        
+                        // Add fabric folds overlay
+                        const folds = document.createElement('div');
+                        folds.style.position = 'absolute';
+                        folds.style.inset = '0';
+                        folds.style.zIndex = '9999';
+                        folds.style.background = isLeft ? 
+                            'linear-gradient(to right, rgba(0,0,0,0.8) 0%, transparent 15%, rgba(0,0,0,0.6) 30%, transparent 45%, rgba(0,0,0,0.7) 60%, transparent 75%, rgba(0,0,0,0.9) 100%)' :
+                            'linear-gradient(to left, rgba(0,0,0,0.8) 0%, transparent 15%, rgba(0,0,0,0.6) 30%, transparent 45%, rgba(0,0,0,0.7) 60%, transparent 75%, rgba(0,0,0,0.9) 100%)';
+                        folds.style.opacity = '0';
+                        folds.style.transition = 'opacity 1.8s ease';
+                        half.appendChild(folds);
+                        half.folds = folds;
+                    };
+                    
+                    setupHalf(leftHalf, true);
+                    setupHalf(rightHalf, false);
+                    
+                    document.body.appendChild(leftHalf);
+                    document.body.appendChild(rightHalf);
+                    
+                    // Temporarily hide step0 without transition so curtain is the only thing visible
+                    step0.style.transition = 'none';
+                    step0.style.opacity = '0';
+                    step0.style.visibility = 'hidden';
+                    
+                    // Animate the curtain opening in the next frame
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            leftHalf.style.transform = 'scaleX(0.05)';
+                            rightHalf.style.transform = 'scaleX(0.05)';
+                            leftHalf.style.filter = 'brightness(0.3)';
+                            rightHalf.style.filter = 'brightness(0.3)';
+                            leftHalf.folds.style.opacity = '1';
+                            rightHalf.folds.style.opacity = '1';
+                            
+                            // Fade out completely near the very end
+                            setTimeout(() => {
+                                leftHalf.style.opacity = '0';
+                                rightHalf.style.opacity = '0';
+                            }, 1200);
+                        });
+                    });
+                    
+                    setTimeout(() => {
+                        leftHalf.remove();
+                        rightHalf.remove();
+                        step0.style.transition = ''; // Restore CSS transition
+                        step0.style.opacity = '';
+                        step0.style.visibility = '';
+                    }, 1800);
+                }
+            }
+
+            // Hide hamburger menu on the first screen (Welcome screen)
+            const controls = document.getElementById("wizard-controls");
+            const hamburgerBtn = controls.querySelector("button[onclick='toggleCanvasMenu()']");
+            if (index === 0) {
+                hamburgerBtn.classList.add('hidden');
+            } else {
+                hamburgerBtn.classList.remove('hidden');
+                hamburgerBtn.style.opacity = '1';
+                hamburgerBtn.style.pointerEvents = 'auto';
+            }
+
+            wizardSteps.forEach((step, i) => {
+                if (i === index) {
+                    step.classList.remove('opacity-0', 'translate-y-8', 'scale-95', 'pointer-events-none', 'z-0');
+                    step.classList.add('opacity-100', 'translate-y-0', 'scale-100', 'z-10', 'pointer-events-auto');
+                    step.scrollTop = 0;
+                } else {
+                    step.classList.add('opacity-0', 'translate-y-8', 'scale-95', 'pointer-events-none', 'z-0');
+                    step.classList.remove('opacity-100', 'translate-y-0', 'scale-100', 'z-10', 'pointer-events-auto');
+                }
+            });
+            
+            // Show wizard controls
+            if (controls) {
+                controls.classList.remove("hidden");
+                // slight delay for fade in
+                setTimeout(() => controls.classList.remove("opacity-0"), 50);
+            }
+
+            // Handle Back Button visibility
+            const backBtn = document.getElementById("wizard-back-btn");
+            if (backBtn) {
+                if (index > 0) {
+                    backBtn.classList.remove("opacity-0", "translate-x-[-20px]");
+                    backBtn.classList.add("opacity-100", "translate-x-0");
+                } else {
+                    backBtn.classList.add("opacity-0", "translate-x-[-20px]");
+                    backBtn.classList.remove("opacity-100", "translate-x-0");
+                }
+            }
+            
+            // Update menu state
+            updateMenuState(index);
+            
+            // Trigger resize after transition to fix ink reveal canvases
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 1050);
+        }
+
+        function nextWizardStep() {
+            if (currentWizardStep < wizardSteps.length - 1) {
+                const nextStep = currentWizardStep + 1;
+                
+                const isUnlocked = localStorage.getItem("wedding_unlocked_2026") === "true";
+                if (nextStep === 9 && !window.isWeddingUnlocked && !isUnlocked) {
+                    lockScreen();
+                    return;
+                }
+                
+                currentWizardStep = nextStep;
+                if (currentWizardStep > highestVisitedStep) {
+                    highestVisitedStep = currentWizardStep;
+                }
+                showWizardStep(currentWizardStep);
+            }
+        }
+        
+        function prevWizardStep() {
+            const passScreen = document.getElementById("password-screen");
+            if (passScreen && !passScreen.classList.contains("hidden")) {
+                // Hide lock screen and stay on current step
+                passScreen.classList.remove("opacity-100", "pointer-events-auto");
+                passScreen.classList.add("opacity-0", "pointer-events-none");
+                setTimeout(() => passScreen.classList.add("hidden"), 1000);
+                
+                // Restore back button visibility based on current step
+                const backBtn = document.getElementById("wizard-back-btn");
+                if (backBtn && currentWizardStep === 0) {
+                    backBtn.classList.add("opacity-0", "translate-x-[-20px]");
+                    backBtn.classList.remove("opacity-100", "translate-x-0");
+                }
+                return;
+            }
+
+            if (currentWizardStep > 0) {
+                currentWizardStep--;
+                showWizardStep(currentWizardStep);
+            }
+        }
+        
+        let isWeddingUnlocked = false; // Global session unlock state
+        function goToWizardStep(index) {
+            if (index <= highestVisitedStep || index === 9) { // Allow trying to go to 9
+                const isUnlocked = localStorage.getItem("wedding_unlocked_2026") === "true";
+                if (index === 9 && !window.isWeddingUnlocked && !isUnlocked) {
+                    // Try to access RSVP without unlock
+                    toggleCanvasMenu(false);
+                    lockScreen();
+                    return;
+                }
+                
+                // If navigating away, ensure lock screen is hidden
+                const passScreen = document.getElementById("password-screen");
+                if (passScreen && !passScreen.classList.contains("hidden")) {
+                    passScreen.classList.remove("opacity-100", "pointer-events-auto");
+                    passScreen.classList.add("opacity-0", "pointer-events-none", "hidden");
+                }
+                
+                // Allowed
+                currentWizardStep = index;
+                if (currentWizardStep > highestVisitedStep) {
+                    highestVisitedStep = currentWizardStep;
+                }
+                showWizardStep(currentWizardStep);
+                toggleCanvasMenu(false);
+            }
+        }
+
+        function toggleCanvasMenu(forceClose = null) {
+            const menu = document.getElementById("canvas-menu");
+            const isShowing = menu.classList.contains("opacity-100");
+            
+            if (forceClose === false || isShowing) {
+                menu.classList.remove("opacity-100", "pointer-events-auto");
+                menu.classList.add("opacity-0", "pointer-events-none");
+            } else {
+                menu.classList.remove("opacity-0", "pointer-events-none");
+                menu.classList.add("opacity-100", "pointer-events-auto");
+                buildMenu(); // Rebuild to ensure active states are correct
+            }
+        }
+
+        function buildMenu() {
+            const list = document.getElementById("menu-list");
+            if(!list) return;
+            
+            list.innerHTML = "";
+            stepNames.forEach((name, idx) => {
+                if (!name) return;
+                
+                const li = document.createElement("li");
+                
+                // Allow clicking if it's the current step, a previously visited step, 
+                // OR if it's the RSVP form (step 9) and we are currently on or past step 8 (Kindly RSVP CTA)
+                const isAccessible = idx <= highestVisitedStep || (idx === 9 && highestVisitedStep >= 8);
+                const isActive = idx === currentWizardStep;
+                
+                let classes = "transition-all duration-300 block ";
+                if (isActive) {
+                    classes += "text-wedding-burgundylight font-bold scale-110 drop-shadow-[0_0_12px_rgba(224,142,160,0.6)]";
+                } else if (isAccessible) {
+                    classes += "text-wedding-cream/80 hover:text-wedding-cream cursor-pointer hover:scale-105 hover:drop-shadow-[0_0_10px_rgba(244,235,232,0.5)]";
+                } else {
+                    classes += "text-wedding-cream/30 cursor-not-allowed line-through decoration-wedding-burgundy/30";
+                }
+                
+                li.innerHTML = `<span class="${classes}" ${isAccessible ? `onclick="goToWizardStep(${idx})"` : ''}>${name}</span>`;
+                list.appendChild(li);
+            });
+        }
+        
+        function updateMenuState(index) {
+            buildMenu(); // Simply rebuild to update classes
+        }
+
+        
+        // Ink Reveal Logic
+        function initInkReveal() {
+            const canvases = document.querySelectorAll('.ink-canvas');
+            
+            canvases.forEach(canvas => {
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+                
+                const mc = [28, 25, 23]; // wedding-dark RGB
+                const brushSize = 128;
+                const lifetime = 600;
+                const rStart = 10;
+                const rVary = 0.45;
+                const stampStep = 10;
+                const maxStamps = 200;
+                const segments = 36;
+                const wobble = [0.14, 0.08, 0.05];
+                const gradientInnerRadius = 0.2;
+                const gradientStops = [0.95, 0.88, 0];
+                
+                let stamps = [];
+                let running = false;
+                let lastPos = null;
+                let dims = { w: 0, h: 0 };
+                
+                function resize() {
+                    const parent = canvas.parentElement;
+                    if (!parent) return;
+                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    const w = window.innerWidth;
+                    const h = window.innerHeight;
+                    dims = { w, h };
+                    canvas.width = Math.round(w * dpr);
+                    canvas.height = Math.round(h * dpr);
+                    canvas.style.width = `${w}px`;
+                    canvas.style.height = `${h}px`;
+                    
+                    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                    ctx.globalCompositeOperation = "source-over";
+                    ctx.fillStyle = `rgb(${mc[0]},${mc[1]},${mc[2]})`;
+                    ctx.fillRect(0, 0, w, h);
+                }
+                
+                function carveInk(x, y, r, seed, alpha) {
+                    const g = ctx.createRadialGradient(x, y, r * gradientInnerRadius, x, y, r);
+                    g.addColorStop(0, `rgba(0,0,0,${gradientStops[0] * alpha})`);
+                    g.addColorStop(0.5, `rgba(0,0,0,${gradientStops[1] * alpha})`);
+                    g.addColorStop(1, `rgba(0,0,0,${gradientStops[2] * alpha})`);
+                    ctx.fillStyle = g;
+
+                    ctx.beginPath();
+                    for (let i = 0; i <= segments; i++) {
+                        const a = (i / segments) * Math.PI * 2;
+                        const wob = 0.78 +
+                            wobble[0] * Math.sin(a * 3 + seed) +
+                            wobble[1] * Math.sin(a * 5 + seed * 2.1) +
+                            wobble[2] * Math.sin(a * 7 + seed * 0.7);
+                        const px = x + Math.cos(a) * r * wob;
+                        const py = y + Math.sin(a) * r * wob;
+                        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                
+                function addStamp(x, y) {
+                    if (stamps.length >= maxStamps) stamps.shift();
+                    stamps.push({
+                        x, y,
+                        born: performance.now(),
+                        seed: Math.random() * Math.PI * 2,
+                        rmax: brushSize * (1 - rVary + Math.random() * rVary),
+                    });
+                }
+                
+                function stampAlong(x, y) {
+                    if (!lastPos) {
+                        addStamp(x, y);
+                    } else {
+                        const dx = x - lastPos.x;
+                        const dy = y - lastPos.y;
+                        const dist = Math.hypot(dx, dy);
+                        const steps = Math.max(1, Math.ceil(dist / stampStep));
+                        for (let i = 1; i <= steps; i++) {
+                            addStamp(lastPos.x + (dx * i) / steps, lastPos.y + (dy * i) / steps);
+                        }
+                    }
+                    lastPos = { x, y };
+                }
+                
+                function loop() {
+                    const now = performance.now();
+                    const { w, h } = dims;
+
+                    ctx.globalCompositeOperation = "source-over";
+                    ctx.fillStyle = `rgb(${mc[0]},${mc[1]},${mc[2]})`;
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.globalCompositeOperation = "destination-out";
+
+                    for (let i = stamps.length - 1; i >= 0; i--) {
+                        const t = (now - stamps[i].born) / lifetime;
+                        if (t >= 1) {
+                            stamps.splice(i, 1);
+                            continue;
+                        }
+                        const ease = 1 - Math.pow(1 - t, 3);
+                        const r = rStart + (stamps[i].rmax - rStart) * ease;
+                        const alpha = 1 - t * t;
+                        carveInk(stamps[i].x, stamps[i].y, r, stamps[i].seed, alpha);
+                    }
+
+                    if (stamps.length) {
+                        requestAnimationFrame(loop);
+                    } else {
+                        running = false;
+                    }
+                }
+                
+                function startLoop() {
+                    if (!running) {
+                        running = true;
+                        requestAnimationFrame(loop);
+                    }
+                }
+                
+                function getRelativePos(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    return { x: clientX - rect.left, y: clientY - rect.top };
+                }
+                
+                resize();
+                window.addEventListener("resize", resize);
+                
+                canvas.addEventListener("mouseenter", (e) => {
+                    const pos = getRelativePos(e);
+                    lastPos = pos;
+                    stampAlong(pos.x, pos.y);
+                    startLoop();
+                });
+                
+                canvas.addEventListener("mousemove", (e) => {
+                    const pos = getRelativePos(e);
+                    stampAlong(pos.x, pos.y);
+                    startLoop();
+                });
+                
+                canvas.addEventListener("mouseleave", () => {
+                    lastPos = null;
+                });
+                
+                canvas.addEventListener("touchstart", (e) => {
+                    const pos = getRelativePos(e);
+                    lastPos = pos;
+                    stampAlong(pos.x, pos.y);
+                    startLoop();
+                }, {passive: true});
+                
+                canvas.addEventListener("touchmove", (e) => {
+                    const pos = getRelativePos(e);
+                    stampAlong(pos.x, pos.y);
+                    startLoop();
+                }, {passive: true});
+                
+                canvas.addEventListener("touchend", () => {
+                    lastPos = null;
+                });
+            });
+        }
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            initInkReveal();
+        });
+
+        // Open Location Maps Modal
+        function openMapModal(mapUrl) {
+            const modal = document.getElementById("map-modal");
+            const iframe = document.getElementById("map-iframe");
+            iframe.src = mapUrl;
+            modal.classList.remove("hidden");
+            modal.classList.add("opacity-100");
+            document.body.classList.add("overflow-hidden");
+        }
+
+        // Close Location Maps Modal
+        function closeMapModal() {
+            const modal = document.getElementById("map-modal");
+            const iframe = document.getElementById("map-iframe");
+            iframe.src = "";
+            modal.classList.add("hidden");
+            modal.classList.remove("opacity-100");
+            document.body.classList.remove("overflow-hidden");
+        }
+
+        // Add to Calendar Generator (ICS format)
+        function addToCalendar(title, desc, location, isoStartDate) {
+            const startTime = isoStartDate.replace(/-|:|\.\d\d\d/g, "");
+            const endHour = parseInt(startTime.substring(9, 11)) + 3;
+            const endTime = startTime.substring(0, 9) + (endHour < 10 ? "0" + endHour : endHour) + startTime.substring(11);
+            
+            const icsContent = 
+                "BEGIN:VCALENDAR\n" +
+                "VERSION:2.0\n" +
+                "BEGIN:VEVENT\n" +
+                "SUMMARY:" + title + "\n" +
+                "DESCRIPTION:" + desc + "\n" +
+                "LOCATION:" + location + "\n" +
+                "DTSTART:" + startTime + "Z\n" +
+                "DTEND:" + endTime + "Z\n" +
+                "END:VEVENT\n" +
+                "END:VCALENDAR";
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', title.toLowerCase().replace(/\s+/g, '-') + '.ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Copy Direct Details to Clipboard securely
+        function copyToClipboard(textToCopy, btnElement) {
+            const originalText = btnElement.innerText;
+            
+            const el = document.createElement('textarea');
+            el.value = textToCopy;
+            el.setAttribute('readonly', '');
+            el.style.position = 'absolute';
+            el.style.left = '-9999px';
+            document.body.appendChild(el);
+            el.select();
+            
+            try {
+                document.execCommand('copy');
+                btnElement.innerText = "COPIED SUCCESSFULLY";
+                btnElement.classList.add("bg-wedding-burgundy", "text-wedding-cream");
+                setTimeout(() => {
+                    btnElement.innerText = originalText;
+                    btnElement.classList.remove("bg-wedding-burgundy", "text-wedding-cream");
+                }, 2000);
+            } catch (err) {
+                btnElement.innerText = "FAILED TO COPY";
+            }
+            document.body.removeChild(el);
+        }
+
+        // Open Lightbox
+        function openLightbox(index) {
+            currentLightboxIndex = index;
+            const lightbox = document.getElementById("lightbox-modal");
+            const targetImg = document.getElementById("lightbox-image");
+            const counter = document.getElementById("lightbox-counter");
+
+            targetImg.src = galleryImages[index];
+            counter.innerText = (index + 1) + " of " + galleryImages.length;
+            
+            lightbox.classList.remove("hidden");
+            document.body.classList.add("overflow-hidden");
+        }
+
+        // Close Lightbox
+        function closeLightbox() {
+            const lightbox = document.getElementById("lightbox-modal");
+            lightbox.classList.add("hidden");
+            document.body.classList.remove("overflow-hidden");
+        }
+
+        // Previous Image in Lightbox
+        function prevImage() {
+            currentLightboxIndex = (currentLightboxIndex - 1 + galleryImages.length) % galleryImages.length;
+            openLightbox(currentLightboxIndex);
+        }
+
+        // Next Image in Lightbox
+        function nextImage() {
+            currentLightboxIndex = (currentLightboxIndex + 1) % galleryImages.length;
+            openLightbox(currentLightboxIndex);
+        }
+
+        // Toggle Accordion functionality for FAQ list
+        function toggleFaq(button) {
+            const item = button.closest('.faq-item');
+            const content = item.querySelector('.faq-content');
+            const isActive = item.classList.contains('active');
+            
+            // Close all other open FAQ items cleanly
+            document.querySelectorAll('.faq-item').forEach(el => {
+                el.classList.remove('active');
+                el.querySelector('.faq-content').style.maxHeight = null;
+            });
+            
+            // If clicked item wasn't open, expand it now
+            if (!isActive) {
+                item.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+        }
+
+        // Toggle Gift suggestions section
+        function toggleGiftSuggestions() {
+            const container = document.getElementById("gift-selection-container");
+            const btn = document.getElementById("gift-toggle-btn");
+            const icon = document.getElementById("gift-toggle-icon");
+            const isCollapsed = container.classList.contains("max-h-0") || container.style.maxHeight === "0px" || !container.style.maxHeight;
+
+            if (isCollapsed) {
+                // Expanding the container smoothly using scrollHeight reference
+                container.classList.remove("max-h-0", "opacity-0", "mt-0");
+                container.style.maxHeight = container.scrollHeight + 150 + "px";
+                container.classList.add("opacity-100", "mt-6");
+                icon.classList.add("rotate-180");
+                btn.querySelector('span').innerText = "Hide Gift Suggestions (Optional)";
+            } else {
+                // Collapsing back down
+                container.style.maxHeight = "0px";
+                container.classList.add("max-h-0", "opacity-0", "mt-0");
+                container.classList.remove("opacity-100", "mt-6");
+                icon.classList.remove("rotate-180");
+                btn.querySelector('span').innerText = "View Gift Suggestions (Optional)";
+            }
+        }
+
+        // Handle Selectable Luxury Gift Cards (Single Radio Behavior)
+        function selectGiftCard(cardId) {
+            const hiddenInput = document.getElementById("selected-gift");
+            const isCurrentlySelected = (hiddenInput.value == cardId);
+
+            // Reset all card styles and buttons
+            document.querySelectorAll('.gift-card').forEach(card => {
+                card.classList.remove('border-wedding-burgundy', 'bg-wedding-champagne/30', 'ring-1', 'ring-wedding-burgundy');
+                card.classList.add('border-wedding-burgundylight/30', 'bg-wedding-dark/30');
+                
+                const btn = card.querySelector('.select-btn');
+                if (btn) {
+                    btn.innerText = "Select This Gift";
+                    btn.classList.remove('bg-wedding-burgundy', 'text-wedding-cream');
+                    btn.classList.add('border-wedding-burgundy', 'text-wedding-cream/70');
+                }
+            });
+
+            // Toggle selection logic
+            if (isCurrentlySelected) {
+                hiddenInput.value = "";
+            } else {
+                hiddenInput.value = cardId;
+                const activeCard = document.getElementById('gift-card-' + cardId);
+                if (activeCard) {
+                    activeCard.classList.remove('border-wedding-burgundylight/30', 'bg-wedding-dark/30');
+                    activeCard.classList.add('border-wedding-burgundy', 'bg-wedding-champagne/30', 'ring-1', 'ring-wedding-burgundy');
+                    
+                    const btn = activeCard.querySelector('.select-btn');
+                    if (btn) {
+                        btn.innerText = "✓ Selected";
+                        btn.classList.remove('border-wedding-burgundy', 'text-wedding-cream/70');
+                        btn.classList.add('bg-wedding-burgundy', 'text-wedding-cream');
+                    }
+                }
+            }
+        }
+
+        // Handle RSVP Form Submission Simulator
+        function handleRSVPSubmit(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById("fullname").value;
+            const email = document.getElementById("email").value;
+            const phone = document.getElementById("phone").value;
+            const attendance = document.querySelector('input[name="attendance"]:checked').value;
+            const message = document.getElementById("message").value;
+            const selectedGiftId = document.getElementById("selected-gift").value;
+
+            console.log("RSVP Request Collected:", { 
+                name, 
+                email, 
+                phone, 
+                attendance, 
+                message,
+                selectedGiftId: selectedGiftId || "None Chosen"
+            });
+
+            const successModal = document.getElementById("rsvp-success-modal");
+            successModal.classList.remove("hidden");
+            document.body.classList.add("overflow-hidden");
+        }
+
+        // Close RSVP Success Modal and Reset Form
+        function closeRSVPModal() {
+            const successModal = document.getElementById("rsvp-success-modal");
+            successModal.classList.add("hidden");
+            document.body.classList.remove("overflow-hidden");
+            document.getElementById("rsvpForm").reset();
+
+            // Clear selected gifts visuals
+            document.getElementById("selected-gift").value = "";
+            document.querySelectorAll('.gift-card').forEach(card => {
+                card.classList.remove('border-wedding-burgundy', 'bg-wedding-champagne/30', 'ring-1', 'ring-wedding-burgundy');
+                card.classList.add('border-wedding-cream/40');
+                const btn = card.querySelector('.select-btn');
+                if (btn) {
+                    btn.innerText = "Select This Gift";
+                    btn.classList.remove('bg-wedding-burgundy', 'text-wedding-cream');
+                    btn.classList.add('border-wedding-burgundy', 'text-wedding-cream/70');
+                }
+            });
+
+            // Collapse the registry panel back to hidden state
+            const container = document.getElementById("gift-selection-container");
+            const btn = document.getElementById("gift-toggle-btn");
+            const icon = document.getElementById("gift-toggle-icon");
+            container.style.maxHeight = "0px";
+            container.classList.add("max-h-0", "opacity-0", "mt-0");
+            container.classList.remove("opacity-100", "mt-6");
+            icon.classList.remove("rotate-180");
+            btn.querySelector('span').innerText = "View Gift Suggestions (Optional)";
+        }
+
+        // Show Lock Screen overlay for RSVP Form
+        function lockScreen() {
+            const passScreen = document.getElementById("password-screen");
+            passScreen.classList.remove("hidden");
+            // small delay to allow display:block to apply before animating opacity
+            setTimeout(() => {
+                passScreen.classList.remove("opacity-0", "pointer-events-none");
+                passScreen.classList.add("opacity-100", "pointer-events-auto");
+                
+                // Clear the input value for security
+                const passInput = document.getElementById("wedding-pass");
+                if (passInput) passInput.value = "";
+                if (passInput) passInput.focus();
+            }, 50);
+
+            // Force show wizard controls and back button so user can escape lock screen
+            const controls = document.getElementById("wizard-controls");
+            if (controls) {
+                controls.classList.remove("hidden", "opacity-0");
+            }
+            const backBtn = document.getElementById("wizard-back-btn");
+            if (backBtn) {
+                backBtn.classList.remove("opacity-0", "translate-x-[-20px]");
+                backBtn.classList.add("opacity-100", "translate-x-0");
+            }
+        }
+    </script>
+</body>
+</html>
