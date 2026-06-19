@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { GiftSelectionModal } from './GiftSelectionModal';
 
 interface Gift {
@@ -129,7 +129,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
     setMounted(true);
   }, []);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -137,7 +137,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
   };

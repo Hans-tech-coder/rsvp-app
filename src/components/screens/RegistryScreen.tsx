@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { CuratedRegistryScreen } from './CuratedRegistryScreen';
 
@@ -12,7 +12,7 @@ interface RegistryScreenProps {
 export function RegistryScreen({ onContinue }: RegistryScreenProps) {
   const [showCuratedRegistry, setShowCuratedRegistry] = useState(false);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -20,7 +20,7 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
   };

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 
@@ -12,7 +12,7 @@ interface GalleryScreenProps {
 export function GalleryScreen({ onContinue }: GalleryScreenProps) {
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -20,7 +20,7 @@ export function GalleryScreen({ onContinue }: GalleryScreenProps) {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
   };

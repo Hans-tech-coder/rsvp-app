@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion , Variants } from 'framer-motion';
 import { FallingPetals } from '@/components/effects/FallingPetals';
 
 interface WelcomeScreenProps {
@@ -42,7 +42,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -53,7 +53,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { 
       opacity: 1, 

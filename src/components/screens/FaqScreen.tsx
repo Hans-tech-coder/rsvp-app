@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 
 interface FaqScreenProps {
@@ -11,7 +11,7 @@ interface FaqScreenProps {
 export function FaqScreen({ onContinue }: FaqScreenProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -19,7 +19,7 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 15 },
     show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
   };

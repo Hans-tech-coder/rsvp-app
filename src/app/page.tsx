@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { OurStoryScreen } from '@/components/screens/OurStoryScreen';
 import { EntourageScreen } from '@/components/screens/EntourageScreen';
@@ -54,7 +54,7 @@ export default function Home() {
   };
 
   // Variants for a luxury cinematic transition
-  const pageVariants = {
+  const pageVariants: Variants = {
     initial: { 
       opacity: 0, 
       scale: 0.95
