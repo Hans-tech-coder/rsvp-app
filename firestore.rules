@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if the current user is an admin by looking up their UID in the admins collection
+    function isAdmin() {
+      return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Admins Collection: Only readable by the authenticated user to verify their own admin status.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false; // Only manageable from Firebase Console natively for now
+    }
+
+    // Guests Collection
+    match /guests/{inviteCode} {
+      // Admins have full access
+      allow read, write: if isAdmin();
+      
+      // Public can ONLY read a single document if they query its exact ID (the invite code)
+      // This is used to validate the code on the landing page form unlock
+      allow get: if true;
+      allow list: if false; // Cannot list all guests
+      
+      // Writes are strictly disabled from the client.
+      // RSVP submissions are handled by the Server Action using firebase-admin to ensure transactions
+      allow write: if false; 
+    }
+
+    // Registry Gifts Collection
+    match /registryGifts/{giftId} {
+      allow read, write: if isAdmin();
+      
+      // Public can read to browse gifts on the landing page
+      allow read: if true; 
+      
+      // Writes disabled from client. Handled by Server Action.
+      allow write: if false;
+    }
+
+    // Gift Selections Collection
+    match /giftSelections/{selectionId} {
+      allow read, write: if isAdmin();
+      
+      // Public cannot read who selected what
+      allow read: if false;
+      
+      // Writes disabled from client. Handled by Server Action.
+      allow write: if false;
+    }
+  }
+}
