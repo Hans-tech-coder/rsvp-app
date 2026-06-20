@@ -6,23 +6,32 @@ import { Users, UserCheck, UserX, Gift, CheckCircle2 } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  // Fetch Guests Data
-  const guestsSnapshot = await adminDb.collection('guests').get();
-  const guests = guestsSnapshot.docs.map(doc => doc.data() as Guest);
-  
-  const totalCodes = guests.length;
-  const usedCodes = guests.filter(g => g.codeStatus === 'used');
-  const unusedCodes = totalCodes - usedCodes.length;
-  const attendingCount = usedCodes.filter(g => g.willAttend === 'Yes').length;
-  const notAttendingCount = usedCodes.filter(g => g.willAttend === 'No').length;
+  let totalCodes = 0, unusedCodes = 0, attendingCount = 0, notAttendingCount = 0;
+  let totalGifts = 0, fullyClaimedGifts = 0, availableGifts = 0;
+  let errorMsg = null;
 
-  // Fetch Registry Data
-  const giftsSnapshot = await adminDb.collection('registryGifts').get();
-  const gifts = giftsSnapshot.docs.map(doc => doc.data() as RegistryGift);
-  
-  const totalGifts = gifts.length;
-  const fullyClaimedGifts = gifts.filter(g => g.isFull).length;
-  const availableGifts = totalGifts - fullyClaimedGifts;
+  try {
+    // Fetch Guests Data
+    const guestsSnapshot = await adminDb.collection('guests').get();
+    const guests = guestsSnapshot.docs.map(doc => doc.data() as Guest);
+    
+    totalCodes = guests.length;
+    const usedCodes = guests.filter(g => g.codeStatus === 'used');
+    unusedCodes = totalCodes - usedCodes.length;
+    attendingCount = usedCodes.filter(g => g.willAttend === 'Yes').length;
+    notAttendingCount = usedCodes.filter(g => g.willAttend === 'No').length;
+
+    // Fetch Registry Data
+    const giftsSnapshot = await adminDb.collection('registryGifts').get();
+    const gifts = giftsSnapshot.docs.map(doc => doc.data() as RegistryGift);
+    
+    totalGifts = gifts.length;
+    fullyClaimedGifts = gifts.filter(g => g.isFull).length;
+    availableGifts = totalGifts - fullyClaimedGifts;
+  } catch (err: any) {
+    console.error('Dashboard Error:', err);
+    errorMsg = err.message || 'An error occurred while fetching dashboard data.';
+  }
 
   return (
     <div className="space-y-8">
@@ -30,6 +39,14 @@ export default async function DashboardPage() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-zinc-100">Dashboard Overview</h1>
         <p className="text-gray-500 dark:text-zinc-400 mt-1">High-level stats for RSVPs and your registry.</p>
       </div>
+
+      {errorMsg && (
+        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-6 rounded-2xl">
+          <h2 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">Error Loading Data</h2>
+          <p className="text-red-600 dark:text-red-300 font-mono text-sm break-all">{errorMsg}</p>
+          <p className="text-red-600 dark:text-red-300 mt-3 text-sm">Please check your Firebase Admin environment variables in Vercel. Make sure the private key is copied exactly.</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard title="Total Invites Sent" value={totalCodes} icon={Users} />

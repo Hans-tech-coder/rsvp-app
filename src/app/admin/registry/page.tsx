@@ -6,31 +6,47 @@ import { Download } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default async function RegistryPage() {
-  // Fetch Registry Gifts
-  const giftsSnapshot = await adminDb.collection('registryGifts').orderBy('createdAt', 'desc').get();
-  const gifts = giftsSnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      ...data,
-      id: doc.id,
-      createdAt: data.createdAt?.toDate()?.toISOString() || null,
-    } as unknown as RegistryGift;
-  });
+  let gifts: RegistryGift[] = [];
+  let selections: GiftSelection[] = [];
+  let errorMsg = null;
 
-  // Fetch Selections
-  const selectionsSnapshot = await adminDb.collection('giftSelections').orderBy('selectedAt', 'desc').get();
-  const selections = selectionsSnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      ...data,
-      id: doc.id,
-      selectedAt: data.selectedAt?.toDate()?.toISOString() || null,
-    } as unknown as GiftSelection;
-  });
+  try {
+    // Fetch Registry Gifts
+    const giftsSnapshot = await adminDb.collection('registryGifts').orderBy('createdAt', 'desc').get();
+    gifts = giftsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt?.toDate()?.toISOString() || null,
+      } as unknown as RegistryGift;
+    });
+
+    // Fetch Selections
+    const selectionsSnapshot = await adminDb.collection('giftSelections').orderBy('selectedAt', 'desc').get();
+    selections = selectionsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: doc.id,
+        selectedAt: data.selectedAt?.toDate()?.toISOString() || null,
+      } as unknown as GiftSelection;
+    });
+  } catch (err: any) {
+    console.error('Registry Error:', err);
+    errorMsg = err.message || 'An error occurred while fetching registry data.';
+  }
 
   return (
     <div className="space-y-12">
-      <RegistryClient initialGifts={gifts} />
+      {errorMsg ? (
+        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-6 rounded-2xl">
+          <h2 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">Error Loading Data</h2>
+          <p className="text-red-600 dark:text-red-300 font-mono text-sm break-all">{errorMsg}</p>
+        </div>
+      ) : (
+        <RegistryClient initialGifts={gifts} />
+      )}
 
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] overflow-hidden transition-colors duration-200">
         <div className="p-5 border-b border-gray-200 dark:border-zinc-800 flex justify-between items-center">
