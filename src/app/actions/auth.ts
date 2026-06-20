@@ -15,9 +15,9 @@ export async function createSessionCookie(idToken: string) {
       path: '/',
     });
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Session cookie error:', error);
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: error.message || 'Unauthorized' };
   }
 }
 
