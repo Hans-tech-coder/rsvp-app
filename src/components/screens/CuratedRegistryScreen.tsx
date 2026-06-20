@@ -12,108 +12,12 @@ interface Gift {
   iconFn: () => React.ReactNode;
 }
 
-const defaultGifts: Gift[] = [
-  { 
-    id: 1, name: "Kitchen Appliance", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M10 4v3m4-3v3m-2 3v7m-4-7h8m-6 7h4a2 2 0 002-2V8H8v7a2 2 0 002 2z" />
-  },
-  { 
-    id: 2, name: "Dinnerware Set", link: "https://shopee.ph", maxCount: 2, currentCount: 0, 
-    iconFn: () => <><circle cx="12" cy="12" r="8" strokeWidth="1.5"/><circle cx="12" cy="12" r="3" strokeWidth="1.5"/></>
-  },
-  { 
-    id: 3, name: "Coffee Machine", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 1v3M10 1v3M14 1v3" /></>
-  },
-  { 
-    id: 4, name: "Home Decor Piece", link: "https://shopee.ph", maxCount: 3, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 18v-5m0 0a4 4 0 10-4-4v4h8v-4a4 4 0 10-4 4zM8 21h8" />
-  },
-  { 
-    id: 5, name: "Bedding Set", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6h16M4 10h16M4 14h16M4 18h16M2 6v12a2 2 0 002 2h16a2 2 0 002-2V6" />
-  },
-  { 
-    id: 6, name: "Smart Home Device", link: "https://shopee.ph", maxCount: 2, currentCount: 0, 
-    iconFn: () => <><circle cx="12" cy="12" r="9" strokeWidth="1.5"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v8M8 12h8" /></>
-  },
-  { 
-    id: 7, name: "Cookware Set", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 11h12v6a2 2 0 01-2 2H8a2 2 0 01-2-2v-6zM4 11h16M9 7h6v4H9z" />
-  },
-  { 
-    id: 8, name: "Blender Premium", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 4h6v9H9zM10 13v6a2 2 0 004 0v-6M10 16h4" />
-  },
-  { 
-    id: 9, name: "Wine Glass Set", link: "https://shopee.ph", maxCount: 2, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 3h8l-1.5 7h-5L8 3zM12 10v10M9 20h6" />
-  },
-  { 
-    id: 10, name: "Toaster Oven Deluxe", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <><rect x="4" y="6" width="16" height="12" rx="2" strokeWidth="1.5"/><circle cx="8" cy="12" r="1" strokeWidth="1.5"/><circle cx="16" cy="12" r="1" strokeWidth="1.5"/></>
-  },
-  { 
-    id: 11, name: "Air Fryer", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-  },
-  { 
-    id: 12, name: "Vacuum Cleaner", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 16a2 2 0 100-4 2 2 0 000 4zm0 0v-5m0 5a2 2 0 100 4 2 2 0 000-4zm0 0v5m8-10a2 2 0 100-4 2 2 0 000 4zm0 0v-5m0 5a2 2 0 100 4 2 2 0 000-4zm0 0v5" />
-  },
-  { 
-    id: 13, name: "Knife Block Set", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-  },
-  { 
-    id: 14, name: "Stand Mixer", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-  },
-  { 
-    id: 15, name: "Slow Cooker", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-  },
-  { 
-    id: 16, name: "Towels Set", link: "https://shopee.ph", maxCount: 2, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-  },
-  { 
-    id: 17, name: "Baking Set", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
-  },
-  { 
-    id: 18, name: "Luggage Set", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-  },
-  { 
-    id: 19, name: "Throw Blankets", link: "https://shopee.ph", maxCount: 2, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-  },
-  { 
-    id: 20, name: "Cutlery Set", link: "https://shopee.ph", maxCount: 2, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-  },
-  { 
-    id: 21, name: "Rice Cooker", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-  },
-  { 
-    id: 22, name: "Robot Vacuum", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-  },
-  { 
-    id: 23, name: "Dutch Oven", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-  },
-  { 
-    id: 24, name: "Water Purifier", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-  },
-  { 
-    id: 25, name: "Picnic Basket", link: "https://shopee.ph", maxCount: 1, currentCount: 0, 
-    iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-  }
-];
+import weddingContent from '@/data/wedding-content.json';
+
+const defaultGifts: Gift[] = weddingContent.registry.curatedGifts.map(gift => ({
+  ...gift,
+  iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+}));
 
 interface CuratedRegistryScreenProps {
   isOpen: boolean;

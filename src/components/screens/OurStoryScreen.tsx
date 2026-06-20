@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
+import weddingContent from '@/data/wedding-content.json';
 
 interface OurStoryScreenProps {
   onContinue: () => void;
@@ -29,32 +30,7 @@ export function OurStoryScreen({ onContinue }: OurStoryScreenProps) {
     }
   };
 
-  const timelineItems = [
-    {
-      date: "September 2020",
-      title: "A Serendipitous Encounter",
-      image: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=800",
-      description: "Our eyes first met across the crowded terrace of Cafe de Flore in Paris. It took just one shared look, an accidental spill of a coffee cup, and an hour of endless laughter to realize our worlds had shifted permanently."
-    },
-    {
-      date: "December 2020",
-      title: "An Evening of Whispers",
-      image: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=800",
-      description: "Our first formal date was under the soft winter haze of London. We strolled along the banks of the Seine, talking about dreams, philosophies, and music. By midnight, we knew this was no ordinary courtship."
-    },
-    {
-      date: "June 2025",
-      title: "By the Cliffs of Amalfi",
-      image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800",
-      description: "Under the golden dusk of Positano, perched on a private terrace hanging between the blue heavens and quiet waves, Hans bent his knee and asked the question that would seal our destinies."
-    },
-    {
-      date: "October 2026",
-      title: "The Path to Forever",
-      image: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=800",
-      description: "As we prepare to declare our eternal promises, we are filled with boundless joy to gather those who have walked beside us on our journeys. Our final chapter as two is closing, and a lifetime as one is about to begin."
-    }
-  ];
+  const timelineItems = weddingContent.ourStory;
 
   return (
     <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">

@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence , Variants } from 'framer-motion';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
+import weddingContent from '@/data/wedding-content.json';
 
 interface GalleryScreenProps {
   onContinue: () => void;
@@ -25,16 +26,7 @@ export function GalleryScreen({ onContinue }: GalleryScreenProps) {
     show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
   };
 
-  const galleryImages = [
-    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=600"
-  ];
+
 
   return (
     <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
@@ -57,16 +49,15 @@ export function GalleryScreen({ onContinue }: GalleryScreenProps) {
           mask: 'linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)',
           WebkitMask: 'linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)'
         }}>
-          {/* Top Row Slider */}
           <div className="slider-wrapper w-full py-2 relative">
-            <DraggableSlider speed={0.5}>
-              {[...galleryImages, ...galleryImages].map((src, index) => (
+            <DraggableSlider speed={0.4}>
+              {weddingContent.gallery.map((src, index) => (
                 <div 
                   key={`top-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
                   onClick={() => setLightboxImg(src)}
                 >
-                  <img src={src} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
+                  <img src={src} alt={`Engagement ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
                   <div className="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
                     <span className="text-wedding-goldlight text-[10px] uppercase tracking-[0.3em] border border-wedding-gold/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm pointer-events-none">View</span>
                   </div>
@@ -78,13 +69,13 @@ export function GalleryScreen({ onContinue }: GalleryScreenProps) {
           {/* Bottom Row Slider (Reverse) */}
           <div className="slider-wrapper w-full py-2 relative mt-4">
             <DraggableSlider speed={0.5} reverse={true}>
-              {[...galleryImages.slice().reverse(), ...galleryImages.slice().reverse()].map((src, index) => (
+              {[...weddingContent.gallery].reverse().map((src, index) => (
                 <div 
                   key={`bottom-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
                   onClick={() => setLightboxImg(src)}
                 >
-                  <img src={src} alt={`Gallery Reverse ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
+                  <img src={src} alt={`Memory ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
                   <div className="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
                     <span className="text-wedding-goldlight text-[10px] uppercase tracking-[0.3em] border border-wedding-gold/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm pointer-events-none">View</span>
                   </div>

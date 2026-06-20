@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { InkRevealCanvas } from '@/components/ui/InkRevealCanvas';
+import weddingContent from '@/data/wedding-content.json';
 
 interface EntranceScreenProps {
   onUnlock: () => void;
@@ -29,7 +30,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
   }, []);
 
   const handleUnlock = () => {
-    if (password.toUpperCase() === 'FOREVER2026') {
+    if (password.toUpperCase() === weddingContent.global.passcode) {
       setError(false);
       setIsUnlocking(true);
       if (onStartUnlock) onStartUnlock();
@@ -54,7 +55,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 3, ease: "easeOut" }}
         className="absolute inset-0 bg-cover bg-center" 
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=1920')" }}
+        style={{ backgroundImage: `url('${weddingContent.entranceScreen.backgroundImage}')` }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-wedding-dark/80 via-wedding-dark/30 to-transparent z-0"></div>
 
@@ -128,10 +129,10 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
 
         <div className="text-center">
           <span className="inline-block text-[10px] uppercase tracking-[0.4em] text-wedding-gold font-medium mb-3 border-b border-wedding-gold/30 pb-1">The Royal Invitation</span>
-          <h1 className="text-4xl md:text-5xl font-cinzel text-wedding-goldlight font-light tracking-widest mb-4 drop-shadow-md">Hans & Czay</h1>
+          <h1 className="text-4xl md:text-5xl font-cinzel text-wedding-goldlight font-light tracking-widest mb-4 drop-shadow-md">{weddingContent.global.coupleNameFormat}</h1>
           <p className="text-sm font-cormorant text-wedding-cream/90 italic tracking-widest mb-10 flex items-center justify-center gap-2">
             <span className="w-4 h-[1px] bg-wedding-gold/50"></span>
-            December 20, 2026 • Paniqui, Tarlac
+            {weddingContent.global.dateShort} • {weddingContent.global.venueShort}
             <span className="w-4 h-[1px] bg-wedding-gold/50"></span>
           </p>
         </div>
@@ -182,7 +183,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
               </button>
               
               <div className="mt-8 text-center animate-pulse-slow">
-                <p className="text-[9px] text-wedding-cream/50 tracking-[0.2em] border border-wedding-cream/10 rounded-full px-4 py-1.5 inline-block bg-wedding-dark/30">HINT: USE CODE "FOREVER2026"</p>
+                <p className="text-[9px] text-wedding-cream/50 tracking-[0.2em] border border-wedding-cream/10 rounded-full px-4 py-1.5 inline-block bg-wedding-dark/30">HINT: USE CODE "{weddingContent.global.passcode}"</p>
               </div>
             </motion.div>
           )}

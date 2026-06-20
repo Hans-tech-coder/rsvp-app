@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
+import weddingContent from '@/data/wedding-content.json';
 
 interface FaqScreenProps {
   onContinue: () => void;
@@ -24,48 +25,7 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
     show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
   };
 
-  const faqs = [
-    {
-      q: "Can I bring a plus one?",
-      a: "Due to the intimate nature of our chosen venue in Tarlac, our guest list is strictly personalized. Your digital invitation card indicates the specific number of reserved places in your honor. We kindly ask that only those specified on the envelope attend."
-    },
-    {
-      q: "Can I bring my children?",
-      a: "To allow all our guests—including parents—a night of relaxation and uninhibited celebration, we have chosen for our wedding weekend to be an adults-only affair. We thank you in advance for your understanding and hope you can join us to raise a glass in comfort."
-    },
-    {
-      q: "What time should I arrive?",
-      a: "The ceremony will commence promptly at 3:00 PM. We recommend arriving 30 to 60 minutes prior (between 2:00 PM and 2:30 PM) to comfortably enjoy a welcome refreshment and find your seats."
-    },
-    {
-      q: "Is there a dress code?",
-      a: "Yes, the style guidelines are Formal Black Tie Optional. Gentlemen are encouraged to wear classic dinner suits (tuxedos) or tailored coordinates. Ladies are invited to wear floor-length or refined midi dresses matching our neutral palette."
-    },
-    {
-      q: "Can I take photos or videos?",
-      a: "We respectfully request an \"unplugged\" ceremony where all phones and cameras remain off so that you can be fully present with us. You are more than welcome to capture memories during the cocktail hour and reception dinner!"
-    },
-    {
-      q: "Where is the venue and is parking available?",
-      a: "All celebrations take place within our designated venues in Paniqui, Tarlac. Secure valet and open parking spaces are fully accommodated at the entrance of both properties for all driving guests."
-    },
-    {
-      q: "Will there be food restrictions or meal options?",
-      a: "A curated multi-course fine dining buffet of classical and modern gourmet fare will be served. We collect all dietary requirements directly within the interactive RSVP form. Please submit your specifications when confirming."
-    },
-    {
-      q: "Can I give gifts or cash?",
-      a: "Your love, laughter, and presence on our special day are the greatest gifts we could receive. Should you wish to honor us with a contribution towards our new life together, details can be found in the registry section."
-    },
-    {
-      q: "What if I cannot attend?",
-      a: "You will be deeply missed! If you are unable to make it, please let us know by selecting \"Regretfully Declines\" in our RSVP section as early as possible so we can organize our final seating numbers."
-    },
-    {
-      q: "Who can I contact for questions?",
-      a: "For any additional logistics or questions, please reach out directly to our Maid of Honor, Sofia, at +63 917 123 4567."
-    }
-  ];
+  const faqs = weddingContent.faq;
 
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);

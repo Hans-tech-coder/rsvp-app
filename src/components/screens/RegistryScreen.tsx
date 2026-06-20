@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { CuratedRegistryScreen } from './CuratedRegistryScreen';
+import weddingContent from '@/data/wedding-content.json';
 
 interface RegistryScreenProps {
   onContinue: () => void;
@@ -64,23 +65,23 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               <div className="bg-wedding-dark/40 p-4 rounded-lg border border-wedding-gold/10 text-xs font-inter space-y-3 mb-6">
                 <div className="flex justify-between border-b border-wedding-gold/10 pb-2">
                   <span className="text-wedding-cream/60 uppercase">Bank:</span>
-                  <span className="font-medium text-wedding-cream">Lombard Odier Private Bank</span>
+                  <span className="font-medium text-wedding-cream">{weddingContent.registry.bankTransfer.bank}</span>
                 </div>
                 <div className="flex justify-between border-b border-wedding-gold/10 pb-2">
                   <span className="text-wedding-cream/60 uppercase">Beneficiary:</span>
-                  <span className="font-medium text-wedding-cream">Hans & Czay</span>
+                  <span className="font-medium text-wedding-cream">{weddingContent.registry.bankTransfer.beneficiary}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-wedding-gold/10 pb-2">
                   <span className="text-wedding-cream/60 uppercase">IBAN:</span>
-                  <span className="font-medium text-wedding-goldlight">CH89 0023 9482 1042 8111 0</span>
+                  <span className="font-medium text-wedding-goldlight">{weddingContent.registry.bankTransfer.iban}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-wedding-cream/60 uppercase">SWIFT:</span>
-                  <span className="font-medium text-wedding-goldlight">LOMDCH22XXX</span>
+                  <span className="font-medium text-wedding-goldlight">{weddingContent.registry.bankTransfer.swift}</span>
                 </div>
               </div>
             </div>
-            <button onClick={() => copyToClipboard('CH89 0023 9482 1042 8111 0')} className="w-full text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.2em] font-medium uppercase transition-all duration-300 rounded-sm">
+            <button onClick={() => copyToClipboard(weddingContent.registry.bankTransfer.iban)} className="w-full text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.2em] font-medium uppercase transition-all duration-300 rounded-sm">
               Copy IBAN Details
             </button>
           </div>

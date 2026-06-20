@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
+import weddingContent from '@/data/wedding-content.json';
 
 interface DetailsScreenProps {
   onContinue: () => void;
@@ -61,29 +62,29 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
             <div>
               <div className="flex justify-between items-start mb-6">
                 <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">The Vows</span>
-                <span className="text-sm font-cinzel text-wedding-goldlight/70">3:00 PM</span>
+                <span className="text-sm font-cinzel text-wedding-goldlight/70">{weddingContent.details.ceremony.time}</span>
               </div>
-              <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">The Ceremony</h3>
+              <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">{weddingContent.details.ceremony.title}</h3>
               <div className="w-12 h-[1px] bg-wedding-cream/30 mb-6"></div>
               <p className="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
-                Witness our union in the majestic glass sanctuary. Soft harp melodies, cascading white roses, and gentle tropical breeze will frame our exchange of vows.
+                {weddingContent.details.ceremony.description}
               </p>
               <div className="space-y-3 text-sm text-wedding-cream mb-8 font-cormorant tracking-wide">
                 <div className="flex items-start">
                   <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>Location:</strong>&nbsp;Iglesia Ni Cristo [Paniqui, Tarlac] - Nagserialan</p>
+                  <p className="flex-1"><strong>Location:</strong>&nbsp;{weddingContent.details.ceremony.location}</p>
                 </div>
                 <div className="flex items-start">
                   <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>Address:</strong>&nbsp;Nagserialan camiling, Paniqui - Camiling Rd, Paniqui, Tarlac</p>
+                  <p className="flex-1"><strong>Address:</strong>&nbsp;{weddingContent.details.ceremony.address}</p>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-wedding-gold/20">
-              <button onClick={() => openMap('https://maps.google.com/maps?q=Iglesia%20Ni%20Cristo%20%5BPaniqui,%20Tarlac%5D%20-%20Nagserialan&t=&z=15&ie=UTF8&output=embed')} className="text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
+              <button onClick={() => openMap(weddingContent.details.ceremony.mapLink)} className="text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
                 View Location
               </button>
-              <button onClick={() => addToCalendar('Wedding Ceremony', 'Hans and Czay Union - Paniqui, Tarlac', 'https://maps.app.goo.gl/yBdxdLkEZMgYQyo8A', '2026-12-20T15:00:00')} className="text-center py-3 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
+              <button onClick={() => addToCalendar(weddingContent.details.ceremony.calendarDesc, weddingContent.details.ceremony.calendarDesc, weddingContent.details.ceremony.calendarLoc, weddingContent.details.ceremony.calendarStart)} className="text-center py-3 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
                 Add To Calendar
               </button>
             </div>
@@ -94,29 +95,29 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
             <div>
               <div className="flex justify-between items-start mb-6">
                 <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">The Dinner & Ball</span>
-                <span className="text-sm font-cinzel text-wedding-goldlight/70">6:30 PM</span>
+                <span className="text-sm font-cinzel text-wedding-goldlight/70">{weddingContent.details.reception.time}</span>
               </div>
-              <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">The Reception</h3>
+              <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">{weddingContent.details.reception.title}</h3>
               <div className="w-12 h-[1px] bg-wedding-cream/30 mb-6"></div>
               <p className="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
-                Following the ceremony, join us for premium cocktails on the terrace, followed by a formal dinner and grand ballroom dancing under crystal chandeliers.
+                {weddingContent.details.reception.description}
               </p>
               <div className="space-y-3 text-sm text-wedding-cream mb-8 font-cormorant tracking-wide">
                 <div className="flex items-start">
                   <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>Location:</strong>&nbsp;DokNWellness Natural Health Care Center</p>
+                  <p className="flex-1"><strong>Location:</strong>&nbsp;{weddingContent.details.reception.location}</p>
                 </div>
                 <div className="flex items-start">
                   <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>Address:</strong>&nbsp;Purok 1, San Isidro, Camiling, 2306 Tarlac</p>
+                  <p className="flex-1"><strong>Address:</strong>&nbsp;{weddingContent.details.reception.address}</p>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-wedding-gold/20">
-              <button onClick={() => openMap('https://maps.google.com/maps?q=DokNWellness%20Natural%20Health%20Care%20Center,%20Camiling,%20Tarlac&t=&z=15&ie=UTF8&output=embed')} className="text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
+              <button onClick={() => openMap(weddingContent.details.reception.mapLink)} className="text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
                 View Location
               </button>
-              <button onClick={() => addToCalendar('Wedding Reception', 'Dinner, Cocktails, & Dance - DokNWellness Natural Health Care Center', 'https://maps.app.goo.gl/XZg1ByDqMjzxiP5UA', '2026-12-20T18:30:00')} className="text-center py-3 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
+              <button onClick={() => addToCalendar(weddingContent.details.reception.calendarDesc, weddingContent.details.reception.calendarDesc, weddingContent.details.reception.calendarLoc, weddingContent.details.reception.calendarStart)} className="text-center py-3 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
                 Add To Calendar
               </button>
             </div>

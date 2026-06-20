@@ -1,0 +1,214 @@
+{
+  "global": {
+    "brideName": "Czay",
+    "groomName": "Hans",
+    "coupleNameFormat": "Hans & Czay",
+    "dateFull": "Sunday, the twentieth of December, two thousand twenty-six",
+    "dateShort": "December 20, 2026",
+    "venueShort": "Paniqui, Tarlac",
+    "passcode": "FOREVER2026"
+  },
+  "welcomeScreen": {
+    "targetDate": "December 20, 2026 15:00:00",
+    "backgroundImage": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=1920",
+    "subtitle": "Join us in celebrating",
+    "topText": "Together with their Families",
+    "bottomText1": "Request the honor of your presence",
+    "bottomText2": "On Sunday, the twentieth of December, two thousand twenty-six"
+  },
+  "entranceScreen": {
+    "backgroundImage": "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=1920"
+  },
+  "ourStory": [
+    {
+      "date": "September 2020",
+      "title": "A Serendipitous Encounter",
+      "image": "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=800",
+      "description": "Our eyes first met across the crowded terrace of Cafe de Flore in Paris. It took just one shared look, an accidental spill of a coffee cup, and an hour of endless laughter to realize our worlds had shifted permanently."
+    },
+    {
+      "date": "December 2020",
+      "title": "An Evening of Whispers",
+      "image": "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=800",
+      "description": "Our first formal date was under the soft winter haze of London. We strolled along the banks of the Seine, talking about dreams, philosophies, and music. By midnight, we knew this was no ordinary courtship."
+    },
+    {
+      "date": "June 2025",
+      "title": "By the Cliffs of Amalfi",
+      "image": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800",
+      "description": "Under the golden dusk of Positano, perched on a private terrace hanging between the blue heavens and quiet waves, Hans bent his knee and asked the question that would seal our destinies."
+    },
+    {
+      "date": "October 2026",
+      "title": "The Path to Forever",
+      "image": "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=800",
+      "description": "As we prepare to declare our eternal promises, we are filled with boundless joy to gather those who have walked beside us on our journeys. Our final chapter as two is closing, and a lifetime as one is about to begin."
+    }
+  ],
+  "entourage": {
+    "principalSponsors": [
+      "Sponsor Name 1",
+      "Sponsor Name 2",
+      "Sponsor Name 3",
+      "Sponsor Name 4"
+    ],
+    "honorAttendants": {
+      "maidOfHonor": "Jane Doe",
+      "bestMan": "John Smith"
+    },
+    "bridesmaids": [
+      "Anna Cruz",
+      "Maria Santos",
+      "Liza Garcia",
+      "Kim Reyes"
+    ],
+    "groomsmen": [
+      "Mark Dela Cruz",
+      "Paulo Rivera",
+      "Jason Lim",
+      "Carlo Mendoza"
+    ]
+  },
+  "details": {
+    "ceremony": {
+      "time": "3:00 PM",
+      "title": "The Ceremony",
+      "description": "Witness our union in the majestic glass sanctuary. Soft harp melodies, cascading white roses, and gentle tropical breeze will frame our exchange of vows.",
+      "location": "Iglesia Ni Cristo [Paniqui, Tarlac] - Nagserialan",
+      "address": "Nagserialan camiling, Paniqui - Camiling Rd, Paniqui, Tarlac",
+      "mapLink": "https://maps.google.com/maps?q=Iglesia%20Ni%20Cristo%20%5BPaniqui,%20Tarlac%5D%20-%20Nagserialan&t=&z=15&ie=UTF8&output=embed",
+      "calendarDesc": "Hans and Czay Union - Paniqui, Tarlac",
+      "calendarLoc": "https://maps.app.goo.gl/yBdxdLkEZMgYQyo8A",
+      "calendarStart": "2026-12-20T15:00:00"
+    },
+    "reception": {
+      "time": "6:30 PM",
+      "title": "The Reception",
+      "description": "Following the ceremony, join us for premium cocktails on the terrace, followed by a formal dinner and grand ballroom dancing under crystal chandeliers.",
+      "location": "DokNWellness Natural Health Care Center",
+      "address": "Purok 1, San Isidro, Camiling, 2306 Tarlac",
+      "mapLink": "https://maps.google.com/maps?q=DokNWellness%20Natural%20Health%20Care%20Center,%20Camiling,%20Tarlac&t=&z=15&ie=UTF8&output=embed",
+      "calendarDesc": "Dinner, Cocktails, & Dance - DokNWellness Natural Health Care Center",
+      "calendarLoc": "https://maps.app.goo.gl/XZg1ByDqMjzxiP5UA",
+      "calendarStart": "2026-12-20T18:30:00"
+    }
+  },
+  "dressCode": {
+    "title": "Formal Black Tie Optional",
+    "description": "To honor our vision of a beautiful, cohesive atmosphere in Tarlac, we respectfully request our guests to dress in harmony with our burgundy and gold color story.",
+    "colors": [
+      { "name": "Dark Burgundy", "hex": "#4A1519" },
+      { "name": "Deep Burgundy", "hex": "#841B2D" },
+      { "name": "Antique Gold", "hex": "#BFA071" },
+      { "name": "Soft Blush", "hex": "#D2B1A2" },
+      { "name": "Ivory Cream", "hex": "#F4F5EB" }
+    ],
+    "ladiesGuideline": "Floor-length gowns or refined midi-cocktail dresses in shades of burgundy, blush, antique gold, or warm neutrals. Flowing silhouettes and romantic laces are highly welcomed.",
+    "gentlemenGuideline": "Classic dinner suit (Tuxedo) or tailored suit with crisp white dress shirts. Deep charcoal, navy, or black tailored coordinates. Bowties or silk ties matching the theme are preferred.",
+    "inspirationImages": [
+      {
+        "type": "Ladies",
+        "url": "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&q=80&w=400"
+      },
+      {
+        "type": "Gentlemen",
+        "url": "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=400"
+      },
+      {
+        "type": "Ladies",
+        "url": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400"
+      },
+      {
+        "type": "Gentlemen",
+        "url": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=400"
+      }
+    ]
+  },
+  "gallery": [
+    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600",
+    "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=600",
+    "https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=600",
+    "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=600",
+    "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=600",
+    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=600",
+    "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=600",
+    "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=600"
+  ],
+  "faq": [
+    {
+      "q": "Can I bring a plus one?",
+      "a": "Due to the intimate nature of our chosen venue in Tarlac, our guest list is strictly personalized. Your digital invitation card indicates the specific number of reserved places in your honor. We kindly ask that only those specified on the envelope attend."
+    },
+    {
+      "q": "Can I bring my children?",
+      "a": "To allow all our guests—including parents—a night of relaxation and uninhibited celebration, we have chosen for our wedding weekend to be an adults-only affair. We thank you in advance for your understanding and hope you can join us to raise a glass in comfort."
+    },
+    {
+      "q": "What time should I arrive?",
+      "a": "The ceremony will commence promptly at 3:00 PM. We recommend arriving 30 to 60 minutes prior (between 2:00 PM and 2:30 PM) to comfortably enjoy a welcome refreshment and find your seats."
+    },
+    {
+      "q": "Is there a dress code?",
+      "a": "Yes, the style guidelines are Formal Black Tie Optional. Gentlemen are encouraged to wear classic dinner suits (tuxedos) or tailored coordinates. Ladies are invited to wear floor-length or refined midi dresses matching our neutral palette."
+    },
+    {
+      "q": "Can I take photos or videos?",
+      "a": "We respectfully request an \"unplugged\" ceremony where all phones and cameras remain off so that you can be fully present with us. You are more than welcome to capture memories during the cocktail hour and reception dinner!"
+    },
+    {
+      "q": "Where is the venue and is parking available?",
+      "a": "All celebrations take place within our designated venues in Paniqui, Tarlac. Secure valet and open parking spaces are fully accommodated at the entrance of both properties for all driving guests."
+    },
+    {
+      "q": "Will there be food restrictions or meal options?",
+      "a": "A curated multi-course fine dining buffet of classical and modern gourmet fare will be served. We collect all dietary requirements directly within the interactive RSVP form. Please submit your specifications when confirming."
+    },
+    {
+      "q": "Can I give gifts or cash?",
+      "a": "Your love, laughter, and presence on our special day are the greatest gifts we could receive. Should you wish to honor us with a contribution towards our new life together, details can be found in the registry section."
+    },
+    {
+      "q": "What if I cannot attend?",
+      "a": "You will be deeply missed! If you are unable to make it, please let us know by selecting \"Regretfully Declines\" in our RSVP section as early as possible so we can organize our final seating numbers."
+    },
+    {
+      "q": "Who can I contact for questions?",
+      "a": "For any additional logistics or questions, please reach out directly to our Maid of Honor, Sofia, at +63 917 123 4567."
+    }
+  ],
+  "registry": {
+    "bankTransfer": {
+      "bank": "Lombard Odier Private Bank",
+      "beneficiary": "Hans & Czay",
+      "iban": "CH89 0023 9482 1042 8111 0",
+      "swift": "LOMDCH22XXX"
+    },
+    "curatedGifts": [
+      { "id": 1, "name": "Kitchen Appliance", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 2, "name": "Dinnerware Set", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
+      { "id": 3, "name": "Coffee Machine", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 4, "name": "Home Decor Piece", "link": "https://shopee.ph", "maxCount": 3, "currentCount": 0 },
+      { "id": 5, "name": "Bedding Set", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 6, "name": "Smart Home Device", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
+      { "id": 7, "name": "Cookware Set", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 8, "name": "Blender Premium", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 9, "name": "Wine Glass Set", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
+      { "id": 10, "name": "Toaster Oven Deluxe", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 11, "name": "Air Fryer", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 12, "name": "Vacuum Cleaner", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 13, "name": "Knife Block Set", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 14, "name": "Stand Mixer", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 15, "name": "Slow Cooker", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 16, "name": "Towels Set", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
+      { "id": 17, "name": "Baking Set", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 18, "name": "Luggage Set", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 19, "name": "Throw Blankets", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
+      { "id": 20, "name": "Cutlery Set", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
+      { "id": 21, "name": "Rice Cooker", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 22, "name": "Robot Vacuum", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 23, "name": "Dutch Oven", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 24, "name": "Water Purifier", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
+      { "id": 25, "name": "Picnic Basket", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 }
+    ]
+  }
+}

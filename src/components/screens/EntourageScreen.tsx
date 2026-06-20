@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
+import weddingContent from '@/data/wedding-content.json';
 
 interface EntourageScreenProps {
   onContinue: () => void;
@@ -45,11 +46,11 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             <span className="w-8 h-[1px] bg-wedding-gold/30"></span> Principal Sponsors <span className="w-8 h-[1px] bg-wedding-gold/30"></span>
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((num) => (
-              <motion.div whileHover={{ y: -5 }} key={num} className="p-8 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-gold/20 rounded-xl shadow-sm hover:shadow-md hover:border-wedding-gold/40 transition-all duration-500 ease-out text-center flex flex-col justify-center items-center group">
+            {weddingContent.entourage.principalSponsors.map((sponsor, index) => (
+              <motion.div whileHover={{ y: -5 }} key={index} className="p-8 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-gold/20 rounded-xl shadow-sm hover:shadow-md hover:border-wedding-gold/40 transition-all duration-500 ease-out text-center flex flex-col justify-center items-center group">
                 <span className="text-[9px] uppercase tracking-[0.25em] text-wedding-gold/70 font-medium mb-2 block">Principal Sponsor</span>
                 <div className="w-1.5 h-1.5 rounded-full bg-wedding-gold/40 mb-4 group-hover:bg-wedding-gold transition-colors duration-500"></div>
-                <h4 className="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">Sponsor Name {num}</h4>
+                <h4 className="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">{sponsor}</h4>
               </motion.div>
             ))}
           </div>
@@ -64,12 +65,12 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             <motion.div whileHover={{ y: -5 }} className="p-8 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-gold/20 rounded-xl shadow-sm hover:shadow-md hover:border-wedding-gold/40 transition-all duration-500 ease-out text-center flex flex-col justify-center items-center group">
               <span className="text-[9px] uppercase tracking-[0.25em] text-wedding-gold/70 font-semibold mb-2 block">Maid of Honor</span>
               <div className="w-1.5 h-1.5 rounded-full bg-wedding-gold/40 mb-4 group-hover:bg-wedding-gold transition-colors duration-500"></div>
-              <h4 className="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">Jane Doe</h4>
+              <h4 className="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">{weddingContent.entourage.honorAttendants.maidOfHonor}</h4>
             </motion.div>
             <motion.div whileHover={{ y: -5 }} className="p-8 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-gold/20 rounded-xl shadow-sm hover:shadow-md hover:border-wedding-gold/40 transition-all duration-500 ease-out text-center flex flex-col justify-center items-center group">
               <span className="text-[9px] uppercase tracking-[0.25em] text-wedding-gold/70 font-semibold mb-2 block">Best Man</span>
               <div className="w-1.5 h-1.5 rounded-full bg-wedding-gold/40 mb-4 group-hover:bg-wedding-gold transition-colors duration-500"></div>
-              <h4 className="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">John Smith</h4>
+              <h4 className="font-cormorant text-xl md:text-2xl text-wedding-cream font-medium tracking-wide">{weddingContent.entourage.honorAttendants.bestMan}</h4>
             </motion.div>
           </div>
         </motion.div>
@@ -82,10 +83,9 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             </h3>
             <div className="flex-1 p-6 md:p-10 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-gold/20 rounded-xl shadow-sm hover:shadow-md hover:border-wedding-gold/40 transition-all duration-500 ease-out text-center">
               <ul className="font-cormorant text-lg md:text-2xl text-wedding-cream font-medium tracking-wide space-y-3 md:space-y-4">
-                <li>Anna Cruz</li>
-                <li>Maria Santos</li>
-                <li>Liza Garcia</li>
-                <li>Kim Reyes</li>
+                {weddingContent.entourage.bridesmaids.map((name, index) => (
+                  <li key={index}>{name}</li>
+                ))}
               </ul>
             </div>
           </div>
@@ -96,10 +96,9 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             </h3>
             <div className="flex-1 p-6 md:p-10 bg-wedding-dark/40 backdrop-blur-sm border border-wedding-gold/20 rounded-xl shadow-sm hover:shadow-md hover:border-wedding-gold/40 transition-all duration-500 ease-out text-center">
               <ul className="font-cormorant text-lg md:text-2xl text-wedding-cream font-medium tracking-wide space-y-3 md:space-y-4">
-                <li>Mark Dela Cruz</li>
-                <li>Paulo Rivera</li>
-                <li>Jason Lim</li>
-                <li>Carlo Mendoza</li>
+                {weddingContent.entourage.groomsmen.map((name, index) => (
+                  <li key={index}>{name}</li>
+                ))}
               </ul>
             </div>
           </div>

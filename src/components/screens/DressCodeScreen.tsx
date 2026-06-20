@@ -4,6 +4,7 @@ import React from 'react';
 import { motion , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
+import weddingContent from '@/data/wedding-content.json';
 
 interface DressCodeScreenProps {
   onContinue: () => void;
@@ -23,13 +24,7 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
     show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
   };
 
-  const colors = [
-    { name: "Dark Burgundy", hex: "#4A1519" },
-    { name: "Deep Burgundy", hex: "#841B2D" },
-    { name: "Antique Gold", hex: "#BFA071" },
-    { name: "Soft Blush", hex: "#D2B1A2" },
-    { name: "Ivory Cream", hex: "#F4F5EB" }
-  ];
+  const colors = weddingContent.dressCode.colors;
 
   return (
     <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
@@ -49,9 +44,9 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
         </motion.div>
 
         <motion.div variants={itemVariants} className="bg-wedding-dark/60 p-8 md:p-12 rounded-xl border border-wedding-gold/20 shadow-md">
-          <p className="text-sm uppercase tracking-[0.2em] text-wedding-gold font-semibold mb-3">Dress Code: Formal Black Tie Optional</p>
+          <p className="text-sm uppercase tracking-[0.2em] text-wedding-gold font-semibold mb-3">Dress Code: {weddingContent.dressCode.title}</p>
           <p className="text-base font-cormorant italic text-wedding-goldlight max-w-2xl mx-auto leading-relaxed mb-10">
-            To honor our vision of a beautiful, cohesive atmosphere in Tarlac, we respectfully request our guests to dress in harmony with our burgundy and gold color story.
+            {weddingContent.dressCode.description}
           </p>
 
           {/* Suggested Color Swatches */}
@@ -74,13 +69,13 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
             <div>
               <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">For Ladies</h4>
               <p className="text-sm font-cormorant text-wedding-cream leading-relaxed">
-                Floor-length gowns or refined midi-cocktail dresses in shades of burgundy, blush, antique gold, or warm neutrals. Flowing silhouettes and romantic laces are highly welcomed.
+                {weddingContent.dressCode.ladiesGuideline}
               </p>
             </div>
             <div>
               <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">For Gentlemen</h4>
               <p className="text-sm font-cormorant text-wedding-cream leading-relaxed">
-                Classic dinner suit (Tuxedo) or tailored suit with crisp white dress shirts. Deep charcoal, navy, or black tailored coordinates. Bowties or silk ties matching the theme are preferred.
+                {weddingContent.dressCode.gentlemenGuideline}
               </p>
             </div>
           </div>
@@ -95,33 +90,13 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
             }}>
               <div className="outfit-slider-wrapper w-full py-4">
                 <DraggableSlider speed={0.5}>
-                  {[...Array(2)].map((_, i) => (
-                    <React.Fragment key={i}>
-                      <div className="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-gold/20 flex-shrink-0">
-                        <img src="https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&q=80&w=400" alt="Ladies Dress 1" className="w-full h-full object-cover transform duration-500 group-hover:scale-105 pointer-events-none" />
-                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2 pointer-events-none">
-                          <span className="text-[9px] uppercase tracking-widest text-wedding-cream/90 pointer-events-none">Ladies</span>
-                        </div>
+                  {weddingContent.dressCode.inspirationImages.map((img, i) => (
+                    <div key={i} className="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-gold/20 flex-shrink-0">
+                      <img src={img.url} alt={`${img.type} Inspiration ${i + 1}`} className="w-full h-full object-cover transform duration-500 group-hover:scale-105 pointer-events-none" />
+                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2 pointer-events-none">
+                        <span className="text-[9px] uppercase tracking-widest text-wedding-cream/90 pointer-events-none">{img.type}</span>
                       </div>
-                      <div className="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-gold/20 flex-shrink-0">
-                        <img src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=400" alt="Gentlemen Suit 1" className="w-full h-full object-cover transform duration-500 group-hover:scale-105 pointer-events-none" />
-                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2 pointer-events-none">
-                          <span className="text-[9px] uppercase tracking-widest text-wedding-cream/90 pointer-events-none">Gentlemen</span>
-                        </div>
-                      </div>
-                      <div className="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-gold/20 flex-shrink-0">
-                        <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400" alt="Ladies Dress 2" className="w-full h-full object-cover transform duration-500 group-hover:scale-105 pointer-events-none" />
-                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2 pointer-events-none">
-                          <span className="text-[9px] uppercase tracking-widest text-wedding-cream/90 pointer-events-none">Ladies</span>
-                        </div>
-                      </div>
-                      <div className="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-gold/20 flex-shrink-0">
-                        <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=400" alt="Gentlemen Suit 2" className="w-full h-full object-cover transform duration-500 group-hover:scale-105 pointer-events-none" />
-                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2 pointer-events-none">
-                          <span className="text-[9px] uppercase tracking-widest text-wedding-cream/90 pointer-events-none">Gentlemen</span>
-                        </div>
-                      </div>
-                    </React.Fragment>
+                    </div>
                   ))}
                 </DraggableSlider>
               </div>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion , Variants } from 'framer-motion';
 import { FallingPetals } from '@/components/effects/FallingPetals';
+import weddingContent from '@/data/wedding-content.json';
 
 interface WelcomeScreenProps {
   onContinue: () => void;
@@ -14,7 +15,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
 
   useEffect(() => {
     setMounted(true);
-    const targetDate = new Date("December 20, 2026 15:00:00").getTime();
+    const targetDate = new Date(weddingContent.welcomeScreen.targetDate).getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
@@ -71,7 +72,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           animate={{ scale: 1, opacity: 0.5 }}
           transition={{ duration: 3, ease: "easeOut" }}
           className="absolute inset-0 bg-cover bg-center mix-blend-overlay" 
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=1920')" }}
+          style={{ backgroundImage: `url('${weddingContent.welcomeScreen.backgroundImage}')` }}
         ></motion.div>
         <div className="absolute inset-0 bg-gradient-to-b from-wedding-dark/60 via-wedding-dark/40 to-wedding-dark/80"></div>
       </div>
@@ -84,18 +85,18 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
       >
         <div className="flex-1 flex flex-col justify-center lg:justify-between items-center min-h-full w-full py-16 lg:py-0 gap-10 lg:gap-0">
         <motion.div variants={itemVariants} className="lg:pt-20 w-full">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-wedding-cream/80 font-medium">Join us in celebrating</p>
+          <p className="text-[11px] uppercase tracking-[0.4em] text-wedding-cream/80 font-medium">{weddingContent.welcomeScreen.subtitle}</p>
           <div className="w-12 h-[1px] bg-wedding-cream/40 mx-auto mt-3"></div>
         </motion.div>
 
         <motion.div variants={itemVariants} className="px-4 w-full max-w-4xl lg:py-12">
-          <span className="text-sm font-cormorant italic text-wedding-cream/90 tracking-widest block mb-4">Together with their Families</span>
+          <span className="text-sm font-cormorant italic text-wedding-cream/90 tracking-widest block mb-4">{weddingContent.welcomeScreen.topText}</span>
           <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-cinzel text-wedding-cream font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
-            Hans <span className="text-wedding-gold italic font-serif text-3xl sm:text-4xl md:text-6xl font-light">&</span> Czay
+            {weddingContent.global.groomName} <span className="text-wedding-gold italic font-serif text-3xl sm:text-4xl md:text-6xl font-light">&</span> {weddingContent.global.brideName}
           </h2>
           <div className="w-24 h-[1px] bg-wedding-gold/40 mx-auto my-8"></div>
-          <p className="text-xs uppercase tracking-[0.3em] text-wedding-cream/90 mb-3">Request the honor of your presence</p>
-          <p className="text-lg md:text-2xl font-cormorant italic text-wedding-cream tracking-wider drop-shadow-md">On Sunday, the twentieth of December, two thousand twenty-six</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-wedding-cream/90 mb-3">{weddingContent.welcomeScreen.bottomText1}</p>
+          <p className="text-lg md:text-2xl font-cormorant italic text-wedding-cream tracking-wider drop-shadow-md">{weddingContent.welcomeScreen.bottomText2}</p>
         </motion.div>
 
         <motion.div variants={itemVariants} className="lg:pb-8 w-full max-w-3xl px-4 flex flex-col items-center">
