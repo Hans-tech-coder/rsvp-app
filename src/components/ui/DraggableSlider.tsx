@@ -11,6 +11,7 @@ interface DraggableSliderProps {
 
 export function DraggableSlider({ children, reverse = false, className = "", speed = 0.5 }: DraggableSliderProps) {
   const sliderRef = useRef<HTMLDivElement>(null);
+  const set1Ref = useRef<HTMLDivElement>(null);
   const isDown = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
@@ -24,21 +25,24 @@ export function DraggableSlider({ children, reverse = false, className = "", spe
     if (!slider) return;
 
     const scrollStep = () => {
-      if (!isDown.current && !isHovered.current) {
+      if (!isDown.current && !isHovered.current && set1Ref.current) {
         accumulatedScroll.current += speed;
         if (accumulatedScroll.current >= 1) {
           const step = Math.floor(accumulatedScroll.current);
           accumulatedScroll.current -= step;
 
+          // The exact distance to the start of the second set is the width of the first set + the gap of the parent (16px for gap-4)
+          const singleSetWidth = set1Ref.current.offsetWidth + 16; 
+
           if (reverse) {
             slider.scrollLeft -= step;
             if (slider.scrollLeft <= 0) {
-              slider.scrollLeft = slider.scrollWidth / 2;
+              slider.scrollLeft += singleSetWidth;
             }
           } else {
             slider.scrollLeft += step;
-            if (slider.scrollLeft >= slider.scrollWidth / 2) {
-               slider.scrollLeft = 0;
+            if (slider.scrollLeft >= singleSetWidth) {
+               slider.scrollLeft -= singleSetWidth;
             }
           }
         }
@@ -48,7 +52,9 @@ export function DraggableSlider({ children, reverse = false, className = "", spe
     
     if (reverse) {
       setTimeout(() => {
-        if (slider) slider.scrollLeft = slider.scrollWidth / 2;
+        if (slider && set1Ref.current) {
+          slider.scrollLeft = set1Ref.current.offsetWidth + 16;
+        }
       }, 100);
     }
     
@@ -123,7 +129,12 @@ export function DraggableSlider({ children, reverse = false, className = "", spe
           display: none;
         }
       `}} />
-      {children}
+      <div ref={set1Ref} className="flex gap-4 flex-nowrap flex-shrink-0">
+        {children}
+      </div>
+      <div className="flex gap-4 flex-nowrap flex-shrink-0">
+        {children}
+      </div>
     </div>
   );
 }

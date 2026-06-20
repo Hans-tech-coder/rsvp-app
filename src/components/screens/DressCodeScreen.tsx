@@ -90,9 +90,9 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
             }}>
               <div className="outfit-slider-wrapper w-full py-4">
                 <DraggableSlider speed={0.5}>
-                  {weddingContent.dressCode.inspirationImages.map((img, i) => (
-                    <div key={i} className="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-gold/20 flex-shrink-0">
-                      <img src={img.url} alt={`${img.type} Inspiration ${i + 1}`} className="w-full h-full object-cover transform duration-500 group-hover:scale-105 pointer-events-none" />
+                  {weddingContent.dressCode.inspirationImages.map((img, index) => (
+                    <div key={index} className="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-gold/20 flex-shrink-0">
+                      <img src={img.url} alt={`${img.type} Inspiration ${index + 1}`} className="w-full h-full object-cover transform duration-500 group-hover:scale-105 pointer-events-none" />
                       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2 pointer-events-none">
                         <span className="text-[9px] uppercase tracking-widest text-wedding-cream/90 pointer-events-none">{img.type}</span>
                       </div>
