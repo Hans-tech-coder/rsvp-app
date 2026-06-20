@@ -11,6 +11,7 @@ interface RsvpScreenProps {
 export function RsvpScreen({ onContinue }: RsvpScreenProps) {
   const [showGifts, setShowGifts] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [attendance, setAttendance] = useState('accept');
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -84,14 +85,14 @@ export function RsvpScreen({ onContinue }: RsvpScreenProps) {
                 <span className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-3">Will you attend?</span>
                 <div className="flex space-x-8 mt-1">
                   <label className="flex items-center cursor-pointer group">
-                    <input type="radio" name="attendance" value="accept" defaultChecked className="sr-only peer" />
+                    <input type="radio" name="attendance" value="accept" checked={attendance === 'accept'} onChange={() => setAttendance('accept')} className="sr-only peer" />
                     <div className="w-5 h-5 rounded-full border border-wedding-gold flex items-center justify-center mr-3 peer-checked:bg-wedding-gold transition-all duration-300">
                       <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
                     </div>
                     <span className="text-sm font-cormorant italic text-wedding-cream group-hover:text-wedding-goldlight transition-colors">Joyfully Accepts</span>
                   </label>
                   <label className="flex items-center cursor-pointer group">
-                    <input type="radio" name="attendance" value="decline" className="sr-only peer" />
+                    <input type="radio" name="attendance" value="decline" checked={attendance === 'decline'} onChange={() => setAttendance('decline')} className="sr-only peer" />
                     <div className="w-5 h-5 rounded-full border border-wedding-gold flex items-center justify-center mr-3 peer-checked:bg-wedding-gold transition-all duration-300">
                       <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
                     </div>
@@ -100,6 +101,23 @@ export function RsvpScreen({ onContinue }: RsvpScreenProps) {
                 </div>
               </div>
             </div>
+
+            {/* Conditional Proxy Field */}
+            <AnimatePresence>
+              {attendance === 'decline' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="relative pt-2">
+                    <label htmlFor="proxy" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Proxy Name (If Any)</label>
+                    <input type="text" id="proxy" placeholder="Enter proxy name or N/A" required={attendance === 'decline'} className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-all duration-300" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Special Message */}
             <div>

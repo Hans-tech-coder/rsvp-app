@@ -1,17 +1,39 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, Variants, AnimatePresence } from 'framer-motion';
+import { motion, Variants, AnimatePresence, PanInfo } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import weddingContent from '@/data/wedding-content.json';
 
 interface GalleryScreenProps {
   onContinue: () => void;
+  onLightboxChange?: (isOpen: boolean) => void;
 }
 
-export function GalleryScreen({ onContinue }: GalleryScreenProps) {
-  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenProps) {
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  // Call the callback when lightbox state changes
+  React.useEffect(() => {
+    if (onLightboxChange) {
+      onLightboxChange(lightboxIndex !== null);
+    }
+  }, [lightboxIndex, onLightboxChange]);
+
+  const handlePrev = (e?: React.MouseEvent | Event) => {
+    e?.stopPropagation();
+    if (lightboxIndex !== null) {
+      setLightboxIndex((prev) => (prev === 0 ? weddingContent.gallery.length - 1 : prev! - 1));
+    }
+  };
+
+  const handleNext = (e?: React.MouseEvent | Event) => {
+    e?.stopPropagation();
+    if (lightboxIndex !== null) {
+      setLightboxIndex((prev) => (prev === weddingContent.gallery.length - 1 ? 0 : prev! + 1));
+    }
+  };
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -55,7 +77,7 @@ export function GalleryScreen({ onContinue }: GalleryScreenProps) {
                 <div 
                   key={`top-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
-                  onClick={() => setLightboxImg(src)}
+                  onClick={() => setLightboxIndex(index)}
                 >
                   <img src={src} alt={`Engagement ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
                   <div className="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
@@ -73,7 +95,7 @@ export function GalleryScreen({ onContinue }: GalleryScreenProps) {
                 <div 
                   key={`bottom-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
-                  onClick={() => setLightboxImg(src)}
+                  onClick={() => setLightboxIndex(weddingContent.gallery.length - 1 - index)}
                 >
                   <img src={src} alt={`Memory ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
                   <div className="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
@@ -105,29 +127,69 @@ export function GalleryScreen({ onContinue }: GalleryScreenProps) {
 
       {/* Lightbox Modal */}
       <AnimatePresence>
-        {lightboxImg && (
+        {lightboxIndex !== null && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
-            onClick={() => setLightboxImg(null)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4"
+            onClick={() => setLightboxIndex(null)}
           >
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="max-w-5xl max-h-[90vh] w-full h-full relative flex items-center justify-center"
-              onClick={(e) => e.stopPropagation()}
+              key={lightboxIndex}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="max-w-5xl max-h-[90vh] w-full h-full relative flex items-center justify-center pointer-events-none"
             >
-              <button 
-                onClick={() => setLightboxImg(null)}
-                className="absolute top-4 right-4 text-wedding-cream/70 hover:text-wedding-cream transition-colors z-10 bg-black/50 p-2 rounded-full"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-              </button>
-              <img src={lightboxImg} alt="Enlarged gallery view" className="max-w-full max-h-[90vh] object-contain rounded-sm" />
+              <motion.img 
+                src={weddingContent.gallery[lightboxIndex]} 
+                alt={`Gallery view ${lightboxIndex + 1}`} 
+                className="max-w-full max-h-[90vh] object-contain rounded-sm shadow-2xl pointer-events-auto touch-none cursor-grab active:cursor-grabbing" 
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                drag="y"
+                dragConstraints={{ top: 0, bottom: 0 }}
+                dragElastic={0.5}
+                onDragEnd={(e: any, info: PanInfo) => {
+                  const swipeThreshold = 50;
+                  if (info.offset.y < -swipeThreshold) {
+                    handleNext();
+                  } else if (info.offset.y > swipeThreshold) {
+                    handlePrev();
+                  }
+                }}
+              />
             </motion.div>
+
+            <button 
+              onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
+              className="fixed top-4 right-4 md:top-6 md:right-6 text-wedding-cream/70 hover:text-wedding-cream transition-colors z-[110] bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
+              aria-label="Close"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <button 
+              onClick={handlePrev}
+              className="hidden md:block fixed left-2 md:left-8 top-1/2 -translate-y-1/2 text-wedding-cream/70 hover:text-wedding-cream transition-colors z-[110] bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
+              aria-label="Previous image"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+
+            <button 
+              onClick={handleNext}
+              className="hidden md:block fixed right-2 md:right-8 top-1/2 -translate-y-1/2 text-wedding-cream/70 hover:text-wedding-cream transition-colors z-[110] bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
+              aria-label="Next image"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+
+            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[110] flex flex-col items-center justify-center md:hidden pointer-events-none animate-bounce text-wedding-cream/70">
+              <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+              <span className="text-[10px] uppercase tracking-[0.2em] font-medium drop-shadow-md">Swipe</span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

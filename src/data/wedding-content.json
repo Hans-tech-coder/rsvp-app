@@ -73,9 +73,9 @@
     "ceremony": {
       "time": "3:00 PM",
       "title": "The Ceremony",
-      "description": "Witness our union in the majestic glass sanctuary. Soft harp melodies, cascading white roses, and gentle tropical breeze will frame our exchange of vows.",
+      "description": "Witness the beginning of our forever as we exchange vows in the sacred and solemn ambiance of the Church Of Christ. Surrounded by faith, love, and the blessings of our families and friends, we invite you to share in this meaningful celebration of our union.",
       "location": "Iglesia Ni Cristo [Paniqui, Tarlac] - Nagserialan",
-      "address": "Nagserialan camiling, Paniqui - Camiling Rd, Paniqui, Tarlac",
+      "address": "Nagserialan Camiling, Paniqui - Camiling Rd, Paniqui, Tarlac",
       "mapLink": "https://maps.google.com/maps?q=Iglesia%20Ni%20Cristo%20%5BPaniqui,%20Tarlac%5D%20-%20Nagserialan&t=&z=15&ie=UTF8&output=embed",
       "calendarDesc": "Hans and Czay Union - Paniqui, Tarlac",
       "calendarLoc": "https://maps.app.goo.gl/yBdxdLkEZMgYQyo8A",
@@ -84,7 +84,7 @@
     "reception": {
       "time": "6:30 PM",
       "title": "The Reception",
-      "description": "Following the ceremony, join us for premium cocktails on the terrace, followed by a formal dinner and grand ballroom dancing under crystal chandeliers.",
+      "description": "As the sun sets, join us for an intimate celebration in a charming open farm beneath the canopy of mango trees. Surrounded by nature and the warm glow of twinkling bubble lights, enjoy an evening filled with laughter, heartfelt moments, delicious food, and joyful dancing as we celebrate the start of our new journey together.",
       "location": "DokNWellness Natural Health Care Center",
       "address": "Purok 1, San Isidro, Camiling, 2306 Tarlac",
       "mapLink": "https://maps.google.com/maps?q=DokNWellness%20Natural%20Health%20Care%20Center,%20Camiling,%20Tarlac&t=&z=15&ie=UTF8&output=embed",
@@ -137,7 +137,7 @@
   "faq": [
     {
       "q": "Can I bring a plus one?",
-      "a": "Due to the intimate nature of our chosen venue in Tarlac, our guest list is strictly personalized. Your digital invitation card indicates the specific number of reserved places in your honor. We kindly ask that only those specified on the envelope attend."
+      "a": "To help us maintain an accurate guest count, attendance is limited to individuals who have received a digital invitation and a unique RSVP code. Only guests included in the invitation and successfully registered using the provided code will be accommodated. Unfortunately, those who did not receive an invitation code are not included in our guest list. We sincerely appreciate your understanding and cooperation as we celebrate this special day with our invited family and friends."
     },
     {
       "q": "Can I bring my children?",
@@ -160,20 +160,16 @@
       "a": "All celebrations take place within our designated venues in Paniqui, Tarlac. Secure valet and open parking spaces are fully accommodated at the entrance of both properties for all driving guests."
     },
     {
-      "q": "Will there be food restrictions or meal options?",
-      "a": "A curated multi-course fine dining buffet of classical and modern gourmet fare will be served. We collect all dietary requirements directly within the interactive RSVP form. Please submit your specifications when confirming."
-    },
-    {
       "q": "Can I give gifts or cash?",
       "a": "Your love, laughter, and presence on our special day are the greatest gifts we could receive. Should you wish to honor us with a contribution towards our new life together, details can be found in the registry section."
     },
     {
       "q": "What if I cannot attend?",
-      "a": "You will be deeply missed! If you are unable to make it, please let us know by selecting \"Regretfully Declines\" in our RSVP section as early as possible so we can organize our final seating numbers."
+      "a": "We understand that unforeseen circumstances may arise. If you are unable to attend, please submit your RSVP and select either \"Regretfully Declines\" or provide the details of your designated proxy, if applicable. Kindly note that only responses received through the RSVP system will be considered. Guests who do not submit an RSVP by the stated deadline will be assumed unable to attend, and their reserved seat may be released accordingly. Thank you for helping us finalize our guest arrangements."
     },
     {
       "q": "Who can I contact for questions?",
-      "a": "For any additional logistics or questions, please reach out directly to our Maid of Honor, Sofia, at +63 917 123 4567."
+      "a": "For any additional logistics or questions, please reach, at +63 995 179 2240 / +63 945 728 7481."
     }
   ],
   "registry": {

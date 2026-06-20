@@ -21,6 +21,7 @@ export default function Home() {
   const [currentStep, setCurrentStep] = useState(0);
   const [highestVisitedStep, setHighestVisitedStep] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const goToStep = (step: number) => {
     if (step === currentStep) return;
@@ -85,7 +86,7 @@ export default function Home() {
 
       {/* Global Navigation Controls */}
       <AnimatePresence>
-        {currentStep > 0 && (
+        {currentStep > 0 && !isLightboxOpen && (
           <motion.button 
             key="back-button"
             initial={{ opacity: 0, y: -20 }}
@@ -104,7 +105,7 @@ export default function Home() {
 
       {/* Hamburger Menu Button */}
       <AnimatePresence>
-        {currentStep > 0 && (
+        {currentStep > 0 && !isLightboxOpen && (
           <motion.button 
             key="menu-button"
             initial={{ opacity: 0, y: -20 }}
@@ -198,7 +199,10 @@ export default function Home() {
               exit="exit"
               className="absolute inset-0 w-full h-full pointer-events-auto"
             >
-              <GalleryScreen onContinue={nextStep} />
+              <GalleryScreen 
+                onContinue={nextStep} 
+                onLightboxChange={setIsLightboxOpen} 
+              />
             </motion.div>
           )}
 
