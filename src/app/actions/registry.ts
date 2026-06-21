@@ -1,6 +1,6 @@
 'use server';
 
-import { adminDb } from '@/lib/firebase/admin';
+import { getAdminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { RegistryGift } from '@/types';
 
@@ -13,11 +13,11 @@ export async function claimGift(
   }
 ) {
   try {
-    const giftRef = adminDb.collection('registryGifts').doc(giftId);
+    const giftRef = getAdminDb().collection('registryGifts').doc(giftId);
     // Create a new reference for the selection
-    const selectionRef = adminDb.collection('giftSelections').doc();
+    const selectionRef = getAdminDb().collection('giftSelections').doc();
 
-    await adminDb.runTransaction(async (transaction) => {
+    await getAdminDb().runTransaction(async (transaction) => {
       const giftDoc = await transaction.get(giftRef);
 
       if (!giftDoc.exists) {

@@ -1,12 +1,12 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 
 export async function createSessionCookie(idToken: string) {
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
   try {
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+    const sessionCookie = await getAdminAuth().createSessionCookie(idToken, { expiresIn });
     const cookieStore = await cookies();
     cookieStore.set('session', sessionCookie, {
       maxAge: expiresIn,

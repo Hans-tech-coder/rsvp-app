@@ -1,6 +1,6 @@
 'use server';
 
-import { adminDb } from '@/lib/firebase/admin';
+import { getAdminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import crypto from 'crypto';
 
@@ -20,9 +20,9 @@ function generateCode(length = 6): string {
 
 export async function generateInviteCodes(count: number) {
   try {
-    const batch = adminDb.batch();
+    const batch = getAdminDb().batch();
     const generatedCodes: string[] = [];
-    const guestsRef = adminDb.collection('guests');
+    const guestsRef = getAdminDb().collection('guests');
 
     for (let i = 0; i < count; i++) {
       const code = generateCode(6);
@@ -45,7 +45,7 @@ export async function generateInviteCodes(count: number) {
 
 export async function deleteInviteCode(code: string) {
   try {
-    await adminDb.collection('guests').doc(code).delete();
+    await getAdminDb().collection('guests').doc(code).delete();
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to delete code' };
@@ -54,7 +54,7 @@ export async function deleteInviteCode(code: string) {
 
 export async function addRegistryGift(data: { name: string; description: string; imageUrl: string; maxClaims: number }) {
   try {
-    const giftRef = adminDb.collection('registryGifts').doc();
+    const giftRef = getAdminDb().collection('registryGifts').doc();
     await giftRef.set({
       ...data,
       claimCount: 0,
@@ -69,9 +69,9 @@ export async function addRegistryGift(data: { name: string; description: string;
 
 export async function updateRegistryGift(giftId: string, data: Partial<{ name: string; description: string; imageUrl: string; maxClaims: number }>) {
   try {
-    const giftRef = adminDb.collection('registryGifts').doc(giftId);
+    const giftRef = getAdminDb().collection('registryGifts').doc(giftId);
     
-    await adminDb.runTransaction(async (transaction) => {
+    await getAdminDb().runTransaction(async (transaction) => {
       const doc = await transaction.get(giftRef);
       if (!doc.exists) throw new Error('Gift not found');
       
@@ -94,7 +94,7 @@ export async function updateRegistryGift(giftId: string, data: Partial<{ name: s
 
 export async function deleteRegistryGift(giftId: string) {
   try {
-    await adminDb.collection('registryGifts').doc(giftId).delete();
+    await getAdminDb().collection('registryGifts').doc(giftId).delete();
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to delete gift' };

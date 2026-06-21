@@ -1,6 +1,6 @@
 'use server';
 
-import { adminDb } from '@/lib/firebase/admin';
+import { getAdminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { Guest } from '@/types';
 
@@ -17,9 +17,9 @@ export async function submitRsvp(
 ) {
   try {
     // We use the inviteCode as the document ID for the 'guests' collection
-    const guestRef = adminDb.collection('guests').doc(inviteCode);
+    const guestRef = getAdminDb().collection('guests').doc(inviteCode);
 
-    await adminDb.runTransaction(async (transaction) => {
+    await getAdminDb().runTransaction(async (transaction) => {
       const guestDoc = await transaction.get(guestRef);
 
       if (!guestDoc.exists) {

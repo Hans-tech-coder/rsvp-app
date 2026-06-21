@@ -1,4 +1,4 @@
-import { adminDb } from '@/lib/firebase/admin';
+import { getAdminDb } from '@/lib/firebase/admin';
 import { RegistryGift, GiftSelection } from '@/types';
 import RegistryClient from './RegistryClient';
 import { Download } from 'lucide-react';
@@ -12,7 +12,7 @@ export default async function RegistryPage() {
 
   try {
     // Fetch Registry Gifts
-    const giftsSnapshot = await adminDb.collection('registryGifts').orderBy('createdAt', 'desc').get();
+    const giftsSnapshot = await getAdminDb().collection('registryGifts').orderBy('createdAt', 'desc').get();
     gifts = giftsSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -23,7 +23,7 @@ export default async function RegistryPage() {
     });
 
     // Fetch Selections
-    const selectionsSnapshot = await adminDb.collection('giftSelections').orderBy('selectedAt', 'desc').get();
+    const selectionsSnapshot = await getAdminDb().collection('giftSelections').orderBy('selectedAt', 'desc').get();
     selections = selectionsSnapshot.docs.map(doc => {
       const data = doc.data();
       return {

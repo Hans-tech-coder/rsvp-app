@@ -39,15 +39,6 @@ export function getAdminApp() {
   });
 }
 
-// Lazy initialization proxies
-export const adminDb = new Proxy({} as ReturnType<typeof getFirestore>, {
-  get: (target, prop) => getFirestore(getAdminApp())[prop as keyof ReturnType<typeof getFirestore>]
-});
-
-export const adminAuth = new Proxy({} as ReturnType<typeof getAuth>, {
-  get: (target, prop) => getAuth(getAdminApp())[prop as keyof ReturnType<typeof getAuth>]
-});
-
-export const adminStorage = new Proxy({} as ReturnType<typeof getStorage>, {
-  get: (target, prop) => getStorage(getAdminApp())[prop as keyof ReturnType<typeof getStorage>]
-});
+export const getAdminDb = () => getFirestore(getAdminApp());
+export const getAdminAuth = () => getAuth(getAdminApp());
+export const getAdminStorage = () => getStorage(getAdminApp());

@@ -1,4 +1,4 @@
-import { adminDb } from '@/lib/firebase/admin';
+import { getAdminDb } from '@/lib/firebase/admin';
 import { Guest, RegistryGift } from '@/types';
 import { Users, UserCheck, UserX, Gift, CheckCircle2 } from 'lucide-react';
 
@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   try {
     // Fetch Guests Data
-    const guestsSnapshot = await adminDb.collection('guests').get();
+    const guestsSnapshot = await getAdminDb().collection('guests').get();
     const guests = guestsSnapshot.docs.map(doc => doc.data() as Guest);
     
     totalCodes = guests.length;
@@ -22,7 +22,7 @@ export default async function DashboardPage() {
     notAttendingCount = usedCodes.filter(g => g.willAttend === 'No').length;
 
     // Fetch Registry Data
-    const giftsSnapshot = await adminDb.collection('registryGifts').get();
+    const giftsSnapshot = await getAdminDb().collection('registryGifts').get();
     const gifts = giftsSnapshot.docs.map(doc => doc.data() as RegistryGift);
     
     totalGifts = gifts.length;

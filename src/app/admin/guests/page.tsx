@@ -1,4 +1,4 @@
-import { adminDb } from '@/lib/firebase/admin';
+import { getAdminDb } from '@/lib/firebase/admin';
 import { Guest } from '@/types';
 import GuestListClient from './GuestListClient';
 
@@ -9,7 +9,7 @@ export default async function GuestsPage() {
   let errorMsg = null;
 
   try {
-    const snapshot = await adminDb.collection('guests').orderBy('createdAt', 'desc').get();
+    const snapshot = await getAdminDb().collection('guests').orderBy('createdAt', 'desc').get();
     
     guests = snapshot.docs.map(doc => {
       const data = doc.data();
