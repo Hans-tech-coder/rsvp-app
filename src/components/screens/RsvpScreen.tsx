@@ -125,6 +125,23 @@ export function RsvpScreen({ onContinue }: RsvpScreenProps) {
               <textarea id="message" rows={4} placeholder="Share your warm thoughts..." className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-all duration-300 resize-none"></textarea>
             </div>
 
+            {/* Data Privacy Consent */}
+            <div className="pt-2">
+              <label className="flex items-start cursor-pointer group">
+                <div className="relative flex items-center justify-center mt-1 mr-3 shrink-0">
+                  <input type="checkbox" required className="peer sr-only" />
+                  <div className="w-5 h-5 border border-wedding-gold/50 rounded-sm bg-transparent peer-checked:bg-wedding-gold peer-checked:border-wedding-gold peer-checked:[&>svg]:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <svg className="w-3.5 h-3.5 text-wedding-dark opacity-0 transition-opacity duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+                <span className="text-xs font-inter text-wedding-cream/70 group-hover:text-wedding-cream/90 transition-colors leading-relaxed">
+                  I agree to the collection and processing of the personal information provided in this form for the sole purpose of organizing and managing this wedding event, in accordance with the Data Privacy Act.
+                </span>
+              </label>
+            </div>
+
             <div className="text-center pt-6">
               <button type="submit" className="px-8 py-4 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.25em] font-medium uppercase transition-all duration-300 rounded-sm shadow-lg w-full md:w-auto">
                 Confirm Attendance
