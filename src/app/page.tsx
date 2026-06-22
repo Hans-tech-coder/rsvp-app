@@ -23,6 +23,7 @@ export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [validatedInviteCode, setValidatedInviteCode] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -50,8 +51,9 @@ export default function Home() {
     }
   };
 
-  const handleUnlock = () => {
+  const handleUnlock = (code: string) => {
     // The screen transition has already finished behind the overlay
+    setValidatedInviteCode(code);
     setShowEntranceScreen(false);
   };
 
@@ -261,7 +263,10 @@ export default function Home() {
                   exit="exit"
                   className="absolute inset-0 w-full h-full pointer-events-auto"
                 >
-                  <RsvpScreen onContinue={() => goToStep(7)} />
+                  <RsvpScreen 
+                    inviteCode={validatedInviteCode || 'dev-mode'} 
+                    onContinue={() => goToStep(7)} 
+                  />
                 </motion.div>
               )}
             </AnimatePresence>

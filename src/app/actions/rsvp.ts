@@ -4,6 +4,26 @@ import { getAdminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { Guest } from '@/types';
 
+export async function verifyInviteCode(inviteCode: string) {
+  try {
+    const guestRef = getAdminDb().collection('guests').doc(inviteCode);
+    const guestDoc = await guestRef.get();
+
+    if (!guestDoc.exists) {
+      return { valid: false, error: 'Invalid invite code.' };
+    }
+
+    const guestData = guestDoc.data() as Guest;
+    if (guestData.codeStatus === 'used') {
+      return { valid: false, error: 'This invite code has already been used.' };
+    }
+
+    return { valid: true };
+  } catch (error: any) {
+    return { valid: false, error: 'Failed to verify code. Please try again.' };
+  }
+}
+
 export async function submitRsvp(
   inviteCode: string,
   formData: {

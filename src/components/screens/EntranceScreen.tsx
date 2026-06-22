@@ -5,16 +5,19 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { InkRevealCanvas } from '@/components/ui/InkRevealCanvas';
 import weddingContent from '@/data/wedding-content.json';
+import { verifyInviteCode } from '@/app/actions/rsvp';
+import { Loader2 } from 'lucide-react';
 
 interface EntranceScreenProps {
-  onUnlock: () => void;
+  onUnlock: (code: string) => void;
   onStartUnlock?: () => void;
 }
 
 export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps) {
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const [particles, setParticles] = useState<{ id: number; left: string; delay: string; duration: string; size: string }[]>([]);
 
   useEffect(() => {
@@ -29,16 +32,38 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
     setParticles(newParticles);
   }, []);
 
-  const handleUnlock = () => {
-    if (password.toUpperCase() === weddingContent.global.passcode) {
-      setError(false);
+  const handleUnlock = async () => {
+    if (!password) return;
+    
+    setIsValidating(true);
+    setError(null);
+
+    const inputCode = password.trim().toUpperCase();
+
+    // Allow dev mode global passcode
+    if (inputCode === weddingContent.global.passcode) {
+      setIsValidating(false);
       setIsUnlocking(true);
       if (onStartUnlock) onStartUnlock();
       setTimeout(() => {
-        onUnlock();
+        onUnlock(inputCode);
+      }, 3000);
+      return;
+    }
+
+    // Verify against database
+    const res = await verifyInviteCode(inputCode);
+    
+    setIsValidating(false);
+
+    if (res.valid) {
+      setIsUnlocking(true);
+      if (onStartUnlock) onStartUnlock();
+      setTimeout(() => {
+        onUnlock(inputCode);
       }, 3000);
     } else {
-      setError(true);
+      setError(res.error || 'Incorrect access code. Please try again.');
     }
   };
 
@@ -173,12 +198,13 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
                   className="relative w-full bg-wedding-dark/60 border border-wedding-gold/30 rounded-sm text-wedding-gold tracking-[0.4em] text-center placeholder:tracking-widest placeholder:text-wedding-gold/30 py-4 px-4 focus:outline-none focus:border-wedding-gold focus:bg-wedding-dark/80 text-sm font-bold uppercase transition-all duration-300 shadow-inner" 
                 />
                 <div className={`absolute -bottom-6 left-0 right-0 text-[10px] text-red-400 tracking-wider text-center transition-opacity duration-300 font-medium ${error ? 'opacity-100' : 'opacity-0'}`}>
-                  Incorrect access code. Please try again.
+                  {error || 'Incorrect access code. Please try again.'}
                 </div>
               </div>
               
-              <button onClick={handleUnlock} className="relative w-full overflow-hidden bg-wedding-burgundy/90 border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy hover:border-wedding-gold hover:text-wedding-goldlight px-6 py-4 text-xs tracking-[0.3em] font-medium transition-all duration-500 uppercase rounded-sm group/btn shadow-lg hover:shadow-wedding-gold/20">
-                <span className="relative z-10">Confirm Attendance</span>
+              <button disabled={isValidating || !password} onClick={handleUnlock} className="relative w-full overflow-hidden bg-wedding-burgundy/90 border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy hover:border-wedding-gold hover:text-wedding-goldlight px-6 py-4 text-xs tracking-[0.3em] font-medium transition-all duration-500 uppercase rounded-sm group/btn shadow-lg hover:shadow-wedding-gold/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                {isValidating && <Loader2 className="w-4 h-4 animate-spin text-wedding-gold" />}
+                <span className="relative z-10">{isValidating ? 'Validating...' : 'Confirm Attendance'}</span>
                 <div className="absolute inset-0 h-full w-0 bg-white/10 group-hover/btn:w-full transition-all duration-500 ease-out z-0"></div>
               </button>
               

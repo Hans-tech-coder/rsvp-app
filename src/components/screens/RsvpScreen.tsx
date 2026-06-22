@@ -5,13 +5,26 @@ import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 
 interface RsvpScreenProps {
+  inviteCode: string;
   onContinue: () => void;
 }
 
-export function RsvpScreen({ onContinue }: RsvpScreenProps) {
+import { submitRsvp } from '@/app/actions/rsvp';
+import { Loader2 } from 'lucide-react';
+
+export function RsvpScreen({ inviteCode, onContinue }: RsvpScreenProps) {
   const [showGifts, setShowGifts] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [attendance, setAttendance] = useState('accept');
+  const [attendance, setAttendance] = useState<'Yes' | 'No'>('Yes');
+  
+  // Form State
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [proxyName, setProxyName] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -31,9 +44,29 @@ export function RsvpScreen({ onContinue }: RsvpScreenProps) {
     alert('IBAN Details Copied!');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowModal(true);
+    setIsSubmitting(true);
+    setError(null);
+
+    const formData = {
+      fullName,
+      email,
+      phoneNumber: phone,
+      willAttend: attendance,
+      proxyName: attendance === 'No' ? proxyName : undefined,
+      message,
+    };
+
+    const result = await submitRsvp(inviteCode, formData);
+
+    setIsSubmitting(false);
+
+    if (result.success) {
+      setShowModal(true);
+    } else {
+      setError(result.error || 'Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -59,25 +92,32 @@ export function RsvpScreen({ onContinue }: RsvpScreenProps) {
 
           {/* Interactive RSVP Form */}
           <form onSubmit={handleSubmit} className="space-y-8 font-inter">
+            
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-center">
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Full Name */}
               <div className="relative col-span-2 md:col-span-1">
-                <label htmlFor="fullname" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Full Name</label>
-                <input type="text" id="fullname" required className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300" />
+                <label htmlFor="fullname" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Full Name <span className="text-red-400">*</span></label>
+                <input type="text" id="fullname" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300" />
               </div>
 
               {/* Email Address */}
               <div className="relative col-span-2 md:col-span-1">
-                <label htmlFor="email" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Email Address</label>
-                <input type="email" id="email" required className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300" />
+                <label htmlFor="email" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Email Address <span className="text-red-400">*</span></label>
+                <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Phone */}
               <div className="relative">
-                <label htmlFor="phone" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Phone Number</label>
-                <input type="tel" id="phone" required className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300" />
+                <label htmlFor="phone" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Phone Number <span className="text-red-400">*</span></label>
+                <input type="tel" id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} required className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300" />
               </div>
 
               {/* Attendance Choice */}
@@ -85,14 +125,14 @@ export function RsvpScreen({ onContinue }: RsvpScreenProps) {
                 <span className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-3">Will you attend?</span>
                 <div className="flex space-x-8 mt-1">
                   <label className="flex items-center cursor-pointer group">
-                    <input type="radio" name="attendance" value="accept" checked={attendance === 'accept'} onChange={() => setAttendance('accept')} className="sr-only peer" />
+                    <input type="radio" name="attendance" value="Yes" checked={attendance === 'Yes'} onChange={() => setAttendance('Yes')} className="sr-only peer" />
                     <div className="w-5 h-5 rounded-full border border-wedding-gold flex items-center justify-center mr-3 peer-checked:bg-wedding-gold transition-all duration-300">
                       <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
                     </div>
                     <span className="text-sm font-cormorant italic text-wedding-cream group-hover:text-wedding-goldlight transition-colors">Joyfully Accepts</span>
                   </label>
                   <label className="flex items-center cursor-pointer group">
-                    <input type="radio" name="attendance" value="decline" checked={attendance === 'decline'} onChange={() => setAttendance('decline')} className="sr-only peer" />
+                    <input type="radio" name="attendance" value="No" checked={attendance === 'No'} onChange={() => setAttendance('No')} className="sr-only peer" />
                     <div className="w-5 h-5 rounded-full border border-wedding-gold flex items-center justify-center mr-3 peer-checked:bg-wedding-gold transition-all duration-300">
                       <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
                     </div>
@@ -104,7 +144,7 @@ export function RsvpScreen({ onContinue }: RsvpScreenProps) {
 
             {/* Conditional Proxy Field */}
             <AnimatePresence>
-              {attendance === 'decline' && (
+              {attendance === 'No' && (
                 <motion.div
                   initial={{ opacity: 0, height: 0, marginTop: 0 }}
                   animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
@@ -113,7 +153,7 @@ export function RsvpScreen({ onContinue }: RsvpScreenProps) {
                 >
                   <div className="relative pt-2">
                     <label htmlFor="proxy" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Proxy Name (If Any)</label>
-                    <input type="text" id="proxy" placeholder="Enter proxy name or N/A" required={attendance === 'decline'} className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-all duration-300" />
+                    <input type="text" id="proxy" value={proxyName} onChange={(e) => setProxyName(e.target.value)} placeholder="Enter proxy name or N/A" required={attendance === 'No'} className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-all duration-300" />
                   </div>
                 </motion.div>
               )}
@@ -122,7 +162,7 @@ export function RsvpScreen({ onContinue }: RsvpScreenProps) {
             {/* Special Message */}
             <div>
               <label htmlFor="message" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Message for Hans & Czay</label>
-              <textarea id="message" rows={4} placeholder="Share your warm thoughts..." className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-all duration-300 resize-none"></textarea>
+              <textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} rows={4} placeholder="Share your warm thoughts..." className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-all duration-300 resize-none"></textarea>
             </div>
 
             {/* Data Privacy Consent */}
@@ -143,8 +183,9 @@ export function RsvpScreen({ onContinue }: RsvpScreenProps) {
             </div>
 
             <div className="text-center pt-6">
-              <button type="submit" className="px-8 py-4 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.25em] font-medium uppercase transition-all duration-300 rounded-sm shadow-lg w-full md:w-auto">
-                Confirm Attendance
+              <button disabled={isSubmitting} type="submit" className="px-8 py-4 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.25em] font-medium uppercase transition-all duration-300 rounded-sm shadow-lg w-full md:w-auto flex items-center justify-center gap-2 mx-auto disabled:opacity-70 disabled:cursor-not-allowed">
+                {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {isSubmitting ? 'Confirming...' : 'Confirm Attendance'}
               </button>
             </div>
           </form>
