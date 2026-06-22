@@ -19,7 +19,7 @@ export default async function GuestsPage() {
         createdAt: data.createdAt?.toDate()?.toISOString() || null,
         submittedAt: data.submittedAt?.toDate()?.toISOString() || null,
       } as unknown as Guest;
-    });
+    }).filter(guest => guest.codeStatus === 'used');
   } catch (err: any) {
     console.error('Guests Error:', err);
     errorMsg = err.message || 'An error occurred while fetching guests.';

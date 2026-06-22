@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { clearSessionCookie } from '@/app/actions/auth';
 import { auth } from '@/lib/firebase/client';
-import { LayoutDashboard, Users, Gift, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Gift, LogOut, Key } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -25,14 +25,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Invites', href: '/admin/invites', icon: Key },
     { name: 'Guests', href: '/admin/guests', icon: Users },
     { name: 'Registry', href: '/admin/registry', icon: Gift },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 flex transition-colors duration-200">
+    <div className="h-screen overflow-hidden bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 flex transition-colors duration-200">
       {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 flex flex-col hidden md:flex transition-colors duration-200">
+      <aside className="w-64 bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 flex flex-col hidden md:flex transition-colors duration-200 h-screen z-20">
         <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200 dark:border-zinc-800">
           <span className="text-lg font-bold text-gray-900 dark:text-zinc-100">Admin Portal</span>
         </div>
@@ -69,9 +70,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
         {/* Mobile Header */}
-        <header className="h-16 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between px-4 md:hidden transition-colors duration-200">
+        <header className="h-16 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between px-4 md:hidden transition-colors duration-200 z-10 shrink-0">
           <span className="text-lg font-bold text-gray-900 dark:text-zinc-100">Admin Portal</span>
           <div className="flex items-center gap-2">
             <ThemeToggle />

@@ -3,6 +3,7 @@
 import { getAdminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { Guest } from '@/types';
+import weddingContent from '@/data/wedding-content.json';
 
 export async function verifyInviteCode(inviteCode: string) {
   try {
@@ -36,7 +37,7 @@ export async function submitRsvp(
   }
 ) {
   try {
-    // We use the inviteCode as the document ID for the 'guests' collection
+    // Normal flow: We use the inviteCode as the document ID for the 'guests' collection
     const guestRef = getAdminDb().collection('guests').doc(inviteCode);
 
     await getAdminDb().runTransaction(async (transaction) => {

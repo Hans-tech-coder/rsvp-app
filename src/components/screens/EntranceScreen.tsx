@@ -40,16 +40,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
 
     const inputCode = password.trim().toUpperCase();
 
-    // Allow dev mode global passcode
-    if (inputCode === weddingContent.global.passcode) {
-      setIsValidating(false);
-      setIsUnlocking(true);
-      if (onStartUnlock) onStartUnlock();
-      setTimeout(() => {
-        onUnlock(inputCode);
-      }, 3000);
-      return;
-    }
+
 
     // Verify against database
     const res = await verifyInviteCode(inputCode);
@@ -186,7 +177,14 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
               initial={{ opacity: 1 }}
               className="w-full"
             >
-              <p className="text-[11px] text-wedding-cream/70 tracking-widest mb-4 text-center uppercase">Awaiting your royal key</p>
+              <div className="flex justify-center w-full px-1 mb-6">
+                <div className="inline-flex items-center gap-2 sm:gap-4 border-y border-wedding-gold/20 py-2.5 px-3 sm:px-6 bg-gradient-to-r from-transparent via-wedding-gold/5 to-transparent w-full justify-center">
+                  <p className="text-[8px] sm:text-[10px] text-wedding-gold/80 tracking-[0.08em] sm:tracking-[0.12em] uppercase font-medium leading-[1.8] whitespace-nowrap text-center">
+                    Please use the unique access code provided<br />
+                    with your invitation link
+                  </p>
+                </div>
+              </div>
               <div className="relative mb-8 group/input">
                 <div className="absolute -inset-1 bg-gradient-to-r from-wedding-gold/0 via-wedding-gold/20 to-wedding-gold/0 rounded-lg blur opacity-0 group-focus-within/input:opacity-100 transition duration-500"></div>
                 <input 
@@ -208,9 +206,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
                 <div className="absolute inset-0 h-full w-0 bg-white/10 group-hover/btn:w-full transition-all duration-500 ease-out z-0"></div>
               </button>
               
-              <div className="mt-8 text-center animate-pulse-slow">
-                <p className="text-[9px] text-wedding-cream/50 tracking-[0.2em] border border-wedding-cream/10 rounded-full px-4 py-1.5 inline-block bg-wedding-dark/30">HINT: USE CODE "{weddingContent.global.passcode}"</p>
-              </div>
+              {/* Note moved to top */}
             </motion.div>
           )}
         </div>

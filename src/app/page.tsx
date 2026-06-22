@@ -61,6 +61,12 @@ export default function Home() {
     goToStep(currentStep + 1);
   };
 
+  const handleRsvpSubmitSuccess = () => {
+    // Relock the RSVP section so it can't be accessed again without an invite code
+    setIsUnlocked(false);
+    setValidatedInviteCode(null);
+  };
+
   // Variants for a luxury cinematic transition
   const pageVariants: Variants = {
     initial: { 
@@ -266,6 +272,7 @@ export default function Home() {
                   <RsvpScreen 
                     inviteCode={validatedInviteCode || 'dev-mode'} 
                     onContinue={() => goToStep(7)} 
+                    onSubmitSuccess={handleRsvpSubmitSuccess}
                   />
                 </motion.div>
               )}

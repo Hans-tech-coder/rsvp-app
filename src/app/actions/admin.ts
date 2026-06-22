@@ -52,6 +52,29 @@ export async function deleteInviteCode(code: string) {
   }
 }
 
+export async function regenerateInviteCode(oldCode: string) {
+  try {
+    const guestsRef = getAdminDb().collection('guests');
+    const newCode = generateCode(6);
+    
+    const batch = getAdminDb().batch();
+    // Delete the old code (this will also remove any attached RSVP data)
+    batch.delete(guestsRef.doc(oldCode));
+    
+    // Create the new code
+    batch.set(guestsRef.doc(newCode), {
+      inviteCode: newCode,
+      codeStatus: 'unused',
+      createdAt: FieldValue.serverTimestamp(),
+    });
+    
+    await batch.commit();
+    return { success: true, newCode };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to regenerate code' };
+  }
+}
+
 export async function addRegistryGift(data: { name: string; description: string; imageUrl: string; maxClaims: number }) {
   try {
     const giftRef = getAdminDb().collection('registryGifts').doc();

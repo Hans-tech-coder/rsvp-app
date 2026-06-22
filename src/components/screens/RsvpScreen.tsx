@@ -7,12 +7,13 @@ import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 interface RsvpScreenProps {
   inviteCode: string;
   onContinue: () => void;
+  onSubmitSuccess?: () => void;
 }
 
 import { submitRsvp } from '@/app/actions/rsvp';
 import { Loader2 } from 'lucide-react';
 
-export function RsvpScreen({ inviteCode, onContinue }: RsvpScreenProps) {
+export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScreenProps) {
   const [showGifts, setShowGifts] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [attendance, setAttendance] = useState<'Yes' | 'No'>('Yes');
@@ -64,6 +65,9 @@ export function RsvpScreen({ inviteCode, onContinue }: RsvpScreenProps) {
 
     if (result.success) {
       setShowModal(true);
+      if (onSubmitSuccess) {
+        onSubmitSuccess();
+      }
     } else {
       setError(result.error || 'Something went wrong. Please try again.');
     }
