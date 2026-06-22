@@ -2,14 +2,21 @@
 
 import { useState, useMemo } from 'react';
 import { Guest } from '@/types';
-import { Download, Copy, Check, Eye, X, Mail, Phone, MessageSquare, User, UserX, Search } from 'lucide-react';
+import { Download, Copy, Check, Eye, X, Mail, Phone, MessageSquare, User, UserX, Search, Trash2, Loader2 } from 'lucide-react';
 import Papa from 'papaparse';
 import { useRouter } from 'next/navigation';
+import { deleteInviteCode } from '@/app/actions/admin';
+import { AdminModal } from '../components/AdminModal';
 
 export default function GuestListClient({ initialGuests }: { initialGuests: Guest[] }) {
   const [guests, setGuests] = useState<Guest[]>(initialGuests);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
+  const [guestToDelete, setGuestToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<{isOpen: boolean, title: string, message: string, variant: 'danger' | 'success' | 'warning' | 'info'}>({
+    isOpen: false, title: '', message: '', variant: 'info'
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [attendanceFilter, setAttendanceFilter] = useState('all'); // 'all', 'Yes', 'No'
   const [proxyFilter, setProxyFilter] = useState('all'); // 'all', 'with_proxy', 'no_proxy'
@@ -42,6 +49,29 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleDelete = (code: string) => {
+    setGuestToDelete(code);
+  };
+
+  const confirmDelete = async () => {
+    if (!guestToDelete) return;
+    setIsDeleting(true);
+    const res = await deleteInviteCode(guestToDelete);
+    setIsDeleting(false);
+    if (res.success) {
+      setGuestToDelete(null);
+      router.refresh();
+    } else {
+      setGuestToDelete(null);
+      setAlertConfig({
+        isOpen: true,
+        title: 'Error',
+        message: res.error,
+        variant: 'danger'
+      });
+    }
   };
 
   const handleCopy = (code: string) => {
@@ -151,6 +181,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
           <table className="w-full text-left text-sm text-gray-600 dark:text-zinc-400 relative">
             <thead className="bg-gray-50/95 dark:bg-zinc-950/95 backdrop-blur-sm text-gray-700 dark:text-zinc-300 uppercase text-xs font-semibold sticky top-0 z-10 shadow-sm">
               <tr>
+                <th className="px-5 py-4 whitespace-nowrap w-16 text-gray-500">No.</th>
                 <th className="px-5 py-4 whitespace-nowrap">Invite Code</th>
                 <th className="px-5 py-4 whitespace-nowrap">Status</th>
                 <th className="px-5 py-4 whitespace-nowrap">Full Name</th>
@@ -159,8 +190,11 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
-              {currentGuests.map((guest) => (
+              {currentGuests.map((guest, index) => (
                 <tr key={guest.inviteCode} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                  <td className="px-5 py-4 whitespace-nowrap text-gray-500 dark:text-zinc-500 font-medium">
+                    {startIndex + index + 1}
+                  </td>
                   <td className="px-5 py-4 font-mono font-medium text-gray-900 dark:text-zinc-100 flex items-center gap-2 whitespace-nowrap">
                     {guest.inviteCode}
                     <button onClick={() => handleCopy(guest.inviteCode)} className="text-gray-400 hover:text-gray-900 dark:hover:text-zinc-100 transition-colors">
@@ -191,12 +225,15 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                         <Eye className="w-4 h-4" />
                       </button>
                     )}
+                    <button onClick={() => handleDelete(guest.inviteCode)} className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 p-2 rounded-lg transition-colors" title="Delete Guest">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               ))}
               {filteredGuests.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-12 text-center text-gray-500 dark:text-zinc-500">
+                  <td colSpan={6} className="px-5 py-12 text-center text-gray-500 dark:text-zinc-500">
                     {searchQuery ? 'No guests match your search.' : 'No guests found. Go to Invites to generate codes.'}
                   </td>
                 </tr>
@@ -345,6 +382,28 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
           </div>
         </div>
       )}
+
+      {/* Modals */}
+      <AdminModal 
+        isOpen={!!guestToDelete}
+        onClose={() => setGuestToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Delete Guest Record"
+        message="Are you sure you want to delete this guest record? This will also delete their invite code, meaning they will no longer be able to access the RSVP form."
+        type="confirm"
+        variant="danger"
+        isLoading={isDeleting}
+        confirmText="Delete Record"
+      />
+
+      <AdminModal
+        isOpen={alertConfig.isOpen}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type="alert"
+        variant={alertConfig.variant}
+      />
     </div>
   );
 }

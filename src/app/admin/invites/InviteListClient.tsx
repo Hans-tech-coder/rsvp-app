@@ -5,12 +5,22 @@ import { Guest } from '@/types';
 import { generateInviteCodes, deleteInviteCode, regenerateInviteCode } from '@/app/actions/admin';
 import { Loader2, Trash2, Copy, Check, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { AdminModal } from '../components/AdminModal';
 
 export default function InviteListClient({ initialInvites }: { initialInvites: Guest[] }) {
   const [invites, setInvites] = useState<Guest[]>(initialInvites);
   const [codeCount, setCodeCount] = useState(10);
   const [generating, setGenerating] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'used' | 'unused'>('all');
+  
+  const [alertConfig, setAlertConfig] = useState<{isOpen: boolean, title: string, message: string, variant: 'danger' | 'success' | 'warning' | 'info'}>({
+    isOpen: false, title: '', message: '', variant: 'info'
+  });
+  const [confirmConfig, setConfirmConfig] = useState<{isOpen: boolean, title: string, message: string, variant: 'danger' | 'success' | 'warning' | 'info', action: () => Promise<void> | void, confirmText: string}>({
+    isOpen: false, title: '', message: '', variant: 'info', action: () => {}, confirmText: 'Confirm'
+  });
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,37 +29,62 @@ export default function InviteListClient({ initialInvites }: { initialInvites: G
   const router = useRouter();
 
   const handleGenerate = async () => {
-    if (codeCount < 1 || codeCount > 100) return alert('Enter a valid number (1-100)');
+    if (codeCount < 1 || codeCount > 100) {
+      setAlertConfig({ isOpen: true, title: 'Invalid Input', message: 'Enter a valid number (1-100)', variant: 'warning' });
+      return;
+    }
     setGenerating(true);
     const res = await generateInviteCodes(codeCount);
     setGenerating(false);
     if (res.success) {
-      alert(`Generated ${res.count} codes successfully!`);
+      setAlertConfig({ isOpen: true, title: 'Success', message: `Generated ${res.count} codes successfully!`, variant: 'success' });
       router.refresh();
     } else {
-      alert(res.error);
+      setAlertConfig({ isOpen: true, title: 'Error', message: res.error, variant: 'danger' });
     }
   };
 
-  const handleDelete = async (code: string) => {
-    if (!confirm('Are you sure you want to delete this unused code?')) return;
-    const res = await deleteInviteCode(code);
-    if (res.success) {
-      router.refresh();
-    } else {
-      alert(res.error);
-    }
+  const handleDelete = (code: string) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Delete Invite Code',
+      message: 'Are you sure you want to delete this unused code?',
+      variant: 'danger',
+      confirmText: 'Delete',
+      action: async () => {
+        setIsProcessing(true);
+        const res = await deleteInviteCode(code);
+        setIsProcessing(false);
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        if (res.success) {
+          router.refresh();
+        } else {
+          setAlertConfig({ isOpen: true, title: 'Error', message: res.error, variant: 'danger' });
+        }
+      }
+    });
   };
 
-  const handleRegenerate = async (oldCode: string) => {
-    if (!confirm('Are you sure you want to regenerate this code? This will delete the current code and create a new unused one.')) return;
-    const res = await regenerateInviteCode(oldCode);
-    if (res.success) {
-      alert(`Code regenerated successfully. New code: ${res.newCode}`);
-      router.refresh();
-    } else {
-      alert(res.error);
-    }
+  const handleRegenerate = (oldCode: string) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Regenerate Code',
+      message: 'Are you sure you want to regenerate this code? This will delete the current code and create a new unused one.',
+      variant: 'warning',
+      confirmText: 'Regenerate',
+      action: async () => {
+        setIsProcessing(true);
+        const res = await regenerateInviteCode(oldCode);
+        setIsProcessing(false);
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        if (res.success) {
+          setAlertConfig({ isOpen: true, title: 'Success', message: `Code regenerated successfully. New code: ${res.newCode}`, variant: 'success' });
+          router.refresh();
+        } else {
+          setAlertConfig({ isOpen: true, title: 'Error', message: res.error, variant: 'danger' });
+        }
+      }
+    });
   };
 
   const handleCopy = (code: string) => {
@@ -58,10 +93,16 @@ export default function InviteListClient({ initialInvites }: { initialInvites: G
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
+  // Filter logic
+  const filteredInvites = invites.filter(invite => {
+    if (statusFilter === 'all') return true;
+    return invite.codeStatus === statusFilter;
+  });
+
   // Pagination logic
-  const totalPages = Math.ceil(invites.length / itemsPerPage) || 1;
+  const totalPages = Math.ceil(filteredInvites.length / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentInvites = invites.slice(startIndex, startIndex + itemsPerPage);
+  const currentInvites = filteredInvites.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="space-y-6">
@@ -93,20 +134,45 @@ export default function InviteListClient({ initialInvites }: { initialInvites: G
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] overflow-hidden transition-colors duration-200">
         <div className="p-5 border-b border-gray-200 dark:border-zinc-800 flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-900 dark:text-zinc-100">Invite Codes</h2>
+          
+          <div className="relative">
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value as 'all' | 'used' | 'unused');
+                setCurrentPage(1); // Reset to page 1 on filter change
+              }}
+              className="appearance-none pl-4 pr-10 py-2 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 rounded-xl text-sm focus:border-gray-400 dark:focus:border-zinc-500 focus:ring-1 focus:ring-gray-400 dark:focus:ring-zinc-500 outline-none transition-all cursor-pointer font-medium"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor' class='w-4 h-4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 0.75rem center',
+                backgroundSize: '1rem'
+              }}
+            >
+              <option value="all">All Codes</option>
+              <option value="unused">Unused Codes</option>
+              <option value="used">Used Codes</option>
+            </select>
+          </div>
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-zinc-400 relative">
             <thead className="bg-gray-50/95 dark:bg-zinc-950/95 backdrop-blur-sm text-gray-700 dark:text-zinc-300 uppercase text-xs font-semibold sticky top-0 z-10 shadow-sm">
               <tr>
+                <th className="px-5 py-4 whitespace-nowrap w-16 text-gray-500">No.</th>
                 <th className="px-5 py-4 whitespace-nowrap">Invite Code</th>
                 <th className="px-5 py-4 whitespace-nowrap">Status</th>
                 <th className="px-5 py-4 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
-              {currentInvites.map((invite) => (
+              {currentInvites.map((invite, index) => (
                 <tr key={invite.inviteCode} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                  <td className="px-5 py-4 whitespace-nowrap text-gray-500 dark:text-zinc-500 font-medium">
+                    {startIndex + index + 1}
+                  </td>
                   <td className="px-5 py-4 font-mono font-medium text-gray-900 dark:text-zinc-100 flex items-center gap-2 whitespace-nowrap">
                     {invite.inviteCode}
                     <button onClick={() => handleCopy(invite.inviteCode)} className="text-gray-400 hover:text-gray-900 dark:hover:text-zinc-100 transition-colors" title="Copy Code">
@@ -130,10 +196,12 @@ export default function InviteListClient({ initialInvites }: { initialInvites: G
                   </td>
                 </tr>
               ))}
-              {invites.length === 0 && (
+              {filteredInvites.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-5 py-12 text-center text-gray-500 dark:text-zinc-500">
-                    No invite codes found. Generate some above.
+                  <td colSpan={4} className="px-5 py-12 text-center text-gray-500 dark:text-zinc-500">
+                    {invites.length === 0 
+                      ? "No invite codes found. Generate some above."
+                      : "No invite codes match the selected filter."}
                   </td>
                 </tr>
               )}
@@ -184,6 +252,28 @@ export default function InviteListClient({ initialInvites }: { initialInvites: G
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <AdminModal
+        isOpen={alertConfig.isOpen}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type="alert"
+        variant={alertConfig.variant}
+      />
+
+      <AdminModal
+        isOpen={confirmConfig.isOpen}
+        onClose={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+        onConfirm={confirmConfig.action}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        type="confirm"
+        variant={confirmConfig.variant}
+        isLoading={isProcessing}
+        confirmText={confirmConfig.confirmText}
+      />
     </div>
   );
 }

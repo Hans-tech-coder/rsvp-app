@@ -5,13 +5,22 @@ import { RegistryGift } from '@/types';
 import { addRegistryGift, deleteRegistryGift, updateRegistryGift } from '@/app/actions/admin';
 import { Loader2, Plus, Edit2, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { AdminModal } from '../components/AdminModal';
 
 export default function RegistryClient({ initialGifts }: { initialGifts: RegistryGift[] }) {
   const [gifts] = useState<RegistryGift[]>(initialGifts);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
+
+  const [alertConfig, setAlertConfig] = useState<{isOpen: boolean, title: string, message: string, variant: 'danger' | 'success' | 'warning' | 'info'}>({
+    isOpen: false, title: '', message: '', variant: 'info'
+  });
+  const [confirmConfig, setConfirmConfig] = useState<{isOpen: boolean, title: string, message: string, variant: 'danger' | 'success' | 'warning' | 'info', action: () => Promise<void> | void, confirmText: string}>({
+    isOpen: false, title: '', message: '', variant: 'info', action: () => {}, confirmText: 'Confirm'
+  });
 
   // Form state
   const [name, setName] = useState('');
@@ -45,10 +54,14 @@ export default function RegistryClient({ initialGifts }: { initialGifts: Registr
     
     if (editingId) {
       const res = await updateRegistryGift(editingId, data);
-      if (!res.success) alert(res.error);
+      if (!res.success) {
+        setAlertConfig({ isOpen: true, title: 'Error', message: res.error, variant: 'danger' });
+      }
     } else {
       const res = await addRegistryGift(data);
-      if (!res.success) alert(res.error);
+      if (!res.success) {
+        setAlertConfig({ isOpen: true, title: 'Error', message: res.error, variant: 'danger' });
+      }
     }
 
     setLoading(false);
@@ -56,14 +69,25 @@ export default function RegistryClient({ initialGifts }: { initialGifts: Registr
     router.refresh();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this gift?')) return;
-    const res = await deleteRegistryGift(id);
-    if (res.success) {
-      router.refresh();
-    } else {
-      alert(res.error);
-    }
+  const handleDelete = (id: string) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Delete Gift',
+      message: 'Are you sure you want to delete this gift?',
+      variant: 'danger',
+      confirmText: 'Delete',
+      action: async () => {
+        setIsProcessing(true);
+        const res = await deleteRegistryGift(id);
+        setIsProcessing(false);
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        if (res.success) {
+          router.refresh();
+        } else {
+          setAlertConfig({ isOpen: true, title: 'Error', message: res.error, variant: 'danger' });
+        }
+      }
+    });
   };
 
   return (
@@ -169,6 +193,28 @@ export default function RegistryClient({ initialGifts }: { initialGifts: Registr
           </div>
         </div>
       )}
+
+      {/* Admin Modals */}
+      <AdminModal
+        isOpen={alertConfig.isOpen}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type="alert"
+        variant={alertConfig.variant}
+      />
+
+      <AdminModal
+        isOpen={confirmConfig.isOpen}
+        onClose={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+        onConfirm={confirmConfig.action}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        type="confirm"
+        variant={confirmConfig.variant}
+        isLoading={isProcessing}
+        confirmText={confirmConfig.confirmText}
+      />
     </div>
   );
 }
