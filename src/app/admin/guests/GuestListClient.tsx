@@ -9,7 +9,7 @@ import { deleteInviteCode } from '@/app/actions/admin';
 import { AdminModal } from '../components/AdminModal';
 
 export default function GuestListClient({ initialGuests }: { initialGuests: Guest[] }) {
-  const [guests, setGuests] = useState<Guest[]>(initialGuests);
+  const guests = initialGuests;
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [guestToDelete, setGuestToDelete] = useState<string | null>(null);
@@ -181,7 +181,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
           <table className="w-full text-left text-sm text-gray-600 dark:text-zinc-400 relative">
             <thead className="bg-gray-50/95 dark:bg-zinc-950/95 backdrop-blur-sm text-gray-700 dark:text-zinc-300 uppercase text-xs font-semibold sticky top-0 z-10 shadow-sm">
               <tr>
-                <th className="px-5 py-4 whitespace-nowrap w-16 text-gray-500">No.</th>
+                <th className="px-5 py-4 whitespace-nowrap w-16 text-gray-500 text-center">NO.</th>
                 <th className="px-5 py-4 whitespace-nowrap">Invite Code</th>
                 <th className="px-5 py-4 whitespace-nowrap">Status</th>
                 <th className="px-5 py-4 whitespace-nowrap">Full Name</th>

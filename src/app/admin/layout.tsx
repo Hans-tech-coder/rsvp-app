@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { clearSessionCookie } from '@/app/actions/auth';
 import { auth } from '@/lib/firebase/client';
-import { LayoutDashboard, Users, Gift, LogOut, Key } from 'lucide-react';
+import { LayoutDashboard, Users, Gift, LogOut, Key, ClipboardList } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -27,7 +27,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Invites', href: '/admin/invites', icon: Key },
     { name: 'Guests', href: '/admin/guests', icon: Users },
-    { name: 'Registry', href: '/admin/registry', icon: Gift },
+    { name: 'Gifts', href: '/admin/gifts', icon: Gift },
+    { name: 'Registry', href: '/admin/registry', icon: ClipboardList },
   ];
 
   return (

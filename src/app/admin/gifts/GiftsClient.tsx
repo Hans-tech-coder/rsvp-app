@@ -7,8 +7,8 @@ import { Loader2, Plus, Edit2, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { AdminModal } from '../components/AdminModal';
 
-export default function RegistryClient({ initialGifts }: { initialGifts: RegistryGift[] }) {
-  const [gifts] = useState<RegistryGift[]>(initialGifts);
+export default function GiftsClient({ initialGifts }: { initialGifts: RegistryGift[] }) {
+  const gifts = initialGifts;
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -103,46 +103,72 @@ export default function RegistryClient({ initialGifts }: { initialGifts: Registr
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {gifts.map(gift => (
-          <div key={gift.id} className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] overflow-hidden flex flex-col transition-colors duration-200 group relative">
-            {gift.isFull && (
-              <div className="absolute inset-0 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-sm z-10 flex items-center justify-center">
-                <span className="bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
-                  Fully Claimed
-                </span>
-              </div>
-            )}
-            <div className="p-5 flex-1 flex flex-col relative z-0">
-              <h3 className="font-bold text-lg text-gray-900 dark:text-zinc-100 mb-1.5">{gift.name}</h3>
-              <a href={gift.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 line-clamp-1 mb-5 flex-1 leading-relaxed underline underline-offset-2">
-                {gift.link}
-              </a>
-              
-              <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-zinc-800">
-                <div className="text-sm font-medium text-gray-600 dark:text-zinc-400">
-                  <span className={gift.currentCount >= gift.maxCount ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
-                    {gift.currentCount}
-                  </span>
-                  {' '} / {gift.maxCount} claimed
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={() => openEditModal(gift)} className="p-2 text-gray-400 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg bg-gray-50 dark:bg-zinc-800 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors">
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleDelete(gift.id!)} className="p-2 text-gray-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 rounded-lg bg-gray-50 dark:bg-zinc-800 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-        {gifts.length === 0 && (
-          <div className="col-span-full text-center py-16 text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm">
-            No gifts added yet. Click "Add Gift" to start building your registry.
-          </div>
-        )}
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] overflow-hidden transition-colors duration-200">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-gray-600 dark:text-zinc-400 relative">
+            <thead className="bg-gray-50/95 dark:bg-zinc-950/95 backdrop-blur-sm text-gray-700 dark:text-zinc-300 uppercase text-xs font-semibold sticky top-0 z-10 shadow-sm">
+              <tr>
+                <th className="px-5 py-4 w-16 text-center text-gray-500">NO.</th>
+                <th className="px-5 py-4">Gift Name</th>
+                <th className="px-5 py-4">Purchase Link</th>
+                <th className="px-5 py-4">Claimed</th>
+                <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+              {gifts.map((gift, index) => (
+                <tr key={gift.id} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                  <td className="px-5 py-4 text-center font-medium text-gray-500 dark:text-zinc-500">
+                    {index + 1}
+                  </td>
+                  <td className="px-5 py-4 font-bold text-gray-900 dark:text-zinc-100">
+                    {gift.name}
+                  </td>
+                  <td className="px-5 py-4 max-w-[200px]">
+                    <a href={gift.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 line-clamp-1 underline underline-offset-2">
+                      {gift.link}
+                    </a>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className={gift.currentCount >= gift.maxCount ? 'text-red-600 dark:text-red-400 font-medium' : 'text-green-600 dark:text-green-400 font-medium'}>
+                      {gift.currentCount}
+                    </span>
+                    {' '} / {gift.maxCount}
+                  </td>
+                  <td className="px-5 py-4">
+                    {gift.isFull ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-500/10 dark:text-red-400">
+                        Fully Claimed
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-500/10 dark:text-green-400">
+                        Available
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-5 py-4 text-right">
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => openEditModal(gift)} className="p-2 text-gray-400 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors">
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleDelete(gift.id!)} className="p-2 text-gray-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {gifts.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-16 text-center text-gray-500 dark:text-zinc-500">
+                    No gifts added yet. Click "Add Gift" to start building your registry.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {isModalOpen && (
