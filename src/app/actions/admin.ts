@@ -75,12 +75,12 @@ export async function regenerateInviteCode(oldCode: string) {
   }
 }
 
-export async function addRegistryGift(data: { name: string; description: string; imageUrl: string; maxClaims: number }) {
+export async function addRegistryGift(data: { name: string; link: string; maxCount: number }) {
   try {
     const giftRef = getAdminDb().collection('registryGifts').doc();
     await giftRef.set({
       ...data,
-      claimCount: 0,
+      currentCount: 0,
       isFull: false,
       createdAt: FieldValue.serverTimestamp(),
     });
@@ -90,7 +90,7 @@ export async function addRegistryGift(data: { name: string; description: string;
   }
 }
 
-export async function updateRegistryGift(giftId: string, data: Partial<{ name: string; description: string; imageUrl: string; maxClaims: number }>) {
+export async function updateRegistryGift(giftId: string, data: Partial<{ name: string; link: string; maxCount: number }>) {
   try {
     const giftRef = getAdminDb().collection('registryGifts').doc(giftId);
     
@@ -101,9 +101,9 @@ export async function updateRegistryGift(giftId: string, data: Partial<{ name: s
       const currentData = doc.data() as any;
       const updates: any = { ...data };
       
-      // If maxClaims is updated, we might need to re-evaluate isFull
-      if (data.maxClaims !== undefined) {
-        updates.isFull = currentData.claimCount >= data.maxClaims;
+      // If maxCount is updated, we might need to re-evaluate isFull
+      if (data.maxCount !== undefined) {
+        updates.isFull = currentData.currentCount >= data.maxCount;
       }
 
       transaction.update(giftRef, updates);

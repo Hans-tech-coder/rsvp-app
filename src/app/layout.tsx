@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Cinzel, Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import Script from "next/script";
+import { getThemeScript } from "@teispace/next-themes/server";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -39,12 +41,18 @@ export default function RootLayout({
       className={`${cinzel.variable} ${cormorant.variable} ${inter.variable} antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {getThemeScript({ attribute: 'class', defaultTheme: 'system' })}
+        </Script>
+      </head>
       <body className="min-h-screen bg-wedding-softdark text-wedding-cream overflow-hidden selection:bg-wedding-cream/10 selection:text-wedding-cream font-inter">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          noScript
         >
           {children}
         </ThemeProvider>

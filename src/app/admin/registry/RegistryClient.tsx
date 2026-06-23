@@ -24,25 +24,22 @@ export default function RegistryClient({ initialGifts }: { initialGifts: Registr
 
   // Form state
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [maxClaims, setMaxClaims] = useState(1);
+  const [link, setLink] = useState('');
+  const [maxCount, setMaxCount] = useState(1);
 
   const openAddModal = () => {
     setEditingId(null);
     setName('');
-    setDescription('');
-    setImageUrl('');
-    setMaxClaims(1);
+    setLink('');
+    setMaxCount(1);
     setIsModalOpen(true);
   };
 
   const openEditModal = (gift: RegistryGift) => {
     setEditingId(gift.id || null);
     setName(gift.name);
-    setDescription(gift.description);
-    setImageUrl(gift.imageUrl);
-    setMaxClaims(gift.maxClaims);
+    setLink(gift.link);
+    setMaxCount(gift.maxCount);
     setIsModalOpen(true);
   };
 
@@ -50,7 +47,7 @@ export default function RegistryClient({ initialGifts }: { initialGifts: Registr
     e.preventDefault();
     setLoading(true);
 
-    const data = { name, description, imageUrl, maxClaims };
+    const data = { name, link, maxCount };
     
     if (editingId) {
       const res = await updateRegistryGift(editingId, data);
@@ -108,31 +105,26 @@ export default function RegistryClient({ initialGifts }: { initialGifts: Registr
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {gifts.map(gift => (
-          <div key={gift.id} className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] overflow-hidden flex flex-col transition-colors duration-200 group">
-            <div className="h-48 bg-gray-100 dark:bg-zinc-800 relative overflow-hidden">
-              {gift.imageUrl ? (
-                <img src={gift.imageUrl} alt={gift.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-zinc-500">No Image</div>
-              )}
-              {gift.isFull && (
-                <div className="absolute inset-0 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-sm flex items-center justify-center">
-                  <span className="bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
-                    Fully Claimed
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="p-5 flex-1 flex flex-col">
+          <div key={gift.id} className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] overflow-hidden flex flex-col transition-colors duration-200 group relative">
+            {gift.isFull && (
+              <div className="absolute inset-0 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-sm z-10 flex items-center justify-center">
+                <span className="bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                  Fully Claimed
+                </span>
+              </div>
+            )}
+            <div className="p-5 flex-1 flex flex-col relative z-0">
               <h3 className="font-bold text-lg text-gray-900 dark:text-zinc-100 mb-1.5">{gift.name}</h3>
-              <p className="text-sm text-gray-500 dark:text-zinc-400 line-clamp-2 mb-5 flex-1 leading-relaxed">{gift.description}</p>
+              <a href={gift.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 line-clamp-1 mb-5 flex-1 leading-relaxed underline underline-offset-2">
+                {gift.link}
+              </a>
               
               <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-zinc-800">
                 <div className="text-sm font-medium text-gray-600 dark:text-zinc-400">
-                  <span className={gift.claimCount >= gift.maxClaims ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
-                    {gift.claimCount}
+                  <span className={gift.currentCount >= gift.maxCount ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
+                    {gift.currentCount}
                   </span>
-                  {' '} / {gift.maxClaims} claimed
+                  {' '} / {gift.maxCount} claimed
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => openEditModal(gift)} className="p-2 text-gray-400 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg bg-gray-50 dark:bg-zinc-800 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors">
@@ -167,16 +159,12 @@ export default function RegistryClient({ initialGifts }: { initialGifts: Registr
                 <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-gray-900 dark:focus:ring-zinc-100 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-zinc-600" placeholder="E.g. Kitchen Stand Mixer" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1.5">Description</label>
-                <textarea required value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-gray-900 dark:focus:ring-zinc-100 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-zinc-600" placeholder="A brief description of this gift..." />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1.5">Image URL</label>
-                <input required value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://..." className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-gray-900 dark:focus:ring-zinc-100 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-zinc-600" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1.5">Purchase Link</label>
+                <input required value={link} onChange={e => setLink(e.target.value)} type="url" placeholder="https://shopee.ph/..." className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-gray-900 dark:focus:ring-zinc-100 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-zinc-600" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1.5">Max Claims Allowed</label>
-                <input type="number" min="1" required value={maxClaims} onChange={e => setMaxClaims(parseInt(e.target.value))} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-gray-900 dark:focus:ring-zinc-100 outline-none transition-all" />
+                <input type="number" min="1" required value={maxCount} onChange={e => setMaxCount(parseInt(e.target.value))} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-gray-900 dark:focus:ring-zinc-100 outline-none transition-all" />
                 <p className="text-xs text-gray-500 dark:text-zinc-500 mt-2">How many guests can contribute to or claim this gift?</p>
               </div>
 

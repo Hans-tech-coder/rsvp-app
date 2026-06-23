@@ -3,21 +3,16 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { GiftSelectionModal } from './GiftSelectionModal';
 
-interface Gift {
-  id: number;
-  name: string;
-  link: string;
-  maxCount: number;
-  currentCount: number;
-  iconFn: () => React.ReactNode;
+import { RegistryGift } from '@/types';
+import { getRegistryGifts } from '@/app/actions/registry';
+
+interface Gift extends RegistryGift {
+  iconFn?: () => React.ReactNode;
 }
 
-import weddingContent from '@/data/wedding-content.json';
-
-const defaultGifts: Gift[] = weddingContent.registry.curatedGifts.map(gift => ({
-  ...gift,
-  iconFn: () => <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-}));
+const defaultIcon = () => (
+  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+);
 
 interface CuratedRegistryScreenProps {
   isOpen: boolean;
@@ -25,12 +20,30 @@ interface CuratedRegistryScreenProps {
 }
 
 export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreenProps) {
-  const [gifts, setGifts] = useState<Gift[]>(defaultGifts);
+  const [gifts, setGifts] = useState<Gift[]>([]);
   const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    
+    // Fetch registry gifts from Server Action
+    let mounted = true;
+    const fetchGifts = async () => {
+      const giftData = await getRegistryGifts();
+      if (mounted) {
+        setGifts(giftData.map(data => ({
+          ...data,
+          iconFn: defaultIcon
+        })));
+      }
+    };
+    
+    fetchGifts();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const containerVariants: Variants = {
@@ -114,7 +127,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
                 <div className="flex flex-col items-center w-full mb-2 sm:mb-3">
                   <div className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center mb-2 sm:mb-3 ${isAvailable ? 'text-wedding-gold' : 'text-wedding-gold/40'}`}>
                     <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      {gift.iconFn()}
+                      {gift.iconFn ? gift.iconFn() : defaultIcon()}
                     </svg>
                   </div>
                   <h3 className={`text-[8px] sm:text-[10px] text-center font-cinzel tracking-widest leading-relaxed uppercase ${isAvailable ? 'text-wedding-cream' : 'text-wedding-cream/50'}`}>

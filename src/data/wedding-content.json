@@ -228,33 +228,6 @@
       "beneficiary": "Hans & Czay",
       "iban": "CH89 0023 9482 1042 8111 0",
       "swift": "LOMDCH22XXX"
-    },
-    "curatedGifts": [
-      { "id": 1, "name": "Kitchen Appliance", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 2, "name": "Dinnerware Set", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
-      { "id": 3, "name": "Coffee Machine", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 4, "name": "Home Decor Piece", "link": "https://shopee.ph", "maxCount": 3, "currentCount": 0 },
-      { "id": 5, "name": "Bedding Set", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 6, "name": "Smart Home Device", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
-      { "id": 7, "name": "Cookware Set", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 8, "name": "Blender Premium", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 9, "name": "Wine Glass Set", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
-      { "id": 10, "name": "Toaster Oven Deluxe", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 11, "name": "Air Fryer", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 12, "name": "Vacuum Cleaner", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 13, "name": "Knife Block Set", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 14, "name": "Stand Mixer", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 15, "name": "Slow Cooker", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 16, "name": "Towels Set", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
-      { "id": 17, "name": "Baking Set", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 18, "name": "Luggage Set", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 19, "name": "Throw Blankets", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
-      { "id": 20, "name": "Cutlery Set", "link": "https://shopee.ph", "maxCount": 2, "currentCount": 0 },
-      { "id": 21, "name": "Rice Cooker", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 22, "name": "Robot Vacuum", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 23, "name": "Dutch Oven", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 24, "name": "Water Purifier", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 },
-      { "id": 25, "name": "Picnic Basket", "link": "https://shopee.ph", "maxCount": 1, "currentCount": 0 }
-    ]
+    }
   }
 }

@@ -18,10 +18,9 @@ export interface Guest {
 export interface RegistryGift {
   id?: string;
   name: string;
-  description: string;
-  imageUrl: string;
-  maxClaims: number;
-  claimCount: number;
+  link: string;
+  maxCount: number;
+  currentCount: number;
   isFull: boolean;
   createdAt: Date | any; // Firestore Timestamp
 }

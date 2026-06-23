@@ -26,16 +26,16 @@ export async function claimGift(
 
       const giftData = giftDoc.data() as RegistryGift;
 
-      if (giftData.isFull || giftData.claimCount >= giftData.maxClaims) {
+      if (giftData.isFull || giftData.currentCount >= giftData.maxCount) {
         throw new Error('This gift has already been fully claimed.');
       }
 
-      const newClaimCount = giftData.claimCount + 1;
-      const isNowFull = newClaimCount >= giftData.maxClaims;
+      const newClaimCount = giftData.currentCount + 1;
+      const isNowFull = newClaimCount >= giftData.maxCount;
 
       // Update the gift document atomically
       transaction.update(giftRef, {
-        claimCount: newClaimCount,
+        currentCount: newClaimCount,
         isFull: isNowFull,
       });
 
@@ -53,5 +53,22 @@ export async function claimGift(
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to claim gift' };
+  }
+}
+
+export async function getRegistryGifts() {
+  try {
+    const snapshot = await getAdminDb().collection('registryGifts').get();
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt
+      };
+    }) as (RegistryGift & { id: string })[];
+  } catch (error) {
+    console.error('Failed to fetch registry gifts:', error);
+    return [];
   }
 }
