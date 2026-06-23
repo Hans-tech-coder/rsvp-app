@@ -6,6 +6,7 @@ import { generateInviteCodes, deleteInviteCode, regenerateInviteCode } from '@/a
 import { Loader2, Trash2, Copy, Check, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { AdminModal } from '../components/AdminModal';
+import { TablePagination } from '../components/TablePagination';
 
 export default function InviteListClient({ initialInvites }: { initialInvites: Guest[] }) {
   const invites = initialInvites;
@@ -208,49 +209,13 @@ export default function InviteListClient({ initialInvites }: { initialInvites: G
             </tbody>
           </table>
         </div>
-        
-        {/* Pagination Controls */}
-        <div className="p-4 border-t border-gray-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600 dark:text-zinc-400">
-          <div className="flex items-center gap-2">
-            <span>Show</span>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="pl-2 pr-6 py-1 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 focus:ring-1 focus:ring-gray-400 dark:focus:ring-zinc-500 transition-all cursor-pointer"
-
-            >
-              <option value={10}>10</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-            <span>entries</span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:inline">
-              Page {currentPage} of {totalPages}
-            </span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1 border border-gray-300 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 border border-gray-300 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        </div>
+        <TablePagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          setCurrentPage={setCurrentPage}
+          setItemsPerPage={setItemsPerPage}
+        />
       </div>
 
       {/* Modals */}

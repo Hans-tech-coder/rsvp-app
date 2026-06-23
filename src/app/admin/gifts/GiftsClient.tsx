@@ -6,6 +6,7 @@ import { addRegistryGift, deleteRegistryGift, updateRegistryGift } from '@/app/a
 import { Loader2, Plus, Edit2, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { AdminModal } from '../components/AdminModal';
+import { TablePagination } from '../components/TablePagination';
 
 export default function GiftsClient({ initialGifts }: { initialGifts: RegistryGift[] }) {
   const gifts = initialGifts;
@@ -14,6 +15,14 @@ export default function GiftsClient({ initialGifts }: { initialGifts: RegistryGi
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  
+  const totalPages = Math.ceil(gifts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedGifts = gifts.slice(startIndex, startIndex + itemsPerPage);
 
   const [alertConfig, setAlertConfig] = useState<{isOpen: boolean, title: string, message: string, variant: 'danger' | 'success' | 'warning' | 'info'}>({
     isOpen: false, title: '', message: '', variant: 'info'
@@ -117,10 +126,10 @@ export default function GiftsClient({ initialGifts }: { initialGifts: RegistryGi
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
-              {gifts.map((gift, index) => (
+              {paginatedGifts.map((gift, index) => (
                 <tr key={gift.id} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                   <td className="px-5 py-4 text-center font-medium text-gray-500 dark:text-zinc-500">
-                    {index + 1}
+                    {startIndex + index + 1}
                   </td>
                   <td className="px-5 py-4 font-bold text-gray-900 dark:text-zinc-100">
                     {gift.name}
@@ -159,16 +168,24 @@ export default function GiftsClient({ initialGifts }: { initialGifts: RegistryGi
                   </td>
                 </tr>
               ))}
-              {gifts.length === 0 && (
+              {paginatedGifts.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-16 text-center text-gray-500 dark:text-zinc-500">
-                    No gifts added yet. Click "Add Gift" to start building your registry.
+                  <td colSpan={6} className="px-5 py-12 text-center text-gray-500 dark:text-zinc-500">
+                    No gifts added to the registry yet.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+        
+        <TablePagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          setCurrentPage={setCurrentPage}
+          setItemsPerPage={setItemsPerPage}
+        />
       </div>
 
       {isModalOpen && (

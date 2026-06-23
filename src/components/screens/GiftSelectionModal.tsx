@@ -5,7 +5,7 @@ interface GiftSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   giftName: string;
-  onSubmit: (details: { name: string; email: string; message: string }) => void;
+  onSubmit: (details: { name: string; email: string; message: string }) => Promise<void>;
 }
 
 export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: GiftSelectionModalProps) {
@@ -14,19 +14,19 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate network delay for better UX
-    setTimeout(() => {
-      onSubmit({ name, email, message });
-      setIsSubmitting(false);
+    try {
+      await onSubmit({ name, email, message });
       // Reset form
       setName('');
       setEmail('');
       setMessage('');
-    }, 800);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

@@ -4,7 +4,7 @@ import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { GiftSelectionModal } from './GiftSelectionModal';
 
 import { RegistryGift } from '@/types';
-import { getRegistryGifts } from '@/app/actions/registry';
+import { getRegistryGifts, claimGift } from '@/app/actions/registry';
 
 interface Gift extends RegistryGift {
   iconFn?: () => React.ReactNode;
@@ -59,17 +59,27 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
     show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
   };
 
-  const handleGiftSubmit = (details: { name: string; email: string; message: string }) => {
-    if (!selectedGift) return;
+  const handleGiftSubmit = async (details: { name: string; email: string; message: string }) => {
+    if (!selectedGift || !selectedGift.id) return;
 
-    setGifts(prev => prev.map(gift => {
-      if (gift.id === selectedGift.id) {
-        return { ...gift, currentCount: gift.currentCount + 1 };
-      }
-      return gift;
-    }));
-    
-    setSelectedGift(null);
+    const res = await claimGift(selectedGift.id, {
+      fullName: details.name,
+      email: details.email,
+      message: details.message
+    });
+
+    if (res.success) {
+      setGifts(prev => prev.map(gift => {
+        if (gift.id === selectedGift.id) {
+          const newCount = gift.currentCount + 1;
+          return { ...gift, currentCount: newCount, isFull: newCount >= gift.maxCount };
+        }
+        return gift;
+      }));
+      setSelectedGift(null);
+    } else {
+      alert(res.error || 'Failed to claim gift. Please try again.');
+    }
   };
 
   if (!mounted) return null;
