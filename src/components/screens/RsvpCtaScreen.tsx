@@ -39,7 +39,7 @@ export function RsvpCtaScreen({ onContinue }: RsvpCtaScreenProps) {
       >
         <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">Join Our Day</span>
         <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide mb-6">Kindly RSVP</h2>
-        <div className="w-16 h-[1px] bg-wedding-gold/30 mx-auto mb-6"></div>
+        <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mb-6 mt-4"></div>
         <p className="text-lg font-cormorant italic text-wedding-goldlight/90 mb-10 leading-relaxed max-w-2xl mx-auto">
           "We would be deeply honored by your presence as we pledge our lives, hearts, and dreams under the beautiful Tarlac skies. Please secure your response before November 1, 2026."
         </p>

@@ -52,7 +52,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
         <motion.div variants={itemVariants} className="text-center mb-20">
           <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">The Celebration</span>
           <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">Where & When</h2>
-          <div className="w-16 h-[1px] bg-wedding-gold/30 mx-auto mt-4"></div>
+          <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
           <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-lg mx-auto">A breathtaking romance in Paniqui, Tarlac.</p>
         </motion.div>
 
@@ -65,7 +65,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
                 <span className="text-sm font-cinzel text-wedding-goldlight/70">{weddingContent.details.ceremony.time}</span>
               </div>
               <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">{weddingContent.details.ceremony.title}</h3>
-              <div className="w-12 h-[1px] bg-wedding-cream/30 mb-6"></div>
+              <div className="w-16 h-[1px] bg-gradient-to-r from-wedding-gold/50 to-transparent mb-6"></div>
               <p className="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
                 {weddingContent.details.ceremony.description}
               </p>
@@ -98,7 +98,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
                 <span className="text-sm font-cinzel text-wedding-goldlight/70">{weddingContent.details.reception.time}</span>
               </div>
               <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">{weddingContent.details.reception.title}</h3>
-              <div className="w-12 h-[1px] bg-wedding-cream/30 mb-6"></div>
+              <div className="w-16 h-[1px] bg-gradient-to-r from-wedding-gold/50 to-transparent mb-6"></div>
               <p className="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
                 {weddingContent.details.reception.description}
               </p>

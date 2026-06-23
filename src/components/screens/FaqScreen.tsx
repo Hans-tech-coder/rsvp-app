@@ -45,7 +45,7 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
         <motion.div variants={itemVariants} className="text-center mb-16">
           <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">Guest Information</span>
           <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">Things You Might Want to Know</h2>
-          <div className="w-16 h-[1px] bg-wedding-gold/30 mx-auto mt-4"></div>
+          <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6 mb-10"></div>
           <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-md mx-auto">Quick answers for our beloved guests</p>
         </motion.div>
 

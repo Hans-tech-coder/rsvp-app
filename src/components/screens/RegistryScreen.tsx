@@ -45,7 +45,7 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
         <motion.div variants={itemVariants} className="text-center mb-16">
           <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">Wishing Well</span>
           <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">Registry & Contributions</h2>
-          <div className="w-16 h-[1px] bg-wedding-gold/30 mx-auto mt-4"></div>
+          <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
           <p className="text-base font-cormorant italic text-wedding-cream/70 mt-3 max-w-md mx-auto">
             Your presence is our ultimate gift, but should you wish to honor us, we have provided options below.
           </p>

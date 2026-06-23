@@ -88,7 +88,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
           <div className="text-center mb-12">
             <span className="text-xs uppercase tracking-[0.3em] text-wedding-gold block mb-1">R.S.V.P</span>
             <h2 className="text-3xl font-cinzel font-light text-wedding-goldlight tracking-wide">The Response</h2>
-            <div className="w-12 h-[1px] bg-wedding-gold/30 mx-auto mt-3"></div>
+            <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-5"></div>
             <p className="text-sm font-cormorant italic text-wedding-goldlight/90 mt-6 leading-relaxed max-w-2xl mx-auto">
               "We would be deeply honored by your presence as we pledge our lives, hearts, and dreams under the beautiful Tarlac skies. Please secure your response before November 1, 2026."
             </p>
@@ -218,7 +218,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent"></div>
               
               <h3 className="text-3xl font-cinzel text-wedding-goldlight mb-4 tracking-wide">Thank You!</h3>
-              <div className="w-16 h-[1px] bg-wedding-gold/30 mx-auto mb-6"></div>
+              <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mb-6"></div>
               
               <p className="text-lg font-cormorant italic text-wedding-cream/90 mb-8 leading-relaxed">
                 Your response has been gracefully recorded. We are thrilled and cannot wait to celebrate this special day with you.

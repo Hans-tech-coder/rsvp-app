@@ -86,7 +86,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         <div className="flex-1 flex flex-col justify-center lg:justify-between items-center min-h-full w-full py-16 lg:py-0 gap-10 lg:gap-0">
         <motion.div variants={itemVariants} className="lg:pt-20 w-full">
           <p className="text-[11px] uppercase tracking-[0.4em] text-wedding-cream/80 font-medium">{weddingContent.welcomeScreen.subtitle}</p>
-          <div className="w-12 h-[1px] bg-wedding-cream/40 mx-auto mt-3"></div>
+          <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-4 mb-2"></div>
         </motion.div>
 
         <motion.div variants={itemVariants} className="px-4 w-full max-w-4xl lg:py-12">
@@ -94,7 +94,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-cinzel text-wedding-cream font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
             {weddingContent.global.groomName} <span className="text-wedding-gold italic font-serif text-3xl sm:text-4xl md:text-6xl font-light">&</span> {weddingContent.global.brideName}
           </h2>
-          <div className="w-24 h-[1px] bg-wedding-gold/40 mx-auto my-8"></div>
+          <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto my-8"></div>
           <p className="text-xs uppercase tracking-[0.3em] text-wedding-cream/90 mb-3">{weddingContent.welcomeScreen.bottomText1}</p>
           <p className="text-lg md:text-2xl font-cormorant italic text-wedding-cream tracking-wider drop-shadow-md">{weddingContent.welcomeScreen.bottomText2}</p>
         </motion.div>
