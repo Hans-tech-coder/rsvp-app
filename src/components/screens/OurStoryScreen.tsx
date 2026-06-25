@@ -3,13 +3,14 @@
 import React from 'react';
 import { motion , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
-import weddingContent from '@/data/wedding-content.json';
+import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface OurStoryScreenProps {
   onContinue: () => void;
 }
 
 export function OurStoryScreen({ onContinue }: OurStoryScreenProps) {
+  const { content } = useWeddingContent();
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
@@ -30,7 +31,6 @@ export function OurStoryScreen({ onContinue }: OurStoryScreenProps) {
     }
   };
 
-  const timelineItems = weddingContent.ourStory;
 
   return (
     <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
@@ -50,10 +50,11 @@ export function OurStoryScreen({ onContinue }: OurStoryScreenProps) {
           <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-md mx-auto">Every love story is beautiful, but ours is our favorite editorial masterpiece.</p>
         </motion.div>
 
-        <div className="relative border-l border-wedding-gold/20 ml-4 md:border-l-0 md:ml-0 md:flex md:flex-col md:items-center">
-          <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-[1px] bg-wedding-gold/10"></div>
-
-          {timelineItems.map((item, index) => (
+        <div className="relative">
+          {/* Vertical Line */}
+          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-wedding-gold/30 to-transparent transform md:-translate-x-1/2"></div>
+          
+          {content.ourStory.map((item, index) => (
             <motion.div 
               key={index}
               variants={itemVariants}

@@ -49,5 +49,15 @@ service cloud.firestore {
       // Writes disabled from client. Handled by Server Action.
       allow write: if false;
     }
+    // Website Content Collection (Dynamic landing page data)
+    match /websiteContent/{docId} {
+      allow read, write: if isAdmin();
+      
+      // Public can read to render the landing page
+      allow read: if true; 
+      
+      // Writes disabled from client. Handled by Server Action or Admin SDK.
+      allow write: if false;
+    }
   }
 }

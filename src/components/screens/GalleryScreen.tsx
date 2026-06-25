@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, Variants, AnimatePresence, PanInfo } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
-import weddingContent from '@/data/wedding-content.json';
+import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface GalleryScreenProps {
   onContinue: () => void;
@@ -12,6 +12,7 @@ interface GalleryScreenProps {
 }
 
 export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenProps) {
+  const { content } = useWeddingContent();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Call the callback when lightbox state changes
@@ -24,14 +25,14 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
   const handlePrev = (e?: React.MouseEvent | Event) => {
     e?.stopPropagation();
     if (lightboxIndex !== null) {
-      setLightboxIndex((prev) => (prev === 0 ? weddingContent.gallery.length - 1 : prev! - 1));
+      setLightboxIndex(lightboxIndex === 0 ? content.gallery.length - 1 : lightboxIndex - 1);
     }
   };
 
   const handleNext = (e?: React.MouseEvent | Event) => {
     e?.stopPropagation();
     if (lightboxIndex !== null) {
-      setLightboxIndex((prev) => (prev === weddingContent.gallery.length - 1 ? 0 : prev! + 1));
+      setLightboxIndex(lightboxIndex === content.gallery.length - 1 ? 0 : lightboxIndex + 1);
     }
   };
 
@@ -73,13 +74,13 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
         }}>
           <div className="slider-wrapper w-full py-2 relative">
             <DraggableSlider speed={0.4}>
-              {weddingContent.gallery.map((src, index) => (
+              {content.gallery.map((img, index) => (
                 <div 
                   key={`top-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
                   onClick={() => setLightboxIndex(index)}
                 >
-                  <img src={src} alt={`Engagement ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
+                  <img src={img} alt={`Engagement ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
                   <div className="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
                     <span className="text-wedding-goldlight text-[10px] uppercase tracking-[0.3em] border border-wedding-gold/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm pointer-events-none">View</span>
                   </div>
@@ -91,13 +92,13 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
           {/* Bottom Row Slider (Reverse) */}
           <div className="slider-wrapper w-full py-2 relative mt-4">
             <DraggableSlider speed={0.5} reverse={true}>
-              {[...weddingContent.gallery].reverse().map((src, index) => (
+              {[...content.gallery].reverse().map((img, index) => (
                 <div 
                   key={`bottom-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
-                  onClick={() => setLightboxIndex(weddingContent.gallery.length - 1 - index)}
+                  onClick={() => setLightboxIndex(content.gallery.length - 1 - index)}
                 >
-                  <img src={src} alt={`Memory ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
+                  <img src={img} alt={`Memory ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
                   <div className="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
                     <span className="text-wedding-goldlight text-[10px] uppercase tracking-[0.3em] border border-wedding-gold/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm pointer-events-none">View</span>
                   </div>
@@ -144,8 +145,8 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
               className="max-w-5xl max-h-[90vh] w-full h-full relative flex items-center justify-center pointer-events-none"
             >
               <motion.img 
-                src={weddingContent.gallery[lightboxIndex]} 
-                alt={`Gallery view ${lightboxIndex + 1}`} 
+                src={content.gallery[lightboxIndex]} 
+                alt={`Gallery Image ${lightboxIndex + 1}`} 
                 className="max-w-full max-h-[90vh] object-contain rounded-sm shadow-2xl pointer-events-auto touch-none cursor-grab active:cursor-grabbing" 
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
                 drag="y"

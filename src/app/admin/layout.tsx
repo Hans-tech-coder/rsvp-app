@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { clearSessionCookie } from '@/app/actions/auth';
 import { auth } from '@/lib/firebase/client';
-import { LayoutDashboard, Users, Gift, LogOut, Key, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Users, Gift, LogOut, Key, ClipboardList, Image as ImageIcon } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -25,6 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Media', href: '/admin/media', icon: ImageIcon }, // Added Media manager
     { name: 'Invites', href: '/admin/invites', icon: Key },
     { name: 'Guests', href: '/admin/guests', icon: Users },
     { name: 'Gifts', href: '/admin/gifts', icon: Gift },

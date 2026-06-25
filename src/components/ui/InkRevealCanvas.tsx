@@ -32,7 +32,7 @@ export function InkRevealCanvas() {
       rmax: number;
     }
 
-    let stamps: Stamp[] = [];
+    const stamps: Stamp[] = [];
     let running = false;
     let lastPos: { x: number; y: number } | null = null;
     let dims = { w: 0, h: 0 };

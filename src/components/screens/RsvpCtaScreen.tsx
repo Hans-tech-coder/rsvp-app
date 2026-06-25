@@ -3,12 +3,14 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { InkRevealCanvas } from '@/components/ui/InkRevealCanvas';
+import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface RsvpCtaScreenProps {
   onContinue: () => void;
 }
 
 export function RsvpCtaScreen({ onContinue }: RsvpCtaScreenProps) {
+  const { content } = useWeddingContent();
   const [isReady, setIsReady] = React.useState(false);
 
   React.useEffect(() => {
@@ -25,7 +27,7 @@ export function RsvpCtaScreen({ onContinue }: RsvpCtaScreenProps) {
         animate={{ scale: 1, opacity: isReady ? 1 : 0 }}
         transition={{ duration: 3, ease: "easeOut" }}
         className="absolute inset-0 bg-cover bg-center" 
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=1920')" }}
+        style={{ backgroundImage: `url('${content.rsvpCtaScreen.backgroundImage}')` }}
       />
       
       <InkRevealCanvas />

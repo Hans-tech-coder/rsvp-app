@@ -11,7 +11,7 @@ export default async function InvitesPage() {
     // Fallback if missing createdAt
     .get();
 
-  let invites = snapshot.docs.map(doc => {
+  const invites = snapshot.docs.map(doc => {
     const data = doc.data();
     return {
       ...data,

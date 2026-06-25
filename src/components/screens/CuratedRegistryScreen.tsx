@@ -25,7 +25,6 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     
     // Fetch registry gifts from Server Action
     let mounted = true;
