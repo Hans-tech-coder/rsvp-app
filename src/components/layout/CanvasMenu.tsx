@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface CanvasMenuProps {
   isOpen: boolean;
@@ -13,8 +12,6 @@ interface CanvasMenuProps {
 }
 
 export function CanvasMenu({ isOpen, onClose, onNavigate, highestVisitedStep, currentStep }: CanvasMenuProps) {
-  const { content } = useWeddingContent();
-
   const menuItems = [
     { label: "Welcome", step: 0 },
     { label: "Our Story", step: 1 },
@@ -48,8 +45,8 @@ export function CanvasMenu({ isOpen, onClose, onNavigate, highestVisitedStep, cu
           <div className="absolute inset-0 bg-gradient-to-tr from-wedding-gold/10 via-wedding-burgundy/20 to-transparent blur-[30px] rounded-full animate-pulse-slow"></div>
           <div className="w-32 h-32 flex items-center justify-center animate-float relative z-10">
             <Image 
-              src={content.global.logoUrl} 
-              alt={`${content.global.groomName} and ${content.global.brideName} Logo`} 
+              src="/hansandczay.svg" 
+              alt="Hans and Czay Logo" 
               width={128} 
               height={128} 
               className="w-full h-full object-contain transition-transform duration-700 hover:scale-110"

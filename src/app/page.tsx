@@ -14,6 +14,7 @@ import { RsvpCtaScreen } from '@/components/screens/RsvpCtaScreen';
 import { RsvpScreen } from '@/components/screens/RsvpScreen';
 import { EntranceScreen } from '@/components/screens/EntranceScreen';
 import { CanvasMenu } from '@/components/layout/CanvasMenu';
+import { WeddingContentProvider } from '@/contexts/WeddingContentContext';
 
 export default function Home() {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -93,7 +94,8 @@ export default function Home() {
   };
 
   return (
-    <main className="relative w-full h-[100dvh] overflow-hidden bg-wedding-dark">
+    <WeddingContentProvider>
+      <main className="relative w-full h-[100dvh] overflow-hidden bg-wedding-dark">
       
       {/* Global Effect removed to specific screens */}
 
@@ -314,5 +316,6 @@ export default function Home() {
         </>
       )}
     </main>
-  );
+  </WeddingContentProvider>
+);
 }

@@ -25,11 +25,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Media', href: '/admin/media', icon: ImageIcon }, // Added Media manager
     { name: 'Invites', href: '/admin/invites', icon: Key },
     { name: 'Guests', href: '/admin/guests', icon: Users },
     { name: 'Gifts', href: '/admin/gifts', icon: Gift },
     { name: 'Registry', href: '/admin/registry', icon: ClipboardList },
+    { name: 'Content', href: '/admin/content', icon: ImageIcon },
   ];
 
   return (

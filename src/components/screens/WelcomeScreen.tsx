@@ -10,11 +10,12 @@ interface WelcomeScreenProps {
 }
 
 export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
+  const { content } = useWeddingContent();
   const [timeLeft, setTimeLeft] = useState({ days: '00', hours: '00', minutes: '00', seconds: '00' });
   const [mounted, setMounted] = useState(false);
-  const { content } = useWeddingContent();
 
   useEffect(() => {
+    setMounted(true);
     const targetDate = new Date(content.welcomeScreen.targetDate).getTime();
 
     const interval = setInterval(() => {
@@ -68,12 +69,12 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
       <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
         <FallingPetals />
         <motion.div 
-          className="absolute inset-0 z-0 bg-cover bg-center"
           initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ scale: 1, opacity: 0.6 }}
-          transition={{ duration: 2.5, ease: "easeOut" }}
+          animate={{ scale: 1, opacity: 0.5 }}
+          transition={{ duration: 3, ease: "easeOut" }}
+          className="absolute inset-0 bg-cover bg-center mix-blend-overlay" 
           style={{ backgroundImage: `url('${content.welcomeScreen.backgroundImage}')` }}
-        />
+        ></motion.div>
         <div className="absolute inset-0 bg-gradient-to-b from-wedding-dark/60 via-wedding-dark/40 to-wedding-dark/80"></div>
       </div>
 
@@ -90,23 +91,13 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         </motion.div>
 
         <motion.div variants={itemVariants} className="px-4 w-full max-w-4xl lg:py-12">
-            <span className="text-xs md:text-sm uppercase tracking-[0.3em] md:tracking-[0.4em] text-wedding-gold block mb-2 md:mb-4">
-              {content.welcomeScreen.topText}
-            </span>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 font-cinzel font-light text-3xl sm:text-4xl md:text-6xl text-wedding-cream mb-4 md:mb-6">
-              <span>{content.global.groomName}</span>
-              <span className="text-xl sm:text-2xl text-wedding-gold italic">&amp;</span>
-              <span>{content.global.brideName}</span>
-            </div>
-            <p className="text-xs sm:text-sm md:text-base tracking-[0.2em] uppercase text-wedding-cream/80 max-w-lg mx-auto leading-relaxed px-4 mb-8">
-              {content.welcomeScreen.subtitle}
-            </p>
-            <p className="text-[10px] sm:text-xs md:text-sm tracking-[0.2em] uppercase text-wedding-gold mb-2 block">
-              {content.welcomeScreen.bottomText1}
-            </p>
-            <p className="text-[10px] sm:text-xs tracking-[0.1em] text-wedding-cream/60 max-w-xs mx-auto">
-              {content.welcomeScreen.bottomText2}
-            </p>
+          <span className="text-sm font-cormorant italic text-wedding-cream/90 tracking-widest block mb-4">{content.welcomeScreen.topText}</span>
+          <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-cinzel text-wedding-cream font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
+            {content.global.groomName} <span className="text-wedding-gold italic font-serif text-3xl sm:text-4xl md:text-6xl font-light">&</span> {content.global.brideName}
+          </h2>
+          <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto my-8"></div>
+          <p className="text-xs uppercase tracking-[0.3em] text-wedding-cream/90 mb-3">{content.welcomeScreen.bottomText1}</p>
+          <p className="text-lg md:text-2xl font-cormorant italic text-wedding-cream tracking-wider drop-shadow-md">{content.welcomeScreen.bottomText2}</p>
         </motion.div>
 
         <motion.div variants={itemVariants} className="lg:pb-8 w-full max-w-3xl px-4 flex flex-col items-center">

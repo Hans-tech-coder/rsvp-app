@@ -1,5 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
-
 export type CodeStatus = 'unused' | 'used';
 export type AttendanceStatus = 'Yes' | 'No';
 
@@ -13,8 +11,8 @@ export interface Guest {
   willAttend?: AttendanceStatus;
   proxyName?: string;
   message?: string;
-  submittedAt?: Date | Timestamp; // Firestore Timestamp
-  createdAt: Date | Timestamp; // Firestore Timestamp
+  submittedAt?: Date | any; // Firestore Timestamp
+  createdAt: Date | any; // Firestore Timestamp
 }
 
 export interface RegistryGift {
@@ -24,7 +22,7 @@ export interface RegistryGift {
   maxCount: number;
   currentCount: number;
   isFull: boolean;
-  createdAt: Date | Timestamp; // Firestore Timestamp
+  createdAt: Date | any; // Firestore Timestamp
 }
 
 export interface GiftSelection {
@@ -34,12 +32,12 @@ export interface GiftSelection {
   fullName: string;
   email: string;
   message?: string;
-  selectedAt: Date | Timestamp; // Firestore Timestamp
+  selectedAt: Date | any; // Firestore Timestamp
 }
 
 export interface AdminUser {
   id?: string; // Firebase Auth UID
   email: string;
   name: string;
-  addedAt: Date | Timestamp; // Firestore Timestamp
+  addedAt: Date | any; // Firestore Timestamp
 }

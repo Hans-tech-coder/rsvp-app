@@ -5,8 +5,7 @@
     "coupleNameFormat": "Hans & Czay",
     "dateFull": "Sunday, the twentieth of December, two thousand twenty-six",
     "dateShort": "December 20, 2026",
-    "venueShort": "Paniqui, Tarlac",
-    "logoUrl": "/hansandczay.svg"
+    "venueShort": "Paniqui, Tarlac"
   },
   "welcomeScreen": {
     "targetDate": "December 20, 2026 15:00:00",
@@ -229,8 +228,5 @@
       "iban": "CH89 0023 9482 1042 8111 0",
       "swift": "LOMDCH22XXX"
     }
-  },
-  "rsvpCtaScreen": {
-    "backgroundImage": "https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=1920"
   }
 }

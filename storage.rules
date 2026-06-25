@@ -4,13 +4,15 @@ service firebase.storage {
   match /b/{bucket}/o {
     
     // Check if the current user is an admin by looking up their UID in the admins collection
-    // Note: Storage rules cannot easily read Firestore without Custom Claims.
-    // Since we are using standard Firebase Auth, we will rely on Firebase Admin SDK 
-    // to generate signed upload URLs instead, or restrict it to authenticated users.
-    
-    match /{allPaths=**} {
+    function isAdmin() {
+      return request.auth != null && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    match /images/{imageId} {
+      // Anyone can view the images
       allow read: if true;
-      allow write: if request.auth != null; // Restrict writes to authenticated users (our admins)
+      // Only admins can upload/delete images
+      allow write: if isAdmin();
     }
   }
 }

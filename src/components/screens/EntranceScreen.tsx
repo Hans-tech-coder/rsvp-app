@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { InkRevealCanvas } from '@/components/ui/InkRevealCanvas';
-import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import weddingContent from '@/data/wedding-content.json';
 import { verifyInviteCode } from '@/app/actions/rsvp';
 import { Loader2 } from 'lucide-react';
 
@@ -14,17 +14,14 @@ interface EntranceScreenProps {
 }
 
 export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps) {
-  const { content } = useWeddingContent();
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [particles, setParticles] = useState<{ id: number; left: string; delay: string; duration: string; size: string }[]>([]);
 
   useEffect(() => {
-    setMounted(true);
-    // Generate random particles only on client
+    // Generate random particles
     const newParticles = Array.from({ length: 20 }).map((_, i) => ({
       id: i,
       left: `${Math.random() * 100}vw`,
@@ -74,7 +71,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 3, ease: "easeOut" }}
         className="absolute inset-0 bg-cover bg-center" 
-        style={{ backgroundImage: `url('${content.entranceScreen.backgroundImage}')` }}
+        style={{ backgroundImage: `url('${weddingContent.entranceScreen.backgroundImage}')` }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-wedding-dark/80 via-wedding-dark/30 to-transparent z-0"></div>
 
@@ -134,7 +131,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
           <div className="absolute inset-0 bg-gradient-to-b from-wedding-gold/20 via-wedding-burgundy/30 to-transparent blur-[40px] rounded-full animate-pulse-slow"></div>
           <div className="w-36 h-36 flex items-center justify-center animate-float relative z-10">
             <Image 
-              src={content.global.logoUrl} 
+              src="/hansandczay.svg" 
               alt="Hans and Czay Logo" 
               width={144} 
               height={144} 
@@ -148,10 +145,10 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
 
         <div className="text-center">
           <span className="inline-block text-[10px] uppercase tracking-[0.4em] text-wedding-gold font-medium mb-3 border-b border-wedding-gold/30 pb-1">The Royal Invitation</span>
-          <h1 className="text-4xl md:text-5xl font-cinzel text-wedding-goldlight font-light tracking-widest mb-4 drop-shadow-md">{content.global.coupleNameFormat}</h1>
+          <h1 className="text-4xl md:text-5xl font-cinzel text-wedding-goldlight font-light tracking-widest mb-4 drop-shadow-md">{weddingContent.global.coupleNameFormat}</h1>
           <p className="text-sm font-cormorant text-wedding-cream/90 italic tracking-widest mb-10 flex items-center justify-center gap-2">
             <span className="w-8 h-[1px] bg-gradient-to-r from-transparent to-wedding-gold/50"></span>
-            {content.global.dateShort} • {content.global.venueShort}
+            {weddingContent.global.dateShort} • {weddingContent.global.venueShort}
             <span className="w-8 h-[1px] bg-gradient-to-l from-transparent to-wedding-gold/50"></span>
           </p>
         </div>

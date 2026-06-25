@@ -42,11 +42,7 @@ export function RegistrySelectionsClient({ initialSelections }: { initialSelecti
                 <td className="px-5 py-4">{selection.email}</td>
                 <td className="px-5 py-4 max-w-[200px] truncate" title={selection.message}>{selection.message || '-'}</td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {selection.selectedAt 
-                    ? (selection.selectedAt as any).toDate 
-                        ? (selection.selectedAt as any).toDate().toLocaleDateString()
-                        : new Date(selection.selectedAt as unknown as string | number).toLocaleDateString()
-                    : '-'}
+                  {selection.selectedAt ? new Date(selection.selectedAt).toLocaleDateString() : '-'}
                 </td>
               </tr>
             ))}

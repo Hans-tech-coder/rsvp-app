@@ -30,8 +30,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { WeddingContentProvider } from "@/contexts/WeddingContentContext";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -56,9 +54,7 @@ export default function RootLayout({
           disableTransitionOnChange
           noScript
         >
-          <WeddingContentProvider>
-            {children}
-          </WeddingContentProvider>
+          {children}
         </ThemeProvider>
       </body>
     </html>
