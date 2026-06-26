@@ -40,6 +40,7 @@ export function GalleryEditor() {
   const [hasBackup, setHasBackup] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   
   const { content: weddingContent } = useWeddingContent();
   const [header, setHeader] = useState({
@@ -273,6 +274,7 @@ export function GalleryEditor() {
 
       setSaved(true);
       setShowRestoreModal(false);
+      setIsSuccessModalOpen(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       console.error('Error restoring backup:', err);
@@ -355,7 +357,7 @@ export function GalleryEditor() {
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="flex flex-wrap gap-4">
             <SortableContext 
               items={gallery.map(item => item.id)}
               strategy={rectSortingStrategy}
@@ -377,14 +379,14 @@ export function GalleryEditor() {
         </DndContext>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
-        <div>
-          {error && (
+      <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6 border-t border-gray-200 dark:border-zinc-800 mt-12">
+        {error && (
+          <div className="w-full text-left sm:w-auto sm:mr-auto">
             <p className="text-sm text-red-500 dark:text-red-400">
               {error}
             </p>
-          )}
-        </div>
+          </div>
+        )}
         <div className="flex w-full sm:w-auto items-center gap-3">
           {(JSON.stringify(gallery.map(i => i.url)) !== JSON.stringify(originalGallery.map(i => i.url)) || JSON.stringify(header) !== JSON.stringify(originalHeader)) && (
             <button
@@ -408,8 +410,12 @@ export function GalleryEditor() {
           )}
           <button
             onClick={() => setShowConfirmModal(true)}
-            disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg hover:bg-gray-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+            disabled={saving || !(JSON.stringify(gallery.map(i => i.url)) !== JSON.stringify(originalGallery.map(i => i.url)) || JSON.stringify(header) !== JSON.stringify(originalHeader))}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg transition-colors ${
+              !(JSON.stringify(gallery.map(i => i.url)) !== JSON.stringify(originalGallery.map(i => i.url)) || JSON.stringify(header) !== JSON.stringify(originalHeader)) 
+                ? 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed'
+                : 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800 dark:hover:bg-zinc-200'
+            }`}
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -438,11 +444,22 @@ export function GalleryEditor() {
         isOpen={showRestoreModal}
         onClose={() => setShowRestoreModal(false)}
         onConfirm={restoreBackup}
-        title="Restore Backup?"
+        title="Restore Previous Save?"
         message="This will replace all your current edits with the last saved version. This action cannot be undone."
         type="confirm"
         variant="warning"
-        confirmText="Yes, Restore"
+        confirmText={saving ? "Restoring..." : "Yes, Restore"}
+      />
+
+      <AdminModal
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+        onConfirm={() => setIsSuccessModalOpen(false)}
+        title="Restored Successfully"
+        message="The previous save has been successfully restored."
+        type="alert"
+        variant="success"
+        confirmText="Got it"
       />
     </div>
   );
@@ -469,31 +486,30 @@ function SortableGalleryItem({ item, index, onRemove, onUpload }: { item: Galler
     <div 
       ref={setNodeRef} 
       style={style} 
-      className="flex flex-col gap-4 items-start sm:items-center p-4 bg-gray-50 dark:bg-zinc-900/50 rounded-lg border border-gray-200 dark:border-zinc-800 relative pt-10 group"
+      className="flex flex-col gap-2 items-center p-2 bg-gray-50 dark:bg-zinc-900/50 rounded-lg border border-gray-200 dark:border-zinc-800 relative group w-36"
     >
-      <div className="absolute top-2 left-3 z-10 flex items-center justify-center w-6 h-6 bg-gray-200 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 text-xs font-semibold rounded-full">
+      <div className="absolute top-1 left-2 z-10 flex items-center justify-center w-5 h-5 bg-gray-200/80 dark:bg-zinc-800/80 text-gray-700 dark:text-zinc-300 text-[10px] font-bold rounded-full backdrop-blur-sm shadow-sm">
         {index + 1}
       </div>
-      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-white/90 dark:bg-zinc-800/90 rounded-md shadow-sm backdrop-blur-sm">
         <div 
-          className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing transition-colors"
+          className="p-1 text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-100 cursor-grab active:cursor-grabbing transition-colors"
           title="Drag to reorder"
           {...attributes} 
           {...listeners}
         >
-          <GripVertical className="w-4 h-4" />
+          <GripVertical className="w-3.5 h-3.5" />
         </div>
-        <div className="w-px h-3 bg-gray-200 dark:bg-zinc-700 mx-0.5"></div>
         <button 
           onClick={() => onRemove(item.id)}
-          className="p-1 text-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
           title="Remove Image"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div className="relative w-full aspect-[4/5] bg-gray-200 dark:bg-zinc-800 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-200 dark:border-zinc-700">
+      <div className="relative w-32 h-32 bg-gray-200 dark:bg-zinc-800 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-200 dark:border-zinc-700 mt-1">
         {item.url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={item.url} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />

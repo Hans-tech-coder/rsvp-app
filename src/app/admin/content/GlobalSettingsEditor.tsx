@@ -37,6 +37,8 @@ export function GlobalSettingsEditor() {
   const [formData, setFormData] = useState(defaultData);
   const [originalData, setOriginalData] = useState(defaultData);
 
+  const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -348,21 +350,9 @@ export function GlobalSettingsEditor() {
         </div>
       </div>
 
-      <div className="pt-4 flex justify-between items-center gap-3 flex-wrap">
-        <div>
-          {hasBackup && (
-            <button
-              onClick={handleRestoreBackup}
-              disabled={saving || restoring}
-              className="flex items-center gap-2 px-6 py-2.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors disabled:opacity-50"
-            >
-              {restoring ? <Loader2 className="w-4 h-4 animate-spin" /> : <History className="w-4 h-4" />}
-              Restore Previous Save
-            </button>
-          )}
-        </div>
-        <div className="flex gap-3">
-          {JSON.stringify(formData) !== JSON.stringify(originalData) && (
+      <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6 border-t border-gray-200 dark:border-zinc-800 mt-12">
+        <div className="flex w-full sm:w-auto items-center gap-3">
+          {hasChanges && (
             <button
               onClick={handleUndo}
               disabled={saving}
@@ -372,10 +362,24 @@ export function GlobalSettingsEditor() {
               Undo Changes
             </button>
           )}
+          {hasBackup && (
+            <button
+              onClick={() => setIsRestoreModalOpen(true)}
+              disabled={saving}
+              className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+            >
+              <History className="w-4 h-4" />
+              Restore Previous Save
+            </button>
+          )}
           <button
             onClick={() => setShowConfirmModal(true)}
-            disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg hover:bg-gray-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+            disabled={saving || !hasChanges}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg transition-colors ${
+              !hasChanges 
+                ? 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed'
+                : 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800 dark:hover:bg-zinc-200'
+            }`}
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -393,20 +397,22 @@ export function GlobalSettingsEditor() {
         isOpen={isRestoreModalOpen}
         onClose={() => setIsRestoreModalOpen(false)}
         onConfirm={executeRestore}
-        title="Restore Previous Save"
-        message="Are you sure you want to load the previous save? This will overwrite your current unsaved changes in the editor."
+        title="Restore Previous Save?"
+        message="This will replace all your current edits with the last saved version. This action cannot be undone."
         type="confirm"
         variant="warning"
-        confirmText="Yes, restore it"
+        confirmText={restoring ? "Restoring..." : "Yes, Restore"}
       />
 
       <AdminModal
         isOpen={isSuccessModalOpen}
         onClose={() => setIsSuccessModalOpen(false)}
-        title="Restore Loaded"
-        message="Previous save loaded into the editor! Review the changes, then click 'Save Changes' to publish them to the live site."
+        onConfirm={() => setIsSuccessModalOpen(false)}
+        title="Restored Successfully"
+        message="The previous save has been successfully restored."
         type="alert"
         variant="success"
+        confirmText="Got it"
       />
 
       <AdminModal

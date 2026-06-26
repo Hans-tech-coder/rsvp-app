@@ -446,7 +446,7 @@ function SortableFaqItem({ item, index, onChange, onRemove }: { item: any, index
       <div className="absolute top-4 left-4 flex items-center justify-center w-6 h-6 bg-white dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 text-xs font-semibold rounded-full border border-gray-200 dark:border-zinc-700">
         {index + 1}
       </div>
-      <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-zinc-800 rounded-md border border-gray-200 dark:border-zinc-700 px-1 py-0.5 shadow-sm z-10">
+      <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
         <div 
           className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing transition-colors"
           title="Drag to reorder"
@@ -455,7 +455,6 @@ function SortableFaqItem({ item, index, onChange, onRemove }: { item: any, index
         >
           <GripVertical className="w-4 h-4" />
         </div>
-        <div className="w-px h-4 bg-gray-200 dark:bg-zinc-700 mx-0.5"></div>
         <button 
           onClick={onRemove}
           className="p-1.5 text-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"

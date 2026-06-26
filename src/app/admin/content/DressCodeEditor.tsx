@@ -74,6 +74,7 @@ export function DressCodeEditor() {
   
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [lastBackup, setLastBackup] = useState<any>(null);
 
   const sensors = useSensors(
@@ -298,7 +299,7 @@ export function DressCodeEditor() {
         ladiesGuideline: lastBackup.ladiesGuideline ?? weddingContent.dressCode.ladiesGuideline,
         gentlemenGuideline: lastBackup.gentlemenGuideline ?? weddingContent.dressCode.gentlemenGuideline,
         colors: lastBackup.colors ?? weddingContent.dressCode.colors,
-        inspirationImages: (lastBackup.inspirationImages ?? weddingContent.dressCode.inspirationImages).map((img: any) => ({ ...img, id: nanoid() })),
+        inspirationImages: Array.isArray(lastBackup.inspirationImages) ? lastBackup.inspirationImages.map((img: any) => ({ ...img, id: nanoid() })) : data.inspirationImages
       };
       
       setData(mergedData);
@@ -306,6 +307,7 @@ export function DressCodeEditor() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       setShowRestoreModal(false);
+      setIsSuccessModalOpen(true);
     } catch (err: any) {
       console.error("Error restoring backup:", err);
       setError("Failed to restore backup.");
@@ -509,20 +511,8 @@ export function DressCodeEditor() {
         </div>
       )}
 
-      <div className="pt-4 flex justify-between items-center gap-3 flex-wrap border-t border-gray-200 dark:border-zinc-800 mt-6">
-        <div>
-          {lastBackup && (
-            <button
-              onClick={() => setShowRestoreModal(true)}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors disabled:opacity-50"
-            >
-              <History className="w-4 h-4" />
-              Restore Previous Save
-            </button>
-          )}
-        </div>
-        <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6 border-t border-gray-200 dark:border-zinc-800 mt-12">
+        <div className="flex w-full sm:w-auto items-center gap-3">
           {originalData && JSON.stringify(data) !== JSON.stringify(originalData) && (
             <button
               onClick={handleUndo}
@@ -533,10 +523,24 @@ export function DressCodeEditor() {
               Undo Changes
             </button>
           )}
+          {lastBackup && (
+            <button
+              onClick={() => setShowRestoreModal(true)}
+              disabled={isSaving}
+              className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+            >
+              <History className="w-4 h-4" />
+              Restore Previous Save
+            </button>
+          )}
           <button
             onClick={() => setShowConfirmModal(true)}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg hover:bg-gray-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+            disabled={isSaving || !(originalData && JSON.stringify(data) !== JSON.stringify(originalData))}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg transition-colors ${
+              !(originalData && JSON.stringify(data) !== JSON.stringify(originalData)) 
+                ? 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed'
+                : 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800 dark:hover:bg-zinc-200'
+            }`}
           >
             {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -565,11 +569,22 @@ export function DressCodeEditor() {
         isOpen={showRestoreModal}
         onClose={() => setShowRestoreModal(false)}
         onConfirm={restoreBackup}
-        title="Restore Backup?"
+        title="Restore Previous Save?"
         message="This will replace all your current edits with the last saved version. This action cannot be undone."
         type="confirm"
         variant="warning"
-        confirmText="Yes, Restore"
+        confirmText={isSaving ? "Restoring..." : "Yes, Restore"}
+      />
+
+      <AdminModal
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+        onConfirm={() => setIsSuccessModalOpen(false)}
+        title="Restored Successfully"
+        message="The previous save has been successfully restored."
+        type="alert"
+        variant="success"
+        confirmText="Got it"
       />
     </div>
   );
@@ -624,7 +639,6 @@ function SortableInspirationImage({
         >
           <GripVertical className="w-4 h-4" />
         </div>
-        <div className="w-px h-3 bg-gray-200 dark:bg-zinc-700 mx-0.5"></div>
         <button 
           onClick={() => removeImage(image.id!)}
           className="p-1 text-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"

@@ -10,6 +10,7 @@ import { EventDetailsEditor } from './EventDetailsEditor';
 import { DressCodeEditor } from './DressCodeEditor';
 import { GalleryEditor } from './GalleryEditor';
 import { FaqsEditor } from './FaqsEditor';
+import { RegistryEditor } from './RegistryEditor';
 
 export default function ContentManagerPage() {
   const [activeTab, setActiveTab] = useState('welcome');
@@ -24,6 +25,7 @@ export default function ContentManagerPage() {
     { id: 'dress-code', label: 'Dress Code' },
     { id: 'gallery', label: 'Gallery' },
     { id: 'faqs', label: 'FAQs' },
+    { id: 'registry', label: 'Registry' },
     { id: 'rsvp-cta', label: 'RSVP CTA' },
   ];
 
@@ -67,8 +69,9 @@ export default function ContentManagerPage() {
           {activeTab === 'dress-code' && <DressCodeEditor />}
           {activeTab === 'gallery' && <GalleryEditor />}
           {activeTab === 'faqs' && <FaqsEditor />}
+          {activeTab === 'registry' && <RegistryEditor />}
           
-          {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && activeTab !== 'event-details' && activeTab !== 'dress-code' && activeTab !== 'gallery' && activeTab !== 'faqs' && (
+          {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && activeTab !== 'event-details' && activeTab !== 'dress-code' && activeTab !== 'gallery' && activeTab !== 'faqs' && activeTab !== 'registry' && (
             <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center text-gray-500 dark:text-zinc-400 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-xl">
               <p className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-2">
                 {tabs.find(t => t.id === activeTab)?.label}

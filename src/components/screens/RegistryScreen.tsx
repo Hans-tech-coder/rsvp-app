@@ -40,11 +40,11 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
         className="max-w-4xl mx-auto w-full relative z-10"
       >
         <motion.div variants={itemVariants} className="text-center mb-16">
-          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">Wishing Well</span>
-          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">Registry & Contributions</h2>
+          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">{content.registry?.header?.subtitle || "Wishing Well"}</span>
+          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">{content.registry?.header?.title || "Registry & Contributions"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
           <p className="text-base font-cormorant italic text-wedding-cream/70 mt-3 max-w-md mx-auto">
-            Your presence is our ultimate gift, but should you wish to honor us, we have provided options below.
+            {content.registry?.header?.description || "Your presence is our ultimate gift, but should you wish to honor us, we have provided options below."}
           </p>
         </motion.div>
 
@@ -55,19 +55,19 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               <div className="w-12 h-12 bg-wedding-gold rounded-full flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-wedding-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
               </div>
-              <h3 className="text-xl font-cinzel text-wedding-cream font-light mb-3">Bank Transfer</h3>
+              <h3 className="text-xl font-cinzel text-wedding-cream font-light mb-3">{content.registry?.bankTransfer?.title || "Bank Transfer"}</h3>
               <p className="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
-                Directly support our honeymoon adventures or first home goals with an elegant direct bank contribution.
+                {content.registry?.bankTransfer?.description || "Directly support our honeymoon adventures or first home goals with an elegant direct bank contribution."}
               </p>
               
               <div className="grid grid-cols-2 gap-3 mt-auto">
-                {['GCash', 'Maya', 'Maribank', 'Landbank', 'BPI', 'GoTyme'].map((bank) => (
+                {(content.registry?.bankTransfer?.banks || []).map((bank: any) => (
                   <button
-                    key={bank}
-                    onClick={() => setSelectedBank(bank)}
+                    key={bank.name}
+                    onClick={() => setSelectedBank(bank.name)}
                     className="w-full text-center py-3 bg-wedding-dark/40 border border-wedding-gold/20 text-wedding-cream hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.1em] font-medium transition-all duration-300 rounded-sm"
                   >
-                    {bank}
+                    {bank.name}
                   </button>
                 ))}
               </div>
@@ -80,12 +80,12 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               <div className="w-12 h-12 bg-wedding-gold rounded-full flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-wedding-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
               </div>
-              <h3 className="text-xl font-cinzel text-wedding-cream font-light mb-3">Curated Registry</h3>
+              <h3 className="text-xl font-cinzel text-wedding-cream font-light mb-3">{content.registry?.curatedRegistry?.title || "Curated Registry"}</h3>
               <p className="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
-                We have lovingly curated a wedding registry featuring beautiful, elegant keepsakes and lifestyle pieces from our favorite boutiques.
+                {content.registry?.curatedRegistry?.description1 || "We have lovingly curated a wedding registry featuring beautiful, elegant keepsakes and lifestyle pieces from our favorite boutiques."}
               </p>
               <p className="text-xs text-wedding-cream/60 leading-relaxed mb-8">
-                Options include premium vintage collection tablewares, designer home accents, and art contributions for our newly renovated residence.
+                {content.registry?.curatedRegistry?.description2 || "Options include premium vintage collection tablewares, designer home accents, and art contributions for our newly renovated residence."}
               </p>
             </div>
             <button onClick={() => setShowCuratedRegistry(true)} className="w-full text-center py-3 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.2em] font-medium uppercase transition-all duration-300 rounded-sm">
@@ -146,10 +146,18 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               </div>
 
               <div className="bg-white p-4 rounded-lg aspect-square flex items-center justify-center mb-6">
-                <div className="w-full h-full border-4 border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400">
-                  <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4"></path></svg>
-                  <span className="text-xs font-inter uppercase tracking-wider text-center px-4">Place {selectedBank} QR Code Here</span>
-                </div>
+                {content.registry?.bankTransfer?.banks?.find((b: any) => b.name === selectedBank)?.qrImage ? (
+                  <img 
+                    src={content.registry?.bankTransfer?.banks?.find((b: any) => b.name === selectedBank)?.qrImage} 
+                    alt={`${selectedBank} QR Code`} 
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="w-full h-full border-4 border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400">
+                    <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4"></path></svg>
+                    <span className="text-xs font-inter uppercase tracking-wider text-center px-4">Place {selectedBank} QR Code Here</span>
+                  </div>
+                )}
               </div>
 
               <div className="text-center">

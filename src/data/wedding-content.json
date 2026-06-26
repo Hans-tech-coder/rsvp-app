@@ -248,11 +248,27 @@
     }
   ],
   "registry": {
+    "header": {
+      "subtitle": "Wishing Well",
+      "title": "Registry & Contributions",
+      "description": "Your presence is our ultimate gift, but should you wish to honor us, we have provided options below."
+    },
     "bankTransfer": {
-      "bank": "Lombard Odier Private Bank",
-      "beneficiary": "Hans & Czay",
-      "iban": "CH89 0023 9482 1042 8111 0",
-      "swift": "LOMDCH22XXX"
+      "title": "Bank Transfer",
+      "description": "Directly support our honeymoon adventures or first home goals with an elegant direct bank contribution.",
+      "banks": [
+        { "name": "GCash", "qrImage": "" },
+        { "name": "Maya", "qrImage": "" },
+        { "name": "Maribank", "qrImage": "" },
+        { "name": "Landbank", "qrImage": "" },
+        { "name": "BPI", "qrImage": "" },
+        { "name": "GoTyme", "qrImage": "" }
+      ]
+    },
+    "curatedRegistry": {
+      "title": "Curated Registry",
+      "description1": "We have lovingly curated a wedding registry featuring beautiful, elegant keepsakes and lifestyle pieces from our favorite boutiques.",
+      "description2": "Options include premium vintage collection tablewares, designer home accents, and art contributions for our newly renovated residence."
     }
   }
 }
