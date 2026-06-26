@@ -13,6 +13,7 @@ interface RegistryScreenProps {
 export function RegistryScreen({ onContinue }: RegistryScreenProps) {
   const { content } = useWeddingContent();
   const [showCuratedRegistry, setShowCuratedRegistry] = useState(false);
+  const [selectedBank, setSelectedBank] = useState<string | null>(null);
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -25,11 +26,6 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
   const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    alert('IBAN Details Copied!');
   };
 
   return (
@@ -63,28 +59,19 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               <p className="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
                 Directly support our honeymoon adventures or first home goals with an elegant direct bank contribution.
               </p>
-              <div className="bg-wedding-dark/40 p-4 rounded-lg border border-wedding-gold/10 text-xs font-inter space-y-3 mb-6">
-                <div className="flex justify-between border-b border-wedding-gold/10 pb-2">
-                  <span className="text-wedding-cream/60 uppercase">Bank:</span>
-                  <span className="font-medium text-wedding-cream">{content.registry.bankTransfer.bank}</span>
-                </div>
-                <div className="flex justify-between border-b border-wedding-gold/10 pb-2">
-                  <span className="text-wedding-cream/60 uppercase">Beneficiary:</span>
-                  <span className="font-medium text-wedding-cream">{content.registry.bankTransfer.beneficiary}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-wedding-gold/10 pb-2">
-                  <span className="text-wedding-cream/60 uppercase">IBAN:</span>
-                  <span className="font-medium text-wedding-goldlight">{content.registry.bankTransfer.iban}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-wedding-cream/60 uppercase">SWIFT:</span>
-                  <span className="font-medium text-wedding-goldlight">{content.registry.bankTransfer.swift}</span>
-                </div>
+              
+              <div className="grid grid-cols-2 gap-3 mt-auto">
+                {['GCash', 'Maya', 'Maribank', 'Landbank', 'BPI', 'GoTyme'].map((bank) => (
+                  <button
+                    key={bank}
+                    onClick={() => setSelectedBank(bank)}
+                    className="w-full text-center py-3 bg-wedding-dark/40 border border-wedding-gold/20 text-wedding-cream hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.1em] font-medium transition-all duration-300 rounded-sm"
+                  >
+                    {bank}
+                  </button>
+                ))}
               </div>
             </div>
-            <button onClick={() => copyToClipboard(content.registry.bankTransfer.iban)} className="w-full text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.2em] font-medium uppercase transition-all duration-300 rounded-sm">
-              Copy IBAN Details
-            </button>
           </div>
 
           {/* Card 2 */}
@@ -129,6 +116,49 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
         isOpen={showCuratedRegistry} 
         onClose={() => setShowCuratedRegistry(false)} 
       />
+
+      <AnimatePresence>
+        {selectedBank && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setSelectedBank(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-wedding-dark border border-wedding-gold/30 rounded-xl p-8 max-w-sm w-full shadow-2xl relative"
+            >
+              <button 
+                onClick={() => setSelectedBank(null)}
+                className="absolute top-4 right-4 text-wedding-cream/50 hover:text-wedding-gold transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+              
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-cinzel text-wedding-goldlight mb-2">{selectedBank}</h3>
+                <p className="text-sm font-cormorant text-wedding-cream/80">Scan the QR code to transfer</p>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg aspect-square flex items-center justify-center mb-6">
+                <div className="w-full h-full border-4 border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400">
+                  <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4"></path></svg>
+                  <span className="text-xs font-inter uppercase tracking-wider text-center px-4">Place {selectedBank} QR Code Here</span>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <p className="text-xs font-inter text-wedding-cream/60 uppercase tracking-widest">Thank you for your generosity</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
