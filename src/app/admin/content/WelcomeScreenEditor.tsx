@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Upload, Image as ImageIcon, Save, Check } from 'lucide-react';
+import { Loader2, Upload, Image as ImageIcon, Save, Check, RotateCcw } from 'lucide-react';
 import { db, storage } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -24,6 +24,15 @@ export function WelcomeScreenEditor() {
     bottomText2: weddingContent.welcomeScreen.bottomText2,
   });
 
+  const [originalData, setOriginalData] = useState({
+    backgroundImage: weddingContent.welcomeScreen.backgroundImage,
+    targetDate: weddingContent.welcomeScreen.targetDate,
+    subtitle: weddingContent.welcomeScreen.subtitle,
+    topText: weddingContent.welcomeScreen.topText,
+    bottomText1: weddingContent.welcomeScreen.bottomText1,
+    bottomText2: weddingContent.welcomeScreen.bottomText2,
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,10 +40,12 @@ export function WelcomeScreenEditor() {
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
-          setFormData({
+          const fetchedData = {
             ...weddingContent.welcomeScreen,
             ...docSnap.data()
-          });
+          };
+          setFormData(fetchedData);
+          setOriginalData(fetchedData);
         }
       } catch (error) {
         console.error("Error fetching content:", error);
@@ -83,14 +94,20 @@ export function WelcomeScreenEditor() {
     try {
       const docRef = doc(db, 'websiteContent', 'welcomeScreen');
       await setDoc(docRef, formData, { merge: true });
+      setOriginalData(formData);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving content:", error);
-      alert("Failed to save changes. Please try again.");
+      alert(`Failed to save changes: ${error.message}`);
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleUndo = () => {
+    setFormData(originalData);
+    setSaved(false);
   };
 
   if (loading) {
@@ -219,7 +236,17 @@ export function WelcomeScreenEditor() {
         </div>
       </div>
 
-      <div className="pt-4 flex justify-end">
+      <div className="pt-4 flex justify-end gap-3">
+        {JSON.stringify(formData) !== JSON.stringify(originalData) && (
+          <button
+            onClick={handleUndo}
+            disabled={saving}
+            className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Undo Changes
+          </button>
+        )}
         <button
           onClick={handleSave}
           disabled={saving}
