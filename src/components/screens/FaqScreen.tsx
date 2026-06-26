@@ -44,10 +44,10 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
         className="max-w-4xl mx-auto w-full relative z-10"
       >
         <motion.div variants={itemVariants} className="text-center mb-16">
-          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">Guest Information</span>
-          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">Things You Might Want to Know</h2>
+          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">{content.faqHeader?.subtitle || "Guest Information"}</span>
+          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">{content.faqHeader?.title || "Things You Might Want to Know"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6 mb-10"></div>
-          <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-md mx-auto">Quick answers for our beloved guests</p>
+          <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-md mx-auto">{content.faqHeader?.description || "Quick answers for our beloved guests"}</p>
         </motion.div>
 
         <div className="space-y-4">
