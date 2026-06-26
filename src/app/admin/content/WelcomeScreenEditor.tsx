@@ -1,18 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Upload, Image as ImageIcon, Save, Check, RotateCcw } from 'lucide-react';
+import { Loader2, Upload, Image as ImageIcon, Save, Check, RotateCcw, History } from 'lucide-react';
 import { db, storage } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import weddingContent from '@/data/wedding-content.json';
 import Image from 'next/image';
+import { AdminModal } from '../components/AdminModal';
 
 export function WelcomeScreenEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [hasBackup, setHasBackup] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   
   // State for the form fields
   const [formData, setFormData] = useState({
@@ -46,6 +51,12 @@ export function WelcomeScreenEditor() {
           };
           setFormData(fetchedData);
           setOriginalData(fetchedData);
+        }
+
+        const backupRef = doc(db, 'websiteContent', 'welcomeScreen_backup');
+        const backupSnap = await getDoc(backupRef);
+        if (backupSnap.exists()) {
+          setHasBackup(true);
         }
       } catch (error) {
         console.error("Error fetching content:", error);
@@ -92,9 +103,14 @@ export function WelcomeScreenEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const backupRef = doc(db, 'websiteContent', 'welcomeScreen_backup');
+      await setDoc(backupRef, originalData, { merge: true });
+
       const docRef = doc(db, 'websiteContent', 'welcomeScreen');
       await setDoc(docRef, formData, { merge: true });
+      
       setOriginalData(formData);
+      setHasBackup(true);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (error: any) {
@@ -108,6 +124,32 @@ export function WelcomeScreenEditor() {
   const handleUndo = () => {
     setFormData(originalData);
     setSaved(false);
+  };
+
+  const handleRestoreBackup = async () => {
+    setIsRestoreModalOpen(true);
+  };
+
+  const executeRestore = async () => {
+    setRestoring(true);
+    setIsRestoreModalOpen(false);
+    try {
+      const backupRef = doc(db, 'websiteContent', 'welcomeScreen_backup');
+      const backupSnap = await getDoc(backupRef);
+      if (backupSnap.exists()) {
+        const fetchedBackup = {
+          ...weddingContent.welcomeScreen,
+          ...backupSnap.data()
+        };
+        setFormData(fetchedBackup);
+        setIsSuccessModalOpen(true);
+      }
+    } catch (error: any) {
+      console.error("Error restoring backup:", error);
+      alert(`Failed to restore backup: ${error.message}`);
+    } finally {
+      setRestoring(false);
+    }
   };
 
   if (loading) {
@@ -236,18 +278,31 @@ export function WelcomeScreenEditor() {
         </div>
       </div>
 
-      <div className="pt-4 flex justify-end gap-3">
-        {JSON.stringify(formData) !== JSON.stringify(originalData) && (
+      <div className="pt-4 flex justify-between items-center gap-3 flex-wrap">
+        <div>
+          {hasBackup && (
+            <button
+              onClick={handleRestoreBackup}
+              disabled={saving || restoring}
+              className="flex items-center gap-2 px-6 py-2.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors disabled:opacity-50"
+            >
+              {restoring ? <Loader2 className="w-4 h-4 animate-spin" /> : <History className="w-4 h-4" />}
+              Restore Previous Save
+            </button>
+          )}
+        </div>
+        <div className="flex gap-3">
+          {JSON.stringify(formData) !== JSON.stringify(originalData) && (
+            <button
+              onClick={handleUndo}
+              disabled={saving}
+              className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Undo Changes
+            </button>
+          )}
           <button
-            onClick={handleUndo}
-            disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Undo Changes
-          </button>
-        )}
-        <button
           onClick={handleSave}
           disabled={saving}
           className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg hover:bg-gray-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
@@ -260,8 +315,29 @@ export function WelcomeScreenEditor() {
             <Save className="w-4 h-4" />
           )}
           {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
-        </button>
+          </button>
+        </div>
       </div>
+
+      <AdminModal
+        isOpen={isRestoreModalOpen}
+        onClose={() => setIsRestoreModalOpen(false)}
+        onConfirm={executeRestore}
+        title="Restore Previous Save"
+        message="Are you sure you want to load the previous save? This will overwrite your current unsaved changes in the editor."
+        type="confirm"
+        variant="warning"
+        confirmText="Yes, restore it"
+      />
+
+      <AdminModal
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+        title="Restore Loaded"
+        message="Previous save loaded into the editor! Review the changes, then click 'Save Changes' to publish them to the live site."
+        type="alert"
+        variant="success"
+      />
     </div>
   );
 }
