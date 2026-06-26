@@ -1,12 +1,30 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Save, Check, RotateCcw, History, Plus, Trash2, Upload, ImageIcon } from 'lucide-react';
+import { Loader2, Save, Check, RotateCcw, History, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-react';
 import { db, storage } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { AdminModal } from '../components/AdminModal';
+import { nanoid } from 'nanoid';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface ColorData {
   name: string;
@@ -14,6 +32,7 @@ interface ColorData {
 }
 
 interface ImageData {
+  id?: string;
   type: string;
   url: string;
 }
@@ -43,7 +62,7 @@ export function DressCodeEditor() {
     ladiesGuideline: weddingContent.dressCode.ladiesGuideline,
     gentlemenGuideline: weddingContent.dressCode.gentlemenGuideline,
     colors: weddingContent.dressCode.colors || [],
-    inspirationImages: weddingContent.dressCode.inspirationImages || []
+    inspirationImages: (weddingContent.dressCode.inspirationImages || []).map(img => ({ ...img, id: nanoid() }))
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -56,6 +75,17 @@ export function DressCodeEditor() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [lastBackup, setLastBackup] = useState<any>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     async function fetchData() {
@@ -75,7 +105,7 @@ export function DressCodeEditor() {
             ladiesGuideline: fetchedData.ladiesGuideline ?? weddingContent.dressCode.ladiesGuideline,
             gentlemenGuideline: fetchedData.gentlemenGuideline ?? weddingContent.dressCode.gentlemenGuideline,
             colors: fetchedData.colors ?? weddingContent.dressCode.colors,
-            inspirationImages: fetchedData.inspirationImages ?? weddingContent.dressCode.inspirationImages,
+            inspirationImages: (fetchedData.inspirationImages ?? weddingContent.dressCode.inspirationImages).map((img: any) => ({ ...img, id: nanoid() })),
           };
           setData(mergedData);
           setOriginalData(mergedData);
@@ -187,32 +217,32 @@ export function DressCodeEditor() {
   const addImage = () => {
     setData(prev => ({
       ...prev,
-      inspirationImages: [...prev.inspirationImages, { type: 'New Type', url: '' }]
+      inspirationImages: [...prev.inspirationImages, { id: nanoid(), type: 'New Type', url: '' }]
     }));
     setSaved(false);
   };
 
-  const removeImage = (index: number) => {
-    const newImages = [...data.inspirationImages];
-    newImages.splice(index, 1);
+  const removeImage = (id: string) => {
+    const newImages = data.inspirationImages.filter(img => img.id !== id);
     setData(prev => ({ ...prev, inspirationImages: newImages }));
     setSaved(false);
   };
 
-  const moveImage = (index: number, direction: 'up' | 'down') => {
-    if (
-      (direction === 'up' && index === 0) || 
-      (direction === 'down' && index === data.inspirationImages.length - 1)
-    ) return;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    const newImages = [...data.inspirationImages];
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    const temp = newImages[index];
-    newImages[index] = newImages[newIndex];
-    newImages[newIndex] = temp;
+    if (over && active.id !== over.id) {
+      setData((prevData) => {
+        const oldIndex = prevData.inspirationImages.findIndex(item => item.id === active.id);
+        const newIndex = prevData.inspirationImages.findIndex(item => item.id === over.id);
 
-    setData(prev => ({ ...prev, inspirationImages: newImages }));
-    setSaved(false);
+        return {
+          ...prevData,
+          inspirationImages: arrayMove(prevData.inspirationImages, oldIndex, newIndex)
+        };
+      });
+      setSaved(false);
+    }
   };
 
   const saveContent = async () => {
@@ -220,6 +250,11 @@ export function DressCodeEditor() {
     setError(null);
     
     try {
+      const payloadToSave = {
+        ...data,
+        inspirationImages: data.inspirationImages.map(({ id, ...rest }) => rest)
+      };
+
       const docRef = doc(db, 'websiteContent', 'dressCode');
       const currentSnap = await getDoc(docRef);
       if (currentSnap.exists()) {
@@ -231,8 +266,9 @@ export function DressCodeEditor() {
         setLastBackup(currentSnap.data());
       }
 
-      await setDoc(docRef, data, { merge: true });
+      await setDoc(docRef, payloadToSave, { merge: true });
       
+      setOriginalData(data);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       setShowConfirmModal(false);
@@ -262,10 +298,11 @@ export function DressCodeEditor() {
         ladiesGuideline: lastBackup.ladiesGuideline ?? weddingContent.dressCode.ladiesGuideline,
         gentlemenGuideline: lastBackup.gentlemenGuideline ?? weddingContent.dressCode.gentlemenGuideline,
         colors: lastBackup.colors ?? weddingContent.dressCode.colors,
-        inspirationImages: lastBackup.inspirationImages ?? weddingContent.dressCode.inspirationImages,
+        inspirationImages: (lastBackup.inspirationImages ?? weddingContent.dressCode.inspirationImages).map((img: any) => ({ ...img, id: nanoid() })),
       };
       
       setData(mergedData);
+      setOriginalData(mergedData);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       setShowRestoreModal(false);
@@ -437,92 +474,33 @@ export function DressCodeEditor() {
           </button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {data.inspirationImages.map((image, index) => (
-            <div key={index} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4 bg-gray-50 dark:bg-zinc-900/50 rounded-lg border border-gray-200 dark:border-zinc-800 relative pt-10 sm:pt-4">
-              <div className="absolute top-2 left-3 z-10 flex items-center justify-center w-6 h-6 bg-gray-200 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 text-xs font-semibold rounded-full">
-                {index + 1}
-              </div>
-              <div className="absolute top-2 right-2 flex items-center gap-1">
-                <button 
-                  onClick={() => moveImage(index, 'up')}
-                  disabled={index === 0}
-                  className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 disabled:opacity-30 transition-colors"
-                  title="Move Up"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7"></path></svg>
-                </button>
-                <button 
-                  onClick={() => moveImage(index, 'down')}
-                  disabled={index === data.inspirationImages.length - 1}
-                  className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 disabled:opacity-30 transition-colors"
-                  title="Move Down"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                <div className="w-px h-3 bg-gray-200 dark:bg-zinc-700 mx-0.5"></div>
-                <button 
-                  onClick={() => removeImage(index)}
-                  className="p-1 text-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                  title="Remove Image"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              <div className="relative w-24 h-24 bg-gray-200 dark:bg-zinc-800 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-200 dark:border-zinc-700">
-                {image.url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={image.url} alt={image.type} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-gray-400">
-                    <ImageIcon className="w-6 h-6 mb-1" />
-                    <span className="text-[10px]">No Img</span>
-                  </div>
-                )}
-                
-                {uploadingImageIndex === index && (
-                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white z-10">
-                    <Loader2 className="w-5 h-5 animate-spin mb-1" />
-                  </div>
-                )}
-
-                <div className="absolute bottom-1 right-1 z-20">
-                  <input 
-                    type="file" 
-                    id={`dress-image-upload-${index}`} 
-                    accept="image/*" 
-                    className="hidden" 
-                    onChange={(e) => handleImageUpload(index, e)}
-                    disabled={uploadingImageIndex === index}
-                  />
-                  <label 
-                    htmlFor={`dress-image-upload-${index}`}
-                    className="inline-flex items-center justify-center w-7 h-7 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-full shadow-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer transition-colors"
-                    title="Change Image"
-                  >
-                    <Upload className="w-3.5 h-3.5" />
-                  </label>
-                </div>
-              </div>
-              
-              <div className="flex-1 w-full space-y-4">
-                <div className="space-y-2">
-                  <label className="block text-xs text-gray-500 dark:text-zinc-400">Type/Label</label>
-                  <input 
-                    type="text" 
-                    value={image.type}
-                    onChange={(e) => handleImageChange(index, 'type', e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-md text-sm outline-none focus:border-gray-400 dark:focus:border-zinc-500"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-          {data.inspirationImages.length === 0 && (
-            <p className="text-sm text-gray-500 dark:text-zinc-400 italic">No inspiration images added yet.</p>
-          )}
-        </div>
+        <DndContext 
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SortableContext 
+              items={data.inspirationImages.map(img => img.id!)}
+              strategy={rectSortingStrategy}
+            >
+              {data.inspirationImages.map((image, index) => (
+                <SortableInspirationImage
+                  key={image.id}
+                  image={image}
+                  index={index}
+                  handleImageChange={handleImageChange}
+                  handleImageUpload={handleImageUpload}
+                  removeImage={removeImage}
+                  uploadingImageIndex={uploadingImageIndex}
+                />
+              ))}
+            </SortableContext>
+            {data.inspirationImages.length === 0 && (
+              <p className="text-sm text-gray-500 dark:text-zinc-400 italic col-span-full">No inspiration images added yet.</p>
+            )}
+          </div>
+        </DndContext>
       </div>
 
       {error && (
@@ -593,6 +571,116 @@ export function DressCodeEditor() {
         variant="warning"
         confirmText="Yes, Restore"
       />
+    </div>
+  );
+}
+
+function SortableInspirationImage({
+  image,
+  index,
+  handleImageChange,
+  handleImageUpload,
+  removeImage,
+  uploadingImageIndex
+}: {
+  image: ImageData,
+  index: number,
+  handleImageChange: (index: number, field: keyof ImageData, value: string) => void,
+  handleImageUpload: (index: number, e: React.ChangeEvent<HTMLInputElement>) => void,
+  removeImage: (id: string) => void,
+  uploadingImageIndex: number | null
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: image.id! });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4 bg-gray-50 dark:bg-zinc-900/50 rounded-lg border border-gray-200 dark:border-zinc-800 relative pt-10 sm:pt-4 group"
+    >
+      <div className="absolute top-2 left-3 z-10 flex items-center justify-center w-6 h-6 bg-gray-200 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 text-xs font-semibold rounded-full">
+        {index + 1}
+      </div>
+      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div 
+          className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing transition-colors"
+          title="Drag to reorder"
+          {...attributes} 
+          {...listeners}
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
+        <div className="w-px h-3 bg-gray-200 dark:bg-zinc-700 mx-0.5"></div>
+        <button 
+          onClick={() => removeImage(image.id!)}
+          className="p-1 text-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          title="Remove Image"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      <div className="relative w-24 h-24 bg-gray-200 dark:bg-zinc-800 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-200 dark:border-zinc-700">
+        {image.url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image.url} alt={image.type} className="w-full h-full object-cover pointer-events-none" />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-gray-400">
+            <ImageIcon className="w-6 h-6 mb-1" />
+            <span className="text-[10px]">No Img</span>
+          </div>
+        )}
+        
+        {uploadingImageIndex === index && (
+          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white z-10">
+            <Loader2 className="w-5 h-5 animate-spin mb-1" />
+          </div>
+        )}
+
+        <div className="absolute bottom-1 right-1 z-20">
+          <input 
+            type="file" 
+            id={`dress-image-upload-${image.id}`} 
+            accept="image/*" 
+            className="hidden" 
+            onChange={(e) => handleImageUpload(index, e)}
+            disabled={uploadingImageIndex === index}
+          />
+          <label 
+            htmlFor={`dress-image-upload-${image.id}`}
+            className="inline-flex items-center justify-center w-7 h-7 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-full shadow-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer transition-colors"
+            title="Change Image"
+          >
+            <Upload className="w-3.5 h-3.5" />
+          </label>
+        </div>
+      </div>
+      
+      <div className="flex-1 w-full space-y-4">
+        <div className="space-y-2">
+          <label className="block text-xs text-gray-500 dark:text-zinc-400">Type/Label</label>
+          <input 
+            type="text" 
+            value={image.type}
+            onChange={(e) => handleImageChange(index, 'type', e.target.value)}
+            className="w-full px-3 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-md text-sm outline-none focus:border-gray-400 dark:focus:border-zinc-500"
+          />
+        </div>
+      </div>
     </div>
   );
 }

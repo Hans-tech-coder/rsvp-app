@@ -34,6 +34,7 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
         const entourageDoc = await getDoc(doc(db, 'websiteContent', 'entourage'));
         const detailsDoc = await getDoc(doc(db, 'websiteContent', 'details'));
         const dressCodeDoc = await getDoc(doc(db, 'websiteContent', 'dressCode'));
+        const galleryDoc = await getDoc(doc(db, 'websiteContent', 'gallery'));
         
         let newContent = { ...weddingContentDefault };
         
@@ -141,6 +142,19 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
             gentlemenGuideline: dressCodeData.gentlemenGuideline ?? newContent.dressCode.gentlemenGuideline,
             inspirationImages: dressCodeData.inspirationImages ?? newContent.dressCode.inspirationImages
           };
+        }
+
+        if (galleryDoc.exists()) {
+          const galleryData = galleryDoc.data();
+          if (galleryData.images && Array.isArray(galleryData.images)) {
+            newContent.gallery = galleryData.images;
+          }
+          if (galleryData.header) {
+            newContent.galleryHeader = {
+              ...newContent.galleryHeader,
+              ...galleryData.header
+            };
+          }
         }
         
         setContent(newContent);

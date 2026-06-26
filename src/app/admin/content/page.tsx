@@ -8,6 +8,7 @@ import { OurStoryEditor } from './OurStoryEditor';
 import { EntourageEditor } from './EntourageEditor';
 import { EventDetailsEditor } from './EventDetailsEditor';
 import { DressCodeEditor } from './DressCodeEditor';
+import { GalleryEditor } from './GalleryEditor';
 
 export default function ContentManagerPage() {
   const [activeTab, setActiveTab] = useState('welcome');
@@ -62,8 +63,9 @@ export default function ContentManagerPage() {
           {activeTab === 'entourage' && <EntourageEditor />}
           {activeTab === 'event-details' && <EventDetailsEditor />}
           {activeTab === 'dress-code' && <DressCodeEditor />}
+          {activeTab === 'gallery' && <GalleryEditor />}
           
-          {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && activeTab !== 'event-details' && activeTab !== 'dress-code' && (
+          {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && activeTab !== 'event-details' && activeTab !== 'dress-code' && activeTab !== 'gallery' && (
             <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center text-gray-500 dark:text-zinc-400 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-xl">
               <p className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-2">
                 {tabs.find(t => t.id === activeTab)?.label}

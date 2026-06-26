@@ -190,6 +190,10 @@
       }
     ]
   },
+  "galleryHeader": {
+    "subtitle": "Our Memories",
+    "title": "The Gallery"
+  },
   "gallery": [
     "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600",
     "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=600",

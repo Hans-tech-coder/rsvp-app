@@ -7,6 +7,24 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
+import { nanoid } from 'nanoid';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 export function OurStoryEditor() {
   const [loading, setLoading] = useState(true);
@@ -29,8 +47,19 @@ export function OurStoryEditor() {
   });
   const [originalHeader, setOriginalHeader] = useState({ ...header });
   
-  const [items, setItems] = useState([...weddingContent.ourStory.items]);
-  const [originalItems, setOriginalItems] = useState([...weddingContent.ourStory.items]);
+  const [items, setItems] = useState(weddingContent.ourStory.items.map(item => ({ ...item, id: nanoid() })));
+  const [originalItems, setOriginalItems] = useState(weddingContent.ourStory.items.map(item => ({ ...item, id: nanoid() })));
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,8 +70,9 @@ export function OurStoryEditor() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (data.items) {
-            setItems(data.items);
-            setOriginalItems(data.items);
+            const mappedItems = data.items.map((item: any) => ({ ...item, id: nanoid() }));
+            setItems(mappedItems);
+            setOriginalItems(mappedItems);
           }
           setHeader(prev => ({
             ...prev,
@@ -118,6 +148,7 @@ export function OurStoryEditor() {
     setItems(prev => [
       ...prev,
       {
+        id: nanoid(),
         date: "",
         title: "",
         image: "",
@@ -141,6 +172,20 @@ export function OurStoryEditor() {
     setIsDeleteModalOpen(false);
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setItems((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id);
+        const newIndex = items.findIndex(item => item.id === over.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+      setSaved(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -148,13 +193,13 @@ export function OurStoryEditor() {
         subtitle: header.subtitle,
         title: header.title,
         description: header.description,
-        items
+        items: items.map(({ id, ...rest }) => rest)
       };
       const backupPayload = {
         subtitle: originalHeader.subtitle,
         title: originalHeader.title,
         description: originalHeader.description,
-        items: originalItems
+        items: originalItems.map(({ id, ...rest }) => rest)
       };
 
       const backupRef = doc(db, 'websiteContent', 'ourStory_backup');
@@ -196,7 +241,7 @@ export function OurStoryEditor() {
       if (backupSnap.exists()) {
         const data = backupSnap.data();
         if (data.items) {
-          setItems(data.items);
+          setItems(data.items.map((item: any) => ({ ...item, id: nanoid() })));
         }
         setHeader(prev => ({
           ...prev,
@@ -212,30 +257,6 @@ export function OurStoryEditor() {
     } finally {
       setRestoring(false);
     }
-  };
-
-  const moveItemUp = (index: number) => {
-    if (index === 0) return;
-    setItems(prev => {
-      const newItems = [...prev];
-      const temp = newItems[index - 1];
-      newItems[index - 1] = newItems[index];
-      newItems[index] = temp;
-      return newItems;
-    });
-    setSaved(false);
-  };
-
-  const moveItemDown = (index: number) => {
-    if (index === items.length - 1) return;
-    setItems(prev => {
-      const newItems = [...prev];
-      const temp = newItems[index + 1];
-      newItems[index + 1] = newItems[index];
-      newItems[index] = temp;
-      return newItems;
-    });
-    setSaved(false);
   };
 
   if (loading) {
@@ -299,123 +320,35 @@ export function OurStoryEditor() {
         </button>
       </div>
 
-      <div className="space-y-6">
-        {items.map((item, index) => (
-          <div key={index} className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm relative">
-            
-            <div className="absolute top-4 right-4 flex items-center gap-2">
-              <button 
-                onClick={() => moveItemUp(index)}
-                disabled={index === 0}
-                className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 disabled:opacity-30 transition-colors"
-                title="Move Up"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7"></path></svg>
-              </button>
-              <button 
-                onClick={() => moveItemDown(index)}
-                disabled={index === items.length - 1}
-                className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 disabled:opacity-30 transition-colors"
-                title="Move Down"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-              </button>
-              <div className="w-px h-4 bg-gray-200 dark:bg-zinc-700 mx-1"></div>
-              <button 
-                onClick={() => confirmRemoveItem(index)}
-                className="p-1.5 text-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                title="Remove Chapter"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+      <DndContext 
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="space-y-6">
+          <SortableContext 
+            items={items.map(item => item.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {items.map((item, index) => (
+              <SortableStoryItem 
+                key={item.id}
+                item={item}
+                index={index}
+                handleChange={handleChange}
+                handleImageUpload={handleImageUpload}
+                confirmRemoveItem={confirmRemoveItem}
+                uploadingImageIndex={uploadingImageIndex}
+              />
+            ))}
+          </SortableContext>
+          {items.length === 0 && (
+            <div className="text-center py-12 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700">
+              <p className="text-gray-500 dark:text-zinc-400">No story chapters yet. Add one to get started!</p>
             </div>
-
-            <div className="flex flex-col md:flex-row gap-6 mt-4">
-              <div className="relative w-full md:w-48 h-48 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0">
-                {item.image ? (
-                  <img 
-                    src={item.image} 
-                    alt={item.title || "Chapter Image"} 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                    <ImageIcon className="w-8 h-8 mb-2" />
-                    <span className="text-sm">No image</span>
-                  </div>
-                )}
-                {uploadingImageIndex === index && (
-                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white">
-                    <Loader2 className="w-6 h-6 animate-spin mb-2" />
-                    <span className="text-sm font-medium">Uploading...</span>
-                  </div>
-                )}
-                
-                <div className="absolute bottom-2 right-2">
-                  <input 
-                    type="file" 
-                    id={`story-image-upload-${index}`} 
-                    accept="image/*" 
-                    className="hidden" 
-                    onChange={(e) => handleImageUpload(index, e)}
-                    disabled={uploadingImageIndex === index}
-                  />
-                  <label 
-                    htmlFor={`story-image-upload-${index}`}
-                    className="inline-flex items-center justify-center w-8 h-8 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-full shadow-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer transition-colors"
-                    title="Change Image"
-                  >
-                    <Upload className="w-4 h-4" />
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex-1 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Date / Timeframe</label>
-                    <input 
-                      type="text" 
-                      name="date"
-                      value={item.date}
-                      onChange={(e) => handleChange(index, e)}
-                      placeholder="e.g. September 2020"
-                      className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Chapter Title</label>
-                    <input 
-                      type="text" 
-                      name="title"
-                      value={item.title}
-                      onChange={(e) => handleChange(index, e)}
-                      placeholder="e.g. A Serendipitous Encounter"
-                      className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Description</label>
-                  <textarea 
-                    name="description"
-                    value={item.description}
-                    onChange={(e) => handleChange(index, e)}
-                    rows={4}
-                    className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all resize-none"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-        {items.length === 0 && (
-          <div className="text-center py-12 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700">
-            <p className="text-gray-500 dark:text-zinc-400">No story chapters yet. Add one to get started!</p>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </DndContext>
 
       <div className="pt-4 flex justify-between items-center gap-3 flex-wrap">
         <div>
@@ -502,6 +435,144 @@ export function OurStoryEditor() {
         variant="info"
         confirmText="Yes, Publish Now"
       />
+    </div>
+  );
+}
+
+function SortableStoryItem({ 
+  item, 
+  index, 
+  handleChange, 
+  handleImageUpload, 
+  confirmRemoveItem,
+  uploadingImageIndex 
+}: { 
+  item: any, 
+  index: number, 
+  handleChange: (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void,
+  handleImageUpload: (index: number, e: React.ChangeEvent<HTMLInputElement>) => void,
+  confirmRemoveItem: (index: number) => void,
+  uploadingImageIndex: number | null
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm relative group"
+    >
+      <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div 
+          className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing transition-colors"
+          title="Drag to reorder"
+          {...attributes} 
+          {...listeners}
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
+        <div className="w-px h-4 bg-gray-200 dark:bg-zinc-700 mx-1"></div>
+        <button 
+          onClick={() => confirmRemoveItem(index)}
+          className="p-1.5 text-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          title="Remove Chapter"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-6 mt-4">
+        <div className="relative w-full md:w-48 h-48 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0">
+          {item.image ? (
+            <img 
+              src={item.image} 
+              alt={item.title || "Chapter Image"} 
+              className="w-full h-full object-cover pointer-events-none"
+            />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+              <ImageIcon className="w-8 h-8 mb-2" />
+              <span className="text-sm">No image</span>
+            </div>
+          )}
+          {uploadingImageIndex === index && (
+            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white">
+              <Loader2 className="w-6 h-6 animate-spin mb-2" />
+              <span className="text-sm font-medium">Uploading...</span>
+            </div>
+          )}
+          
+          <div className="absolute bottom-2 right-2">
+            <input 
+              type="file" 
+              id={`story-image-upload-${item.id}`} 
+              accept="image/*" 
+              className="hidden" 
+              onChange={(e) => handleImageUpload(index, e)}
+              disabled={uploadingImageIndex === index}
+            />
+            <label 
+              htmlFor={`story-image-upload-${item.id}`}
+              className="inline-flex items-center justify-center w-8 h-8 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-full shadow-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer transition-colors"
+              title="Change Image"
+            >
+              <Upload className="w-4 h-4" />
+            </label>
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Date / Timeframe</label>
+              <input 
+                type="text" 
+                name="date"
+                value={item.date}
+                onChange={(e) => handleChange(index, e)}
+                placeholder="e.g. September 2020"
+                className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Chapter Title</label>
+              <input 
+                type="text" 
+                name="title"
+                value={item.title}
+                onChange={(e) => handleChange(index, e)}
+                placeholder="e.g. A Serendipitous Encounter"
+                className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Description</label>
+            <textarea 
+              name="description"
+              value={item.description}
+              onChange={(e) => handleChange(index, e)}
+              rows={4}
+              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all resize-none"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

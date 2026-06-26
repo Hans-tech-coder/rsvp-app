@@ -63,8 +63,8 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
         className="max-w-7xl mx-auto text-center w-full relative z-10"
       >
         <motion.div variants={itemVariants} className="mb-16">
-          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">Our Memories</span>
-          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">The Gallery</h2>
+          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">{content.galleryHeader?.subtitle || "Our Memories"}</span>
+          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">{content.galleryHeader?.title || "The Gallery"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
         </motion.div>
 
