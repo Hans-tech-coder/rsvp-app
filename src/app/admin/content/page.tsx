@@ -6,6 +6,7 @@ import { GlobalSettingsEditor } from './GlobalSettingsEditor';
 import { EntranceScreenEditor } from './EntranceScreenEditor';
 import { OurStoryEditor } from './OurStoryEditor';
 import { EntourageEditor } from './EntourageEditor';
+import { EventDetailsEditor } from './EventDetailsEditor';
 
 export default function ContentManagerPage() {
   const [activeTab, setActiveTab] = useState('welcome');
@@ -16,6 +17,7 @@ export default function ContentManagerPage() {
     { id: 'entrance', label: 'Entrance Screen' },
     { id: 'our-story', label: 'Our Story' },
     { id: 'entourage', label: 'Entourage' },
+    { id: 'event-details', label: 'Event Details' },
     { id: 'dress-code', label: 'Dress Code' },
     { id: 'gallery', label: 'Gallery' },
     { id: 'rsvp-cta', label: 'RSVP CTA' },
@@ -57,8 +59,9 @@ export default function ContentManagerPage() {
           {activeTab === 'entrance' && <EntranceScreenEditor />}
           {activeTab === 'our-story' && <OurStoryEditor />}
           {activeTab === 'entourage' && <EntourageEditor />}
+          {activeTab === 'event-details' && <EventDetailsEditor />}
           
-          {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && (
+          {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && activeTab !== 'event-details' && (
             <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center text-gray-500 dark:text-zinc-400 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-xl">
               <p className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-2">
                 {tabs.find(t => t.id === activeTab)?.label}

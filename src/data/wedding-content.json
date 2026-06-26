@@ -93,7 +93,13 @@
     ]
   },
   "details": {
+    "header": {
+      "subtitle": "The Celebration",
+      "title": "Where & When",
+      "description": "A breathtaking romance in Paniqui, Tarlac."
+    },
     "ceremony": {
+      "subtitle": "The Vows",
       "time": "3:00 PM",
       "title": "The Ceremony",
       "description": "Witness the beginning of our forever as we exchange vows in the sacred and solemn ambiance of the Church Of Christ. Surrounded by faith, love, and the blessings of our families and friends, we invite you to share in this meaningful celebration of our union.",
@@ -105,6 +111,7 @@
       "calendarStart": "2026-12-20T15:00:00"
     },
     "reception": {
+      "subtitle": "The Dinner & Ball",
       "time": "6:30 PM",
       "title": "The Reception",
       "description": "As the sun sets, join us for an intimate celebration in a charming open farm beneath the canopy of mango trees. Surrounded by nature and the warm glow of twinkling bubble lights, enjoy an evening filled with laughter, heartfelt moments, delicious food, and joyful dancing as we celebrate the start of our new journey together.",

@@ -32,6 +32,7 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
         const entranceDoc = await getDoc(doc(db, 'websiteContent', 'entranceScreen'));
         const ourStoryDoc = await getDoc(doc(db, 'websiteContent', 'ourStory'));
         const entourageDoc = await getDoc(doc(db, 'websiteContent', 'entourage'));
+        const detailsDoc = await getDoc(doc(db, 'websiteContent', 'details'));
         
         let newContent = { ...weddingContentDefault };
         
@@ -46,6 +47,25 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
           newContent.entranceScreen = {
             ...newContent.entranceScreen,
             ...entranceDoc.data()
+          };
+        }
+
+        if (detailsDoc.exists()) {
+          const detailsData = detailsDoc.data();
+          newContent.details = {
+            ...newContent.details,
+            header: {
+              ...newContent.details.header,
+              ...(detailsData.header || {})
+            },
+            ceremony: {
+              ...newContent.details.ceremony,
+              ...(detailsData.ceremony || {})
+            },
+            reception: {
+              ...newContent.details.reception,
+              ...(detailsData.reception || {})
+            }
           };
         }
 
