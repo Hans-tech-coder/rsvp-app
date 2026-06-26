@@ -270,5 +270,12 @@
       "description1": "We have lovingly curated a wedding registry featuring beautiful, elegant keepsakes and lifestyle pieces from our favorite boutiques.",
       "description2": "Options include premium vintage collection tablewares, designer home accents, and art contributions for our newly renovated residence."
     }
+  },
+  "rsvpCta": {
+    "subtitle": "Join Our Day",
+    "title": "Kindly RSVP",
+    "description": "\"We would be deeply honored by your presence as we pledge our lives, hearts, and dreams under the beautiful Tarlac skies. Please secure your response before November 1, 2026.\"",
+    "buttonText": "Confirm Your Attendance",
+    "backgroundImage": "https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=1920"
   }
 }

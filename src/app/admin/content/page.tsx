@@ -11,6 +11,7 @@ import { DressCodeEditor } from './DressCodeEditor';
 import { GalleryEditor } from './GalleryEditor';
 import { FaqsEditor } from './FaqsEditor';
 import { RegistryEditor } from './RegistryEditor';
+import { RsvpCtaEditor } from './RsvpCtaEditor';
 
 export default function ContentManagerPage() {
   const [activeTab, setActiveTab] = useState('welcome');
@@ -70,8 +71,9 @@ export default function ContentManagerPage() {
           {activeTab === 'gallery' && <GalleryEditor />}
           {activeTab === 'faqs' && <FaqsEditor />}
           {activeTab === 'registry' && <RegistryEditor />}
+          {activeTab === 'rsvp-cta' && <RsvpCtaEditor />}
           
-          {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && activeTab !== 'event-details' && activeTab !== 'dress-code' && activeTab !== 'gallery' && activeTab !== 'faqs' && activeTab !== 'registry' && (
+          {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && activeTab !== 'event-details' && activeTab !== 'dress-code' && activeTab !== 'gallery' && activeTab !== 'faqs' && activeTab !== 'registry' && activeTab !== 'rsvp-cta' && (
             <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center text-gray-500 dark:text-zinc-400 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-xl">
               <p className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-2">
                 {tabs.find(t => t.id === activeTab)?.label}

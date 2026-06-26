@@ -37,6 +37,7 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
         const galleryDoc = await getDoc(doc(db, 'websiteContent', 'gallery'));
         const faqDoc = await getDoc(doc(db, 'websiteContent', 'faq'));
         const registryDoc = await getDoc(doc(db, 'websiteContent', 'registry'));
+        const rsvpCtaDoc = await getDoc(doc(db, 'websiteContent', 'rsvpCta'));
         
         let newContent = { ...weddingContentDefault };
         
@@ -177,6 +178,14 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
           newContent.registry = {
             ...newContent.registry,
             ...registryData
+          };
+        }
+
+        if (rsvpCtaDoc.exists()) {
+          const rsvpCtaData = rsvpCtaDoc.data();
+          newContent.rsvpCta = {
+            ...newContent.rsvpCta,
+            ...rsvpCtaData
           };
         }
         

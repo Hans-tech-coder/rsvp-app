@@ -46,7 +46,7 @@ export default function RootLayout({
           {getThemeScript({ attribute: 'class', defaultTheme: 'system' })}
         </Script>
       </head>
-      <body className="min-h-screen bg-wedding-softdark text-wedding-cream overflow-hidden selection:bg-wedding-cream/10 selection:text-wedding-cream font-inter">
+      <body className="min-h-screen bg-wedding-softdark text-wedding-cream overflow-hidden selection:bg-wedding-cream/10 selection:text-wedding-cream font-inter" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
