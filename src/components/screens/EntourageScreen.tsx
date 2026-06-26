@@ -36,8 +36,8 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
         className="max-w-6xl mx-auto relative z-10 w-full"
       >
         <motion.div variants={itemVariants} className="text-center mb-16 md:mb-20">
-          <span className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-3">With love and gratitude</span>
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-cinzel font-light text-wedding-goldlight tracking-widest">Wedding Entourage</h2>
+          <span className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-3">{content.entourage.subtitle}</span>
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-cinzel font-light text-wedding-goldlight tracking-widest">{content.entourage.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
         </motion.div>
 

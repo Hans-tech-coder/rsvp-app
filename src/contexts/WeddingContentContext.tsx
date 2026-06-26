@@ -31,6 +31,7 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
         const globalDoc = await getDoc(doc(db, 'websiteContent', 'globalSettings'));
         const entranceDoc = await getDoc(doc(db, 'websiteContent', 'entranceScreen'));
         const ourStoryDoc = await getDoc(doc(db, 'websiteContent', 'ourStory'));
+        const entourageDoc = await getDoc(doc(db, 'websiteContent', 'entourage'));
         
         let newContent = { ...weddingContentDefault };
         
@@ -88,6 +89,19 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
             title: ourStoryData.title ?? newContent.ourStory.title,
             description: ourStoryData.description ?? newContent.ourStory.description,
             items: ourStoryData.items ?? newContent.ourStory.items
+          };
+        }
+
+        if (entourageDoc.exists()) {
+          const entourageData = entourageDoc.data();
+          newContent.entourage = {
+            ...newContent.entourage,
+            subtitle: entourageData.subtitle ?? newContent.entourage.subtitle,
+            title: entourageData.title ?? newContent.entourage.title,
+            principalSponsors: entourageData.principalSponsors ?? newContent.entourage.principalSponsors,
+            honorAttendants: entourageData.honorAttendants ?? newContent.entourage.honorAttendants,
+            bridesmaids: entourageData.bridesmaids ?? newContent.entourage.bridesmaids,
+            groomsmen: entourageData.groomsmen ?? newContent.entourage.groomsmen
           };
         }
         
