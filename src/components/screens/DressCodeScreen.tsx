@@ -4,13 +4,14 @@ import React from 'react';
 import { motion , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
-import weddingContent from '@/data/wedding-content.json';
+import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface DressCodeScreenProps {
   onContinue: () => void;
 }
 
 export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
+  const { content } = useWeddingContent();
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
@@ -24,7 +25,7 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
     show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
   };
 
-  const colors = weddingContent.dressCode.colors;
+  const colors = content.dressCode.colors;
 
   return (
     <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
@@ -44,9 +45,9 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
         </motion.div>
 
         <motion.div variants={itemVariants} className="bg-wedding-dark/60 p-8 md:p-12 rounded-xl border border-wedding-gold/20 shadow-md">
-          <p className="text-sm uppercase tracking-[0.2em] text-wedding-gold font-semibold mb-3">Dress Code: {weddingContent.dressCode.title}</p>
+          <p className="text-sm uppercase tracking-[0.2em] text-wedding-gold font-semibold mb-3">Dress Code: {content.dressCode.title}</p>
           <p className="text-base font-cormorant italic text-wedding-goldlight max-w-2xl mx-auto leading-relaxed mb-10">
-            {weddingContent.dressCode.description}
+            {content.dressCode.description}
           </p>
 
           {/* Suggested Color Swatches */}
@@ -69,13 +70,13 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
             <div>
               <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">For Ladies</h4>
               <p className="text-sm font-cormorant text-wedding-cream leading-relaxed">
-                {weddingContent.dressCode.ladiesGuideline}
+                {content.dressCode.ladiesGuideline}
               </p>
             </div>
             <div>
               <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">For Gentlemen</h4>
               <p className="text-sm font-cormorant text-wedding-cream leading-relaxed">
-                {weddingContent.dressCode.gentlemenGuideline}
+                {content.dressCode.gentlemenGuideline}
               </p>
             </div>
           </div>
@@ -90,7 +91,7 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
             }}>
               <div className="outfit-slider-wrapper w-full py-4">
                 <DraggableSlider speed={0.5}>
-                  {weddingContent.dressCode.inspirationImages.map((img, index) => (
+                  {content.dressCode.inspirationImages.map((img, index) => (
                     <div key={index} className="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-gold/20 flex-shrink-0">
                       <img src={img.url} alt={`${img.type} Inspiration ${index + 1}`} className="w-full h-full object-cover transform duration-500 group-hover:scale-105 pointer-events-none" />
                       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2 pointer-events-none">

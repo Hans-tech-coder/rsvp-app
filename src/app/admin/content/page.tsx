@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import { WelcomeScreenEditor } from './WelcomeScreenEditor';
+import { GlobalSettingsEditor } from './GlobalSettingsEditor';
+import { EntranceScreenEditor } from './EntranceScreenEditor';
+import { OurStoryEditor } from './OurStoryEditor';
 
 export default function ContentManagerPage() {
   const [activeTab, setActiveTab] = useState('welcome');
 
   const tabs = [
-    { id: 'logo', label: 'Global Logo' },
+    { id: 'global-settings', label: 'Global Settings' },
     { id: 'welcome', label: 'Welcome Screen' },
     { id: 'entrance', label: 'Entrance Screen' },
     { id: 'our-story', label: 'Our Story' },
@@ -47,9 +50,12 @@ export default function ContentManagerPage() {
 
         {/* Main Content Area */}
         <div className="flex-1 p-6 lg:p-8 overflow-y-auto bg-white dark:bg-zinc-900">
+          {activeTab === 'global-settings' && <GlobalSettingsEditor />}
           {activeTab === 'welcome' && <WelcomeScreenEditor />}
+          {activeTab === 'entrance' && <EntranceScreenEditor />}
+          {activeTab === 'our-story' && <OurStoryEditor />}
           
-          {activeTab !== 'welcome' && (
+          {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && (
             <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center text-gray-500 dark:text-zinc-400 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-xl">
               <p className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-2">
                 {tabs.find(t => t.id === activeTab)?.label}

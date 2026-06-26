@@ -3,13 +3,14 @@
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
-import weddingContent from '@/data/wedding-content.json';
+import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface EntourageScreenProps {
   onContinue: () => void;
 }
 
 export function EntourageScreen({ onContinue }: EntourageScreenProps) {
+  const { content } = useWeddingContent();
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
@@ -48,7 +49,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             <span className="w-16 md:w-32 h-[1px] bg-gradient-to-l from-transparent to-wedding-gold/30"></span>
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 md:gap-x-8 gap-y-8 md:gap-y-10 max-w-6xl mx-auto px-4 md:px-0">
-            {weddingContent.entourage.principalSponsors.map((sponsor, index) => (
+            {content.entourage.principalSponsors.map((sponsor, index) => (
               <motion.div 
                 whileHover={{ scale: 1.05 }} 
                 key={index} 
@@ -73,7 +74,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
                 <span className="px-2">Maid of Honor</span>
               </h3>
               <div className="text-center px-4 w-full">
-                <h4 className="font-cormorant text-2xl md:text-3xl lg:text-4xl text-wedding-cream font-medium tracking-widest group-hover:text-wedding-goldlight group-hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] transition-all duration-500 whitespace-nowrap">{weddingContent.entourage.honorAttendants.maidOfHonor}</h4>
+                <h4 className="font-cormorant text-2xl md:text-3xl lg:text-4xl text-wedding-cream font-medium tracking-widest group-hover:text-wedding-goldlight group-hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] transition-all duration-500 whitespace-nowrap">{content.entourage.honorAttendants.maidOfHonor}</h4>
               </div>
             </div>
 
@@ -83,7 +84,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
                 <span className="px-2">Best Man</span>
               </h3>
               <div className="text-center px-4 w-full">
-                <h4 className="font-cormorant text-2xl md:text-3xl lg:text-4xl text-wedding-cream font-medium tracking-widest group-hover:text-wedding-goldlight group-hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] transition-all duration-500 whitespace-nowrap">{weddingContent.entourage.honorAttendants.bestMan}</h4>
+                <h4 className="font-cormorant text-2xl md:text-3xl lg:text-4xl text-wedding-cream font-medium tracking-widest group-hover:text-wedding-goldlight group-hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] transition-all duration-500 whitespace-nowrap">{content.entourage.honorAttendants.bestMan}</h4>
               </div>
             </div>
           </div>
@@ -98,7 +99,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
               <span className="px-2">Bridesmaids</span>
             </h3>
             <ul className="text-center space-y-6 md:space-y-8 w-full px-4">
-              {weddingContent.entourage.bridesmaids.map((name, index) => (
+              {content.entourage.bridesmaids.map((name, index) => (
                 <li key={index} className="font-cormorant text-xl md:text-2xl lg:text-3xl text-wedding-cream/85 hover:text-wedding-goldlight hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default">{name}</li>
               ))}
             </ul>
@@ -109,7 +110,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
               <span className="px-2">Groomsmen</span>
             </h3>
             <ul className="text-center space-y-6 md:space-y-8 w-full px-4">
-              {weddingContent.entourage.groomsmen.map((name, index) => (
+              {content.entourage.groomsmen.map((name, index) => (
                 <li key={index} className="font-cormorant text-xl md:text-2xl lg:text-3xl text-wedding-cream/85 hover:text-wedding-goldlight hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default">{name}</li>
               ))}
             </ul>

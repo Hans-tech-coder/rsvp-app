@@ -16,7 +16,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
 
   useEffect(() => {
     setMounted(true);
-    const targetDate = new Date(content.welcomeScreen.targetDate).getTime();
+    const targetDate = new Date(content.global.targetDate).getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
@@ -120,7 +120,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
             </div>
           </div>
 
-          <p className="text-xs uppercase tracking-[0.25em] text-wedding-cream/90 mb-4">Paniqui, Tarlac</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-wedding-cream/90 mb-4">{content.global.venueShort}</p>
           
           <div className="w-full flex justify-center mt-2 relative z-20">
             <button onClick={onContinue} className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none animate-bounce">

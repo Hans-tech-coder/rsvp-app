@@ -3,13 +3,14 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
-import weddingContent from '@/data/wedding-content.json';
+import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface FaqScreenProps {
   onContinue: () => void;
 }
 
 export function FaqScreen({ onContinue }: FaqScreenProps) {
+  const { content } = useWeddingContent();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const containerVariants: Variants = {
@@ -25,7 +26,7 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
     show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
   };
 
-  const faqs = weddingContent.faq;
+  const faqs = content.faq;
 
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
