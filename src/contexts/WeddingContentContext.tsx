@@ -33,6 +33,7 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
         const ourStoryDoc = await getDoc(doc(db, 'websiteContent', 'ourStory'));
         const entourageDoc = await getDoc(doc(db, 'websiteContent', 'entourage'));
         const detailsDoc = await getDoc(doc(db, 'websiteContent', 'details'));
+        const dressCodeDoc = await getDoc(doc(db, 'websiteContent', 'dressCode'));
         
         let newContent = { ...weddingContentDefault };
         
@@ -122,6 +123,23 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
             honorAttendants: entourageData.honorAttendants ?? newContent.entourage.honorAttendants,
             bridesmaids: entourageData.bridesmaids ?? newContent.entourage.bridesmaids,
             groomsmen: entourageData.groomsmen ?? newContent.entourage.groomsmen
+          };
+        }
+
+        if (dressCodeDoc.exists()) {
+          const dressCodeData = dressCodeDoc.data();
+          newContent.dressCode = {
+            ...newContent.dressCode,
+            header: {
+              ...newContent.dressCode.header,
+              ...(dressCodeData.header || {})
+            },
+            title: dressCodeData.title ?? newContent.dressCode.title,
+            description: dressCodeData.description ?? newContent.dressCode.description,
+            colors: dressCodeData.colors ?? newContent.dressCode.colors,
+            ladiesGuideline: dressCodeData.ladiesGuideline ?? newContent.dressCode.ladiesGuideline,
+            gentlemenGuideline: dressCodeData.gentlemenGuideline ?? newContent.dressCode.gentlemenGuideline,
+            inspirationImages: dressCodeData.inspirationImages ?? newContent.dressCode.inspirationImages
           };
         }
         

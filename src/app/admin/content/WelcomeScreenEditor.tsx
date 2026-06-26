@@ -18,6 +18,7 @@ export function WelcomeScreenEditor() {
   const [restoring, setRestoring] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   
   // State for the form fields
   const [formData, setFormData] = useState({
@@ -111,6 +112,7 @@ export function WelcomeScreenEditor() {
       setHasBackup(true);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+      setShowConfirmModal(false);
     } catch (error: any) {
       console.error("Error saving content:", error);
       alert(`Failed to save changes: ${error.message}`);
@@ -288,7 +290,7 @@ export function WelcomeScreenEditor() {
             </button>
           )}
           <button
-          onClick={handleSave}
+          onClick={() => setShowConfirmModal(true)}
           disabled={saving}
           className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg hover:bg-gray-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
         >
@@ -322,6 +324,17 @@ export function WelcomeScreenEditor() {
         message="Previous save loaded into the editor! Review the changes, then click 'Save Changes' to publish them to the live site."
         type="alert"
         variant="success"
+      />
+
+      <AdminModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleSave}
+        title="Publish Changes?"
+        message="This will update the Welcome Screen section on the live website immediately. A backup of the current version will be saved."
+        type="confirm"
+        variant="info"
+        confirmText="Yes, Publish Now"
       />
     </div>
   );

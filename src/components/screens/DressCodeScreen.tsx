@@ -39,8 +39,8 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
         className="max-w-4xl mx-auto text-center w-full relative z-10"
       >
         <motion.div variants={itemVariants} className="mb-16">
-          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">The Style Guideline</span>
-          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">La Palette de l&apos;Amour</h2>
+          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">{content.dressCode.header?.subtitle || "The Style Guideline"}</span>
+          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">{content.dressCode.header?.title || "La Palette de l'Amour"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
         </motion.div>
 

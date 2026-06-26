@@ -124,6 +124,10 @@
     }
   },
   "dressCode": {
+    "header": {
+      "subtitle": "The Style Guideline",
+      "title": "La Palette de l'Amour"
+    },
     "title": "Formal Black Tie Optional",
     "description": "To honor our vision of a beautiful, cohesive atmosphere in Tarlac, we respectfully request our guests to dress in harmony with our burgundy and gold color story.",
     "colors": [
