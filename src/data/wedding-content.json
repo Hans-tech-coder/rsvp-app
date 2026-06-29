@@ -51,6 +51,10 @@
   "entourage": {
     "subtitle": "With love and gratitude",
     "title": "Wedding Entourage",
+    "parents": {
+      "groom": ["Mr. [Groom's Father]", "Mrs. [Groom's Mother]"],
+      "bride": ["Mr. [Bride's Father]", "Mrs. [Bride's Mother]"]
+    },
     "principalSponsors": [
       "Luningning N. Obena",
       "Vangie Presto",
@@ -90,6 +94,13 @@
       "Karl Christian C. Presto",
       "Elohim Bautista",
       "Jake Nicolas Zarraga"
+    ],
+    "flowerGirls": [
+      "First Flower Girl",
+      "Second Flower Girl"
+    ],
+    "ringBearers": [
+      "First Ring Bearer"
     ]
   },
   "details": {

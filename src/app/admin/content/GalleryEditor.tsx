@@ -387,12 +387,12 @@ export function GalleryEditor() {
             </p>
           </div>
         )}
-        <div className="flex w-full sm:w-auto items-center gap-3">
+        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
           {(JSON.stringify(gallery.map(i => i.url)) !== JSON.stringify(originalGallery.map(i => i.url)) || JSON.stringify(header) !== JSON.stringify(originalHeader)) && (
             <button
               onClick={handleUndo}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               <RotateCcw className="w-4 h-4" />
               Undo Changes
@@ -402,7 +402,7 @@ export function GalleryEditor() {
             <button
               onClick={() => setShowRestoreModal(true)}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               <History className="w-4 h-4" />
               Restore Previous Save
@@ -411,7 +411,7 @@ export function GalleryEditor() {
           <button
             onClick={() => setShowConfirmModal(true)}
             disabled={saving || !(JSON.stringify(gallery.map(i => i.url)) !== JSON.stringify(originalGallery.map(i => i.url)) || JSON.stringify(header) !== JSON.stringify(originalHeader))}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg transition-colors ${
+            className={`flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 rounded-lg transition-colors ${
               !(JSON.stringify(gallery.map(i => i.url)) !== JSON.stringify(originalGallery.map(i => i.url)) || JSON.stringify(header) !== JSON.stringify(originalHeader)) 
                 ? 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed'
                 : 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800 dark:hover:bg-zinc-200'

@@ -41,6 +41,37 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
         </motion.div>
 
+        {/* Parents */}
+        <motion.div variants={itemVariants} className="mb-20 md:mb-32 relative max-w-6xl mx-auto">
+          <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-wedding-gold/20 to-transparent -translate-x-1/2 hidden md:block"></div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-0 w-full px-4 md:px-0">
+            {/* Parents of the Bride */}
+            <div className="flex flex-col items-center justify-start group cursor-default">
+              <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-8 flex items-center justify-center gap-4 w-full">
+                <span className="px-2">Parents of the Bride</span>
+              </h3>
+              <div className="text-center px-4 w-full space-y-6 md:space-y-8">
+                {content.entourage.parents.bride.map((name, index) => (
+                  <h4 key={`bride-parent-${index}`} className="font-cormorant text-2xl md:text-3xl lg:text-4xl text-wedding-cream font-medium tracking-widest group-hover:text-wedding-goldlight group-hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] transition-all duration-500 whitespace-nowrap">{name}</h4>
+                ))}
+              </div>
+            </div>
+
+            {/* Parents of the Groom */}
+            <div className="flex flex-col items-center justify-start group cursor-default">
+              <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-8 flex items-center justify-center gap-4 w-full">
+                <span className="px-2">Parents of the Groom</span>
+              </h3>
+              <div className="text-center px-4 w-full space-y-6 md:space-y-8">
+                {content.entourage.parents.groom.map((name, index) => (
+                  <h4 key={`groom-parent-${index}`} className="font-cormorant text-2xl md:text-3xl lg:text-4xl text-wedding-cream font-medium tracking-widest group-hover:text-wedding-goldlight group-hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] transition-all duration-500 whitespace-nowrap">{name}</h4>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Principal Sponsors */}
         <motion.div variants={itemVariants} className="mb-24 md:mb-32">
           <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-12 flex items-center justify-center gap-4">
@@ -111,6 +142,33 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             </h3>
             <ul className="text-center space-y-6 md:space-y-8 w-full px-4">
               {content.entourage.groomsmen.map((name, index) => (
+                <li key={index} className="font-cormorant text-xl md:text-2xl lg:text-3xl text-wedding-cream/85 hover:text-wedding-goldlight hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default">{name}</li>
+              ))}
+            </ul>
+          </div>
+        </motion.div>
+
+        {/* Flower Girls and Ring Bearers */}
+        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-0 max-w-5xl mx-auto mb-16 px-4 md:px-0 relative">
+          <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-wedding-gold/20 to-transparent -translate-x-1/2 hidden md:block"></div>
+          
+          <div className="flex flex-col items-center">
+            <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-10 flex items-center justify-center gap-4 w-full">
+              <span className="px-2">Flower Girls</span>
+            </h3>
+            <ul className="text-center space-y-6 md:space-y-8 w-full px-4">
+              {content.entourage.flowerGirls.map((name, index) => (
+                <li key={index} className="font-cormorant text-xl md:text-2xl lg:text-3xl text-wedding-cream/85 hover:text-wedding-goldlight hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default">{name}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-10 flex items-center justify-center gap-4 w-full">
+              <span className="px-2">Ring Bearer</span>
+            </h3>
+            <ul className="text-center space-y-6 md:space-y-8 w-full px-4">
+              {content.entourage.ringBearers.map((name, index) => (
                 <li key={index} className="font-cormorant text-xl md:text-2xl lg:text-3xl text-wedding-cream/85 hover:text-wedding-goldlight hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default">{name}</li>
               ))}
             </ul>

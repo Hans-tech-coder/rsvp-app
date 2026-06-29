@@ -15,7 +15,7 @@ import { RsvpCtaEditor } from './RsvpCtaEditor';
 import { RsvpFormEditor } from './RsvpFormEditor';
 
 export default function ContentManagerPage() {
-  const [activeTab, setActiveTab] = useState('welcome');
+  const [activeTab, setActiveTab] = useState('global-settings');
 
   const tabs = [
     { id: 'global-settings', label: 'Global Settings' },
@@ -43,8 +43,29 @@ export default function ContentManagerPage() {
 
       <div className="flex-1 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col md:flex-row">
         {/* Sidebar Navigation */}
-        <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-gray-200 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 overflow-y-auto shrink-0">
-          <div className="p-4 space-y-1">
+        <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-gray-200 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 shrink-0">
+          {/* Mobile Dropdown */}
+          <div className="p-4 md:hidden relative">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
+              className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm font-medium text-gray-900 dark:text-zinc-100 outline-none appearance-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-zinc-100"
+            >
+              {tabs.map((tab) => (
+                <option key={tab.id} value={tab.id}>
+                  {tab.label}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-4 flex items-center px-2 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-500 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
+          
+          {/* Desktop Sidebar */}
+          <div className="hidden md:block p-4 space-y-1 overflow-y-auto h-full">
             {tabs.map((tab) => (
               <button
                 key={tab.id}

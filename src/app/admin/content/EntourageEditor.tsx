@@ -36,8 +36,11 @@ export function EntourageEditor() {
             title: fetchedData.title ?? weddingContent.entourage.title,
             principalSponsors: fetchedData.principalSponsors ?? weddingContent.entourage.principalSponsors,
             honorAttendants: fetchedData.honorAttendants ?? weddingContent.entourage.honorAttendants,
+            parents: fetchedData.parents ?? weddingContent.entourage.parents,
             bridesmaids: fetchedData.bridesmaids ?? weddingContent.entourage.bridesmaids,
-            groomsmen: fetchedData.groomsmen ?? weddingContent.entourage.groomsmen
+            groomsmen: fetchedData.groomsmen ?? weddingContent.entourage.groomsmen,
+            flowerGirls: fetchedData.flowerGirls ?? weddingContent.entourage.flowerGirls,
+            ringBearers: fetchedData.ringBearers ?? weddingContent.entourage.ringBearers
           };
           setData(mergedData);
           setOriginalData(mergedData);
@@ -76,26 +79,54 @@ export function EntourageEditor() {
     setSaved(false);
   };
 
-  const handleArrayChange = (arrayName: 'principalSponsors' | 'bridesmaids' | 'groomsmen', index: number, value: string) => {
+  const handleArrayChange = (arrayName: 'principalSponsors' | 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers' | 'groomParents' | 'brideParents', index: number, value: string) => {
     setData(prev => {
-      const newArray = [...prev[arrayName]];
+      if (arrayName === 'groomParents') {
+        const newArray = [...prev.parents.groom];
+        newArray[index] = value;
+        return { ...prev, parents: { ...prev.parents, groom: newArray } };
+      }
+      if (arrayName === 'brideParents') {
+        const newArray = [...prev.parents.bride];
+        newArray[index] = value;
+        return { ...prev, parents: { ...prev.parents, bride: newArray } };
+      }
+      const newArray = [...prev[arrayName as 'principalSponsors' | 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers']];
       newArray[index] = value;
       return { ...prev, [arrayName]: newArray };
     });
     setSaved(false);
   };
 
-  const addArrayItem = (arrayName: 'principalSponsors' | 'bridesmaids' | 'groomsmen') => {
-    setData(prev => ({
-      ...prev,
-      [arrayName]: [...prev[arrayName], ""]
-    }));
+  const addArrayItem = (arrayName: 'principalSponsors' | 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers' | 'groomParents' | 'brideParents') => {
+    setData(prev => {
+      if (arrayName === 'groomParents') {
+        return { ...prev, parents: { ...prev.parents, groom: [...prev.parents.groom, ""] } };
+      }
+      if (arrayName === 'brideParents') {
+        return { ...prev, parents: { ...prev.parents, bride: [...prev.parents.bride, ""] } };
+      }
+      return {
+        ...prev,
+        [arrayName]: [...prev[arrayName as 'principalSponsors' | 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers'], ""]
+      };
+    });
     setSaved(false);
   };
 
-  const removeArrayItem = (arrayName: 'principalSponsors' | 'bridesmaids' | 'groomsmen', index: number) => {
+  const removeArrayItem = (arrayName: 'principalSponsors' | 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers' | 'groomParents' | 'brideParents', index: number) => {
     setData(prev => {
-      const newArray = [...prev[arrayName]];
+      if (arrayName === 'groomParents') {
+        const newArray = [...prev.parents.groom];
+        newArray.splice(index, 1);
+        return { ...prev, parents: { ...prev.parents, groom: newArray } };
+      }
+      if (arrayName === 'brideParents') {
+        const newArray = [...prev.parents.bride];
+        newArray.splice(index, 1);
+        return { ...prev, parents: { ...prev.parents, bride: newArray } };
+      }
+      const newArray = [...prev[arrayName as 'principalSponsors' | 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers']];
       newArray.splice(index, 1);
       return { ...prev, [arrayName]: newArray };
     });
@@ -146,8 +177,11 @@ export function EntourageEditor() {
           title: fetchedBackup.title ?? weddingContent.entourage.title,
           principalSponsors: fetchedBackup.principalSponsors ?? weddingContent.entourage.principalSponsors,
           honorAttendants: fetchedBackup.honorAttendants ?? weddingContent.entourage.honorAttendants,
+          parents: fetchedBackup.parents ?? weddingContent.entourage.parents,
           bridesmaids: fetchedBackup.bridesmaids ?? weddingContent.entourage.bridesmaids,
-          groomsmen: fetchedBackup.groomsmen ?? weddingContent.entourage.groomsmen
+          groomsmen: fetchedBackup.groomsmen ?? weddingContent.entourage.groomsmen,
+          flowerGirls: fetchedBackup.flowerGirls ?? weddingContent.entourage.flowerGirls,
+          ringBearers: fetchedBackup.ringBearers ?? weddingContent.entourage.ringBearers
         };
         setData(mergedData);
         setIsSuccessModalOpen(true);
@@ -168,44 +202,50 @@ export function EntourageEditor() {
     );
   }
 
-  const renderArraySection = (title: string, arrayName: 'principalSponsors' | 'bridesmaids' | 'groomsmen') => (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">{title}</h3>
-        <button
-          onClick={() => addArrayItem(arrayName)}
-          className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors text-sm font-medium"
-        >
-          <Plus className="w-4 h-4" />
-          Add
-        </button>
+  const renderArraySection = (title: string, arrayName: 'principalSponsors' | 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers' | 'groomParents' | 'brideParents') => {
+    const arrayData = arrayName === 'groomParents' ? data.parents.groom : 
+                      arrayName === 'brideParents' ? data.parents.bride : 
+                      data[arrayName];
+                      
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">{title}</h3>
+          <button
+            onClick={() => addArrayItem(arrayName)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            Add
+          </button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {arrayData.map((item, index) => (
+            <div key={index} className="flex gap-2">
+              <input 
+                type="text" 
+                value={item}
+                onChange={(e) => handleArrayChange(arrayName, index, e.target.value)}
+                className="flex-1 px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+              />
+              <button
+                onClick={() => removeArrayItem(arrayName, index)}
+                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                title="Remove"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </div>
+          ))}
+          {arrayData.length === 0 && (
+            <div className="col-span-full text-center py-8 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-sm text-gray-500">
+              No {title.toLowerCase()} added yet.
+            </div>
+          )}
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {data[arrayName].map((item, index) => (
-          <div key={index} className="flex gap-2">
-            <input 
-              type="text" 
-              value={item}
-              onChange={(e) => handleArrayChange(arrayName, index, e.target.value)}
-              className="flex-1 px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-            <button
-              onClick={() => removeArrayItem(arrayName, index)}
-              className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-              title="Remove"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-          </div>
-        ))}
-        {data[arrayName].length === 0 && (
-          <div className="col-span-full text-center py-8 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-sm text-gray-500">
-            No {title.toLowerCase()} added yet.
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-8">
@@ -265,19 +305,28 @@ export function EntourageEditor() {
 
       <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
 
-      {renderArraySection("Principal Sponsors", "principalSponsors")}
       <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
+      {renderArraySection("Parents of the Groom", "groomParents")}
+      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
+      {renderArraySection("Parents of the Bride", "brideParents")}
+      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
+
+      {renderArraySection("Principal Sponsors", "principalSponsors")}
       {renderArraySection("Bridesmaids", "bridesmaids")}
       <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
       {renderArraySection("Groomsmen", "groomsmen")}
+      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
+      {renderArraySection("Flower Girls", "flowerGirls")}
+      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
+      {renderArraySection("Ring Bearers", "ringBearers")}
 
       <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6 border-t border-gray-200 dark:border-zinc-800 mt-12">
-        <div className="flex w-full sm:w-auto items-center gap-3">
+        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
           {hasChanges && (
             <button
               onClick={handleUndo}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               <RotateCcw className="w-4 h-4" />
               Undo Changes
@@ -287,7 +336,7 @@ export function EntourageEditor() {
             <button
               onClick={() => setIsRestoreModalOpen(true)}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               <History className="w-4 h-4" />
               Restore Previous Save
@@ -296,7 +345,7 @@ export function EntourageEditor() {
           <button
             onClick={() => setShowConfirmModal(true)}
             disabled={saving || !hasChanges}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg transition-colors ${
+            className={`flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 rounded-lg transition-colors ${
               !hasChanges 
                 ? 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed'
                 : 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800 dark:hover:bg-zinc-200'
