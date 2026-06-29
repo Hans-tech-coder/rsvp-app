@@ -399,16 +399,11 @@ export function RsvpFormEditor() {
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         title="Publish Changes"
-        description="Are you sure you want to publish these changes? They will be immediately visible to your guests."
-        primaryAction={{
-          label: "Publish",
-          onClick: handleSave,
-          isDanger: false
-        }}
-        secondaryAction={{
-          label: "Cancel",
-          onClick: () => setShowConfirmModal(false)
-        }}
+        message="Are you sure you want to publish these changes? They will be immediately visible to your guests."
+        type="confirm"
+        confirmText="Publish"
+        cancelText="Cancel"
+        onConfirm={handleSave}
       />
 
       {/* Restore Modal */}
@@ -416,16 +411,12 @@ export function RsvpFormEditor() {
         isOpen={isRestoreModalOpen}
         onClose={() => setIsRestoreModalOpen(false)}
         title="Restore Backup"
-        description="Are you sure you want to restore the last published version? This will overwrite your current changes."
-        primaryAction={{
-          label: restoring ? "Restoring..." : "Restore",
-          onClick: handleRestore,
-          isDanger: true
-        }}
-        secondaryAction={{
-          label: "Cancel",
-          onClick: () => setIsRestoreModalOpen(false)
-        }}
+        message="Are you sure you want to restore the last published version? This will overwrite your current changes."
+        type="confirm"
+        variant="danger"
+        confirmText={restoring ? "Restoring..." : "Restore"}
+        cancelText="Cancel"
+        onConfirm={handleRestore}
       />
 
       {/* Success Modal */}
@@ -433,12 +424,11 @@ export function RsvpFormEditor() {
         isOpen={isSuccessModalOpen}
         onClose={() => setIsSuccessModalOpen(false)}
         title="Success"
-        description="Your changes have been successfully published."
-        primaryAction={{
-          label: "Close",
-          onClick: () => setIsSuccessModalOpen(false),
-          isDanger: false
-        }}
+        message="Your changes have been successfully published."
+        type="alert"
+        variant="success"
+        confirmText="Close"
+        onConfirm={() => setIsSuccessModalOpen(false)}
       />
     </div>
   );
