@@ -277,5 +277,36 @@
     "description": "\"We would be deeply honored by your presence as we pledge our lives, hearts, and dreams under the beautiful Tarlac skies. Please secure your response before November 1, 2026.\"",
     "buttonText": "Confirm Your Attendance",
     "backgroundImage": "https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=1920"
+  },
+  "rsvpForm": {
+    "header": {
+      "subtitle": "R.S.V.P",
+      "title": "The Response",
+      "description": "\"We would be deeply honored by your presence as we pledge our lives, hearts, and dreams under the beautiful Tarlac skies. Please secure your response before November 1, 2026.\""
+    },
+    "labels": {
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "attendance": "Will you attend?",
+      "proxy": "Proxy Name (If Any)",
+      "proxyPlaceholder": "Enter proxy name or N/A",
+      "message": "Message for Hans & Czay",
+      "messagePlaceholder": "Share your warm thoughts..."
+    },
+    "attendanceOptions": {
+      "yes": "Joyfully Accepts",
+      "no": "Regretfully Declines"
+    },
+    "actions": {
+      "privacyText": "I agree to the collection and processing of the personal information provided in this form for the sole purpose of organizing and managing this wedding event, in accordance with the Data Privacy Act.",
+      "submitButton": "Confirm Attendance",
+      "submittingButton": "Confirming..."
+    },
+    "successModal": {
+      "title": "Thank You!",
+      "description": "Your response has been gracefully recorded. We are thrilled and cannot wait to celebrate this special day with you.\n\nYour presence is our greatest gift. Should you wish to honor us with a token of love, please view our Wedding Registry.",
+      "buttonText": "View Wedding Registry"
+    }
   }
 }

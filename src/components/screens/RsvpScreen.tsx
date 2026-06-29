@@ -12,8 +12,12 @@ interface RsvpScreenProps {
 
 import { submitRsvp } from '@/app/actions/rsvp';
 import { Loader2 } from 'lucide-react';
+import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScreenProps) {
+  const { content } = useWeddingContent();
+  const formContent = content.rsvpForm;
+
   const [showGifts, setShowGifts] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [attendance, setAttendance] = useState<'Yes' | 'No'>('Yes');
@@ -86,11 +90,11 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
       >
         <motion.div variants={itemVariants} className="bg-wedding-dark/40 p-8 md:p-12 rounded-xl border border-wedding-burgundylight/30 shadow-lg">
           <div className="text-center mb-12">
-            <span className="text-xs uppercase tracking-[0.3em] text-wedding-gold block mb-1">R.S.V.P</span>
-            <h2 className="text-3xl font-cinzel font-light text-wedding-goldlight tracking-wide">The Response</h2>
+            <span className="text-xs uppercase tracking-[0.3em] text-wedding-gold block mb-1">{formContent.header.subtitle}</span>
+            <h2 className="text-3xl font-cinzel font-light text-wedding-goldlight tracking-wide">{formContent.header.title}</h2>
             <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-5"></div>
-            <p className="text-sm font-cormorant italic text-wedding-goldlight/90 mt-6 leading-relaxed max-w-2xl mx-auto">
-              "We would be deeply honored by your presence as we pledge our lives, hearts, and dreams under the beautiful Tarlac skies. Please secure your response before November 1, 2026."
+            <p className="text-sm font-cormorant italic text-wedding-goldlight/90 mt-6 leading-relaxed max-w-2xl mx-auto whitespace-pre-line">
+              {formContent.header.description}
             </p>
           </div>
 
@@ -106,13 +110,13 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Full Name */}
               <div className="relative col-span-2 md:col-span-1">
-                <label htmlFor="fullname" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Full Name <span className="text-red-400">*</span></label>
+                <label htmlFor="fullname" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">{formContent.labels.fullName} <span className="text-red-400">*</span></label>
                 <input type="text" id="fullname" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300" />
               </div>
 
               {/* Email Address */}
               <div className="relative col-span-2 md:col-span-1">
-                <label htmlFor="email" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Email Address <span className="text-red-400">*</span></label>
+                <label htmlFor="email" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">{formContent.labels.email} <span className="text-red-400">*</span></label>
                 <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300" />
               </div>
             </div>
@@ -120,27 +124,27 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Phone */}
               <div className="relative">
-                <label htmlFor="phone" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Phone Number <span className="text-red-400">*</span></label>
+                <label htmlFor="phone" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">{formContent.labels.phone} <span className="text-red-400">*</span></label>
                 <input type="tel" id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} required className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none transition-all duration-300" />
               </div>
 
               {/* Attendance Choice */}
               <div>
-                <span className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-3">Will you attend?</span>
+                <span className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-3">{formContent.labels.attendance}</span>
                 <div className="flex space-x-8 mt-1">
                   <label className="flex items-center cursor-pointer group">
                     <input type="radio" name="attendance" value="Yes" checked={attendance === 'Yes'} onChange={() => setAttendance('Yes')} className="sr-only peer" />
                     <div className="w-5 h-5 rounded-full border border-wedding-gold flex items-center justify-center mr-3 peer-checked:bg-wedding-gold transition-all duration-300">
                       <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
                     </div>
-                    <span className="text-sm font-cormorant italic text-wedding-cream group-hover:text-wedding-goldlight transition-colors">Joyfully Accepts</span>
+                    <span className="text-sm font-cormorant italic text-wedding-cream group-hover:text-wedding-goldlight transition-colors">{formContent.attendanceOptions.yes}</span>
                   </label>
                   <label className="flex items-center cursor-pointer group">
                     <input type="radio" name="attendance" value="No" checked={attendance === 'No'} onChange={() => setAttendance('No')} className="sr-only peer" />
                     <div className="w-5 h-5 rounded-full border border-wedding-gold flex items-center justify-center mr-3 peer-checked:bg-wedding-gold transition-all duration-300">
                       <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
                     </div>
-                    <span className="text-sm font-cormorant italic text-wedding-cream group-hover:text-wedding-goldlight transition-colors">Regretfully Declines</span>
+                    <span className="text-sm font-cormorant italic text-wedding-cream group-hover:text-wedding-goldlight transition-colors">{formContent.attendanceOptions.no}</span>
                   </label>
                 </div>
               </div>
@@ -156,8 +160,8 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                   className="overflow-hidden"
                 >
                   <div className="relative pt-2">
-                    <label htmlFor="proxy" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Proxy Name (If Any)</label>
-                    <input type="text" id="proxy" value={proxyName} onChange={(e) => setProxyName(e.target.value)} placeholder="Enter proxy name or N/A" required={attendance === 'No'} className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-all duration-300" />
+                    <label htmlFor="proxy" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">{formContent.labels.proxy}</label>
+                    <input type="text" id="proxy" value={proxyName} onChange={(e) => setProxyName(e.target.value)} placeholder={formContent.labels.proxyPlaceholder} required={attendance === 'No'} className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-all duration-300" />
                   </div>
                 </motion.div>
               )}
@@ -165,8 +169,8 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
 
             {/* Special Message */}
             <div>
-              <label htmlFor="message" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">Message for Hans & Czay</label>
-              <textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} rows={4} placeholder="Share your warm thoughts..." className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-all duration-300 resize-none"></textarea>
+              <label htmlFor="message" className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">{formContent.labels.message}</label>
+              <textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} rows={4} placeholder={formContent.labels.messagePlaceholder} className="w-full bg-transparent border-b border-wedding-gold/30 focus:border-wedding-gold py-2 text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-all duration-300 resize-none"></textarea>
             </div>
 
             {/* Data Privacy Consent */}
@@ -181,7 +185,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                   </div>
                 </div>
                 <span className="text-xs font-inter text-wedding-cream/70 group-hover:text-wedding-cream/90 transition-colors leading-relaxed">
-                  I agree to the collection and processing of the personal information provided in this form for the sole purpose of organizing and managing this wedding event, in accordance with the Data Privacy Act.
+                  {formContent.actions.privacyText}
                 </span>
               </label>
             </div>
@@ -189,7 +193,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
             <div className="text-center pt-6">
               <button disabled={isSubmitting} type="submit" className="px-8 py-4 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.25em] font-medium uppercase transition-all duration-300 rounded-sm shadow-lg w-full md:w-auto flex items-center justify-center gap-2 mx-auto disabled:opacity-70 disabled:cursor-not-allowed">
                 {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                {isSubmitting ? 'Confirming...' : 'Confirm Attendance'}
+                {isSubmitting ? formContent.actions.submittingButton : formContent.actions.submitButton}
               </button>
             </div>
           </form>
@@ -217,20 +221,18 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
               {/* Decorative elements */}
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent"></div>
               
-              <h3 className="text-3xl font-cinzel text-wedding-goldlight mb-4 tracking-wide">Thank You!</h3>
+              <h3 className="text-3xl font-cinzel text-wedding-goldlight mb-4 tracking-wide">{formContent.successModal.title}</h3>
               <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mb-6"></div>
               
-              <p className="text-lg font-cormorant italic text-wedding-cream/90 mb-8 leading-relaxed">
-                Your response has been gracefully recorded. We are thrilled and cannot wait to celebrate this special day with you.
-                <br /><br />
-                Your presence is our greatest gift. Should you wish to honor us with a token of love, please view our Wedding Registry.
+              <p className="text-lg font-cormorant italic text-wedding-cream/90 mb-8 leading-relaxed whitespace-pre-line">
+                {formContent.successModal.description}
               </p>
               
               <button
                 onClick={onContinue}
                 className="px-8 py-3 bg-wedding-burgundy/80 border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-burgundy hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.25em] font-medium uppercase transition-all duration-300 rounded-sm w-full"
               >
-                View Wedding Registry
+                {formContent.successModal.buttonText}
               </button>
             </motion.div>
           </motion.div>
