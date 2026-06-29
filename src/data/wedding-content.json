@@ -3,16 +3,25 @@
     "logo": "/hansandczay.svg",
     "brideName": "Czay",
     "groomName": "Hans",
-    "dateFull": "Sunday, the twentieth of December, two thousand twenty-six",
+    "dateFull": "Sunday, the twentieth of December, two thousand twenty-sixs",
     "venueShort": "Paniqui, Tarlac",
-    "targetDate": "December 20, 2026 15:00:00"
+    "targetDate": "December 20, 2026 15:00:00",
+    "coupleNameFormat": "Hans & Czay",
+    "dateShort": "December 21, 2026",
+    "receptionLocation": "DokNWellness Natural Health Care Center",
+    "ceremonyTime": "3:00 PM",
+    "receptionAddress": "Purok 1, San Isidro, Camiling, 2306 Tarlac",
+    "ceremonyAddress": "Nagserialan Camiling, Paniqui - Camiling Rd, Paniqui, Tarlac",
+    "ceremonyLocation": "Iglesia Ni Cristo [Paniqui, Tarlac] - Nagserialan",
+    "receptionTime": "6:30 PM"
   },
   "welcomeScreen": {
-    "backgroundImage": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=1920",
+    "backgroundImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fwelcome-bg-1782443008506?alt=media&token=42054470-d71c-4d08-b653-a13f9f7bac4c",
     "subtitle": "Join us in celebrating",
     "topText": "Together with their Families",
     "bottomText1": "Request the honor of your presence",
-    "bottomText2": "On Sunday, the twentieth of December, two thousand twenty-six"
+    "bottomText2": "On Sunday, the twentieth of December, two thousand twenty-six",
+    "targetDate": "December 20, 2026 15:00:00"
   },
   "entranceScreen": {
     "backgroundImage": "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=1920"
@@ -23,28 +32,28 @@
     "description": "Every love story is beautiful, but ours is our favorite editorial masterpiece.",
     "items": [
       {
-      "date": "September 2020",
-      "title": "A Serendipitous Encounter",
-      "image": "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=800",
-      "description": "Our eyes first met across the crowded terrace of Cafe de Flore in Paris. It took just one shared look, an accidental spill of a coffee cup, and an hour of endless laughter to realize our worlds had shifted permanently."
-    },
-    {
-      "date": "December 2020",
-      "title": "An Evening of Whispers",
-      "image": "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=800",
-      "description": "Our first formal date was under the soft winter haze of London. We strolled along the banks of the Seine, talking about dreams, philosophies, and music. By midnight, we knew this was no ordinary courtship."
-    },
-    {
-      "date": "June 2025",
-      "title": "By the Cliffs of Amalfi",
-      "image": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800",
-      "description": "Under the golden dusk of Positano, perched on a private terrace hanging between the blue heavens and quiet waves, Hans bent his knee and asked the question that would seal our destinies."
-    },
-    {
-      "date": "October 2026",
-      "title": "The Path to Forever",
-      "image": "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=800",
-      "description": "As we prepare to declare our eternal promises, we are filled with boundless joy to gather those who have walked beside us on our journeys. Our final chapter as two is closing, and a lifetime as one is about to begin."
+        "description": "Our eyes first met across the crowded terrace of Cafe de Flore in Paris. It took just one shared look, an accidental spill of a coffee cup, and an hour of endless laughter to realize our worlds had shifted permanently.",
+        "title": "A Serendipitous Encounter",
+        "image": "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=800",
+        "date": "September 2020"
+      },
+      {
+        "description": "Our first formal date was under the soft winter haze of London. We strolled along the banks of the Seine, talking about dreams, philosophies, and music. By midnight, we knew this was no ordinary courtship.1",
+        "title": "An Evening of Whispers",
+        "image": "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=800",
+        "date": "December 2020"
+      },
+      {
+        "description": "Under the golden dusk of Positano, perched on a private terrace hanging between the blue heavens and quiet waves, Hans bent his knee and asked the question that would seal our destinies.",
+        "title": "By the Cliffs of Amalfi",
+        "image": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800",
+        "date": "June 2025"
+      },
+      {
+        "image": "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=800",
+        "date": "October 2026",
+        "description": "As we prepare to declare our eternal promises, we are filled with boundless joy to gather those who have walked beside us on our journeys. Our final chapter as two is closing, and a lifetime as one is about to begin.",
+        "title": "The Path to Forever"
       }
     ]
   },
@@ -52,8 +61,14 @@
     "subtitle": "With love and gratitude",
     "title": "Wedding Entourage",
     "parents": {
-      "groom": ["Mr. [Groom's Father]", "Mrs. [Groom's Mother]"],
-      "bride": ["Mr. [Bride's Father]", "Mrs. [Bride's Mother]"]
+      "groom": [
+        "Mr. [Groom's Father]",
+        "Mrs. [Groom's Mother]"
+      ],
+      "bride": [
+        "Mr. [Bride's Father]",
+        "Mrs. [Bride's Mother]"
+      ]
     },
     "principalSponsors": [
       "Luningning N. Obena",
@@ -76,8 +91,8 @@
       "Larry Adams"
     ],
     "honorAttendants": {
-      "maidOfHonor": "Irish Gail Torio",
-      "bestMan": "Chris John A. Obena"
+      "bestMan": "Chris John A. Obena",
+      "maidOfHonor": "Irish Gail Torio"
     },
     "bridesmaids": [
       "Christina Rose A. Obena",
@@ -110,28 +125,26 @@
       "description": "A breathtaking romance in Paniqui, Tarlac."
     },
     "ceremony": {
-      "subtitle": "The Vows",
-      "time": "3:00 PM",
-      "title": "The Ceremony",
-      "description": "Witness the beginning of our forever as we exchange vows in the sacred and solemn ambiance of the Church Of Christ. Surrounded by faith, love, and the blessings of our families and friends, we invite you to share in this meaningful celebration of our union.",
-      "location": "Iglesia Ni Cristo [Paniqui, Tarlac] - Nagserialan",
       "address": "Nagserialan Camiling, Paniqui - Camiling Rd, Paniqui, Tarlac",
-      "mapLink": "https://maps.google.com/maps?q=Iglesia%20Ni%20Cristo%20%5BPaniqui,%20Tarlac%5D%20-%20Nagserialan&t=&z=15&ie=UTF8&output=embed",
-      "calendarDesc": "Hans and Czay Union - Paniqui, Tarlac",
       "calendarLoc": "https://maps.app.goo.gl/yBdxdLkEZMgYQyo8A",
-      "calendarStart": "2026-12-20T15:00:00"
+      "location": "Iglesia Ni Cristo [Paniqui, Tarlac] - Nagserialan",
+      "time": "3:00 PM",
+      "calendarDesc": "Hans and Czay Union - Paniqui, Tarlac",
+      "mapLink": "https://maps.google.com/maps?q=Iglesia%20Ni%20Cristo%20%5BPaniqui,%20Tarlac%5D%20-%20Nagserialan&t=&z=15&ie=UTF8&output=embed",
+      "calendarStart": "2026-12-20T15:00:00",
+      "description": "Witness the beginning of our forever as we exchange vows in the sacred and solemn ambiance of the Church Of Christ. Surrounded by faith, love, and the blessings of our families and friends, we invite you to share in this meaningful celebration of our union.",
+      "title": "The Ceremony"
     },
     "reception": {
-      "subtitle": "The Dinner & Ball",
-      "time": "6:30 PM",
-      "title": "The Reception",
-      "description": "As the sun sets, join us for an intimate celebration in a charming open farm beneath the canopy of mango trees. Surrounded by nature and the warm glow of twinkling bubble lights, enjoy an evening filled with laughter, heartfelt moments, delicious food, and joyful dancing as we celebrate the start of our new journey together.",
-      "location": "DokNWellness Natural Health Care Center",
       "address": "Purok 1, San Isidro, Camiling, 2306 Tarlac",
-      "mapLink": "https://maps.google.com/maps?q=DokNWellness%20Natural%20Health%20Care%20Center,%20Camiling,%20Tarlac&t=&z=15&ie=UTF8&output=embed",
-      "calendarDesc": "Dinner, Cocktails, & Dance - DokNWellness Natural Health Care Center",
       "calendarLoc": "https://maps.app.goo.gl/XZg1ByDqMjzxiP5UA",
-      "calendarStart": "2026-12-20T18:30:00"
+      "location": "DokNWellness Natural Health Care Center",
+      "time": "6:30 PM",
+      "calendarDesc": "Dinner, Cocktails, & Dance - DokNWellness Natural Health Care Center",
+      "mapLink": "https://maps.google.com/maps?q=DokNWellness%20Natural%20Health%20Care%20Center,%20Camiling,%20Tarlac&t=&z=15&ie=UTF8&output=embed",
+      "calendarStart": "2026-12-20T18:30:00",
+      "description": "As the sun sets, join us for an intimate celebration in a charming open farm beneath the canopy of mango trees. Surrounded by nature and the warm glow of twinkling bubble lights, enjoy an evening filled with laughter, heartfelt moments, delicious food, and joyful dancing as we celebrate the start of our new journey together.",
+      "title": "The Reception"
     }
   },
   "dressCode": {
@@ -142,11 +155,26 @@
     "title": "Formal Black Tie Optional",
     "description": "To honor our vision of a beautiful, cohesive atmosphere in Tarlac, we respectfully request our guests to dress in harmony with our burgundy and gold color story.",
     "colors": [
-      { "name": "Dark Burgundy", "hex": "#4A1519" },
-      { "name": "Deep Burgundy", "hex": "#841B2D" },
-      { "name": "Antique Gold", "hex": "#BFA071" },
-      { "name": "Soft Blush", "hex": "#D2B1A2" },
-      { "name": "Ivory Cream", "hex": "#F4F5EB" }
+      {
+        "hex": "#4A1519",
+        "name": "Dark Burgundy"
+      },
+      {
+        "hex": "#841B2D",
+        "name": "Deep Burgundy"
+      },
+      {
+        "name": "Antique Gold",
+        "hex": "#BFA071"
+      },
+      {
+        "hex": "#D2B1A2",
+        "name": "Soft Blush"
+      },
+      {
+        "name": "Ivory Cream",
+        "hex": "#F4F5EB"
+      }
     ],
     "ladiesGuideline": "Floor-length gowns or refined midi-cocktail dresses in shades of burgundy, blush, antique gold, or warm neutrals. Flowing silhouettes and romantic laces are highly welcomed.",
     "gentlemenGuideline": "Classic dinner suit (Tuxedo) or tailored suit with crisp white dress shirts. Deep charcoal, navy, or black tailored coordinates. Bowties or silk ties matching the theme are preferred.",
@@ -172,32 +200,32 @@
         "url": "/images/dresscode/ladies4.jpeg"
       },
       {
-        "type": "Gentlemen",
-        "url": "/images/dresscode/gentlemen4.jpg"
+        "url": "/images/dresscode/gentlemen4.jpg",
+        "type": "Gentlemen"
       },
       {
-        "type": "Ladies",
-        "url": "/images/dresscode/ladies5.jpeg"
+        "url": "/images/dresscode/ladies5.jpeg",
+        "type": "Ladies"
       },
       {
         "type": "Gentlemen",
         "url": "/images/dresscode/gentlemen5.jpg"
       },
       {
-        "type": "Ladies",
-        "url": "/images/dresscode/ladies6.jpeg"
+        "url": "/images/dresscode/ladies6.jpeg",
+        "type": "Ladies"
       },
       {
-        "type": "Gentlemen",
-        "url": "/images/dresscode/gentlemen6.jpg"
+        "url": "/images/dresscode/gentlemen6.jpg",
+        "type": "Gentlemen"
       },
       {
         "type": "Ladies",
         "url": "/images/dresscode/ladies7.jpg"
       },
       {
-        "type": "Gentlemen",
-        "url": "/images/dresscode/gentlemen7.jpg"
+        "url": "/images/dresscode/gentlemen7.jpg",
+        "type": "Gentlemen"
       }
     ]
   },
@@ -205,16 +233,30 @@
     "subtitle": "Our Memories",
     "title": "The Gallery"
   },
-  "gallery": [
-    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=600",
-    "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=600"
-  ],
+  "gallery": {
+    "0": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600",
+    "1": "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=600",
+    "2": "https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=600",
+    "3": "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=600",
+    "4": "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=600",
+    "5": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=600",
+    "6": "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=600",
+    "7": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=600",
+    "images": [
+      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600",
+      "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=600",
+      "https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=600",
+      "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=600",
+      "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=600",
+      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=600",
+      "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=600",
+      "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=600"
+    ],
+    "header": {
+      "subtitle": "Our Memories",
+      "title": "The Gallery"
+    }
+  },
   "faqHeader": {
     "subtitle": "Guest Information",
     "title": "Things You Might Want to Know",
@@ -268,19 +310,38 @@
       "title": "Bank Transfer",
       "description": "Directly support our honeymoon adventures or first home goals with an elegant direct bank contribution.",
       "banks": [
-        { "name": "GCash", "qrImage": "" },
-        { "name": "Maya", "qrImage": "" },
-        { "name": "Maribank", "qrImage": "" },
-        { "name": "Landbank", "qrImage": "" },
-        { "name": "BPI", "qrImage": "" },
-        { "name": "GoTyme", "qrImage": "" }
+        {
+          "name": "GCash",
+          "qrImage": ""
+        },
+        {
+          "name": "Maya",
+          "qrImage": ""
+        },
+        {
+          "name": "Maribank",
+          "qrImage": ""
+        },
+        {
+          "name": "Landbank",
+          "qrImage": ""
+        },
+        {
+          "name": "BPI",
+          "qrImage": ""
+        },
+        {
+          "name": "GoTyme",
+          "qrImage": ""
+        }
       ]
     },
     "curatedRegistry": {
       "title": "Curated Registry",
       "description1": "We have lovingly curated a wedding registry featuring beautiful, elegant keepsakes and lifestyle pieces from our favorite boutiques.",
       "description2": "Options include premium vintage collection tablewares, designer home accents, and art contributions for our newly renovated residence."
-    }
+    },
+    "updatedAt": "2026-06-26T09:14:22.851Z"
   },
   "rsvpCta": {
     "subtitle": "Join Our Day",
@@ -319,5 +380,51 @@
       "description": "Your response has been gracefully recorded. We are thrilled and cannot wait to celebrate this special day with you.\n\nYour presence is our greatest gift. Should you wish to honor us with a token of love, please view our Wedding Registry.",
       "buttonText": "View Wedding Registry"
     }
+  },
+  "faqs": {
+    "header": {
+      "subtitle": "Guest Information",
+      "title": "Things You Might Want to Know",
+      "description": "Quick answers for our beloved guests"
+    },
+    "items": [
+      {
+        "q": "Can I bring a plus one?",
+        "a": "To help us maintain an accurate guest count, attendance is limited to individuals who have received a digital invitation and a unique RSVP code. Only guests included in the invitation and successfully registered using the provided code will be accommodated. Unfortunately, those who did not receive an invitation code are not included in our guest list. We sincerely appreciate your understanding and cooperation as we celebrate this special day with our invited family and friends."
+      },
+      {
+        "q": "Can I bring my children?",
+        "a": "To allow all our guests—including parents—a night of relaxation and uninhibited celebration, we have chosen for our wedding weekend to be an adults-only affair. We thank you in advance for your understanding and hope you can join us to raise a glass in comfort."
+      },
+      {
+        "q": "What time should I arrive?",
+        "a": "The ceremony will commence promptly at 3:00 PM. We recommend arriving 30 to 60 minutes prior (between 2:00 PM and 2:30 PM) to comfortably enjoy a welcome refreshment and find your seats."
+      },
+      {
+        "q": "Is there a dress code?",
+        "a": "Yes, the style guidelines are Formal Black Tie Optional. Gentlemen are encouraged to wear classic dinner suits (tuxedos) or tailored coordinates. Ladies are invited to wear floor-length or refined midi dresses matching our neutral palette."
+      },
+      {
+        "q": "Can I take photos or videos?",
+        "a": "We respectfully request an \"unplugged\" ceremony where all phones and cameras remain off so that you can be fully present with us. You are more than welcome to capture memories during the cocktail hour and reception dinner!"
+      },
+      {
+        "q": "Where is the venue and is parking available?",
+        "a": "All celebrations take place within our designated venues in Paniqui, Tarlac. Secure valet and open parking spaces are fully accommodated at the entrance of both properties for all driving guests."
+      },
+      {
+        "q": "Can I give gifts or cash?",
+        "a": "Your love, laughter, and presence on our special day are the greatest gifts we could receive. Should you wish to honor us with a contribution towards our new life together, details can be found in the registry section."
+      },
+      {
+        "q": "What if I cannot attend?",
+        "a": "We understand that unforeseen circumstances may arise. If you are unable to attend, please submit your RSVP and select either \"Regretfully Declines\" or provide the details of your designated proxy, if applicable. Kindly note that only responses received through the RSVP system will be considered. Guests who do not submit an RSVP by the stated deadline will be assumed unable to attend, and their reserved seat may be released accordingly. Thank you for helping us finalize our guest arrangements."
+      },
+      {
+        "q": "Who can I contact for questions?",
+        "a": "For any additional logistics or questions, please reach, at +63 995 179 2240 / +63 945 728 7481."
+      }
+    ],
+    "updatedAt": "2026-06-26T09:24:12.585Z"
   }
 }
