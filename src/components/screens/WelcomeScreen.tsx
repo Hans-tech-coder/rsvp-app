@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion , Variants } from 'framer-motion';
+import Image from 'next/image';
 import { FallingPetals } from '@/components/effects/FallingPetals';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
@@ -72,9 +73,16 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           initial={{ scale: 1.1, opacity: 0 }}
           animate={{ scale: 1, opacity: 0.5 }}
           transition={{ duration: 3, ease: "easeOut" }}
-          className="absolute inset-0 bg-cover bg-center mix-blend-overlay" 
-          style={{ backgroundImage: `url('${content.welcomeScreen.backgroundImage}')` }}
-        ></motion.div>
+          className="absolute inset-0 mix-blend-overlay"
+        >
+          <Image 
+            src={content.welcomeScreen.backgroundImage}
+            alt="Wedding Background"
+            fill
+            priority
+            className="object-cover object-center"
+          />
+        </motion.div>
         <div className="absolute inset-0 bg-gradient-to-b from-wedding-dark/60 via-wedding-dark/40 to-wedding-dark/80"></div>
       </div>
 

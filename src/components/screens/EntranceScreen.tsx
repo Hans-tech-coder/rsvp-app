@@ -74,9 +74,16 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
         initial={{ scale: 1.05, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 3, ease: "easeOut" }}
-        className="absolute inset-0 bg-cover bg-center" 
-        style={{ backgroundImage: `url('${content.entranceScreen.backgroundImage}')` }}
-      />
+        className="absolute inset-0"
+      >
+        <Image 
+          src={content.entranceScreen.backgroundImage}
+          alt="Wedding Entrance Background"
+          fill
+          priority
+          className="object-cover object-center"
+        />
+      </motion.div>
       <div className="absolute inset-0 bg-gradient-to-t from-wedding-dark/80 via-wedding-dark/30 to-transparent z-0"></div>
 
       <style dangerouslySetInnerHTML={{__html: `
