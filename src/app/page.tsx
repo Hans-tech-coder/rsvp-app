@@ -14,9 +14,11 @@ import { RsvpCtaScreen } from '@/components/screens/RsvpCtaScreen';
 import { RsvpScreen } from '@/components/screens/RsvpScreen';
 import { EntranceScreen } from '@/components/screens/EntranceScreen';
 import { CanvasMenu } from '@/components/layout/CanvasMenu';
-import { WeddingContentProvider } from '@/contexts/WeddingContentContext';
+import { LoadingScreen } from '@/components/screens/LoadingScreen';
+import { WeddingContentProvider, useWeddingContent } from '@/contexts/WeddingContentContext';
 
-export default function Home() {
+function MainApp() {
+  const { loading } = useWeddingContent();
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showEntranceScreen, setShowEntranceScreen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -94,8 +96,11 @@ export default function Home() {
   };
 
   return (
-    <WeddingContentProvider>
-      <main className="relative w-full h-[100dvh] overflow-hidden bg-wedding-dark">
+    <AnimatePresence mode="wait">
+      {loading ? (
+        <LoadingScreen key="loading" />
+      ) : (
+        <main key="main" className="relative w-full h-[100dvh] overflow-hidden bg-wedding-dark">
       
       {/* Global Effect removed to specific screens */}
 
@@ -315,7 +320,16 @@ export default function Home() {
           </AnimatePresence>
         </>
       )}
-    </main>
-  </WeddingContentProvider>
-);
+        </main>
+      )}
+    </AnimatePresence>
+  );
+}
+
+export default function Home() {
+  return (
+    <WeddingContentProvider>
+      <MainApp />
+    </WeddingContentProvider>
+  );
 }

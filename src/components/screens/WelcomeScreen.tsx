@@ -11,7 +11,7 @@ interface WelcomeScreenProps {
 }
 
 export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
-  const { content } = useWeddingContent();
+  const { content, loading } = useWeddingContent();
   const [timeLeft, setTimeLeft] = useState({ days: '00', hours: '00', minutes: '00', seconds: '00' });
   const [mounted, setMounted] = useState(false);
 
@@ -75,13 +75,15 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           transition={{ duration: 3, ease: "easeOut" }}
           className="absolute inset-0 mix-blend-overlay"
         >
-          <Image 
-            src={content.welcomeScreen.backgroundImage}
-            alt="Wedding Background"
-            fill
-            priority
-            className="object-cover object-center"
-          />
+          {!loading && (
+            <Image 
+              src={content.welcomeScreen.backgroundImage}
+              alt="Wedding Background"
+              fill
+              priority
+              className="object-cover object-center"
+            />
+          )}
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-b from-wedding-dark/60 via-wedding-dark/40 to-wedding-dark/80"></div>
       </div>
