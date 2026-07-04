@@ -8,10 +8,10 @@ service firebase.storage {
       return request.auth != null && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
     }
 
-    match /images/{imageId} {
-      // Anyone can view the images
+    match /{allPaths=**} {
+      // Anyone can view the files
       allow read: if true;
-      // Only admins can upload/delete images
+      // Only admins can upload/delete files
       allow write: if isAdmin();
     }
   }
