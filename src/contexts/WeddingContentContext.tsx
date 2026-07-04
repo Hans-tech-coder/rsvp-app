@@ -127,7 +127,10 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
             principalSponsors: entourageData.principalSponsors ?? newContent.entourage.principalSponsors,
             honorAttendants: entourageData.honorAttendants ?? newContent.entourage.honorAttendants,
             bridesmaids: entourageData.bridesmaids ?? newContent.entourage.bridesmaids,
-            groomsmen: entourageData.groomsmen ?? newContent.entourage.groomsmen
+            groomsmen: entourageData.groomsmen ?? newContent.entourage.groomsmen,
+            parents: entourageData.parents ?? newContent.entourage.parents,
+            flowerGirls: entourageData.flowerGirls ?? newContent.entourage.flowerGirls,
+            ringBearers: entourageData.ringBearers ?? newContent.entourage.ringBearers
           };
         }
 
@@ -151,7 +154,7 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
         if (galleryDoc.exists()) {
           const galleryData = galleryDoc.data();
           if (galleryData.images && Array.isArray(galleryData.images)) {
-            newContent.gallery = galleryData.images;
+            (newContent.gallery as any) = galleryData.images;
           }
           if (galleryData.header) {
             newContent.galleryHeader = {

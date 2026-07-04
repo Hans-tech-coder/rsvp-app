@@ -111,7 +111,12 @@ export function GalleryEditor() {
         }
       } else {
         // Fallback to local data
-        const fallbackGallery = (weddingContent.gallery || []).map((url: string) => ({ id: nanoid(), url }));
+        const galleryData = weddingContent.gallery || {};
+        const imagesArray = Array.isArray(galleryData) 
+          ? galleryData 
+          : (galleryData.images || Object.values(galleryData).filter(val => typeof val === 'string'));
+          
+        const fallbackGallery = imagesArray.map((url: string) => ({ id: nanoid(), url }));
         setGallery(fallbackGallery);
         setOriginalGallery(fallbackGallery);
       }

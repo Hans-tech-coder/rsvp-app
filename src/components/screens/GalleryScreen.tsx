@@ -21,18 +21,23 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
       onLightboxChange(lightboxIndex !== null);
     }
   }, [lightboxIndex, onLightboxChange]);
+  // Normalize gallery data to ensure it's an array
+  const galleryData = content.gallery || {};
+  const imagesArray = Array.isArray(galleryData) 
+    ? galleryData 
+    : ((galleryData as any).images || Object.values(galleryData).filter(val => typeof val === 'string'));
 
   const handlePrev = (e?: React.MouseEvent | Event) => {
     e?.stopPropagation();
     if (lightboxIndex !== null) {
-      setLightboxIndex((prev) => (prev === 0 ? content.gallery.length - 1 : prev! - 1));
+      setLightboxIndex((prev) => (prev === 0 ? imagesArray.length - 1 : prev! - 1));
     }
   };
 
   const handleNext = (e?: React.MouseEvent | Event) => {
     e?.stopPropagation();
     if (lightboxIndex !== null) {
-      setLightboxIndex((prev) => (prev === content.gallery.length - 1 ? 0 : prev! + 1));
+      setLightboxIndex((prev) => (prev === imagesArray.length - 1 ? 0 : prev! + 1));
     }
   };
 
@@ -74,7 +79,7 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
         }}>
           <div className="slider-wrapper w-full py-2 relative">
             <DraggableSlider speed={0.4}>
-              {content.gallery.map((src, index) => (
+              {imagesArray.map((src: string, index: number) => (
                 <div 
                   key={`top-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
@@ -92,11 +97,11 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
           {/* Bottom Row Slider (Reverse) */}
           <div className="slider-wrapper w-full py-2 relative mt-4">
             <DraggableSlider speed={0.5} reverse={true}>
-              {[...content.gallery].reverse().map((src, index) => (
+              {[...imagesArray].reverse().map((src: string, index: number) => (
                 <div 
                   key={`bottom-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
-                  onClick={() => setLightboxIndex(content.gallery.length - 1 - index)}
+                  onClick={() => setLightboxIndex(imagesArray.length - 1 - index)}
                 >
                   <img src={src} alt={`Memory ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
                   <div className="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
@@ -136,31 +141,23 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4"
             onClick={() => setLightboxIndex(null)}
           >
-            <motion.div 
+            <motion.div
               key={lightboxIndex}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="max-w-5xl max-h-[90vh] w-full h-full relative flex items-center justify-center pointer-events-none"
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative max-w-[90vw] max-h-[90vh] w-auto h-auto rounded-lg overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
-              <motion.img 
-                src={content.gallery[lightboxIndex]} 
-                alt={`Gallery view ${lightboxIndex + 1}`} 
-                className="max-w-full max-h-[90vh] object-contain rounded-sm shadow-2xl pointer-events-auto touch-none cursor-grab active:cursor-grabbing" 
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                drag="y"
-                dragConstraints={{ top: 0, bottom: 0 }}
-                dragElastic={0.5}
-                onDragEnd={(e: any, info: PanInfo) => {
-                  const swipeThreshold = 50;
-                  if (info.offset.y < -swipeThreshold) {
-                    handleNext();
-                  } else if (info.offset.y > swipeThreshold) {
-                    handlePrev();
-                  }
-                }}
+              <img
+                src={imagesArray[lightboxIndex]}
+                alt={`Enlarged memory ${lightboxIndex + 1}`}
+                className="max-w-[90vw] max-h-[90vh] object-contain"
               />
+              <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent flex justify-between items-center text-white/80 text-sm font-cinzel">
+                <span>{lightboxIndex + 1} / {imagesArray.length}</span>
+              </div>
             </motion.div>
 
             <button 

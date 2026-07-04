@@ -158,7 +158,7 @@ export function EventDetailsEditor() {
             <input 
               type="text" 
               name="subtitle"
-              value={data[section].subtitle || ""}
+              value={(data[section] as any).subtitle || ""}
               onChange={(e) => handleSectionChange(section, e)}
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
             />

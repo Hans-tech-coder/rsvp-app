@@ -62,7 +62,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
           <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-gold/20 hover:shadow-xl hover:border-wedding-gold/40 transition-all duration-500 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-6">
-                <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{content.details.ceremony.subtitle || "The Vows"}</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{(content.details.ceremony as any).subtitle || "The Vows"}</span>
                 <span className="text-sm font-cinzel text-wedding-goldlight/70">{content.details.ceremony.time}</span>
               </div>
               <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">{content.details.ceremony.title}</h3>
@@ -95,7 +95,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
           <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-gold/20 hover:shadow-xl hover:border-wedding-gold/40 transition-all duration-500 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-6">
-                <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{content.details.reception.subtitle || "The Dinner & Ball"}</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{(content.details.reception as any).subtitle || "The Feast"}</span>
                 <span className="text-sm font-cinzel text-wedding-goldlight/70">{content.details.reception.time}</span>
               </div>
               <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">{content.details.reception.title}</h3>
