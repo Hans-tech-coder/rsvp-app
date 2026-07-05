@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion , Variants } from 'framer-motion';
 import Image from 'next/image';
-import { FallingPetals } from '@/components/effects/FallingPetals';
+import { TwinkleSparks } from '@/components/effects/TwinkleSparks';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface WelcomeScreenProps {
@@ -68,7 +68,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
   return (
     <header className="absolute inset-0 w-full h-full overflow-hidden bg-wedding-dark text-center">
       <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
-        <FallingPetals />
+        <TwinkleSparks />
         <motion.div 
           initial={{ scale: 1.1, opacity: 0 }}
           animate={{ scale: 1, opacity: 0.5 }}
