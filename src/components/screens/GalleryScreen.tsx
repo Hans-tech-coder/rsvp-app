@@ -27,6 +27,10 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
     ? galleryData 
     : ((galleryData as any).images || Object.values(galleryData).filter(val => typeof val === 'string'));
 
+  const midIndex = Math.ceil(imagesArray.length / 2);
+  const topRowImages = imagesArray.slice(0, midIndex);
+  const bottomRowImages = imagesArray.slice(midIndex);
+
   const handlePrev = (e?: React.MouseEvent | Event) => {
     e?.stopPropagation();
     if (lightboxIndex !== null) {
@@ -79,7 +83,7 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
         }}>
           <div className="slider-wrapper w-full py-2 relative">
             <DraggableSlider speed={0.4}>
-              {imagesArray.map((src: string, index: number) => (
+              {topRowImages.map((src: string, index: number) => (
                 <div 
                   key={`top-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
@@ -97,18 +101,20 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
           {/* Bottom Row Slider (Reverse) */}
           <div className="slider-wrapper w-full py-2 relative mt-4">
             <DraggableSlider speed={0.5} reverse={true}>
-              {[...imagesArray].reverse().map((src: string, index: number) => (
+              {bottomRowImages.map((src: string, index: number) => {
+                const originalIndex = midIndex + index;
+                return (
                 <div 
                   key={`bottom-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
-                  onClick={() => setLightboxIndex(imagesArray.length - 1 - index)}
+                  onClick={() => setLightboxIndex(originalIndex)}
                 >
-                  <img src={src} alt={`Memory ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
+                  <img src={src} alt={`Memory ${originalIndex + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
                   <div className="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
                     <span className="text-wedding-goldlight text-[10px] uppercase tracking-[0.3em] border border-wedding-gold/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm pointer-events-none">View</span>
                   </div>
                 </div>
-              ))}
+              )})}
             </DraggableSlider>
           </div>
         </div>
@@ -138,28 +144,38 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 touch-none"
             onClick={() => setLightboxIndex(null)}
           >
-            <motion.div
+            <motion.div 
               key={lightboxIndex}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative max-w-[90vw] max-h-[90vh] w-auto h-auto rounded-lg overflow-hidden shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing"
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={0.8}
+              onDragEnd={(e: any, info: PanInfo) => {
+                const swipeThreshold = 50;
+                const velocityY = info.velocity.y;
+                if (info.offset.y < -swipeThreshold || velocityY < -500) {
+                  handleNext();
+                } else if (info.offset.y > swipeThreshold || velocityY > 500) {
+                  handlePrev();
+                }
+              }}
             >
-              <img
-                src={imagesArray[lightboxIndex]}
-                alt={`Enlarged memory ${lightboxIndex + 1}`}
-                className="max-w-[90vw] max-h-[90vh] object-contain"
+              <img 
+                src={imagesArray[lightboxIndex]} 
+                alt={`Gallery view ${lightboxIndex + 1}`} 
+                draggable={false}
+                className="max-w-full max-h-[85vh] object-contain rounded-sm shadow-2xl pointer-events-auto select-none" 
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
               />
-              <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent flex justify-between items-center text-white/80 text-sm font-cinzel">
-                <span>{lightboxIndex + 1} / {imagesArray.length}</span>
-              </div>
             </motion.div>
-
+            
             <button 
               onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
               className="fixed top-4 right-4 md:top-6 md:right-6 text-wedding-cream/70 hover:text-wedding-cream transition-colors z-[110] bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
