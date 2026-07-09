@@ -2,22 +2,31 @@ const admin = require('firebase-admin');
 const fs = require('fs');
 const path = require('path');
 
-// NOTE: Before running this script, you must set the GOOGLE_APPLICATION_CREDENTIALS 
-// environment variable to the path of your Firebase service account key JSON file.
+// Load environment variables from .env.local
+require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
 
 async function syncContent() {
   try {
-    if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-      console.error('Error: GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.');
-      console.log('Please download a service account key from Firebase Console > Project Settings > Service Accounts');
-      console.log('Then run: export GOOGLE_APPLICATION_CREDENTIALS="/path/to/key.json" && npm run sync-content');
-      process.exit(1);
-    }
-
     if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.applicationDefault()
-      });
+      if (process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
+        admin.initializeApp({
+          credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          })
+        });
+      } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        admin.initializeApp({
+          credential: admin.credential.applicationDefault()
+        });
+      } else {
+        console.error('Error: Firebase Admin credentials not found.');
+        console.log('Please either:');
+        console.log('1. Set FIREBASE_ADMIN_PROJECT_ID, FIREBASE_ADMIN_CLIENT_EMAIL, and FIREBASE_ADMIN_PRIVATE_KEY in .env.local');
+        console.log('2. Or set GOOGLE_APPLICATION_CREDENTIALS environment variable to a service account JSON file');
+        process.exit(1);
+      }
     }
     
     const db = admin.firestore();

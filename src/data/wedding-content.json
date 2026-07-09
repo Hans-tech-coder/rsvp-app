@@ -4,7 +4,7 @@
     "brideName": "Czay",
     "groomName": "Hans",
     "dateFull": "Sunday, the twentieth of December, two thousand twenty-sixs",
-    "venueShort": "Paniqui, Tarlac",
+    "venueShort": "Camiling, Tarlac",
     "targetDate": "December 20, 2026 15:00:00",
     "coupleNameFormat": "Hans & Czay",
     "dateShort": "December 21, 2026",
@@ -16,7 +16,7 @@
     "receptionTime": "6:30 PM"
   },
   "welcomeScreen": {
-    "backgroundImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fwelcome-bg-1782443008506?alt=media&token=42054470-d71c-4d08-b653-a13f9f7bac4c",
+    "backgroundImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fwelcome-bg-1783141231916?alt=media&token=ab66cb30-9914-4e80-9f28-dddbec5693bf",
     "subtitle": "Join us in celebrating",
     "topText": "Together with their Families",
     "bottomText1": "Request the honor of your presence",
@@ -24,7 +24,7 @@
     "targetDate": "December 20, 2026 15:00:00"
   },
   "entranceScreen": {
-    "backgroundImage": "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=1920"
+    "backgroundImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fentrance-bg-1783214887566?alt=media&token=df038175-8252-4450-b275-aaf32ce328e3"
   },
   "ourStory": {
     "subtitle": "Our Journey",
@@ -32,28 +32,28 @@
     "description": "Every love story is beautiful, but ours is our favorite editorial masterpiece.",
     "items": [
       {
+        "date": "September 2020",
         "description": "Our eyes first met across the crowded terrace of Cafe de Flore in Paris. It took just one shared look, an accidental spill of a coffee cup, and an hour of endless laughter to realize our worlds had shifted permanently.",
-        "title": "A Serendipitous Encounter",
         "image": "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=800",
-        "date": "September 2020"
+        "title": "A Serendipitous Encounter"
       },
       {
-        "description": "Our first formal date was under the soft winter haze of London. We strolled along the banks of the Seine, talking about dreams, philosophies, and music. By midnight, we knew this was no ordinary courtship.1",
-        "title": "An Evening of Whispers",
+        "date": "December 2020",
+        "description": "Our first formal date was under the soft winter haze of London. We strolled along the banks of the Seine, talking about dreams, philosophies, and music. By midnight, we knew this was no ordinary courtship.",
         "image": "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=800",
-        "date": "December 2020"
+        "title": "An Evening of Whispers"
       },
       {
-        "description": "Under the golden dusk of Positano, perched on a private terrace hanging between the blue heavens and quiet waves, Hans bent his knee and asked the question that would seal our destinies.",
         "title": "By the Cliffs of Amalfi",
         "image": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800",
+        "description": "Under the golden dusk of Positano, perched on a private terrace hanging between the blue heavens and quiet waves, Hans bent his knee and asked the question that would seal our destinies.",
         "date": "June 2025"
       },
       {
         "image": "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=800",
+        "title": "The Path to Forever",
         "date": "October 2026",
-        "description": "As we prepare to declare our eternal promises, we are filled with boundless joy to gather those who have walked beside us on our journeys. Our final chapter as two is closing, and a lifetime as one is about to begin.",
-        "title": "The Path to Forever"
+        "description": "As we prepare to declare our eternal promises, we are filled with boundless joy to gather those who have walked beside us on our journeys. Our final chapter as two is closing, and a lifetime as one is about to begin."
       }
     ]
   },
@@ -62,33 +62,37 @@
     "title": "Wedding Entourage",
     "parents": {
       "groom": [
-        "Mr. [Groom's Father]",
-        "Mrs. [Groom's Mother]"
+        "Mr. Regie D. Bacarro",
+        "Mrs. Diwata A. Obena"
       ],
       "bride": [
-        "Mr. [Bride's Father]",
-        "Mrs. [Bride's Mother]"
+        "Mr. Reynaldo S. Presto Sr.",
+        "Mrs. Adalia U. Presto"
       ]
     },
     "principalSponsors": [
-      "Luningning N. Obena",
-      "Vangie Presto",
-      "Analyn Gonzales",
-      "Margarette Oliver",
-      "Ira Veronica Santillan",
-      "Raziel C. Catacutan",
-      "Angelina C. Soriano",
-      "Lani M. Villarico",
-      "Lina Adams",
-      "Ahmed N. Obena",
-      "Allan N. Obena",
-      "John Edward U. Bautista",
-      "Oliver",
-      "Atty. Maglangit S. Decampong",
-      "Glenn P. Perpinian",
-      "Cristobal R. De Mayo",
-      "Melchor Vardeleon",
-      "Larry Adams"
+      "Mrs. Luningning N. Obena",
+      "Mrs. Vangie Presto",
+      "Mrs. Analyn Gonzales",
+      "Mrs. Margarette Oliver",
+      "Ms. Ira Veronica Santillan",
+      "Mrs. Raziel C. Catacutan",
+      "Mrs. Angelina C. Soriano",
+      "Mrs. Lani M. Villarico",
+      "Mrs. Lina Adams",
+      "Mr. Ahmed N. Obena",
+      "Mr. Allan N. Obena",
+      "Mr. John Edward U. Bautista",
+      "Mr. Edwin Oliver",
+      "Mr. Maglangit S. Decampong",
+      "Mr. Glenn P. Perpinian",
+      "Mr. Cristobal R. De Mayo",
+      "Mr. Melchor Vardeleon",
+      "Mr. Larry Adams",
+      "Mr. Mario B. Gaña",
+      "Mr. Eduardo D. Nicolas",
+      "Mrs. Esmelia R. Gaña",
+      "Mrs. Kristine Joy A. Navarro"
     ],
     "honorAttendants": {
       "bestMan": "Chris John A. Obena",
@@ -103,37 +107,38 @@
       "Irene Dimmangna"
     ],
     "groomsmen": [
-      "Cyriel .....",
-      "John Lloyd",
+      "Ernie Joshua O. Villegas",
+      "Rusty S. Linsao",
       "Jake Borenz Obena",
       "Karl Christian C. Presto",
-      "Elohim Bautista",
+      "Elohim Q. Bautista",
       "Jake Nicolas Zarraga"
     ],
     "flowerGirls": [
-      "First Flower Girl",
-      "Second Flower Girl"
+      "Wraynne C. Presto",
+      "Athena Amara S. Obena"
     ],
     "ringBearers": [
-      "First Ring Bearer"
+      "Matthew Hero O. Tan"
     ]
   },
   "details": {
     "header": {
       "subtitle": "The Celebration",
-      "title": "Where & When",
-      "description": "A breathtaking romance in Paniqui, Tarlac."
+      "description": "A breathtaking romance in Camiling, Tarlac.",
+      "title": "Where & When"
     },
     "ceremony": {
       "address": "Nagserialan Camiling, Paniqui - Camiling Rd, Paniqui, Tarlac",
       "calendarLoc": "https://maps.app.goo.gl/yBdxdLkEZMgYQyo8A",
       "location": "Iglesia Ni Cristo [Paniqui, Tarlac] - Nagserialan",
       "time": "3:00 PM",
-      "calendarDesc": "Hans and Czay Union - Paniqui, Tarlac",
       "mapLink": "https://maps.google.com/maps?q=Iglesia%20Ni%20Cristo%20%5BPaniqui,%20Tarlac%5D%20-%20Nagserialan&t=&z=15&ie=UTF8&output=embed",
       "calendarStart": "2026-12-20T15:00:00",
       "description": "Witness the beginning of our forever as we exchange vows in the sacred and solemn ambiance of the Church Of Christ. Surrounded by faith, love, and the blessings of our families and friends, we invite you to share in this meaningful celebration of our union.",
-      "title": "The Ceremony"
+      "title": "The Ceremony",
+      "subtitle": "The Vows",
+      "calendarDesc": "Hans and Czay Union - Camiling, Tarlac"
     },
     "reception": {
       "address": "Purok 1, San Isidro, Camiling, 2306 Tarlac",
@@ -144,7 +149,8 @@
       "mapLink": "https://maps.google.com/maps?q=DokNWellness%20Natural%20Health%20Care%20Center,%20Camiling,%20Tarlac&t=&z=15&ie=UTF8&output=embed",
       "calendarStart": "2026-12-20T18:30:00",
       "description": "As the sun sets, join us for an intimate celebration in a charming open farm beneath the canopy of mango trees. Surrounded by nature and the warm glow of twinkling bubble lights, enjoy an evening filled with laughter, heartfelt moments, delicious food, and joyful dancing as we celebrate the start of our new journey together.",
-      "title": "The Reception"
+      "title": "The Reception",
+      "subtitle": "The Dinner & Ball"
     }
   },
   "dressCode": {
@@ -177,55 +183,63 @@
       }
     ],
     "ladiesGuideline": "Floor-length gowns or refined midi-cocktail dresses in shades of burgundy, blush, antique gold, or warm neutrals. Flowing silhouettes and romantic laces are highly welcomed.",
-    "gentlemenGuideline": "Classic dinner suit (Tuxedo) or tailored suit with crisp white dress shirts. Deep charcoal, navy, or black tailored coordinates. Bowties or silk ties matching the theme are preferred.",
+    "gentlemenGuideline": "Classic dinner suit (Tuxedo) or tailored suit with crisp white dress shirts. Burgundy, antique gold, or black tailored coordinates. Bowties or silk ties matching the theme are preferred.",
     "inspirationImages": [
       {
-        "type": "Ladies",
-        "url": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400"
-      },
-      {
-        "type": "Gentlemen",
-        "url": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=400"
-      },
-      {
-        "type": "Ladies",
-        "url": "/images/dresscode/ladies3.jpg"
-      },
-      {
-        "type": "Gentlemen",
-        "url": "/images/dresscode/gentlemen3.jpg"
-      },
-      {
-        "type": "Ladies",
-        "url": "/images/dresscode/ladies4.jpeg"
-      },
-      {
-        "url": "/images/dresscode/gentlemen4.jpg",
-        "type": "Gentlemen"
-      },
-      {
-        "url": "/images/dresscode/ladies5.jpeg",
-        "type": "Ladies"
-      },
-      {
-        "type": "Gentlemen",
-        "url": "/images/dresscode/gentlemen5.jpg"
-      },
-      {
-        "url": "/images/dresscode/ladies6.jpeg",
-        "type": "Ladies"
+        "url": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fdress-code-1783510885739?alt=media&token=13570183-be80-4795-bf57-41e7359f3777",
+        "type": "Principal Sponsor - Ladies"
       },
       {
         "url": "/images/dresscode/gentlemen6.jpg",
-        "type": "Gentlemen"
+        "type": "Principal Sponsor - Gentlemen"
       },
       {
-        "type": "Ladies",
-        "url": "/images/dresscode/ladies7.jpg"
+        "type": "Principal Sponsor - Ladies",
+        "url": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fdress-code-1783510905760?alt=media&token=2dd965ec-b7d2-49bd-bbf6-4cde19b11779"
+      },
+      {
+        "url": "/images/dresscode/gentlemen4.jpg",
+        "type": "Principal Sponsor - Gentlemen"
+      },
+      {
+        "type": "Guest - Ladies",
+        "url": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=400",
+        "type": "Guest - Gentlemen"
+      },
+      {
+        "type": "Guest - Ladies",
+        "url": "/images/dresscode/ladies3.jpg"
+      },
+      {
+        "type": "Guest - Gentlemen",
+        "url": "/images/dresscode/gentlemen3.jpg"
+      },
+      {
+        "type": "Guest - Ladies",
+        "url": "/images/dresscode/ladies5.jpeg"
+      },
+      {
+        "type": "Guest - Gentlemen",
+        "url": "/images/dresscode/gentlemen5.jpg"
+      },
+      {
+        "url": "/images/dresscode/ladies4.jpeg",
+        "type": "Guest - Ladies"
       },
       {
         "url": "/images/dresscode/gentlemen7.jpg",
-        "type": "Gentlemen"
+        "type": "Guest - Gentlemen"
+      },
+      {
+        "url": "/images/dresscode/ladies6.jpeg",
+        "type": "Guest - Ladies"
+      },
+      {
+        "url": "/images/dresscode/ladies7.jpg",
+        "type": "Guest - Ladies"
       }
     ]
   },
@@ -243,14 +257,46 @@
     "6": "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=600",
     "7": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=600",
     "images": [
-      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600",
-      "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=600",
-      "https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=600",
-      "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=600",
-      "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=600",
-      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=600",
-      "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=600",
-      "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=600"
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142907368-hH_p0vH8Ug3SuNCJEcvfQ.jpg?alt=media&token=96665ddf-5654-4310-9302-296f11f6fe59",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142909325-qL8HvLVwL_ZoVnHvPSc6t.jpg?alt=media&token=1aede7d2-7fde-4279-9566-d959ba98f1cb",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142911108-LZObPPKxNCUO5de2L_Eh6.jpg?alt=media&token=b8ede201-d8a2-4b3b-af75-fde063a58ac6",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142912713-NaAsVSyPKWKh0rFgiAa_o.jpg?alt=media&token=bfe357cc-bff3-4bf7-9ca2-93ae2919d4a8",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142914376-9ic9B7FoLTQpA88ZcupWj.jpg?alt=media&token=aa386947-be33-4bbc-a9e1-22135f9938a4",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142916056-tm5v3S9RcB3ezsk5Gnsk_.jpg?alt=media&token=84d0e075-9a87-4097-92b4-033123cb69c7",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142917846-Y85_1MHOQ_u8S6jIdNhGo.jpg?alt=media&token=fb7d09f8-9f96-4676-b8e8-769140bc2bc3",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142919483-Ntt0suMfZZyefzp7EhGAx.jpg?alt=media&token=b277fb13-12b8-4214-9d5b-31773d34ee1a",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142921056-Ic__TnAGv_7t1pETMcscS.jpg?alt=media&token=d6ffe222-71a7-4bc5-a82c-431ac4afe27d",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142922780-Vp7-drN4YBP3SqnQj8B90.jpg?alt=media&token=2da56c30-09d3-4865-b4aa-604917304c6a",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142924095-uijXVxQ36ZKvtHIhcHSiD.jpg?alt=media&token=e538008c-51e3-4024-9a43-5187ed3f5bf5",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142925522-ZyYZJG3Sslf3b7_-oVVvM.jpg?alt=media&token=5134a139-c6e6-43cc-a0bf-68a9d6271a89",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142926798-7oCfrQproC2iUVrlKCbWb.jpg?alt=media&token=1598c12d-cae3-4d3c-b780-90f6268add41",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142928346-CnCzbrJ0_kqbaKEmfdPUY.jpg?alt=media&token=cf76dfb1-e832-4e59-89b1-3bd35aede586",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142929872-YRQdoRJ2w6xUrKeRRoJDe.jpg?alt=media&token=1373f8e4-e0b7-48c0-8a1f-1f763b6abc5a",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142931251-DtiLit7KAqSvbI7sF9ugp.jpg?alt=media&token=083946bb-117e-4735-9174-5395732894f4",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142974485-DWptB8cYfKwrRlD-S8D7I.jpg?alt=media&token=2b9349cd-b4f5-41de-8173-24deb68abaa3",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142932521-wUoR7rJ7JrTl1Gl20bCIu.jpg?alt=media&token=71582b8b-0609-4c66-a389-83d1d36d0ff7",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142933746-MyMnh_pmAaJbeBN4PvaQJ.jpg?alt=media&token=4201a225-a558-41c6-b3d6-6c4773a5381a",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142935115-4RasHpYigPJb1PnjO-sWp.jpg?alt=media&token=4e47c086-a300-49ef-8340-8dd3a0eddcef",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142936292-mTmYDmkjQCX-y0h3DorKQ.jpg?alt=media&token=ef86ef02-28ac-40de-bf27-ec75e5b8f89b",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142973090-Lf6McZVcg_IQEVblYzwZi.jpg?alt=media&token=b478cc4e-5923-498b-a751-557df0658eda",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142957059-cfq8vZ4lmLVU-U2S8j_0X.jpg?alt=media&token=5a846128-ae0f-40a5-8bd0-468cf9397cae",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142958316-y951F3QisoM8o4OOl3rkZ.jpg?alt=media&token=d6bbf8f7-fc7f-4748-a1dd-781e94b2b19e",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142959589-_J04V1FhD0LwzT07UJ1b2.jpg?alt=media&token=16448bbf-1d8d-4a05-9ff3-2f129a83da43",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142961022-KTdFjhQYf5t6s3-G8AbMP.jpg?alt=media&token=20ab435b-9b49-4175-934a-c21fb832176b",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142962271-2FxscjNiM-WiBWgRNLcSu.jpg?alt=media&token=6a16a7ba-2374-4512-82fc-221cc728e9d2",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142963721-7_8YMgW2yccoJSn2JOEEW.jpg?alt=media&token=d2a1c5d2-1224-41f8-ba3b-998aa33ef670",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142964977-a5EOPm0HKApU8y40iZ1Zr.jpg?alt=media&token=f7c67f8e-2443-48d3-b11d-1feeaca79d8c",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142966274-oLUg4pMl7I09KJcM7K4Uv.jpg?alt=media&token=ba9e15b2-5552-42c0-8f69-2962d6308af3",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142976946-Mm2IY6AgkYawP6DUWkSB1.jpg?alt=media&token=e2e0af28-e8c6-4eab-8269-243cbe484434",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142967699-847jwDbWpuVs6DyJ9h8lI.jpg?alt=media&token=34a3fa9e-d881-42d0-8f10-6ff763e65f31",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142968862-VxFV-xzrRaqwhx8dspHoz.jpg?alt=media&token=108ac8d6-70a9-4761-81eb-3b46270673e5",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142970257-TNa5OoycO0zu6xmozkgCD.jpg?alt=media&token=e0d2347c-d826-48cc-82cf-283a64748d82",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142971639-WUrqCJITHfY-HtKklzjPt.jpg?alt=media&token=66378cc6-14bc-4140-b99e-2c05d53babea",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142975711-AYH9h47W6P9t2jZHtrUXn.jpg?alt=media&token=dedb2220-380e-40d8-9c91-f90401ad7788",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142978108--vuHyV-FJTb42wYJ9nmFd.jpg?alt=media&token=51188f99-f328-46e5-a679-a216d54aca64",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142979507-v9fe_RYGvnhyA5296kZO1.jpg?alt=media&token=7610ca8c-8758-4c61-ab9d-5a1f78a4f10b",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142980799-XULhej7GGhm3RDTARC5sJ.jpg?alt=media&token=8c2b320b-ebe4-40cb-8f07-89a296d21273",
+      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142982233-kG1Y9grt8VgCj0GOMJuVj.jpg?alt=media&token=0f00e375-4457-4282-85bb-3d40f80d02ca"
     ],
     "header": {
       "subtitle": "Our Memories",
@@ -312,27 +358,27 @@
       "banks": [
         {
           "name": "GCash",
-          "qrImage": ""
+          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513362551?alt=media&token=b10bd35b-6853-4c90-8b97-471f216882c5"
         },
         {
           "name": "Maya",
-          "qrImage": ""
+          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513377033?alt=media&token=8b3830e7-368e-4a59-a640-51467391c493"
         },
         {
           "name": "Maribank",
-          "qrImage": ""
+          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513391949?alt=media&token=2c9ea2e0-fb83-42ae-b6a8-539727dd2b6c"
         },
         {
-          "name": "Landbank",
-          "qrImage": ""
+          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513409067?alt=media&token=e1d9d97c-e529-4b37-bca5-562b6a309f4f",
+          "name": "Landbank"
         },
         {
           "name": "BPI",
-          "qrImage": ""
+          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513417609?alt=media&token=554560b3-d8cd-4011-9b5b-62ee4a7a830b"
         },
         {
           "name": "GoTyme",
-          "qrImage": ""
+          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513430599?alt=media&token=a9e2428e-f323-4b8a-9876-9a9084d5648f"
         }
       ]
     },
@@ -341,14 +387,14 @@
       "description1": "We have lovingly curated a wedding registry featuring beautiful, elegant keepsakes and lifestyle pieces from our favorite boutiques.",
       "description2": "Options include premium vintage collection tablewares, designer home accents, and art contributions for our newly renovated residence."
     },
-    "updatedAt": "2026-06-26T09:14:22.851Z"
+    "updatedAt": "2026-07-08T12:24:05.463Z"
   },
   "rsvpCta": {
     "subtitle": "Join Our Day",
     "title": "Kindly RSVP",
     "description": "\"We would be deeply honored by your presence as we pledge our lives, hearts, and dreams under the beautiful Tarlac skies. Please secure your response before November 1, 2026.\"",
     "buttonText": "Confirm Your Attendance",
-    "backgroundImage": "https://images.unsplash.com/photo-1519379169146-d4b170447caa?auto=format&fit=crop&q=80&w=1920"
+    "backgroundImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2FrsvpCta-bg-1783214863938?alt=media&token=b4e7ffdc-1498-4f73-88ab-3f6feee31c21"
   },
   "rsvpForm": {
     "header": {
@@ -389,16 +435,20 @@
     },
     "items": [
       {
-        "q": "Can I bring a plus one?",
-        "a": "To help us maintain an accurate guest count, attendance is limited to individuals who have received a digital invitation and a unique RSVP code. Only guests included in the invitation and successfully registered using the provided code will be accommodated. Unfortunately, those who did not receive an invitation code are not included in our guest list. We sincerely appreciate your understanding and cooperation as we celebrate this special day with our invited family and friends."
+        "a": "To help us maintain an accurate guest count, attendance is limited to individuals who have received a digital invitation and a unique RSVP code. Only guests included in the invitation and successfully registered using the provided code will be accommodated. Unfortunately, those who did not receive an invitation code are not included in our guest list. We sincerely appreciate your understanding and cooperation as we celebrate this special day with our invited family and friends.",
+        "q": "Can I bring a plus one?"
       },
       {
-        "q": "Can I bring my children?",
-        "a": "To allow all our guests—including parents—a night of relaxation and uninhibited celebration, we have chosen for our wedding weekend to be an adults-only affair. We thank you in advance for your understanding and hope you can join us to raise a glass in comfort."
+        "a": "To allow all our guests—including parents—a night of relaxation and uninhibited celebration, we have chosen for our wedding weekend to be an adults-only affair. We thank you in advance for your understanding and hope you can join us to raise a glass in comfort.",
+        "q": "Can I bring my children?"
       },
       {
-        "q": "What time should I arrive?",
-        "a": "The ceremony will commence promptly at 3:00 PM. We recommend arriving 30 to 60 minutes prior (between 2:00 PM and 2:30 PM) to comfortably enjoy a welcome refreshment and find your seats."
+        "a": "We understand that unforeseen circumstances may arise. If you are unable to attend, please submit your RSVP and select either \"Regretfully Declines\" or provide the details of your designated proxy, if applicable. Kindly note that only responses received through the RSVP system will be considered. Guests who do not submit an RSVP by the stated deadline will be assumed unable to attend, and their reserved seat may be released accordingly. Thank you for helping us finalize our guest arrangements.",
+        "q": "What if I cannot attend?"
+      },
+      {
+        "a": "The ceremony will commence promptly at 3:00 PM. We recommend arriving 30 to 60 minutes prior (between 2:00 PM and 2:30 PM) to comfortably enjoy a welcome refreshment and find your seats.",
+        "q": "What time should I arrive?"
       },
       {
         "q": "Is there a dress code?",
@@ -410,21 +460,17 @@
       },
       {
         "q": "Where is the venue and is parking available?",
-        "a": "All celebrations take place within our designated venues in Paniqui, Tarlac. Secure valet and open parking spaces are fully accommodated at the entrance of both properties for all driving guests."
+        "a": "All celebrations take place within our designated venues in Camiling, Tarlac. Secure valet and open parking spaces are fully accommodated at the entrance of both properties for all driving guests."
       },
       {
-        "q": "Can I give gifts or cash?",
-        "a": "Your love, laughter, and presence on our special day are the greatest gifts we could receive. Should you wish to honor us with a contribution towards our new life together, details can be found in the registry section."
+        "a": "Your love, laughter, and presence on our special day are the greatest gifts we could receive. Should you wish to honor us with a contribution towards our new life together, details can be found in the registry section.",
+        "q": "Can I give gifts or cash?"
       },
       {
-        "q": "What if I cannot attend?",
-        "a": "We understand that unforeseen circumstances may arise. If you are unable to attend, please submit your RSVP and select either \"Regretfully Declines\" or provide the details of your designated proxy, if applicable. Kindly note that only responses received through the RSVP system will be considered. Guests who do not submit an RSVP by the stated deadline will be assumed unable to attend, and their reserved seat may be released accordingly. Thank you for helping us finalize our guest arrangements."
-      },
-      {
-        "q": "Who can I contact for questions?",
-        "a": "For any additional logistics or questions, please reach, at +63 995 179 2240 / +63 945 728 7481."
+        "a": "For any additional logistics or questions, please reach out to us at +63 995 179 2240 / +63 945 728 7481.",
+        "q": "Who can I contact for questions?"
       }
     ],
-    "updatedAt": "2026-06-26T09:24:12.585Z"
+    "updatedAt": "2026-07-05T01:25:49.069Z"
   }
 }
