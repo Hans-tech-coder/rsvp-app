@@ -89,7 +89,32 @@ export default function InviteListClient({ initialInvites }: { initialInvites: G
   };
 
   const handleCopy = (code: string) => {
-    navigator.clipboard.writeText(code);
+    const messageTemplate = `You're Invited!
+
+Dear Guest,
+
+We are delighted to invite you to celebrate our wedding with us! Your presence on our special day would mean the world to us.
+
+To view all the details of our wedding and confirm your attendance, please visit our wedding website:
+
+🌐 Wedding Website: https://hans-czay-wedding.vercel.app
+
+To access the RSVP page, use your One-Time RSVP Code below:
+
+🔑 RSVP Code: ${code}
+
+This code is unique to your invitation and can only be used once.
+
+On our website, you'll find everything you need to know about our wedding, including the ceremony and reception details, venue, schedule, dress code, and other important information.
+
+Before submitting your RSVP, please take a moment to read the FAQs section for important reminders and helpful information.
+
+We look forward to celebrating this unforgettable day with you!
+
+With love,
+Hans & Czay`;
+
+    navigator.clipboard.writeText(messageTemplate);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
   };
