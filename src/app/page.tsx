@@ -30,7 +30,48 @@ function MainApp() {
 
   useEffect(() => {
     setMounted(true);
+    
+    // Load saved state on initial client-side render
+    try {
+      const savedStep = localStorage.getItem('wedding_currentStep');
+      const savedHighestStep = localStorage.getItem('wedding_highestVisitedStep');
+      const savedUnlocked = localStorage.getItem('wedding_isUnlocked');
+      const savedInviteCode = localStorage.getItem('wedding_inviteCode');
+      
+      if (savedStep !== null) {
+        setCurrentStep(parseInt(savedStep, 10));
+      }
+      if (savedHighestStep !== null) {
+        setHighestVisitedStep(parseInt(savedHighestStep, 10));
+      }
+      if (savedUnlocked === 'true') {
+        setIsUnlocked(true);
+      }
+      if (savedInviteCode !== null) {
+        setValidatedInviteCode(savedInviteCode);
+      }
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+    }
   }, []);
+
+  // Save state changes to localStorage
+  useEffect(() => {
+    if (mounted) {
+      try {
+        localStorage.setItem('wedding_currentStep', currentStep.toString());
+        localStorage.setItem('wedding_highestVisitedStep', highestVisitedStep.toString());
+        localStorage.setItem('wedding_isUnlocked', isUnlocked.toString());
+        if (validatedInviteCode) {
+          localStorage.setItem('wedding_inviteCode', validatedInviteCode);
+        } else {
+          localStorage.removeItem('wedding_inviteCode');
+        }
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
+    }
+  }, [currentStep, highestVisitedStep, isUnlocked, validatedInviteCode, mounted]);
 
   const goToStep = (step: number) => {
     if (step === currentStep) return;
