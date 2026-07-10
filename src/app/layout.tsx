@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cinzel, Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AudioPlayer } from "@/components/AudioPlayer";
 import Script from "next/script";
 import { getThemeScript } from "@teispace/next-themes/server";
 
@@ -55,6 +56,7 @@ export default function RootLayout({
           noScript
         >
           {children}
+          <AudioPlayer />
         </ThemeProvider>
       </body>
     </html>
