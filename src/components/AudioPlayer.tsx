@@ -14,31 +14,35 @@ export function AudioPlayer() {
     }
 
     const handleInteraction = () => {
-      if (!interactionDone.current && audioRef.current) {
-        interactionDone.current = true;
+      if (audioRef.current && audioRef.current.paused) {
+        const playPromise = audioRef.current.play();
         
-        audioRef.current.play().then(() => {
-          setIsPlaying(true);
-        }).catch((error) => {
-          console.error("Audio playback failed:", error);
-          // Kung sakaling ma-block pa rin, irereset natin para pwede i-click sa next interaction
-          interactionDone.current = false;
-        });
-        
-        // Remove listeners
-        ['click', 'touchstart', 'touchend', 'scroll'].forEach(event => {
-          document.removeEventListener(event, handleInteraction);
-        });
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            // Playback started successfully!
+            setIsPlaying(true);
+            
+            // Now it's safe to remove the listeners because audio is playing
+            ['click', 'touchend'].forEach(event => {
+              document.removeEventListener(event, handleInteraction);
+            });
+          }).catch((error) => {
+            // Playback failed (e.g. they just scrolled instead of tapping)
+            // We DO NOT remove the listeners here so the next tap can try again
+            console.log("Audio waiting for valid interaction...");
+          });
+        }
       }
     };
 
-    // Add listeners for different types of user interactions
-    ['click', 'touchstart', 'touchend', 'scroll'].forEach(event => {
-      document.addEventListener(event, handleInteraction, { once: true });
+    // Listen only to explicit tap/click events, not scroll.
+    // Do not use { once: true } so we can retry if the first tap fails.
+    ['click', 'touchend'].forEach(event => {
+      document.addEventListener(event, handleInteraction);
     });
 
     return () => {
-      ['click', 'touchstart', 'touchend', 'scroll'].forEach(event => {
+      ['click', 'touchend'].forEach(event => {
         document.removeEventListener(event, handleInteraction);
       });
     };
@@ -58,7 +62,15 @@ export function AudioPlayer() {
 
   return (
     <>
-      <audio ref={audioRef} src="/bg-music.mp3" loop preload="auto" />
+      <audio 
+        id="wedding-bg-music"
+        ref={audioRef} 
+        src="/bg-music.mp3" 
+        loop 
+        preload="auto" 
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
       <button
         onClick={togglePlay}
         className={`fixed bottom-6 right-6 z-50 p-3 rounded-full bg-wedding-gold/20 backdrop-blur-md border border-wedding-gold/30 text-wedding-gold shadow-lg transition-all duration-300 hover:scale-110 hover:bg-wedding-gold/30 ${

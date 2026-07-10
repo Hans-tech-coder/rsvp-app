@@ -62,6 +62,12 @@ function MainApp() {
 
   const nextStep = () => {
     goToStep(currentStep + 1);
+    
+    // Play audio synchronously during user interaction (fixes iOS Safari)
+    const audioEl = document.getElementById('wedding-bg-music') as HTMLAudioElement;
+    if (audioEl && audioEl.paused) {
+      audioEl.play().catch(e => console.log('Audio autoplay prevented:', e));
+    }
   };
 
   const handleRsvpSubmitSuccess = () => {
