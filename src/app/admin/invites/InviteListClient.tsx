@@ -2,14 +2,17 @@
 
 import { useState } from 'react';
 import { Guest } from '@/types';
-import { generateInviteCodes, deleteInviteCode, regenerateInviteCode } from '@/app/actions/admin';
-import { Loader2, Trash2, Copy, Check, RefreshCw } from 'lucide-react';
+import { generateInviteCodes, deleteInviteCode, regenerateInviteCode, updateInviteMessageTemplate } from '@/app/actions/admin';
+import { Loader2, Trash2, Copy, Check, RefreshCw, MessageSquarePlus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { AdminModal } from '../components/AdminModal';
 import { TablePagination } from '../components/TablePagination';
 
-export default function InviteListClient({ initialInvites }: { initialInvites: Guest[] }) {
+export default function InviteListClient({ initialInvites, initialTemplate }: { initialInvites: Guest[], initialTemplate: string }) {
   const invites = initialInvites;
+  const [template, setTemplate] = useState(initialTemplate);
+  const [editingTemplate, setEditingTemplate] = useState(initialTemplate);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [codeCount, setCodeCount] = useState(10);
   const [generating, setGenerating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -89,34 +92,26 @@ export default function InviteListClient({ initialInvites }: { initialInvites: G
   };
 
   const handleCopy = (code: string) => {
-    const messageTemplate = `You're Invited!
-
-Dear Guest,
-
-We are delighted to invite you to celebrate our wedding with us! Your presence on our special day would mean the world to us.
-
-To view all the details of our wedding and confirm your attendance, please visit our wedding website:
-
-🌐 Wedding Website: https://hans-czay-wedding.vercel.app
-
-To access the RSVP page, use your One-Time RSVP Code below:
-
-🔑 RSVP Code: ${code}
-
-This code is unique to your invitation and can only be used once.
-
-On our website, you'll find everything you need to know about our wedding, including the ceremony and reception details, venue, schedule, dress code, and other important information.
-
-Before submitting your RSVP, please take a moment to read the FAQs section for important reminders and helpful information.
-
-We look forward to celebrating this unforgettable day with you!
-
-With love,
-Hans & Czay`;
+    const messageTemplate = template.replace('{{CODE}}', code);
 
     navigator.clipboard.writeText(messageTemplate);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const handleSaveTemplate = async () => {
+    setIsProcessing(true);
+    const res = await updateInviteMessageTemplate(editingTemplate);
+    setIsProcessing(false);
+    
+    if (res.success) {
+      setTemplate(editingTemplate);
+      setIsEditModalOpen(false);
+      setAlertConfig({ isOpen: true, title: 'Success', message: 'Message template updated successfully!', variant: 'success' });
+      router.refresh();
+    } else {
+      setAlertConfig({ isOpen: true, title: 'Error', message: res.error, variant: 'danger' });
+    }
   };
 
   // Filter logic
@@ -138,6 +133,16 @@ Hans & Czay`;
           <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">Create new unique codes for your guests</p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              setEditingTemplate(template);
+              setIsEditModalOpen(true);
+            }}
+            className="bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-zinc-800 shadow-sm flex items-center transition-all"
+          >
+            <MessageSquarePlus className="w-4 h-4 mr-2" />
+            Edit Message
+          </button>
           <input
             type="number"
             min="1"
@@ -264,6 +269,33 @@ Hans & Czay`;
         isLoading={isProcessing}
         confirmText={confirmConfig.confirmText}
       />
+
+      <AdminModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onConfirm={handleSaveTemplate}
+        title="Edit Invite Message"
+        message=""
+        type="confirm"
+        variant="info"
+        isLoading={isProcessing}
+        confirmText="Save Message"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600 dark:text-zinc-400">
+            Customize the message copied when you click the copy button. 
+            <br/><br/>
+            <strong>Important:</strong> Keep the <code className="bg-gray-100 dark:bg-zinc-800 px-1 py-0.5 rounded text-blue-600 dark:text-blue-400">{"{{CODE}}"}</code> tag in your message. It will automatically be replaced with the unique RSVP code.
+          </p>
+          <textarea
+            value={editingTemplate}
+            onChange={(e) => setEditingTemplate(e.target.value)}
+            rows={12}
+            className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-zinc-100 outline-none transition-all resize-y"
+            placeholder="Type your invitation message here..."
+          />
+        </div>
+      </AdminModal>
     </div>
   );
 }

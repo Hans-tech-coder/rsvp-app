@@ -15,6 +15,7 @@ interface AdminModalProps {
   isLoading?: boolean;
   confirmText?: string;
   cancelText?: string;
+  children?: ReactNode;
 }
 
 export function AdminModal({
@@ -27,7 +28,8 @@ export function AdminModal({
   variant = 'info',
   isLoading = false,
   confirmText = 'Confirm',
-  cancelText = 'Cancel'
+  cancelText = 'Cancel',
+  children
 }: AdminModalProps) {
   if (!isOpen) return null;
 
@@ -63,9 +65,13 @@ export function AdminModal({
         </div>
         
         <div className="p-6">
-          <p className="text-gray-600 dark:text-zinc-400">
-            {message}
-          </p>
+          {children ? (
+            children
+          ) : (
+            <p className="text-gray-600 dark:text-zinc-400">
+              {message}
+            </p>
+          )}
         </div>
         
         <div className="p-5 border-t border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950/50 flex justify-end gap-3">

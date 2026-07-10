@@ -123,3 +123,51 @@ export async function deleteRegistryGift(giftId: string) {
     return { success: false, error: error.message || 'Failed to delete gift' };
   }
 }
+
+const DEFAULT_INVITE_TEMPLATE = `You're Invited!
+
+Dear Guest,
+
+We are delighted to invite you to celebrate our wedding with us! Your presence on our special day would mean the world to us.
+
+To view all the details of our wedding and confirm your attendance, please visit our wedding website:
+
+🌐 Wedding Website: https://hans-czay-wedding.vercel.app
+
+To access the RSVP page, use your One-Time RSVP Code below:
+
+🔑 RSVP Code: {{CODE}}
+
+This code is unique to your invitation and can only be used once.
+
+On our website, you'll find everything you need to know about our wedding, including the ceremony and reception details, venue, schedule, dress code, and other important information.
+
+Before submitting your RSVP, please take a moment to read the FAQs section for important reminders and helpful information.
+
+We look forward to celebrating this unforgettable day with you!
+
+With love,
+Hans & Czay`;
+
+export async function getInviteMessageTemplate() {
+  try {
+    const doc = await getAdminDb().collection('settings').doc('inviteTemplate').get();
+    if (doc.exists) {
+      return doc.data()?.template || DEFAULT_INVITE_TEMPLATE;
+    }
+    return DEFAULT_INVITE_TEMPLATE;
+  } catch (error) {
+    console.error('Failed to fetch invite template:', error);
+    return DEFAULT_INVITE_TEMPLATE;
+  }
+}
+
+export async function updateInviteMessageTemplate(template: string) {
+  try {
+    await getAdminDb().collection('settings').doc('inviteTemplate').set({ template });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to update template' };
+  }
+}
+
