@@ -66,7 +66,16 @@ export function OurStoryScreen({ onContinue }: OurStoryScreenProps) {
               <div className="bg-wedding-dark/40 p-6 md:p-8 rounded-lg shadow-sm border border-wedding-gold/10 hover:shadow-lg hover:border-wedding-gold/30 transition-all duration-500">
                 <span className="text-xs uppercase tracking-widest text-wedding-gold/70 font-semibold block mb-1">{item.date}</span>
                 <h3 className="text-2xl font-cinzel text-wedding-cream font-light mb-3">{item.title}</h3>
-                <img src={item.image} alt={item.title} className="w-full h-48 object-cover rounded-md mb-4 brightness-[0.95] hover:brightness-110 transition-all duration-500" />
+                <div className="relative w-full h-64 md:h-72 mb-6 rounded-xl overflow-hidden group shadow-lg">
+                  <img 
+                    src={item.image} 
+                    alt={item.title} 
+                    className="absolute inset-0 w-full h-full object-cover object-[center_25%] transform group-hover:scale-105 transition-transform duration-700 ease-out" 
+                  />
+                  {/* Cinematic gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-wedding-dark/80 via-transparent to-wedding-dark/20 opacity-80 group-hover:opacity-40 transition-opacity duration-500" />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-wedding-gold/20 rounded-xl" />
+                </div>
                 <p className="text-sm font-cormorant text-wedding-cream leading-relaxed">{item.description}</p>
               </div>
             </motion.div>
