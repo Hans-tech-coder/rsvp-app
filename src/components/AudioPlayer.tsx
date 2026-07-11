@@ -2,13 +2,19 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export function AudioPlayer() {
+  const pathname = usePathname();
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const interactionDone = useRef(false);
 
+  // Do not render anything if we are on an admin route
+  const isAdmin = pathname?.startsWith('/admin');
+
   useEffect(() => {
+    if (isAdmin) return;
     if (audioRef.current) {
       audioRef.current.volume = 0.5; // Set default volume to 50%
     }
@@ -59,6 +65,10 @@ export function AudioPlayer() {
       setIsPlaying(!isPlaying);
     }
   };
+
+  if (isAdmin) {
+    return null;
+  }
 
   return (
     <>
