@@ -1,6 +1,7 @@
 {
   "global": {
     "logo": "/hansandczay.svg",
+    "ogImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fentrance-bg-1783214887566?alt=media&token=df038175-8252-4450-b275-aaf32ce328e3",
     "brideName": "Czay",
     "groomName": "Hans",
     "dateFull": "Sunday, the twentieth of December, two thousand twenty-sixs",

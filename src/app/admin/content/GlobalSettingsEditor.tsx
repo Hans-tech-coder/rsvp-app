@@ -13,6 +13,7 @@ export function GlobalSettingsEditor() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingOgImage, setUploadingOgImage] = useState(false);
   const [hasBackup, setHasBackup] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
@@ -22,6 +23,7 @@ export function GlobalSettingsEditor() {
   // Extract defaults
   const defaultData = {
     logo: weddingContent.global.logo,
+    ogImage: weddingContent.global.ogImage || '',
     brideName: weddingContent.global.brideName,
     groomName: weddingContent.global.groomName,
     venueShort: weddingContent.global.venueShort,
@@ -89,6 +91,26 @@ export function GlobalSettingsEditor() {
       alert("Failed to upload logo. Please try again.");
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  const handleOgImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingOgImage(true);
+    setSaved(false);
+    
+    try {
+      const storageRef = ref(storage, `images/global-og-${Date.now()}`);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      setFormData(prev => ({ ...prev, ogImage: downloadURL }));
+    } catch (error) {
+      console.error("Error uploading og image:", error);
+      alert("Failed to upload preview image. Please try again.");
+    } finally {
+      setUploadingOgImage(false);
     }
   };
 
@@ -190,6 +212,52 @@ export function GlobalSettingsEditor() {
               >
                 <Upload className="w-4 h-4" />
                 Upload New Logo
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
+
+      {/* OG Image Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Link Preview Image (Open Graph)</h3>
+        <div className="flex flex-col md:flex-row gap-6 items-start">
+          <div className="relative w-64 h-32 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0 flex items-center justify-center p-4">
+            <img 
+              src={formData.ogImage} 
+              alt="OG Image Preview" 
+              className="max-w-full max-h-full object-cover"
+            />
+            {uploadingOgImage && (
+              <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white">
+                <Loader2 className="w-6 h-6 animate-spin mb-2" />
+                <span className="text-xs font-medium">Uploading...</span>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex-1 space-y-3">
+            <p className="text-sm text-gray-500 dark:text-zinc-400">
+              This image appears when you share the website link on social media platforms (like Facebook or iMessage).
+              Recommended: A landscape image (1200x630px).
+            </p>
+            <div>
+              <input 
+                type="file" 
+                id="global-og-upload" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={handleOgImageUpload}
+                disabled={uploadingOgImage}
+              />
+              <label 
+                htmlFor="global-og-upload"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer transition-colors"
+              >
+                <Upload className="w-4 h-4" />
+                Upload Preview Image
               </label>
             </div>
           </div>

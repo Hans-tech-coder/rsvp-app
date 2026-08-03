@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import Script from "next/script";
 import { getThemeScript } from "@teispace/next-themes/server";
+import { getAdminDb } from "@/lib/firebase/admin";
+import weddingContent from "@/data/wedding-content.json";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -23,13 +25,53 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Hans & Czay - Wedding RSVP",
-  description: "The Royal Invitation of Hans and Czay. December 20, 2026.",
-  icons: {
-    icon: "/hansandczay.svg",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  let ogImage = weddingContent.global.ogImage;
+  const title = "Hans & Czay - Wedding RSVP";
+  const description = "The Royal Invitation of Hans and Czay. December 20, 2026.";
+
+  try {
+    const db = getAdminDb();
+    const docSnap = await db.collection('websiteContent').doc('globalSettings').get();
+    
+    if (docSnap.exists) {
+      const data = docSnap.data();
+      if (data?.ogImage) {
+        ogImage = data.ogImage;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching metadata from Firebase:", error);
+  }
+
+  return {
+    title,
+    description,
+    icons: {
+      icon: "/hansandczay.svg",
+    },
+    openGraph: {
+      title,
+      description,
+      url: "https://hans-czay-wedding.vercel.app/",
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
+  };
+}
 
 export default function RootLayout({
   children,
