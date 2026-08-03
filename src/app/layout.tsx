@@ -27,8 +27,8 @@ const inter = Inter({
 
 export async function generateMetadata(): Promise<Metadata> {
   let ogImage = weddingContent.global.ogImage;
-  const title = "Hans & Czay - Wedding RSVP";
-  const description = "The Royal Invitation of Hans and Czay. December 20, 2026.";
+  const title = "Hans & Czay | A Celebration of Love";
+  const description = "We joyfully request the honor of your presence as we celebrate the beginning of our forever. Join us on December 20, 2026.";
 
   try {
     const db = getAdminDb();
