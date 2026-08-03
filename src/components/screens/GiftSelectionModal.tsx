@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface GiftSelectionModalProps {
   isOpen: boolean;
@@ -9,6 +10,9 @@ interface GiftSelectionModalProps {
 }
 
 export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: GiftSelectionModalProps) {
+  const { content } = useWeddingContent();
+  const formContent = content.rsvpForm;
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -106,6 +110,23 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
                   className="w-full bg-wedding-dark/50 border border-wedding-gold/30 rounded-sm px-4 py-3 text-wedding-cream font-inter text-sm focus:outline-none focus:border-wedding-gold transition-colors placeholder:text-wedding-cream/30 resize-none"
                   placeholder="Wishing you a lifetime of love and happiness..."
                 />
+              </div>
+
+              {/* Data Privacy Consent */}
+              <div className="pt-2">
+                <label className="flex items-start cursor-pointer group">
+                  <div className="relative flex items-center justify-center mt-1 mr-3 shrink-0">
+                    <input type="checkbox" required className="peer sr-only" />
+                    <div className="w-5 h-5 border border-wedding-gold/50 rounded-sm bg-transparent peer-checked:bg-wedding-gold peer-checked:border-wedding-gold peer-checked:[&>svg]:opacity-100 transition-all duration-300 flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-wedding-dark opacity-0 transition-opacity duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </div>
+                  <span className="text-xs font-inter text-wedding-cream/70 group-hover:text-wedding-cream/90 transition-colors leading-relaxed">
+                    {formContent.actions.privacyText}
+                  </span>
+                </label>
               </div>
 
               <div className="pt-4">
