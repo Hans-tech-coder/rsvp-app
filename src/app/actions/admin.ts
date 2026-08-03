@@ -171,3 +171,58 @@ export async function updateInviteMessageTemplate(template: string) {
   }
 }
 
+export async function resetRegistryGift(giftId: string) {
+  try {
+    const batch = getAdminDb().batch();
+    
+    // 1. Reset the gift
+    const giftRef = getAdminDb().collection('registryGifts').doc(giftId);
+    batch.update(giftRef, {
+      currentCount: 0,
+      isFull: false
+    });
+
+    // 2. Delete all selections for this gift
+    const selectionsSnapshot = await getAdminDb()
+      .collection('giftSelections')
+      .where('giftId', '==', giftId)
+      .get();
+      
+    selectionsSnapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to reset gift' };
+  }
+}
+
+export async function deleteGiftSelection(selectionId: string, giftId: string) {
+  try {
+    const selectionRef = getAdminDb().collection('giftSelections').doc(selectionId);
+    const giftRef = getAdminDb().collection('registryGifts').doc(giftId);
+
+    await getAdminDb().runTransaction(async (transaction) => {
+      const selectionDoc = await transaction.get(selectionRef);
+      if (!selectionDoc.exists) throw new Error('Selection not found');
+
+      const giftDoc = await transaction.get(giftRef);
+      if (giftDoc.exists) {
+        const giftData = giftDoc.data() as any;
+        const newCount = Math.max(0, (giftData.currentCount || 0) - 1);
+        transaction.update(giftRef, {
+          currentCount: newCount,
+          isFull: newCount >= giftData.maxCount
+        });
+      }
+
+      transaction.delete(selectionRef);
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to delete gift selection' };
+  }
+}

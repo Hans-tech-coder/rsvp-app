@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { RegistryGift } from '@/types';
-import { addRegistryGift, deleteRegistryGift, updateRegistryGift } from '@/app/actions/admin';
-import { Loader2, Plus, Edit2, Trash2 } from 'lucide-react';
+import { addRegistryGift, deleteRegistryGift, updateRegistryGift, resetRegistryGift } from '@/app/actions/admin';
+import { Loader2, Plus, Edit2, Trash2, RefreshCcw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { AdminModal } from '../components/AdminModal';
 import { TablePagination } from '../components/TablePagination';
@@ -96,6 +96,27 @@ export default function GiftsClient({ initialGifts }: { initialGifts: RegistryGi
     });
   };
 
+  const handleReset = (id: string) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Reset Gift Claims',
+      message: 'Are you sure you want to reset this gift? This will delete all guest claims for this item.',
+      variant: 'warning',
+      confirmText: 'Reset',
+      action: async () => {
+        setIsProcessing(true);
+        const res = await resetRegistryGift(id);
+        setIsProcessing(false);
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        if (res.success) {
+          router.refresh();
+        } else {
+          setAlertConfig({ isOpen: true, title: 'Error', message: res.error, variant: 'danger' });
+        }
+      }
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] gap-4 transition-colors duration-200">
@@ -158,6 +179,11 @@ export default function GiftsClient({ initialGifts }: { initialGifts: RegistryGi
                   </td>
                   <td className="px-5 py-4 text-right">
                     <div className="flex justify-end gap-2">
+                      {gift.isFull && (
+                        <button onClick={() => handleReset(gift.id!)} title="Reset Claims" className="p-2 text-gray-400 dark:text-zinc-500 hover:text-orange-600 dark:hover:text-orange-400 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors">
+                          <RefreshCcw className="w-4 h-4" />
+                        </button>
+                      )}
                       <button onClick={() => openEditModal(gift)} className="p-2 text-gray-400 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors">
                         <Edit2 className="w-4 h-4" />
                       </button>
