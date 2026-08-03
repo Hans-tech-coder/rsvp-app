@@ -32,6 +32,7 @@ export async function generateInviteCodes(count: number) {
       batch.set(docRef, {
         inviteCode: code,
         codeStatus: 'unused',
+        isCopied: false,
         createdAt: FieldValue.serverTimestamp(),
       });
     }
@@ -65,6 +66,7 @@ export async function regenerateInviteCode(oldCode: string) {
     batch.set(guestsRef.doc(newCode), {
       inviteCode: newCode,
       codeStatus: 'unused',
+      isCopied: false,
       createdAt: FieldValue.serverTimestamp(),
     });
     
@@ -226,3 +228,17 @@ export async function deleteGiftSelection(selectionId: string, giftId: string) {
     return { success: false, error: error.message || 'Failed to delete gift selection' };
   }
 }
+
+export async function toggleInviteCopiedStatus(code: string, isCopied: boolean) {
+  try {
+    const guestsRef = getAdminDb().collection('guests').doc(code);
+    await guestsRef.update({
+      isCopied,
+      updatedAt: FieldValue.serverTimestamp()
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to update copied status' };
+  }
+}
+

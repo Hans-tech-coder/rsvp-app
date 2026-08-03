@@ -22,6 +22,7 @@ export default async function InvitesPage() {
       // Convert timestamps to string/Date for serialization to client component
       createdAt: data.createdAt?.toDate()?.toISOString() || null,
       submittedAt: data.submittedAt?.toDate()?.toISOString() || null,
+      updatedAt: data.updatedAt?.toDate()?.toISOString() || null,
     } as unknown as Guest;
   });
   

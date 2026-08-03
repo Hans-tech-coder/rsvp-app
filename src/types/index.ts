@@ -13,6 +13,7 @@ export interface Guest {
   message?: string;
   submittedAt?: Date | any; // Firestore Timestamp
   createdAt: Date | any; // Firestore Timestamp
+  isCopied?: boolean;
 }
 
 export interface RegistryGift {
