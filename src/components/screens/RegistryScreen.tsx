@@ -60,7 +60,7 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
                 {content.registry?.bankTransfer?.description || "Directly support our honeymoon adventures or first home goals with an elegant direct bank contribution."}
               </p>
               
-              <div className="grid grid-cols-2 gap-3 mt-auto">
+              <div className={`grid gap-3 mt-auto ${(content.registry?.bankTransfer?.banks || []).length >= 4 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                 {(content.registry?.bankTransfer?.banks || []).map((bank: any) => (
                   <button
                     key={bank.name}

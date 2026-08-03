@@ -79,18 +79,24 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             Principal Sponsors 
             <span className="w-16 md:w-32 h-[1px] bg-gradient-to-l from-transparent to-wedding-gold/30"></span>
           </h3>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 md:gap-x-8 gap-y-8 md:gap-y-10 max-w-6xl mx-auto px-4 md:px-0">
-            {content.entourage.principalSponsors.map((sponsor, index) => (
-              <motion.div 
-                whileHover={{ scale: 1.05 }} 
-                key={index} 
-                className="text-center flex items-center justify-center gap-2 md:gap-3 group cursor-default"
-              >
-                <div className="w-1 h-1 rotate-45 bg-wedding-gold/40 group-hover:bg-wedding-gold transition-colors duration-500 hidden sm:block"></div>
-                <h4 className="font-cormorant text-base sm:text-lg md:text-xl lg:text-2xl text-wedding-cream/90 font-medium tracking-wide md:tracking-widest group-hover:text-wedding-goldlight group-hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] transition-all duration-500 ease-out">{sponsor}</h4>
-                <div className="w-1 h-1 rotate-45 bg-wedding-gold/40 group-hover:bg-wedding-gold transition-colors duration-500 hidden sm:block"></div>
-              </motion.div>
-            ))}
+          <div className="grid grid-cols-2 gap-4 md:gap-16 max-w-5xl mx-auto px-2 md:px-0 relative">
+            <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-wedding-gold/20 to-transparent -translate-x-1/2 hidden md:block"></div>
+            
+            <div className="flex flex-col items-center">
+              <ul className="text-center space-y-6 md:space-y-8 w-full px-2">
+                {content.entourage.principalSponsors.filter(s => !s.startsWith('Mr.')).map((name, index) => (
+                  <li key={index} className="font-cormorant text-xl md:text-2xl lg:text-3xl text-wedding-cream/85 hover:text-wedding-goldlight hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default">{name}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex flex-col items-center">
+              <ul className="text-center space-y-6 md:space-y-8 w-full px-2">
+                {content.entourage.principalSponsors.filter(s => s.startsWith('Mr.')).map((name, index) => (
+                  <li key={index} className="font-cormorant text-xl md:text-2xl lg:text-3xl text-wedding-cream/85 hover:text-wedding-goldlight hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default">{name}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </motion.div>
 
