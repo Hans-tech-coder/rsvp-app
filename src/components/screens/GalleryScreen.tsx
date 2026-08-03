@@ -14,6 +14,15 @@ interface GalleryScreenProps {
 export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenProps) {
   const { content } = useWeddingContent();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [direction, setDirection] = useState(0);
+  const [isMobile, setIsMobile] = useState(true);
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Call the callback when lightbox state changes
   React.useEffect(() => {
@@ -34,6 +43,7 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
   const handlePrev = (e?: React.MouseEvent | Event) => {
     e?.stopPropagation();
     if (lightboxIndex !== null) {
+      setDirection(-1);
       setLightboxIndex((prev) => (prev === 0 ? imagesArray.length - 1 : prev! - 1));
     }
   };
@@ -41,6 +51,7 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
   const handleNext = (e?: React.MouseEvent | Event) => {
     e?.stopPropagation();
     if (lightboxIndex !== null) {
+      setDirection(1);
       setLightboxIndex((prev) => (prev === imagesArray.length - 1 ? 0 : prev! + 1));
     }
   };
@@ -56,6 +67,51 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
   const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  };
+
+  const lightboxVariants = {
+    enter: ({ direction, isMobile }: { direction: number; isMobile: boolean }) => ({
+      rotateX: isMobile ? (direction > 0 ? 90 : -90) : 0,
+      rotateY: !isMobile ? (direction > 0 ? 90 : -90) : 0,
+      z: -300,
+      opacity: 0,
+      scale: 0.85,
+      filter: "blur(10px)",
+    }),
+    center: {
+      zIndex: 1,
+      rotateX: 0,
+      rotateY: 0,
+      z: 0,
+      opacity: 1,
+      scale: 1,
+      filter: "blur(0px)",
+      transition: {
+        rotateX: { type: "spring", stiffness: 100, damping: 20 },
+        rotateY: { type: "spring", stiffness: 100, damping: 20 },
+        z: { type: "spring", stiffness: 100, damping: 20 },
+        opacity: { duration: 0.8, ease: [0.64, 0.04, 0.35, 1] },
+        scale: { duration: 0.8, ease: [0.64, 0.04, 0.35, 1] },
+        filter: { duration: 0.8, ease: [0.64, 0.04, 0.35, 1] }
+      }
+    },
+    exit: ({ direction, isMobile }: { direction: number; isMobile: boolean }) => ({
+      zIndex: 0,
+      rotateX: isMobile ? (direction < 0 ? 90 : -90) : 0,
+      rotateY: !isMobile ? (direction < 0 ? 90 : -90) : 0,
+      z: -300,
+      opacity: 0,
+      scale: 0.85,
+      filter: "blur(10px)",
+      transition: {
+        rotateX: { type: "spring", stiffness: 100, damping: 20 },
+        rotateY: { type: "spring", stiffness: 100, damping: 20 },
+        z: { type: "spring", stiffness: 100, damping: 20 },
+        opacity: { duration: 0.8, ease: [0.64, 0.04, 0.35, 1] },
+        scale: { duration: 0.8, ease: [0.64, 0.04, 0.35, 1] },
+        filter: { duration: 0.8, ease: [0.64, 0.04, 0.35, 1] }
+      }
+    })
   };
 
 
@@ -87,7 +143,7 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
                 <div 
                   key={`top-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
-                  onClick={() => setLightboxIndex(index)}
+                  onClick={() => { setDirection(0); setLightboxIndex(index); }}
                 >
                   <img src={src} alt={`Engagement ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
                   <div className="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
@@ -107,7 +163,7 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
                 <div 
                   key={`bottom-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
-                  onClick={() => setLightboxIndex(originalIndex)}
+                  onClick={() => { setDirection(0); setLightboxIndex(originalIndex); }}
                 >
                   <img src={src} alt={`Memory ${originalIndex + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" />
                   <div className="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
@@ -144,37 +200,51 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            style={{ perspective: 1200 }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 touch-none"
             onClick={() => setLightboxIndex(null)}
           >
-            <motion.div 
-              key={lightboxIndex}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing"
-              drag="y"
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={0.8}
-              onDragEnd={(e: any, info: PanInfo) => {
-                const swipeThreshold = 50;
-                const velocityY = info.velocity.y;
-                if (info.offset.y < -swipeThreshold || velocityY < -500) {
-                  handleNext();
-                } else if (info.offset.y > swipeThreshold || velocityY > 500) {
-                  handlePrev();
-                }
-              }}
-            >
-              <img 
-                src={imagesArray[lightboxIndex]} 
-                alt={`Gallery view ${lightboxIndex + 1}`} 
-                draggable={false}
-                className="max-w-full max-h-[85vh] object-contain rounded-sm shadow-2xl pointer-events-auto select-none" 
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              />
-            </motion.div>
+            <AnimatePresence custom={{ direction, isMobile }} initial={false}>
+              <motion.div 
+                key={lightboxIndex}
+                custom={{ direction, isMobile }}
+                variants={lightboxVariants as any}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing"
+                style={{ transformStyle: "preserve-3d" }}
+                drag={isMobile ? "y" : "x"}
+                dragConstraints={isMobile ? { top: 0, bottom: 0 } : { left: 0, right: 0 }}
+                dragElastic={0.8}
+                onDragEnd={(e: any, info: PanInfo) => {
+                  const swipeThreshold = 50;
+                  if (isMobile) {
+                    const velocityY = info.velocity.y;
+                    if (info.offset.y < -swipeThreshold || velocityY < -500) {
+                      handleNext();
+                    } else if (info.offset.y > swipeThreshold || velocityY > 500) {
+                      handlePrev();
+                    }
+                  } else {
+                    const velocityX = info.velocity.x;
+                    if (info.offset.x < -swipeThreshold || velocityX < -500) {
+                      handleNext();
+                    } else if (info.offset.x > swipeThreshold || velocityX > 500) {
+                      handlePrev();
+                    }
+                  }
+                }}
+              >
+                <img 
+                  src={imagesArray[lightboxIndex]} 
+                  alt={`Gallery view ${lightboxIndex + 1}`} 
+                  draggable={false}
+                  className="max-w-full max-h-[85vh] object-contain rounded-sm shadow-2xl pointer-events-auto select-none" 
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                />
+              </motion.div>
+            </AnimatePresence>
             
             <button 
               onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
