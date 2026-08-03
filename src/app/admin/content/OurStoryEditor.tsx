@@ -155,7 +155,8 @@ export function OurStoryEditor() {
         date: "",
         title: "",
         image: "",
-        description: ""
+        description: "",
+        videoLink: ""
       }
     ]);
     setSaved(false);
@@ -575,6 +576,18 @@ function SortableStoryItem({
               onChange={(e) => handleChange(index, e)}
               rows={4}
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all resize-none"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Video Link (Optional)</label>
+            <input 
+              type="text" 
+              name="videoLink"
+              value={item.videoLink || ''}
+              onChange={(e) => handleChange(index, e)}
+              placeholder="e.g. https://www.youtube.com/embed/... or .mp4 link"
+              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
             />
           </div>
         </div>

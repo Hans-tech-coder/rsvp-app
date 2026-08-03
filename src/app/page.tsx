@@ -73,6 +73,14 @@ function MainApp() {
     }
   }, [currentStep, highestVisitedStep, isUnlocked, validatedInviteCode, mounted]);
 
+  useEffect(() => {
+    if (isLightboxOpen) {
+      document.body.classList.add('lightbox-open');
+    } else {
+      document.body.classList.remove('lightbox-open');
+    }
+  }, [isLightboxOpen]);
+
   const goToStep = (step: number) => {
     if (step === currentStep) return;
     
@@ -102,13 +110,15 @@ function MainApp() {
   };
 
   const nextStep = () => {
-    goToStep(currentStep + 1);
-    
-    // Play audio synchronously during user interaction (fixes iOS Safari)
-    const audioEl = document.getElementById('wedding-bg-music') as HTMLAudioElement;
-    if (audioEl && audioEl.paused) {
-      audioEl.play().catch(e => console.log('Audio autoplay prevented:', e));
+    // Play audio synchronously during the first user interaction (WelcomeScreen continue button)
+    if (currentStep === 0) {
+      const audioEl = document.getElementById('wedding-bg-music') as HTMLAudioElement;
+      if (audioEl && audioEl.paused) {
+        audioEl.play().catch(e => console.log('Audio autoplay prevented:', e));
+      }
     }
+
+    goToStep(currentStep + 1);
   };
 
   const handleRsvpSubmitSuccess = () => {
@@ -216,7 +226,10 @@ function MainApp() {
                   exit="exit"
                   className="absolute inset-0 w-full h-full pointer-events-auto"
                 >
-                  <OurStoryScreen onContinue={nextStep} />
+                  <OurStoryScreen 
+                    onContinue={nextStep} 
+                    onLightboxChange={setIsLightboxOpen}
+                  />
                 </motion.div>
               )}
 

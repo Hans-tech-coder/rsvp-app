@@ -1,16 +1,58 @@
 "use client";
 
-import React from 'react';
-import { motion , Variants } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
+import { Play } from 'lucide-react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface OurStoryScreenProps {
   onContinue: () => void;
+  onLightboxChange?: (isOpen: boolean) => void;
 }
 
-export function OurStoryScreen({ onContinue }: OurStoryScreenProps) {
+export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenProps) {
   const { content } = useWeddingContent();
+  const [activeVideo, setActiveVideo] = useState<{link: string, coverImage: string} | null>(null);
+  const [wasMusicPlaying, setWasMusicPlaying] = useState(false);
+
+  useEffect(() => {
+    if (activeVideo) {
+      document.body.classList.add('video-modal-open');
+    } else {
+      document.body.classList.remove('video-modal-open');
+    }
+    return () => {
+      document.body.classList.remove('video-modal-open');
+    };
+  }, [activeVideo]);
+
+  const openVideo = (link: string, coverImage: string) => {
+    const audioEl = document.getElementById('wedding-bg-music') as HTMLAudioElement;
+    if (audioEl && !audioEl.paused) {
+      setWasMusicPlaying(true);
+      audioEl.pause();
+    } else {
+      setWasMusicPlaying(false);
+    }
+    setActiveVideo({ link, coverImage });
+    if (onLightboxChange) {
+      onLightboxChange(true);
+    }
+  };
+
+  const closeVideo = () => {
+    setActiveVideo(null);
+    if (onLightboxChange) {
+      onLightboxChange(false);
+    }
+    if (wasMusicPlaying) {
+      const audioEl = document.getElementById('wedding-bg-music') as HTMLAudioElement;
+      if (audioEl) {
+        audioEl.play().catch(console.error);
+      }
+    }
+  };
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
@@ -77,6 +119,16 @@ export function OurStoryScreen({ onContinue }: OurStoryScreenProps) {
                   <div className="absolute inset-0 ring-1 ring-inset ring-wedding-gold/20 rounded-xl" />
                 </div>
                 <p className="text-sm font-cormorant text-wedding-cream leading-relaxed">{item.description}</p>
+                {item.videoLink && (
+                  <button
+                    onClick={() => openVideo(item.videoLink!, item.image)}
+                    data-suppress-audio-autoplay="true"
+                    className="mt-6 flex items-center justify-center gap-2 px-6 py-2.5 bg-wedding-gold/10 hover:bg-wedding-gold/20 border border-wedding-gold/30 rounded-full transition-all duration-300 group/btn w-fit"
+                  >
+                    <Play className="w-4 h-4 text-wedding-gold group-hover/btn:scale-110 transition-transform duration-300" fill="currentColor" />
+                    <span className="text-xs uppercase tracking-widest text-wedding-gold font-medium">Watch Video</span>
+                  </button>
+                )}
               </div>
             </motion.div>
           ))}
@@ -99,6 +151,68 @@ export function OurStoryScreen({ onContinue }: OurStoryScreenProps) {
       </motion.div>
 
       <EmbeddedFooter />
+
+      <AnimatePresence>
+        {activeVideo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 touch-none"
+            onClick={closeVideo}
+          >
+            <button
+              onClick={closeVideo}
+              className="fixed top-4 right-4 md:top-6 md:right-6 text-wedding-cream/70 hover:text-wedding-cream transition-colors z-[110] bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
+              aria-label="Close"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              data-suppress-audio-autoplay="true"
+              className="relative w-full max-w-4xl h-[85vh] rounded-xl overflow-hidden bg-black ring-1 ring-wedding-gold/20 shadow-2xl flex items-center justify-center"
+            >
+              {/* Blurred background image behind the video */}
+              <div 
+                className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40 blur-xl scale-110"
+                style={{ backgroundImage: `url(${activeVideo.coverImage})` }}
+              />
+              <div className="absolute inset-0 z-0 bg-black/60" /> {/* Darken the blur to match cinematic theme */}
+
+              <div className="relative z-10 w-full h-full">
+                {(activeVideo.link.includes('youtube.com') || activeVideo.link.includes('youtu.be') || activeVideo.link.includes('vimeo.com')) ? (
+                  <iframe
+                    src={
+                      activeVideo.link.includes('vimeo.com') 
+                        ? `${activeVideo.link.replace('vimeo.com/', 'player.vimeo.com/video/').split('?')[0]}?transparent=0&badge=0&autopause=0&player_id=0`
+                        : activeVideo.link.includes('watch?v=') 
+                          ? activeVideo.link.replace('watch?v=', 'embed/') 
+                          : activeVideo.link.includes('youtu.be/') 
+                            ? activeVideo.link.replace('youtu.be/', 'youtube.com/embed/') 
+                            : activeVideo.link
+                    }
+                    className="w-full h-full"
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+                    style={{ backgroundColor: '#000000' }}
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    src={activeVideo.link}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-contain"
+                  />
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

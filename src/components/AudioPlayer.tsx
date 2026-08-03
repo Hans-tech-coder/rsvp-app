@@ -19,7 +19,13 @@ export function AudioPlayer() {
       audioRef.current.volume = 0.5; // Set default volume to 50%
     }
 
-    const handleInteraction = () => {
+    const handleInteraction = (e: Event) => {
+      // Check if the click originated from an element that wants to suppress autoplay
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-suppress-audio-autoplay="true"]')) {
+        return; // Ignore this interaction for background music
+      }
+
       if (audioRef.current && audioRef.current.paused) {
         const playPromise = audioRef.current.play();
         
@@ -72,6 +78,11 @@ export function AudioPlayer() {
 
   return (
     <>
+      <style>{`
+        body.video-modal-open #audio-toggle-btn {
+          display: none !important;
+        }
+      `}</style>
       <audio 
         id="wedding-bg-music"
         ref={audioRef} 
@@ -82,6 +93,7 @@ export function AudioPlayer() {
         onPause={() => setIsPlaying(false)}
       />
       <button
+        id="audio-toggle-btn"
         onClick={togglePlay}
         className={`fixed bottom-6 right-6 z-50 p-3 rounded-full bg-wedding-gold/20 backdrop-blur-md border border-wedding-gold/30 text-wedding-gold shadow-lg transition-all duration-300 hover:scale-110 hover:bg-wedding-gold/30 ${
           isPlaying ? 'animate-[pulse_4s_ease-in-out_infinite]' : ''
