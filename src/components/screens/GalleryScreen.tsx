@@ -7,6 +7,7 @@ import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { TextsReveal } from '@/components/ui/TextsReveal';
+import { CircularImageGallery } from '@/components/ui/circular-image-gallery';
 
 interface GalleryScreenProps {
   onContinue: () => void;
@@ -142,9 +143,11 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
           <div className="slider-wrapper w-full py-2 relative">
             <DraggableSlider speed={0.4}>
               {topRowImages.map((src: string, index: number) => (
-                <div key={index} className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] relative group overflow-hidden rounded-sm shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-wedding-gold/10 cursor-pointer flex-shrink-0" onClick={() => setLightboxIndex(index)}>
-                  <div className="absolute inset-0 bg-wedding-dark/20 group-hover:bg-transparent transition-colors duration-500 z-10 pointer-events-none"></div>
-                  <RevealImage src={src} alt={`Engagement ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" wrapperClassName="w-full h-full" />
+                <div key={`top-${index}`} className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] relative group overflow-hidden rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-wedding-gold/10 cursor-pointer flex-shrink-0" onClick={() => setLightboxIndex(index)}>
+                  <RevealImage src={src} alt={`Engagement ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-50 pointer-events-none" wrapperClassName="w-full h-full" />
+                  <div className="absolute inset-0 bg-wedding-dark/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none z-10">
+                    <span className="text-wedding-goldlight text-xs font-medium uppercase tracking-[0.4em] border border-wedding-gold/50 px-6 py-2.5 bg-wedding-dark/50 backdrop-blur-sm pointer-events-none drop-shadow-md transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">View</span>
+                  </div>
                 </div>
               ))}
             </DraggableSlider>
@@ -158,12 +161,12 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
                 return (
                 <div 
                   key={`bottom-${index}`}
-                  className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md flex-shrink-0"
+                  className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md border border-wedding-gold/10 flex-shrink-0"
                   onClick={() => { setDirection(0); setLightboxIndex(originalIndex); }}
                 >
-                  <RevealImage src={src} alt={`Memory ${originalIndex + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-75 pointer-events-none" wrapperClassName="w-full h-full" />
-                  <div className="absolute inset-0 bg-wedding-deepburgundy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
-                    <span className="text-wedding-goldlight text-[10px] uppercase tracking-[0.3em] border border-wedding-gold/50 px-4 py-2 bg-wedding-dark/30 backdrop-blur-sm pointer-events-none">View</span>
+                  <RevealImage src={src} alt={`Memory ${originalIndex + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-50 pointer-events-none" wrapperClassName="w-full h-full" />
+                  <div className="absolute inset-0 bg-wedding-dark/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none z-10">
+                    <span className="text-wedding-goldlight text-xs font-medium uppercase tracking-[0.4em] border border-wedding-gold/50 px-6 py-2.5 bg-wedding-dark/50 backdrop-blur-sm pointer-events-none drop-shadow-md transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">View</span>
                   </div>
                 </div>
               )})}
@@ -196,81 +199,13 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            style={{ perspective: 1200 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 touch-none"
-            onClick={() => setLightboxIndex(null)}
+            className="fixed inset-0 z-[100]"
           >
-            <AnimatePresence custom={{ direction, isMobile }} initial={false}>
-              <motion.div 
-                key={lightboxIndex}
-                custom={{ direction, isMobile }}
-                variants={lightboxVariants as any}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                className="absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing"
-                style={{ transformStyle: "preserve-3d" }}
-                drag={isMobile ? "y" : "x"}
-                dragConstraints={isMobile ? { top: 0, bottom: 0 } : { left: 0, right: 0 }}
-                dragElastic={0.8}
-                onDragEnd={(e: any, info: PanInfo) => {
-                  const swipeThreshold = 50;
-                  if (isMobile) {
-                    const velocityY = info.velocity.y;
-                    if (info.offset.y < -swipeThreshold || velocityY < -500) {
-                      handleNext();
-                    } else if (info.offset.y > swipeThreshold || velocityY > 500) {
-                      handlePrev();
-                    }
-                  } else {
-                    const velocityX = info.velocity.x;
-                    if (info.offset.x < -swipeThreshold || velocityX < -500) {
-                      handleNext();
-                    } else if (info.offset.x > swipeThreshold || velocityX > 500) {
-                      handlePrev();
-                    }
-                  }
-                }}
-              >
-                <RevealImage 
-                  src={imagesArray[lightboxIndex]} 
-                  alt={`Gallery view ${lightboxIndex + 1}`} 
-                  draggable={false}
-                  className="max-w-full max-h-[85vh] object-contain rounded-sm shadow-2xl pointer-events-auto select-none" 
-                  wrapperClassName="max-w-full max-h-[85vh] flex items-center justify-center"
-                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                />
-              </motion.div>
-            </AnimatePresence>
-            
-            <button 
-              onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
-              className="fixed top-4 right-4 md:top-6 md:right-6 text-wedding-cream/70 hover:text-wedding-cream transition-colors z-[110] bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
-              aria-label="Close"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            
-            <button 
-              onClick={handlePrev}
-              className="hidden md:block fixed left-2 md:left-8 top-1/2 -translate-y-1/2 text-wedding-cream/70 hover:text-wedding-cream transition-colors z-[110] bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
-              aria-label="Previous image"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
-            </button>
-
-            <button 
-              onClick={handleNext}
-              className="hidden md:block fixed right-2 md:right-8 top-1/2 -translate-y-1/2 text-wedding-cream/70 hover:text-wedding-cream transition-colors z-[110] bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
-              aria-label="Next image"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
-            </button>
-
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[110] flex flex-col items-center justify-center md:hidden pointer-events-none animate-bounce text-wedding-cream/70">
-              <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
-              <span className="text-[10px] uppercase tracking-[0.2em] font-medium drop-shadow-md">Swipe</span>
-            </div>
+            <CircularImageGallery 
+              images={imagesArray.map((src: string) => ({ url: src }))}
+              initialIndex={lightboxIndex}
+              onClose={() => setLightboxIndex(null)}
+            />
           </motion.div>
         )}
       </AnimatePresence>
