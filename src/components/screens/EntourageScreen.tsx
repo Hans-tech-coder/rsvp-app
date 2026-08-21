@@ -4,6 +4,7 @@ import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { TextsReveal } from '@/components/ui/TextsReveal';
 
 interface EntourageScreenProps {
   onContinue: () => void;
@@ -35,11 +36,11 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
         viewport={{ once: true, margin: "-50px" }}
         className="max-w-6xl mx-auto relative z-10 w-full"
       >
-        <motion.div variants={itemVariants} className="text-center mb-16 md:mb-20">
-          <span className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-3">{content.entourage.subtitle}</span>
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-cinzel font-light text-wedding-goldlight tracking-widest">{content.entourage.title}</h2>
+        <TextsReveal className="text-center mb-16 md:mb-20 flex flex-col items-center">
+          <span className="text-[10px] md:text-sm font-cormorant italic tracking-widest text-wedding-goldlight/80 block mb-3">{content.entourage.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.entourage.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
-        </motion.div>
+        </TextsReveal>
 
         {/* Parents */}
         <motion.div variants={itemVariants} className="mb-20 md:mb-32 relative max-w-6xl mx-auto">

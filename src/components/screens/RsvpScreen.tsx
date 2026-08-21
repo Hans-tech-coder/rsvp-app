@@ -13,6 +13,7 @@ interface RsvpScreenProps {
 import { submitRsvp } from '@/app/actions/rsvp';
 import { Loader2 } from 'lucide-react';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { TextsReveal } from '@/components/ui/TextsReveal';
 
 export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScreenProps) {
   const { content } = useWeddingContent();
@@ -89,14 +90,14 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
         className="max-w-4xl mx-auto w-full relative z-10"
       >
         <motion.div variants={itemVariants} className="bg-wedding-dark/40 p-8 md:p-12 rounded-xl border border-wedding-burgundylight/30 shadow-lg">
-          <div className="text-center mb-12">
-            <span className="text-xs uppercase tracking-[0.3em] text-wedding-gold block mb-1">{formContent.header.subtitle}</span>
-            <h2 className="text-3xl font-cinzel font-light text-wedding-goldlight tracking-wide">{formContent.header.title}</h2>
+          <TextsReveal className="text-center mb-12 flex flex-col items-center">
+            <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-1">{formContent.header.subtitle}</span>
+            <h2 className="text-5xl md:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{formContent.header.title}</h2>
             <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-5"></div>
-            <p className="text-sm font-cormorant italic text-wedding-goldlight/90 mt-6 leading-relaxed max-w-2xl mx-auto whitespace-pre-line">
+            <p className="text-base font-cormorant italic text-wedding-goldlight/90 mt-6 leading-relaxed max-w-2xl mx-auto whitespace-pre-line">
               {formContent.header.description}
             </p>
-          </div>
+          </TextsReveal>
 
           {/* Interactive RSVP Form */}
           <form onSubmit={handleSubmit} className="space-y-8 font-inter">

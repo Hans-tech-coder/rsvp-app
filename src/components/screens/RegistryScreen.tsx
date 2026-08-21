@@ -6,6 +6,7 @@ import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { CuratedRegistryScreen } from './CuratedRegistryScreen';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { RevealImage } from '@/components/ui/RevealImage';
+import { TextsReveal } from '@/components/ui/TextsReveal';
 
 interface RegistryScreenProps {
   onContinue: () => void;
@@ -40,14 +41,14 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
         viewport={{ once: true, margin: "-50px" }}
         className="max-w-4xl mx-auto w-full relative z-10"
       >
-        <motion.div variants={itemVariants} className="text-center mb-16">
-          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">{content.registry?.header?.subtitle || "Wishing Well"}</span>
-          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">{content.registry?.header?.title || "Registry & Contributions"}</h2>
+        <TextsReveal className="text-center mb-16 flex flex-col items-center">
+          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.registry?.header?.subtitle || "Wishing Well"}</span>
+          <h2 className="text-5xl md:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.registry?.header?.title || "Registry & Contributions"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
-          <p className="text-base font-cormorant italic text-wedding-cream/70 mt-3 max-w-md mx-auto">
+          <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-md mx-auto">
             {content.registry?.header?.description || "Your presence is our ultimate gift, but should you wish to honor us, we have provided options below."}
           </p>
-        </motion.div>
+        </TextsReveal>
 
         <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Card 1 */}

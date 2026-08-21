@@ -6,6 +6,7 @@ import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { TextsReveal } from '@/components/ui/TextsReveal';
 
 interface DressCodeScreenProps {
   onContinue: () => void;
@@ -39,11 +40,11 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
         viewport={{ once: true, margin: "-50px" }}
         className="max-w-4xl mx-auto text-center w-full relative z-10"
       >
-        <motion.div variants={itemVariants} className="mb-16">
-          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">{content.dressCode.header?.subtitle || "The Style Guideline"}</span>
-          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">{content.dressCode.header?.title || "La Palette de l'Amour"}</h2>
+        <TextsReveal className="mb-16 flex flex-col items-center">
+          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.dressCode.header?.subtitle || "The Style Guideline"}</span>
+          <h2 className="text-5xl md:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.dressCode.header?.title || "La Palette de l'Amour"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
-        </motion.div>
+        </TextsReveal>
 
         <motion.div variants={itemVariants} className="bg-wedding-dark/60 p-8 md:p-12 rounded-xl border border-wedding-gold/20 shadow-md">
           <p className="text-sm uppercase tracking-[0.2em] text-wedding-gold font-semibold mb-3">Dress Code: {content.dressCode.title}</p>

@@ -6,6 +6,7 @@ import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { RevealImage } from '@/components/ui/RevealImage';
+import { TextsReveal } from '@/components/ui/TextsReveal';
 
 interface GalleryScreenProps {
   onContinue: () => void;
@@ -128,11 +129,11 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
         viewport={{ once: true, margin: "-50px" }}
         className="max-w-7xl mx-auto text-center w-full relative z-10"
       >
-        <motion.div variants={itemVariants} className="mb-16">
-          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">{content.galleryHeader?.subtitle || "Our Memories"}</span>
-          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">{content.galleryHeader?.title || "The Gallery"}</h2>
+        <TextsReveal className="mb-16 flex flex-col items-center">
+          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.galleryHeader?.subtitle || "Our Memories"}</span>
+          <h2 className="text-5xl md:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.galleryHeader?.title || "The Gallery"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
-        </motion.div>
+        </TextsReveal>
 
         <div className="relative w-full max-w-full mt-8" style={{
           mask: 'linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)',

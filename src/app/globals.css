@@ -84,6 +84,50 @@
   .t-digit-group .t-digit { animation: none !important; }
 }
 
+/* Texts reveal */
+:root {
+  --stagger-dur: 700ms;
+  --stagger-distance: 24px;
+  --stagger-stagger: 60ms;
+  --stagger-blur: 4px;
+  --stagger-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.t-stagger-line {
+  display: block;
+  opacity: 0;
+  transform: translateY(var(--stagger-distance));
+  filter: blur(var(--stagger-blur));
+  transition:
+    opacity   var(--stagger-dur) var(--stagger-ease),
+    transform var(--stagger-dur) var(--stagger-ease),
+    filter    var(--stagger-dur) var(--stagger-ease);
+  will-change: transform, opacity, filter;
+  /* Use CSS var for dynamic index calculation from React */
+  transition-delay: calc(var(--stagger-stagger) * var(--stagger-idx, 0));
+}
+
+.t-stagger.is-shown .t-stagger-line {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+.t-stagger.is-hiding .t-stagger-line {
+  opacity: 0;
+  transform: translateY(0);
+  filter: blur(0);
+  transition:
+    opacity 200ms ease,
+    transform 0s linear,
+    filter 0s linear;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-stagger-line { transition: none !important; }
+}
+
 /* Skeleton loader and reveal */
 .t-skel { position: relative; }
 .t-skel-skeleton,

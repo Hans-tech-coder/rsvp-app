@@ -5,6 +5,7 @@ import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { RevealImage } from '@/components/ui/RevealImage';
+import { TextsReveal } from '@/components/ui/TextsReveal';
 
 interface DetailsScreenProps {
   onContinue: () => void;
@@ -74,12 +75,14 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
         viewport={{ once: true, margin: "-50px" }}
         className="max-w-6xl mx-auto relative z-10 w-full"
       >
-        <motion.div variants={itemVariants} className="text-center mb-20">
-          <span className="text-xs uppercase tracking-[0.4em] text-wedding-gold block mb-2">{content.details.header?.subtitle || "The Celebration"}</span>
-          <h2 className="text-3xl md:text-5xl font-cinzel font-light text-wedding-goldlight tracking-wide">{content.details.header?.title || "Where & When"}</h2>
+        <TextsReveal className="text-center mb-16 relative z-10 flex flex-col items-center">
+          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.details.header?.subtitle || "Where & When"}</span>
+          <h2 className="text-5xl md:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">
+            {content.details.header?.title || "The Details"}
+          </h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
           <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-lg mx-auto">{content.details.header?.description || "A breathtaking romance in Paniqui, Tarlac."}</p>
-        </motion.div>
+        </TextsReveal>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Ceremony Details */}
