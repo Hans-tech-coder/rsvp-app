@@ -1,7 +1,7 @@
 {
   "global": {
     "logo": "/hansandczay.svg",
-    "ogImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fentrance-bg-1783214887566?alt=media&token=df038175-8252-4450-b275-aaf32ce328e3",
+    "ogImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fglobal-og-1785731134904?alt=media&token=d83d2fd7-06ab-4427-bbeb-25f967c2e9d2",
     "brideName": "Czay",
     "groomName": "Hans",
     "dateFull": "Sunday, the twentieth of December, two thousand twenty-sixs",
@@ -145,7 +145,7 @@
     ]
   },
   "details": {
-    "orderOfEventsImage": "",
+    "orderOfEventsImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/website%2Forder-of-events-1787284751986?alt=media&token=7f4b2bf1-0fa8-4a81-9d2b-150b25a7e197",
     "header": {
       "subtitle": "The Celebration",
       "description": "A breathtaking romance in Camiling, Tarlac.",
@@ -380,12 +380,8 @@
       "description": "Directly support our honeymoon adventures or first home goals with an elegant direct bank contribution.",
       "banks": [
         {
-          "name": "GCash",
-          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513362551?alt=media&token=b10bd35b-6853-4c90-8b97-471f216882c5"
-        },
-        {
-          "name": "Maya",
-          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513377033?alt=media&token=8b3830e7-368e-4a59-a640-51467391c493"
+          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513362551?alt=media&token=b10bd35b-6853-4c90-8b97-471f216882c5",
+          "name": "GCash"
         },
         {
           "name": "Maribank",
@@ -394,14 +390,6 @@
         {
           "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513409067?alt=media&token=e1d9d97c-e529-4b37-bca5-562b6a309f4f",
           "name": "Landbank"
-        },
-        {
-          "name": "BPI",
-          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513417609?alt=media&token=554560b3-d8cd-4011-9b5b-62ee4a7a830b"
-        },
-        {
-          "name": "GoTyme",
-          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513430599?alt=media&token=a9e2428e-f323-4b8a-9876-9a9084d5648f"
         }
       ]
     },
@@ -410,7 +398,7 @@
       "description1": "We have lovingly curated a wedding registry featuring beautiful, elegant keepsakes and lifestyle pieces from our favorite boutiques.",
       "description2": "Options include premium vintage collection tablewares, designer home accents, and art contributions for our newly renovated residence."
     },
-    "updatedAt": "2026-07-08T12:24:05.463Z"
+    "updatedAt": "2026-08-03T02:47:57.973Z"
   },
   "rsvpCta": {
     "subtitle": "Join Our Day",
