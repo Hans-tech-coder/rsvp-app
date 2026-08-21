@@ -132,7 +132,7 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
       >
         <TextsReveal className="mb-16 flex flex-col items-center">
           <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.galleryHeader?.subtitle || "Our Memories"}</span>
-          <h2 className="text-5xl md:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.galleryHeader?.title || "The Gallery"}</h2>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.galleryHeader?.title || "The Gallery"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
         </TextsReveal>
 

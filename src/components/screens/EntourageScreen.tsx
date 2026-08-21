@@ -37,8 +37,8 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
         className="max-w-6xl mx-auto relative z-10 w-full"
       >
         <TextsReveal className="text-center mb-16 md:mb-20 flex flex-col items-center">
-          <span className="text-[10px] md:text-sm font-cormorant italic tracking-widest text-wedding-goldlight/80 block mb-3">{content.entourage.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.entourage.title}</h2>
+          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.entourage.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md text-center">{content.entourage.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
         </TextsReveal>
 

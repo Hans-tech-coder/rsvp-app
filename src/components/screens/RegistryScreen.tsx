@@ -43,7 +43,7 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
       >
         <TextsReveal className="text-center mb-16 flex flex-col items-center">
           <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.registry?.header?.subtitle || "Wishing Well"}</span>
-          <h2 className="text-5xl md:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.registry?.header?.title || "Registry & Contributions"}</h2>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.registry?.header?.title || "Registry & Contributions"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
           <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-md mx-auto">
             {content.registry?.header?.description || "Your presence is our ultimate gift, but should you wish to honor us, we have provided options below."}

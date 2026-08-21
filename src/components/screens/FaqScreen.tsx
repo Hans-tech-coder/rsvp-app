@@ -46,7 +46,7 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
       >
         <TextsReveal className="text-center mb-16 flex flex-col items-center">
           <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.faqHeader?.subtitle || "Guest Information"}</span>
-          <h2 className="text-5xl md:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.faqHeader?.title || "Things You Might Want to Know"}</h2>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.faqHeader?.title || "Things You Might Want to Know"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6 mb-10"></div>
           <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-md mx-auto">{content.faqHeader?.description || "Quick answers for our beloved guests"}</p>
         </TextsReveal>

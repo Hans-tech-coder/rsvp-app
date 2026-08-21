@@ -173,7 +173,7 @@ interface GalleryImageProps {
 
 function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeIndex }: GalleryImageProps) {
   const [firstLoad, setLoaded] = useState(true)
-  const clip = useRef<SVGCircleElement>(null)
+  const clip = useRef<SVGPathElement>(null)
   
   // Use dynamic window size so it maps perfectly to the screen
   const [size, setSize] = useState({ width: 1200, height: 800 })
@@ -188,12 +188,13 @@ function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeI
   // --- Animation Constants ---
   const gap = 12
   const circleRadius = 8
+  const heartBaseRadius = 10 // Approximate radius of our heart SVG path
   const defaults = { transformOrigin: "center center" }
   const duration = 0.4
   const viewportDiagonal = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
-  const scale = (viewportDiagonal / 2) / circleRadius * 1.2 // Ensure circle safely covers corners of the entire screen
-
-  const bigSize = circleRadius * scale
+  const maxScale = (viewportDiagonal / 2) / heartBaseRadius * 1.5 // Ensure it safely covers corners
+  
+  const bigSize = heartBaseRadius * maxScale
   const overlap = 0
 
   // --- Position Calculation Functions ---
@@ -203,9 +204,9 @@ function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeI
       let diff = id - activeIndex;
       if (diff > total / 2) diff -= total;
       else if (diff < -total / 2) diff += total;
-      return { cx: width / 2 + diff * (circleRadius * 2 + gap), cy: height - 90, r: circleRadius };
+      return { x: width / 2 + diff * (circleRadius * 2 + gap), y: height - 90, scale: circleRadius / heartBaseRadius };
     }
-    return { cx: width / 2 - (total * (circleRadius * 2 + gap) - gap) / 2 + id * (circleRadius * 2 + gap), cy: height - 50, r: circleRadius };
+    return { x: width / 2 - (total * (circleRadius * 2 + gap) - gap) / 2 + id * (circleRadius * 2 + gap), y: height - 50, scale: circleRadius / heartBaseRadius };
   }
   
   const getPosSmallAbove = () => {
@@ -214,14 +215,14 @@ function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeI
       let diff = id - activeIndex;
       if (diff > total / 2) diff -= total;
       else if (diff < -total / 2) diff += total;
-      return { cx: width / 2 + diff * (circleRadius * 2 + gap), cy: height / 2, r: circleRadius * 2 };
+      return { x: width / 2 + diff * (circleRadius * 2 + gap), y: height / 2, scale: (circleRadius * 2) / heartBaseRadius };
     }
-    return { cx: width / 2 - (total * (circleRadius * 2 + gap) - gap) / 2 + id * (circleRadius * 2 + gap), cy: height / 2, r: circleRadius * 2 };
+    return { x: width / 2 - (total * (circleRadius * 2 + gap) - gap) / 2 + id * (circleRadius * 2 + gap), y: height / 2, scale: (circleRadius * 2) / heartBaseRadius };
   }
   
-  const getPosCenter = () => ({ cx: width / 2, cy: height / 2, r: circleRadius * 7 })
-  const getPosEnd = () => ({ cx: width / 2 - bigSize + overlap, cy: height / 2, r: bigSize })
-  const getPosStart = () => ({ cx: width / 2 + bigSize - overlap, cy: height / 2, r: bigSize })
+  const getPosCenter = () => ({ x: width / 2, y: height / 2, scale: (circleRadius * 7) / heartBaseRadius })
+  const getPosEnd = () => ({ x: width / 2 - bigSize + overlap, y: height / 2, scale: maxScale })
+  const getPosStart = () => ({ x: width / 2 + bigSize - overlap, y: height / 2, scale: maxScale })
 
   const wasOpen = useRef(open)
 
@@ -301,7 +302,7 @@ function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeI
     >
       <defs>
         <clipPath id={`${id}_circleClip`}>
-          <circle className="clip" cx="0" cy="0" r={circleRadius} ref={clip}></circle>
+          <path className="clip" d="M 8.84 -7.39 a 5.5 5.5 0 0 0 -7.78 0 L 0 -6.33 l -1.06 -1.06 a 5.5 5.5 0 0 0 -7.78 7.78 l 1.06 1.06 L 0 9.23 l 7.78 -7.78 l 1.06 -1.06 a 5.5 5.5 0 0 0 0 -7.78 z" ref={clip}></path>
         </clipPath>
         <clipPath id={`${id}_squareClip`}>
           <rect className="clip" width={width} height={height}></rect>

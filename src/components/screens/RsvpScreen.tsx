@@ -92,7 +92,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
         <motion.div variants={itemVariants} className="bg-wedding-dark/40 p-8 md:p-12 rounded-xl border border-wedding-burgundylight/30 shadow-lg">
           <TextsReveal className="text-center mb-12 flex flex-col items-center">
             <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-1">{formContent.header.subtitle}</span>
-            <h2 className="text-5xl md:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{formContent.header.title}</h2>
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{formContent.header.title}</h2>
             <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-5"></div>
             <p className="text-base font-cormorant italic text-wedding-goldlight/90 mt-6 leading-relaxed max-w-2xl mx-auto whitespace-pre-line">
               {formContent.header.description}

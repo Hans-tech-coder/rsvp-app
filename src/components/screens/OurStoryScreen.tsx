@@ -90,7 +90,7 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
       >
         <TextsReveal className="text-center mb-20 flex flex-col items-center">
           <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.ourStory.subtitle}</span>
-          <h2 className="text-5xl md:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.ourStory.title}</h2>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.ourStory.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
           <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-md mx-auto">{content.ourStory.description}</p>
         </TextsReveal>

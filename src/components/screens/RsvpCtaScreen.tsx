@@ -36,7 +36,7 @@ export function RsvpCtaScreen({ onContinue }: RsvpCtaScreenProps) {
       <div className="relative z-20 max-w-3xl mx-auto text-center px-4">
         <TextsReveal className="flex flex-col items-center">
           <span className="text-sm font-cormorant italic tracking-widest text-wedding-goldlight/80 block mb-2">{content.rsvpCta.subtitle}</span>
-          <h2 className="text-5xl md:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md mb-6">{content.rsvpCta.title}</h2>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md mb-6">{content.rsvpCta.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mb-6 mt-4"></div>
           <p className="text-lg font-cormorant italic text-wedding-goldlight/90 mb-10 leading-relaxed max-w-2xl mx-auto">
             {content.rsvpCta.description}
