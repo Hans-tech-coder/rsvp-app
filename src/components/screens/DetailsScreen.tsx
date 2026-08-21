@@ -39,6 +39,29 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
     window.open(url, '_blank');
   };
 
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadImage = (url: string, filename: string) => {
+    if (!url) return;
+    setIsDownloading(true);
+    
+    // Create an invisible iframe or direct window location to trigger the proxy download
+    // This avoids CORS completely and utilizes the browser's native download mechanism
+    const proxyUrl = `/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
+    
+    const a = document.createElement('a');
+    a.href = proxyUrl;
+    a.download = filename; // This is a hint, but the proxy's Content-Disposition forces it
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    // Slight delay to allow the download to start before removing the loading state
+    setTimeout(() => {
+      setIsDownloading(false);
+    }, 1500);
+  };
+
   return (
     <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
@@ -124,6 +147,36 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
             </div>
           </motion.div>
         </div>
+
+        {/* Order of Events Section */}
+        {content.details.orderOfEventsImage && (
+          <motion.div variants={itemVariants} className="mt-24 w-full flex flex-col items-center">
+            <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mb-16"></div>
+            
+            <div className="relative w-fit max-w-full md:max-w-3xl mx-auto rounded-sm overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-wedding-gold/10 group mb-10">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10"></div>
+              <img 
+                src={content.details.orderOfEventsImage} 
+                alt="Order of Events" 
+                className="block max-w-full h-auto max-h-[85vh] transition-transform duration-1000 ease-out group-hover:scale-[1.02]" 
+              />
+            </div>
+            
+            <button 
+              onClick={() => handleDownloadImage(content.details.orderOfEventsImage, 'Order_of_Events.jpg')}
+              disabled={isDownloading}
+              className={`group relative overflow-hidden inline-flex items-center justify-center gap-3 px-10 py-4 bg-transparent border border-wedding-gold/30 text-wedding-gold hover:text-wedding-dark hover:border-wedding-gold text-xs tracking-[0.2em] font-medium uppercase transition-all duration-500 rounded-sm ${isDownloading ? 'opacity-70 cursor-wait' : ''}`}
+            >
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-wedding-gold to-wedding-goldlight transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500 ease-out"></div>
+              {isDownloading ? (
+                <svg className="w-4 h-4 relative z-10 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              ) : (
+                <svg className="w-4 h-4 relative z-10 group-hover:-translate-y-0.5 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              )}
+              <span className="relative z-10">{isDownloading ? 'Downloading...' : 'Save a Copy'}</span>
+            </button>
+          </motion.div>
+        )}
       </motion.div>
 
       <motion.div 

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Loader2, Save, Check, RotateCcw, History } from 'lucide-react';
-import { db } from '@/lib/firebase/client';
+import { useState, useEffect, useRef } from 'react';
+import { Loader2, Save, Check, RotateCcw, History, Upload, ImageIcon, X } from 'lucide-react';
+import { db, storage } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 
@@ -16,10 +17,13 @@ export function EventDetailsEditor() {
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // State for the form fields
-  const [data, setData] = useState({ ...weddingContent.details });
-  const [originalData, setOriginalData] = useState({ ...weddingContent.details });
+  const [data, setData] = useState({ ...weddingContent.details, orderOfEventsImage: '' });
+  const [originalData, setOriginalData] = useState({ ...weddingContent.details, orderOfEventsImage: '' });
 
   const hasChanges = JSON.stringify(data) !== JSON.stringify(originalData);
 
@@ -43,7 +47,8 @@ export function EventDetailsEditor() {
             reception: {
               ...weddingContent.details.reception,
               ...(fetchedData.reception || {})
-            }
+            },
+            orderOfEventsImage: fetchedData.orderOfEventsImage || weddingContent.details.orderOfEventsImage || ''
           };
           setData(mergedData);
           setOriginalData(mergedData);
@@ -127,7 +132,8 @@ export function EventDetailsEditor() {
           reception: {
             ...weddingContent.details.reception,
             ...(fetchedBackup.reception || {})
-          }
+          },
+          orderOfEventsImage: fetchedBackup.orderOfEventsImage || weddingContent.details.orderOfEventsImage || ''
         };
         setData(mergedData);
         setIsSuccessModalOpen(true);
@@ -138,6 +144,34 @@ export function EventDetailsEditor() {
     } finally {
       setRestoring(false);
     }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const storageRef = ref(storage, `website/order-of-events-${Date.now()}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      
+      setData(prev => ({ ...prev, orderOfEventsImage: url }));
+      setSaved(false);
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setData(prev => ({ ...prev, orderOfEventsImage: '' }));
+    setSaved(false);
   };
 
   if (loading) {
@@ -296,6 +330,64 @@ export function EventDetailsEditor() {
       <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
       
       {renderSection('Reception Details', 'reception')}
+
+      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
+
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Order of Events</h3>
+        </div>
+        
+        <div className="bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg p-6">
+          <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-4">Order of Events Image</label>
+          
+          {data.orderOfEventsImage ? (
+            <div className="relative inline-block">
+              <div className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 flex items-center justify-center min-h-[200px] min-w-[200px]">
+                <img 
+                  src={data.orderOfEventsImage} 
+                  alt="Order of Events" 
+                  className="max-h-[400px] w-auto object-contain"
+                />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <button
+                    onClick={handleRemoveImage}
+                    className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors shadow-lg"
+                    title="Remove Image"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full max-w-md h-48 border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 dark:hover:border-zinc-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors"
+            >
+              {isUploadingImage ? (
+                <div className="flex flex-col items-center text-gray-500 dark:text-zinc-400">
+                  <Loader2 className="w-8 h-8 animate-spin mb-2" />
+                  <span className="text-sm font-medium">Uploading...</span>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center text-gray-500 dark:text-zinc-400">
+                  <Upload className="w-8 h-8 mb-2 text-gray-400 dark:text-zinc-500" />
+                  <span className="text-sm font-medium">Click to upload image</span>
+                  <span className="text-xs mt-1">PNG, JPG up to 5MB</span>
+                </div>
+              )}
+            </div>
+          )}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+            accept="image/*"
+            className="hidden"
+          />
+        </div>
+      </div>
 
       <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6 border-t border-gray-200 dark:border-zinc-800 mt-12">
         <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">

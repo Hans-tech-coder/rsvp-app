@@ -71,7 +71,8 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
             reception: {
               ...newContent.details.reception,
               ...(detailsData.reception || {})
-            }
+            },
+            orderOfEventsImage: detailsData.orderOfEventsImage ?? newContent.details.orderOfEventsImage
           };
         }
 
