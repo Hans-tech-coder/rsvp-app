@@ -137,16 +137,16 @@ function MainApp() {
       opacity: 1, 
       scale: 1,
       transition: { 
-        duration: 1.8, 
+        duration: 0.8, 
         ease: [0.22, 1, 0.36, 1], // Custom slow out ease
-        delay: 0.2
+        delay: 0.1
       }
     },
     exit: { 
       opacity: 0, 
-      scale: 1.05,
+      scale: 1.02,
       transition: { 
-        duration: 1.5, 
+        duration: 0.5, 
         ease: [0.64, 0, 0.78, 0] // Custom slow in ease
       }
     }
@@ -171,9 +171,10 @@ function MainApp() {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 1, delay: 0.8 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
                 onClick={() => goToStep(currentStep - 1)} 
-                className="absolute top-6 left-6 w-10 h-10 z-[40] rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:bg-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300 pointer-events-auto"
+                aria-label="Back"
+                className="absolute top-6 left-6 w-11 h-11 z-[40] rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:bg-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300 active:scale-95 pointer-events-auto"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -190,9 +191,10 @@ function MainApp() {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 1, delay: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
                 onClick={() => setIsMenuOpen(true)} 
-                className="absolute top-6 right-6 w-10 h-10 z-[40] rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:bg-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300 pointer-events-auto"
+                aria-label="Menu"
+                className="absolute top-6 right-6 w-11 h-11 z-[40] rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:bg-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300 active:scale-95 pointer-events-auto"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>

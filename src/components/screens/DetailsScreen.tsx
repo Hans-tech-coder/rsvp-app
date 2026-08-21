@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence , Variants } from 'framer-motion';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { RevealImage } from '@/components/ui/RevealImage';
 
 interface DetailsScreenProps {
   onContinue: () => void;
@@ -155,10 +156,11 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
             
             <div className="relative w-fit max-w-full md:max-w-3xl mx-auto rounded-sm overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-wedding-gold/10 group mb-10">
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10"></div>
-              <img 
+              <RevealImage 
                 src={content.details.orderOfEventsImage} 
                 alt="Order of Events" 
                 className="block max-w-full h-auto max-h-[85vh] transition-transform duration-1000 ease-out group-hover:scale-[1.02]" 
+                wrapperClassName="w-full h-full"
               />
             </div>
             
@@ -186,10 +188,10 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
         transition={{ duration: 1, delay: 0.5 }}
         className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20"
       >
-        <button onClick={onContinue} className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none animate-bounce mt-4">
+        <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
           <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
           <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
-            <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:translate-y-1 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>
         </button>
       </motion.div>

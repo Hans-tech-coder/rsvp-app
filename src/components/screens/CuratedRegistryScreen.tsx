@@ -88,16 +88,18 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={{ opacity: 0, scale: 0.96, filter: "blur(4px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          exit={{ opacity: 0, scale: 0.98, filter: "blur(2px)" }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="fixed inset-0 w-full h-full bg-wedding-dark z-[100] overflow-y-auto overflow-x-hidden flex flex-col"
         >
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
 
       <button 
         onClick={onClose}
-        className="fixed top-6 left-6 z-[60] w-10 h-10 rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-gold/30 flex items-center justify-center text-wedding-gold hover:text-wedding-goldlight hover:border-wedding-gold transition-all duration-300"
+        aria-label="Close registry"
+        className="fixed top-6 left-6 z-[60] w-11 h-11 rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-gold/30 flex items-center justify-center text-wedding-gold hover:text-wedding-goldlight hover:border-wedding-gold transition-all duration-300 active:scale-95"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>

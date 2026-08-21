@@ -46,15 +46,16 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
           />
           
           <motion.div 
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.96, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            exit={{ opacity: 0, scale: 0.98, y: 10 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="bg-wedding-dark relative z-10 w-full max-w-md p-8 rounded-xl border border-wedding-gold/30 shadow-2xl"
           >
             <button 
               onClick={onClose}
-              className="absolute top-4 right-4 text-wedding-cream/60 hover:text-wedding-gold transition-colors"
+              aria-label="Close modal"
+              className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center text-wedding-cream/60 hover:text-wedding-gold transition-colors active:scale-95"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>

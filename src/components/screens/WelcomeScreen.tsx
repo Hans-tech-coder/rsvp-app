@@ -5,6 +5,7 @@ import { motion , Variants } from 'framer-motion';
 import Image from 'next/image';
 import { TwinkleSparks } from '@/components/effects/TwinkleSparks';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { PopInNumber } from '@/components/ui/PopInNumber';
 
 interface WelcomeScreenProps {
   onContinue: () => void;
@@ -113,19 +114,27 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         <motion.div variants={itemVariants} className="lg:pb-8 w-full max-w-3xl px-4 flex flex-col items-center">
           <div className="grid grid-cols-4 gap-2 md:gap-8 bg-wedding-dark/50 backdrop-blur-md px-4 md:px-6 py-4 rounded-xl border border-wedding-gold/20 w-full max-w-md mb-6 shadow-xl">
             <div className="text-center">
-              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">{mounted ? timeLeft.days : '00'}</span>
+              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">
+                {mounted ? <PopInNumber value={timeLeft.days} /> : '00'}
+              </span>
               <span className="text-[9px] uppercase tracking-widest text-wedding-cream/70">Days</span>
             </div>
             <div className="text-center border-l border-wedding-gold/20">
-              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">{mounted ? timeLeft.hours : '00'}</span>
+              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">
+                {mounted ? <PopInNumber value={timeLeft.hours} /> : '00'}
+              </span>
               <span className="text-[9px] uppercase tracking-widest text-wedding-cream/70">Hours</span>
             </div>
             <div className="text-center border-l border-wedding-gold/20">
-              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">{mounted ? timeLeft.minutes : '00'}</span>
+              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">
+                {mounted ? <PopInNumber value={timeLeft.minutes} /> : '00'}
+              </span>
               <span className="text-[9px] uppercase tracking-widest text-wedding-cream/70">Min</span>
             </div>
             <div className="text-center border-l border-wedding-gold/20">
-              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">{mounted ? timeLeft.seconds : '00'}</span>
+              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">
+                {mounted ? <PopInNumber value={timeLeft.seconds} /> : '00'}
+              </span>
               <span className="text-[9px] uppercase tracking-widest text-wedding-cream/70">Sec</span>
             </div>
           </div>
@@ -133,10 +142,10 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           <p className="text-xs uppercase tracking-[0.25em] text-wedding-cream/90 mb-4">{content.global.venueShort}</p>
           
           <div className="w-full flex justify-center mt-2 relative z-20">
-            <button onClick={onContinue} className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none animate-bounce">
+            <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
               <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/90 group-hover:text-wedding-gold transition-colors duration-300 drop-shadow-md">Continue</span>
               <div className="w-10 h-10 rounded-full border border-wedding-cream/50 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold shadow-lg bg-wedding-dark/30 backdrop-blur-sm">
-                <svg className="w-4 h-4 text-wedding-cream group-hover:text-wedding-gold transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                <svg className="w-4 h-4 text-wedding-cream group-hover:text-wedding-gold transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
               </div>
             </button>
           </div>

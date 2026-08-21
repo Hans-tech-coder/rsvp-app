@@ -3,6 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { RevealImage } from '@/components/ui/RevealImage';
 
 interface CanvasMenuProps {
   isOpen: boolean;
@@ -30,30 +32,42 @@ export function CanvasMenu({ isOpen, onClose, onNavigate, highestVisitedStep, cu
   ];
 
   return (
-    <div 
-      className={`fixed inset-0 z-[60] bg-wedding-dark/95 backdrop-blur-md transition-all duration-500 flex justify-center items-center ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-    >
-      <button 
-        onClick={onClose} 
-        className="absolute top-6 right-6 w-10 h-10 rounded-full bg-transparent border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:text-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+          animate={{ opacity: 1, backdropFilter: "blur(12px)" }}
+          exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+          transition={{ duration: 0.4 }}
+          className="fixed inset-0 z-[60] bg-wedding-dark/95 flex justify-center items-center pointer-events-auto"
+        >
+          <button 
+            onClick={onClose} 
+            aria-label="Close menu"
+            className="absolute top-6 right-6 w-11 h-11 rounded-full bg-transparent border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:text-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300 active:scale-95"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
 
-      <div className="text-center w-full max-w-md px-6 relative">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.98, filter: "blur(2px)" }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="text-center w-full max-w-md px-6 relative"
+          >
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-wedding-burgundy/5 rounded-full blur-3xl -z-10"></div>
         
         <div className="mb-10 flex justify-center relative">
           <div className="absolute inset-0 bg-gradient-to-tr from-wedding-gold/10 via-wedding-burgundy/20 to-transparent blur-[30px] rounded-full animate-pulse-slow"></div>
           <div className="w-32 h-32 flex items-center justify-center animate-float relative z-10">
-            <img 
+            <RevealImage 
               src={logoUrl} 
               alt={`${content.global.groomName} & ${content.global.brideName} Logo`} 
-              width={128} 
-              height={128} 
               className="w-full h-full object-contain transition-transform duration-700 hover:scale-110"
+              wrapperClassName="w-full h-full flex items-center justify-center"
               style={{ 
                 filter: 'drop-shadow(0px 15px 25px rgba(0,0,0,0.7)) drop-shadow(0px 0px 20px rgba(197,160,89,0.5)) drop-shadow(-1px -1px 2px rgba(255,255,255,0.3)) drop-shadow(1px 1px 2px rgba(0,0,0,0.8))'
               }}
@@ -97,7 +111,9 @@ export function CanvasMenu({ isOpen, onClose, onNavigate, highestVisitedStep, cu
             );
           })}
         </nav>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

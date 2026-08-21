@@ -95,7 +95,7 @@ export function AudioPlayer() {
       <button
         id="audio-toggle-btn"
         onClick={togglePlay}
-        className={`fixed bottom-6 right-6 z-50 p-3 rounded-full bg-wedding-gold/20 backdrop-blur-md border border-wedding-gold/30 text-wedding-gold shadow-lg transition-all duration-300 hover:scale-110 hover:bg-wedding-gold/30 ${
+        className={`fixed bottom-6 right-6 z-50 p-3 rounded-full bg-wedding-gold/20 backdrop-blur-md border border-wedding-gold/30 text-wedding-gold shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-wedding-gold/30 ${
           isPlaying ? 'animate-[pulse_4s_ease-in-out_infinite]' : ''
         }`}
         aria-label={isPlaying ? "Mute background music" : "Play background music"}
