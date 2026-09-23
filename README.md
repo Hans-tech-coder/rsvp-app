@@ -13,7 +13,7 @@ A modern, full-stack Next.js application designed to manage wedding RSVPs and gi
 *   **Access Control**: Routes under `src/app/admin/` are secured, requiring Firebase Auth and Firestore `admins` collection validation.
 *   **Guest Management**: Bulk generate unique, unguessable 6-character alphanumeric invite codes (excluding ambiguous characters like I, 1, O, 0) via `generateInviteCodes()` in `src/app/actions/admin.ts`. Admins can view usage status, delete, and regenerate codes.
 *   **Registry Management**: Add, update, and remove gifts with limits (`addRegistryGift()`, `updateRegistryGift()`, `deleteRegistryGift()` in `src/app/actions/admin.ts`).
-*   **Content Synchronization**: Push local content configuration to Firestore via the `node scripts/sync-content.js` script.
+*   **Content Synchronization**: Pull the live `websiteContent` from Firestore into `src/data/wedding-content.json` (the bundled defaults) via `npm run sync-content`.
 
 ## Tech Stack
 
@@ -94,7 +94,7 @@ Copy `.env.local.example` to `.env.local` and configure your Firebase credential
     npm run start
 ```
 
-5.  **Sync initial content to Firestore** (Optional):
+5.  **Pull live content from Firestore into `wedding-content.json`** (Optional):
 ```bash
     npm run sync-content
 ```
