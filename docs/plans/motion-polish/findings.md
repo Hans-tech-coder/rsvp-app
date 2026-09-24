@@ -38,6 +38,39 @@ Screenshots (seen in session, not saved):
 Real-phone check (one line): **not done.** The session had no phone. T07 should
 record it, especially for the gallery open and the Welcome sparkles.
 
+## After fixes (T07, production build, 375×812)
+
+Measured 2026-09-24 after T03–T06, same pane and protocol as the baseline (warm
+cache, no CPU throttle, display ~90–165 Hz). "Worst" is the longest frame.
+"First new content" is the time from the tap until a new screen's `TextsReveal` gets
+`is-shown` (text) and a new element is visible at > 10 % opacity.
+Two setup notes: the step is saved in `localStorage` (`wedding_currentStep`), so
+S1 sets it to `0` before reload. Menu items after the highest visited step are
+locked, so S4 sets `wedding_highestVisitedStep` to `8`. The pane also hides the tab
+while `navigate` runs (rAF stops, no FCP recorded), so reloads used
+`location.reload()` from inside the page.
+
+| Scenario | CLS | Top shifts | Long tasks > 50 ms | Slow frames / total (worst) | First new content | Verdict |
+| --- | --- | --- | --- | --- | --- | --- |
+| S1 cold load → Welcome | 0 | none | none | 0 / 351 | FCP 56 ms · `<main>` 337 ms · first Welcome text **690 ms** (was ~4.5–5 s) | pass |
+| S2 Welcome → Our Story | 0 | none | none (was 51 ms) | 0 / 407 | text **177 ms**, visible 207 ms (was 1,137 ms) | pass |
+| S3 scroll Our Story (4,931 px in 4 s) | 0 | none | none | 0 / 789 | – | pass |
+| S4 menu → Gallery | 0 | none | none | 5 / 442 (1.1 %) | text 222 ms, image 183 ms | pass |
+| S4 circular gallery, first open | 0 (was 0.0165) | none | none | 2 / 551 (62 ms) | 2 SVG `<image>`s (was 80) | pass |
+| S4 next photo | 0 | none | none | 0 / 219 (20 ms) | – | pass |
+| S4 close | 0 | none | none (was 154 ms) | 0 / 243 (16 ms) | – | pass |
+| S4 second open (warm) | 0 (was 0.0065) | none | none (was **216 ms**) | 1 / 331 (51 ms; was 286 ms) | – | pass |
+| S4 second close | 0 | none | none | 0 / 243 (17 ms) | – | pass |
+| S5 Gallery → Dress Code (back) | 0 | none | none | 0 / 402 (20 ms) | text **187 ms**, visible 207 ms | pass |
+| S5 Dress Code → Details (back) | 0 | none | none | 0 / 407 (19 ms) | text **190 ms**, visible 208 ms | pass |
+
+Thresholds (T07): CLS < 0.05 · no long task > 50 ms in a transition · slow
+frames ≤ 5 % · S2/S5 first new content within ~300 ms. **Every row passes.**
+
+Real-phone check (one line): **Samsung Galaxy A56, production URL, tested by
+the owner. All smooth:** load → Welcome, screen swaps, Our Story scroll, the
+circular gallery (open, next, close, reopen), and the back button.
+
 ## Hypotheses (ranked by evidence)
 
 Status per row: confirmed · refuted · untested. Each confirmed row names the fix
