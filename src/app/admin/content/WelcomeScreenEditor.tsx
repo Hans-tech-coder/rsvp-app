@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon, Save, Check, RotateCcw, History } from 'lucide-react';
-import { db, storage } from '@/lib/firebase/client';
+import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import Image from 'next/image';
 import { AdminModal } from '../components/AdminModal';
@@ -83,14 +83,7 @@ export function WelcomeScreenEditor() {
     setSaved(false);
     
     try {
-      // Create a reference to the storage location
-      const storageRef = ref(storage, `images/welcome-bg-${Date.now()}`);
-      
-      // Upload the file
-      await uploadBytes(storageRef, file);
-      
-      // Get the download URL
-      const downloadURL = await getDownloadURL(storageRef);
+      const downloadURL = await uploadImage(file, 'images/welcome-bg');
       
       setFormData(prev => ({ ...prev, backgroundImage: downloadURL }));
     } catch (error) {

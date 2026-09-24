@@ -44,6 +44,7 @@ All editors are in `src/app/admin/content/`.
 | Ink reveal canvas background | `src/components/ui/InkRevealCanvas.tsx` |
 | Sparkle particles (welcome) | `src/components/effects/TwinkleSparks.tsx` |
 | Image download proxy | `src/app/api/download/route.ts` (called from `DetailsScreen.tsx`) |
+| Image upload (admin editors) | `src/lib/blob/uploadImage.ts` (compress + client upload), `src/app/api/upload/route.ts` (admin-only Blob token) |
 
 ## Server actions (`src/app/actions/`)
 
@@ -71,7 +72,7 @@ server actions and then `router.refresh()`.
 | `/admin/guests` | `src/app/admin/guests/page.tsx` | `GuestListClient.tsx` (CSV export via papaparse) | `guests` |
 | `/admin/gifts` | `src/app/admin/gifts/page.tsx` | `GiftsClient.tsx` | `registryGifts` |
 | `/admin/registry` | `src/app/admin/registry/page.tsx` | `RegistrySelectionsClient.tsx` | `giftSelections` |
-| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder | `websiteContent/*` + Storage |
+| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder | `websiteContent/*` + Vercel Blob |
 | sidebar/nav | `src/app/admin/layout.tsx` | – | – |
 | shared UI | `src/app/admin/components/AdminModal.tsx`, `TablePagination.tsx` | | |
 

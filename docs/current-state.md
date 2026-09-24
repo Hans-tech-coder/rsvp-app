@@ -21,7 +21,8 @@ when you find or fix one of these.
 | `/api/download` is an open proxy | `src/app/api/download/route.ts` | Security gap 3 |
 | Guest PII readable by code from the browser | `firestore.rules` `guests` | Security gap 4 |
 | No collision check when generating invite codes | `generateCode()` in `admin.ts` | A duplicate overwrites an existing guest doc |
-| Replaced images are never deleted from Storage | all editors | Storage grows over time |
+| Replaced images are never deleted from Blob | all editors | Counts against the shared 1 GB Hobby Blob quota |
+| Legacy Firebase Storage URLs return 402 | Firestore `websiteContent/*`, `wedding-content.json` | Google billing account closed; replace by re-uploading in the admin, then `npm run sync-content`. See `docs/data-model.md` |
 | `wedding-content.json` has a mixed `gallery` key and an unused `faqs` key | `src/data/wedding-content.json` | Side effect of `sync-content.js`; see `docs/data-model.md` |
 | Content merge is hand-written per doc | `WeddingContentContext.tsx` | New fields in field-by-field docs need an explicit line |
 | `RsvpScreen` falls back to `'dev-mode'` as the code | `src/app/page.tsx` | Submission fails server-side, which is the intended outcome |
@@ -33,11 +34,16 @@ when you find or fix one of these.
 - `refactor_editors.py` — one-off script with a hard-coded macOS path.
 - `legacy/` — the old static site, reference only.
 
+- Firebase Storage: `storage` export in `src/lib/firebase/client.ts`,
+  `getAdminStorage` in `admin.ts`, `storage.rules` — no longer used for uploads.
+  Keep until the legacy URLs are gone (rollback path), then remove.
+
 Remove them only when asked.
 
 ## Deployment
 
-Vercel (Node 22). Firestore/Storage rules are deployed separately with the
+Vercel (Node 22). Image uploads need a **public** Vercel Blob store connected
+to the project (`BLOB_READ_WRITE_TOKEN`). Firestore/Storage rules are deployed separately with the
 Firebase CLI. The Vercel project must have all `FIREBASE_ADMIN_*` and
 `NEXT_PUBLIC_FIREBASE_*` variables set; `layout.tsx` and every admin page call
 the admin SDK at request time.

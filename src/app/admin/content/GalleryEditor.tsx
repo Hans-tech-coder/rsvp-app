@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Save, Check, RotateCcw, History, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-react';
-import { db, storage } from '@/lib/firebase/client';
+import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { uploadImage } from '@/lib/blob/uploadImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { AdminModal } from '../components/AdminModal';
 import { nanoid } from 'nanoid';
@@ -154,12 +154,7 @@ export function GalleryEditor() {
     for (const item of newItems) {
       try {
         if (!item.file) continue;
-        const fileExtension = item.file.name.split('.').pop();
-        const fileName = `gallery-${Date.now()}-${nanoid()}.${fileExtension}`;
-        const storageRef = ref(storage, `gallery/${fileName}`);
-        
-        await uploadBytes(storageRef, item.file);
-        const url = await getDownloadURL(storageRef);
+        const url = await uploadImage(item.file, 'gallery/photo');
         
         setGallery(prev => prev.map(p => p.id === item.id ? { ...p, url, isUploading: false, file: undefined } : p));
       } catch (err) {
@@ -187,12 +182,7 @@ export function GalleryEditor() {
     try {
       setGallery(prev => prev.map(p => p.id === id ? { ...p, isUploading: true } : p));
       
-      const fileExtension = file.name.split('.').pop();
-      const fileName = `gallery-${Date.now()}-${nanoid()}.${fileExtension}`;
-      const storageRef = ref(storage, `gallery/${fileName}`);
-      
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
+      const url = await uploadImage(file, 'gallery/photo');
       
       setGallery(prev => prev.map(p => p.id === id ? { ...p, url, isUploading: false } : p));
       setSaved(false);

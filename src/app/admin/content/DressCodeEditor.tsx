@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Save, Check, RotateCcw, History, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-react';
-import { db, storage } from '@/lib/firebase/client';
+import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { uploadImage } from '@/lib/blob/uploadImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { AdminModal } from '../components/AdminModal';
 import { nanoid } from 'nanoid';
@@ -200,9 +200,7 @@ export function DressCodeEditor() {
     setSaved(false);
     
     try {
-      const storageRef = ref(storage, `images/dress-code-${Date.now()}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
+      const url = await uploadImage(file, 'images/dress-code');
       
       const newImages = [...data.inspirationImages];
       newImages[index] = { ...newImages[index], url };

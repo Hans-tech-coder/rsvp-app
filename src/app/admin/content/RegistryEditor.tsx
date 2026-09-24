@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Save, Check, RotateCcw, History, Plus, Trash2, GripVertical, Image as ImageIcon, Upload } from 'lucide-react';
-import { db, storage } from '@/lib/firebase/client';
+import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 import { nanoid } from 'nanoid';
@@ -151,9 +151,7 @@ export function RegistryEditor() {
     setSaved(false);
     
     try {
-      const storageRef = ref(storage, `images/registry-qr-${Date.now()}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
+      const downloadURL = await uploadImage(file, 'images/registry-qr', { type: 'image/png' });
       
       setBanks(prev => prev.map(item => item.id === id ? { ...item, qrImage: downloadURL } : item));
     } catch (error) {

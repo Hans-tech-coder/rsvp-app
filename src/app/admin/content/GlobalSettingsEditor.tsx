@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon, Save, Check, RotateCcw, History } from 'lucide-react';
-import { db, storage } from '@/lib/firebase/client';
+import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 
@@ -82,9 +82,7 @@ export function GlobalSettingsEditor() {
     setSaved(false);
     
     try {
-      const storageRef = ref(storage, `images/global-logo-${Date.now()}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
+      const downloadURL = await uploadImage(file, 'images/global-logo', { type: 'image/png', maxDimension: 800 });
       setFormData(prev => ({ ...prev, logo: downloadURL }));
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -102,9 +100,7 @@ export function GlobalSettingsEditor() {
     setSaved(false);
     
     try {
-      const storageRef = ref(storage, `images/global-og-${Date.now()}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
+      const downloadURL = await uploadImage(file, 'images/global-og', { type: 'image/jpeg', maxDimension: 1200 });
       setFormData(prev => ({ ...prev, ogImage: downloadURL }));
     } catch (error) {
       console.error("Error uploading og image:", error);

@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Loader2, Save, Check, RotateCcw, History, Upload, ImageIcon, X } from 'lucide-react';
-import { db, storage } from '@/lib/firebase/client';
+import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 
@@ -152,9 +152,7 @@ export function EventDetailsEditor() {
 
     setIsUploadingImage(true);
     try {
-      const storageRef = ref(storage, `website/order-of-events-${Date.now()}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
+      const url = await uploadImage(file, 'website/order-of-events');
       
       setData(prev => ({ ...prev, orderOfEventsImage: url }));
       setSaved(false);

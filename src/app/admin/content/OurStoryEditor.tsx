@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon, Save, Check, RotateCcw, History, Plus, Trash2, GripVertical } from 'lucide-react';
-import { db, storage } from '@/lib/firebase/client';
+import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 import { nanoid } from 'nanoid';
@@ -130,9 +130,7 @@ export function OurStoryEditor() {
     setSaved(false);
     
     try {
-      const storageRef = ref(storage, `images/our-story-${Date.now()}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
+      const downloadURL = await uploadImage(file, 'images/our-story');
       
       setItems(prev => {
         const newItems = [...prev];

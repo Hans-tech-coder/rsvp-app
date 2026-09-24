@@ -48,8 +48,10 @@ admin portal. Production URL: `https://hans-czay-wedding.vercel.app`.
   there is no `tailwind.config.js`).
 - **Framer Motion 12** for screen transitions; CSS classes in `globals.css` for
   text/number reveals.
-- **Firebase 12** client SDK (browser reads, admin content writes, Storage
-  uploads) and **firebase-admin 12** (server actions and server pages).
+- **Firebase 12** client SDK (browser reads, admin content writes, Auth) and
+  **firebase-admin 12** (server actions and server pages).
+- **Vercel Blob** (`@vercel/blob`) for admin image uploads; Hobby quota is
+  shared with the account's other projects (see `docs/data-model.md`).
 - **Node 22.x.** Deployed on **Vercel**. No test suite exists — verify with
   `npm run lint`, `npm run build`, and the running app.
 
@@ -66,7 +68,8 @@ node scripts/add-admin.js <email>   # needs GOOGLE_APPLICATION_CREDENTIALS
 ### Environment (`.env.local`, template in `.env.local.example`)
 
 `NEXT_PUBLIC_FIREBASE_*` (six client keys) and `FIREBASE_ADMIN_PROJECT_ID`,
-`FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`. Never print,
+`FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`, and `BLOB_READ_WRITE_TOKEN`
+(from the connected Blob store, `vercel env pull`). Never print,
 commit, or paste their values.
 
 ---
@@ -81,6 +84,7 @@ src/
     globals.css              Tailwind @theme colors/fonts + motion tokens + reveal CSS
     actions/                 server actions: rsvp.ts, registry.ts, admin.ts, auth.ts
     api/download/route.ts    image download proxy (used by DetailsScreen)
+    api/upload/route.ts      admin-only Vercel Blob upload token
     admin/                   admin portal (layout.tsx = sidebar)
       content/               Content manager: page.tsx (tabs) + one *Editor.tsx per screen
       components/            AdminModal, TablePagination
@@ -93,6 +97,7 @@ src/
   contexts/WeddingContentContext.tsx   JSON defaults + Firestore overrides -> useWeddingContent()
   data/wedding-content.json  default/fallback content for every screen
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
+  lib/blob/uploadImage.ts    compress + upload an image to Vercel Blob (all editors)
   types/index.ts             Guest, RegistryGift, GiftSelection, AdminUser
   proxy.ts                   /admin/** redirect when no session cookie
 scripts/                     sync-content.js, add-admin.js

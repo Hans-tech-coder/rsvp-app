@@ -1,7 +1,7 @@
 {
   "global": {
     "logo": "/hansandczay.svg",
-    "ogImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fglobal-og-1785731134904?alt=media&token=d83d2fd7-06ab-4427-bbeb-25f967c2e9d2",
+    "ogImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/global-og-1mbYmcdV6dwoZTYfthMHbALUD7Ix6N.jpg",
     "brideName": "Czay",
     "groomName": "Hans",
     "dateFull": "Sunday, the twentieth of December, two thousand twenty-sixs",
@@ -17,7 +17,7 @@
     "receptionTime": "6:30 PM"
   },
   "welcomeScreen": {
-    "backgroundImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fwelcome-bg-1783141231916?alt=media&token=ab66cb30-9914-4e80-9f28-dddbec5693bf",
+    "backgroundImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/welcome-bg-axudzflkDlVGWsNhY7twkhYJRWfWLI.webp",
     "subtitle": "Join us in celebrating",
     "topText": "Together with their Families",
     "bottomText1": "Request the honor of your presence",
@@ -25,7 +25,7 @@
     "targetDate": "December 20, 2026 15:00:00"
   },
   "entranceScreen": {
-    "backgroundImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fentrance-bg-1783214887566?alt=media&token=df038175-8252-4450-b275-aaf32ce328e3"
+    "backgroundImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/entrance-bg-iP1BBmSirXRpX9ltrBXoVojTKEQwfV.jpg"
   },
   "ourStory": {
     "subtitle": "Our Journey",
@@ -34,46 +34,46 @@
     "items": [
       {
         "date": "EARLY STAGE",
-        "image": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Four-story-1783744379997?alt=media&token=be4e8b3f-58e1-4774-8717-210c14faf814",
         "description": "Before we ever knew each other's names, fate had already written the first page of our story. Two children, complete strangers, unknowingly captured in separate moments of life—never imagining that one day, those innocent smiles would become part of the same love story. Looking back now, it feels as though destiny had been quietly introducing us long before we ever met.",
-        "title": "Two Strangers, One Beautiful Beginning"
+        "title": "Two Strangers, One Beautiful Beginning",
+        "image": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/our-story-8N2P2eyIShBlgiv6F8mAIAvdr3mC5v.png"
       },
       {
-        "title": "The First Glance",
-        "description": "Sometimes love begins with nothing more than a simple glance. During the college ball, we found ourselves wanting to capture a photo with someone who had unexpectedly caught each other's attention. At that moment, we had no idea that this picture would become the beginning of our lifetime together. It was just one photograph—but little did we know, it would one day hold so much meaning.",
         "date": "FEBRUARY 2017",
-        "image": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Four-story-1783744386939?alt=media&token=cb812e3c-02b2-4b9c-a8d4-133d2904bd26"
+        "image": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/our-story-NQ6FTGz0ZDJf4nDqqtm59bfyDvNIpa.png",
+        "title": "The First Glance",
+        "description": "Sometimes love begins with nothing more than a simple glance. During the college ball, we found ourselves wanting to capture a photo with someone who had unexpectedly caught each other's attention. At that moment, we had no idea that this picture would become the beginning of our lifetime together. It was just one photograph—but little did we know, it would one day hold so much meaning."
       },
       {
-        "image": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Four-story-1783744393228?alt=media&token=c10df185-4bf0-4ab2-a77f-0c9876883534",
         "date": "MARCH 2018",
+        "image": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/our-story-4UjeFsuvCcRZgYEypQqC4VRcRrOsil.png",
         "description": "We officially became \"us.\" No grand announcements, no social media posts—just two hearts quietly choosing each other. We treasured our little secret, enjoying every moment before the world knew. Somehow, though, love has a way of revealing itself. It wasn't long before our friends noticed that something beautiful was growing between us.",
         "title": "A Love Kept Between Us"
       },
       {
         "description": "Graduation marked more than the end of our college journey—it celebrated our first major milestone as a couple. As we stepped into a new chapter of life, we also chose to face the future side by side. From that day onward came years of challenges, sacrifices, victories, laughter, and countless ordinary moments that quietly built an extraordinary love. Through every season, we discovered that home was always found in each other.",
-        "image": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Four-story-1783744398798?alt=media&token=a073c907-92ee-42f2-af25-8f928fed6728",
-        "date": "APRIL 2019",
-        "title": "Growing Together"
+        "image": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/our-story-14SgrUEB15m09Wu54hokGNUFfpqzSb.png",
+        "title": "Growing Together",
+        "date": "APRIL 2019"
       },
       {
+        "image": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/our-story-uPNvEAsLxrxqfsqGLPuo2Wnqw8YQj8.jpg",
         "description": "For the first time, we welcomed a brand-new year hand in hand. As fireworks lit up the night sky, so did our dreams for the future. It wasn't simply the beginning of another year—it was the beginning of traditions, memories, and countless celebrations we promised to share together.",
-        "title": "Our First New Year Together",
         "date": "JANUARY 2021",
-        "image": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Four-story-1783744404912?alt=media&token=a94a0ffd-77e2-42d1-9825-37c2ff872e69"
+        "title": "Our First New Year Together"
       },
       {
+        "videoLink": "https://vimeo.com/1215047500?share=copy&fl=sv&fe=ci",
         "title": "The Sweetest Surprise",
         "description": "What I thought was an ordinary day turned into one of the most unforgettable moments of my life. With the help of our friends, he carefully planned every detail to create the perfect surprise. Then came the question that changed everything forever. Through happy tears and overwhelming joy, one simple word became the easiest answer I had ever given: \"Yes.\"",
-        "image": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Four-story-1783744410066?alt=media&token=ea93706a-0826-49cf-85ad-7003b9de4c41",
-        "date": "FEBRUARY 2025",
-        "videoLink": "https://vimeo.com/1215047500?share=copy&fl=sv&fe=ci"
+        "image": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/our-story-FNvMviiBgvwqGHozzzFWoVh48g4aRs.jpg",
+        "date": "FEBRUARY 2025"
       },
       {
-        "title": "Our Forever Begins",
         "date": "DECEMBER 20, 2026",
         "description": "Every chapter of our journey has led us here. From strangers to best friends, from secret lovers to soulmates, every step has prepared us for this beautiful day. Surrounded by the people we love most, we begin our greatest adventure—not as two separate stories, but as one.\n\nOn Dec 20, 2026, we will finally say, \"I do.\"\n\nThis isn't the end of our story—it's the beginning of our happily ever after. ❤️",
-        "image": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Four-story-1783744419616?alt=media&token=caae13ff-bb5e-4e4c-8de8-349445ca7ee0"
+        "title": "Our Forever Begins",
+        "image": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/our-story-mSD8p1vQqNxPzRsYkYrIKPMhvUqtOB.jpg"
       }
     ]
   },
@@ -145,7 +145,7 @@
     ]
   },
   "details": {
-    "orderOfEventsImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/website%2Forder-of-events-1787284751986?alt=media&token=7f4b2bf1-0fa8-4a81-9d2b-150b25a7e197",
+    "orderOfEventsImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/website/order-of-events-xad3Hl2ZAcNek0zNQWnH3E3kdpJEHm.jpg",
     "header": {
       "subtitle": "The Celebration",
       "description": "A breathtaking romance in Camiling, Tarlac.",
@@ -209,16 +209,16 @@
     "gentlemenGuideline": "Classic dinner suit (Tuxedo) or tailored suit with crisp white dress shirts. Burgundy, antique gold, or black tailored coordinates. Bowties or silk ties matching the theme are preferred.",
     "inspirationImages": [
       {
-        "url": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fdress-code-1783510885739?alt=media&token=13570183-be80-4795-bf57-41e7359f3777",
-        "type": "Principal Sponsor - Ladies"
+        "type": "Principal Sponsor - Ladies",
+        "url": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/dress-code-WQeacOOoaOo769DeQhUre1jMqY1duB.jpg"
       },
       {
         "url": "/images/dresscode/gentlemen6.jpg",
         "type": "Principal Sponsor - Gentlemen"
       },
       {
-        "type": "Principal Sponsor - Ladies",
-        "url": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fdress-code-1783510905760?alt=media&token=2dd965ec-b7d2-49bd-bbf6-4cde19b11779"
+        "url": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/dress-code-hJ37dZAtvYYFnhssHqoQorIkalPAiY.jpg",
+        "type": "Principal Sponsor - Ladies"
       },
       {
         "url": "/images/dresscode/gentlemen4.jpg",
@@ -237,28 +237,28 @@
         "url": "/images/dresscode/ladies3.jpg"
       },
       {
-        "type": "Guest - Gentlemen",
-        "url": "/images/dresscode/gentlemen3.jpg"
+        "url": "/images/dresscode/gentlemen3.jpg",
+        "type": "Guest - Gentlemen"
       },
       {
         "type": "Guest - Ladies",
         "url": "/images/dresscode/ladies5.jpeg"
       },
       {
-        "type": "Guest - Gentlemen",
-        "url": "/images/dresscode/gentlemen5.jpg"
-      },
-      {
-        "url": "/images/dresscode/ladies4.jpeg",
-        "type": "Guest - Ladies"
-      },
-      {
-        "url": "/images/dresscode/gentlemen7.jpg",
+        "url": "/images/dresscode/gentlemen5.jpg",
         "type": "Guest - Gentlemen"
       },
       {
-        "url": "/images/dresscode/ladies6.jpeg",
-        "type": "Guest - Ladies"
+        "type": "Guest - Ladies",
+        "url": "/images/dresscode/ladies4.jpeg"
+      },
+      {
+        "type": "Guest - Gentlemen",
+        "url": "/images/dresscode/gentlemen7.jpg"
+      },
+      {
+        "type": "Guest - Ladies",
+        "url": "/images/dresscode/ladies6.jpeg"
       },
       {
         "url": "/images/dresscode/ladies7.jpg",
@@ -280,46 +280,46 @@
     "6": "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=600",
     "7": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=600",
     "images": [
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142907368-hH_p0vH8Ug3SuNCJEcvfQ.jpg?alt=media&token=96665ddf-5654-4310-9302-296f11f6fe59",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142909325-qL8HvLVwL_ZoVnHvPSc6t.jpg?alt=media&token=1aede7d2-7fde-4279-9566-d959ba98f1cb",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142911108-LZObPPKxNCUO5de2L_Eh6.jpg?alt=media&token=b8ede201-d8a2-4b3b-af75-fde063a58ac6",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142912713-NaAsVSyPKWKh0rFgiAa_o.jpg?alt=media&token=bfe357cc-bff3-4bf7-9ca2-93ae2919d4a8",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142914376-9ic9B7FoLTQpA88ZcupWj.jpg?alt=media&token=aa386947-be33-4bbc-a9e1-22135f9938a4",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142916056-tm5v3S9RcB3ezsk5Gnsk_.jpg?alt=media&token=84d0e075-9a87-4097-92b4-033123cb69c7",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142917846-Y85_1MHOQ_u8S6jIdNhGo.jpg?alt=media&token=fb7d09f8-9f96-4676-b8e8-769140bc2bc3",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142919483-Ntt0suMfZZyefzp7EhGAx.jpg?alt=media&token=b277fb13-12b8-4214-9d5b-31773d34ee1a",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142921056-Ic__TnAGv_7t1pETMcscS.jpg?alt=media&token=d6ffe222-71a7-4bc5-a82c-431ac4afe27d",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142922780-Vp7-drN4YBP3SqnQj8B90.jpg?alt=media&token=2da56c30-09d3-4865-b4aa-604917304c6a",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142924095-uijXVxQ36ZKvtHIhcHSiD.jpg?alt=media&token=e538008c-51e3-4024-9a43-5187ed3f5bf5",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142925522-ZyYZJG3Sslf3b7_-oVVvM.jpg?alt=media&token=5134a139-c6e6-43cc-a0bf-68a9d6271a89",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142926798-7oCfrQproC2iUVrlKCbWb.jpg?alt=media&token=1598c12d-cae3-4d3c-b780-90f6268add41",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142928346-CnCzbrJ0_kqbaKEmfdPUY.jpg?alt=media&token=cf76dfb1-e832-4e59-89b1-3bd35aede586",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142929872-YRQdoRJ2w6xUrKeRRoJDe.jpg?alt=media&token=1373f8e4-e0b7-48c0-8a1f-1f763b6abc5a",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142931251-DtiLit7KAqSvbI7sF9ugp.jpg?alt=media&token=083946bb-117e-4735-9174-5395732894f4",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142974485-DWptB8cYfKwrRlD-S8D7I.jpg?alt=media&token=2b9349cd-b4f5-41de-8173-24deb68abaa3",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142932521-wUoR7rJ7JrTl1Gl20bCIu.jpg?alt=media&token=71582b8b-0609-4c66-a389-83d1d36d0ff7",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142933746-MyMnh_pmAaJbeBN4PvaQJ.jpg?alt=media&token=4201a225-a558-41c6-b3d6-6c4773a5381a",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142935115-4RasHpYigPJb1PnjO-sWp.jpg?alt=media&token=4e47c086-a300-49ef-8340-8dd3a0eddcef",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142936292-mTmYDmkjQCX-y0h3DorKQ.jpg?alt=media&token=ef86ef02-28ac-40de-bf27-ec75e5b8f89b",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142973090-Lf6McZVcg_IQEVblYzwZi.jpg?alt=media&token=b478cc4e-5923-498b-a751-557df0658eda",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142957059-cfq8vZ4lmLVU-U2S8j_0X.jpg?alt=media&token=5a846128-ae0f-40a5-8bd0-468cf9397cae",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142958316-y951F3QisoM8o4OOl3rkZ.jpg?alt=media&token=d6bbf8f7-fc7f-4748-a1dd-781e94b2b19e",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142959589-_J04V1FhD0LwzT07UJ1b2.jpg?alt=media&token=16448bbf-1d8d-4a05-9ff3-2f129a83da43",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142961022-KTdFjhQYf5t6s3-G8AbMP.jpg?alt=media&token=20ab435b-9b49-4175-934a-c21fb832176b",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142962271-2FxscjNiM-WiBWgRNLcSu.jpg?alt=media&token=6a16a7ba-2374-4512-82fc-221cc728e9d2",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142963721-7_8YMgW2yccoJSn2JOEEW.jpg?alt=media&token=d2a1c5d2-1224-41f8-ba3b-998aa33ef670",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142964977-a5EOPm0HKApU8y40iZ1Zr.jpg?alt=media&token=f7c67f8e-2443-48d3-b11d-1feeaca79d8c",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142966274-oLUg4pMl7I09KJcM7K4Uv.jpg?alt=media&token=ba9e15b2-5552-42c0-8f69-2962d6308af3",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142976946-Mm2IY6AgkYawP6DUWkSB1.jpg?alt=media&token=e2e0af28-e8c6-4eab-8269-243cbe484434",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142967699-847jwDbWpuVs6DyJ9h8lI.jpg?alt=media&token=34a3fa9e-d881-42d0-8f10-6ff763e65f31",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142968862-VxFV-xzrRaqwhx8dspHoz.jpg?alt=media&token=108ac8d6-70a9-4761-81eb-3b46270673e5",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142970257-TNa5OoycO0zu6xmozkgCD.jpg?alt=media&token=e0d2347c-d826-48cc-82cf-283a64748d82",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142971639-WUrqCJITHfY-HtKklzjPt.jpg?alt=media&token=66378cc6-14bc-4140-b99e-2c05d53babea",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142975711-AYH9h47W6P9t2jZHtrUXn.jpg?alt=media&token=dedb2220-380e-40d8-9c91-f90401ad7788",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142978108--vuHyV-FJTb42wYJ9nmFd.jpg?alt=media&token=51188f99-f328-46e5-a679-a216d54aca64",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142979507-v9fe_RYGvnhyA5296kZO1.jpg?alt=media&token=7610ca8c-8758-4c61-ab9d-5a1f78a4f10b",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142980799-XULhej7GGhm3RDTARC5sJ.jpg?alt=media&token=8c2b320b-ebe4-40cb-8f07-89a296d21273",
-      "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/gallery%2Fgallery-1783142982233-kG1Y9grt8VgCj0GOMJuVj.jpg?alt=media&token=0f00e375-4457-4282-85bb-3d40f80d02ca"
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-P3i9JOyp3CHbVHiaZVgwFy6gZnzoJH.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-5t1fWmASrnDFhqVdq97jH7iZITzcBb.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-hr79K32EebY7VpXSxVAEWwUw7xM7hv.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-0a8v1sfTxiXIirN2e6LtjHrHcAh2G1.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-hX6GMeBjJlGJiWBpeIQHLoT1HOXjtb.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-DZrTcMBToeItRZJkRrYEwaw00Rl1tQ.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-LGcQ4PYNVnNGLUuckPL30KpT2wy95s.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-mdwZ6hCHHioFRz15L2fml07SRUfvsu.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-tId3TKraldpzNi9rs1NZTAiXu753Fk.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-DBWb5vzaDSFJDaA4ppK95MJCFv8yhS.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-tijjyuabmftRTrmRW89NyWnFxuoT5d.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-1yJLtemTU7o50eJJT6JOUpqKlomuuI.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-WQceYG4OZ0AntUhUJngr8yocKVn53z.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-5RIJjHWcYFIqdrWgHKqAByIbQGEJoQ.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-WoF6SuUX5Xzuvsrzt1Mkmu86adxTOS.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-n87VK3JdflyP3Mhcw4SMBsYNE7YzRG.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-SClRSTXYPTL1ljSpGOMcV3APIfV231.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-9WAsaV3c3a0HQWlDfTSyDWNIUxmYgE.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-A4grRbBlYe90UKW4sKM27gfJK2On6C.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-PApIbDVRALKjlZy7Ffvj4MxTdqGAj1.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-UnIhLvIPK5hiR6yT0qu8H9WXkMP3Q0.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-Obr9HNxHbxTkNFTNajDIrpBBmw9wvO.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-S7Rr4apawfX03mVzycVNURRfnLPXUK.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-lEgR1gpfsCTK6swyF5IacRMIs04aPL.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-t9i1MzCJrTtxx4lLBXfiNOT34XOCJt.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-AvhtrREsftyn1ceH6gf5hc0DHopJpy.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-HoeNLvVVu5IhC7uoLkFDaBU5bFFSoz.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-uljLhMkLloNXqPb9V0UQ2XIU8siqcT.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-3pOiW1sEkGGJwli96oii81kTeTstET.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-1Gi7nziH9tHtjwQSN2HnS2hHP8e8wO.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-JJ2DuWpx30RZ0YsYhLJ1UJK2cETqiB.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-uiC9b1RKft4qzdlNLTq6Jbz1cbBfvw.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-ywAHe42Avzfq64IkMnzCt5ChAAfp8T.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-RVaWooUgrZwxgWmW900AkZFhwmOA2H.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-XT4bCpScnH0uut30emlskJHOt0VAqK.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-nGMEo9loXxnHGw8jQs1KYCahy8W75K.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-elmx5ooreB3UkTDBTyEzxyZRGSAvts.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-MJAZ0DrkC9N2yhFYqK1XxK9RcDOaTw.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-o0Zg32toCRhBDuLKLrHUNBSizYC2pb.webp",
+      "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/gallery/photo-C4Wm2Xh5NRZPXxmcEHVGIeaKtbroj9.webp"
     ],
     "header": {
       "subtitle": "Our Memories",
@@ -380,15 +380,15 @@
       "description": "Directly support our honeymoon adventures or first home goals with an elegant direct bank contribution.",
       "banks": [
         {
-          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513362551?alt=media&token=b10bd35b-6853-4c90-8b97-471f216882c5",
-          "name": "GCash"
+          "name": "GCash",
+          "qrImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/registry-qr-P2uYBwlb2TiIaPHeFTCpoMfuBz9cNN.jpg"
         },
         {
           "name": "Maribank",
-          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513391949?alt=media&token=2c9ea2e0-fb83-42ae-b6a8-539727dd2b6c"
+          "qrImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/registry-qr-R135Q4EXE77oMGlpLFr9heLegygRKH.jpeg"
         },
         {
-          "qrImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2Fregistry-qr-1783513409067?alt=media&token=e1d9d97c-e529-4b37-bca5-562b6a309f4f",
+          "qrImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/registry-qr-g2GFOepqcCZdXv3T8ZmhSadOOFDJoa.jpg",
           "name": "Landbank"
         }
       ]
@@ -398,14 +398,14 @@
       "description1": "We have lovingly curated a wedding registry featuring beautiful, elegant keepsakes and lifestyle pieces from our favorite boutiques.",
       "description2": "Options include premium vintage collection tablewares, designer home accents, and art contributions for our newly renovated residence."
     },
-    "updatedAt": "2026-08-03T02:47:57.973Z"
+    "updatedAt": "2026-09-24T02:57:46.340Z"
   },
   "rsvpCta": {
     "subtitle": "Join Our Day",
     "title": "Kindly RSVP",
     "description": "\"We would be deeply honored by your presence as we pledge our lives, hearts, and dreams under the beautiful Tarlac skies. Please secure your response before November 1, 2026.\"",
     "buttonText": "Confirm Your Attendance",
-    "backgroundImage": "https://firebasestorage.googleapis.com/v0/b/hans-czay-wedding-rsvp.firebasestorage.app/o/images%2FrsvpCta-bg-1783214863938?alt=media&token=b4e7ffdc-1498-4f73-88ab-3f6feee31c21"
+    "backgroundImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/rsvpCta-bg-twSeHifp60joGWtBBrh7w78ZBNvjEh.jpg"
   },
   "rsvpForm": {
     "header": {

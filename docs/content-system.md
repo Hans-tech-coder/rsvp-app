@@ -46,8 +46,9 @@ a new one):
    seeded from `wedding-content.json`. `hasChanges` = JSON compare of the two.
 2. **Load:** `getDoc(websiteContent/<doc>)`, spread over the JSON default, set
    both states. Check whether `<doc>_backup` exists to enable "Restore".
-3. **Upload image:** `uploadBytes` to a Storage path (see `docs/data-model.md`),
-   `getDownloadURL`, put the URL into `formData`. The image is live only after Save.
+3. **Upload image:** `await uploadImage(file, '<folder>/<name>')` from
+   `src/lib/blob/uploadImage.ts` (compresses, uploads to Vercel Blob, returns the
+   URL; see `docs/data-model.md`), put the URL into `formData`. The image is live only after Save.
 4. **Save:** confirm modal (`AdminModal`) → write the previous values to
    `<doc>_backup` → write `<doc>`. Most editors use
    `setDoc(..., { merge: true })`; `FaqsEditor`, `RegistryEditor` and

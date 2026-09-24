@@ -4,9 +4,9 @@
 
 | Actor | Can |
 | --- | --- |
-| Anyone | Read `websiteContent`, `registryGifts`, and any single `guests/{code}` doc from the browser (`firestore.rules`); read all Storage files; call any server action; call `/api/download` |
+| Anyone | Read `websiteContent`, `registryGifts`, and any single `guests/{code}` doc from the browser (`firestore.rules`); read all uploaded images (public Vercel Blob URLs); call any server action; call `/api/download` |
 | Guest with a valid unused code | Submit one RSVP (`submitRsvp` transaction flips `codeStatus` to `used`) |
-| Signed-in admin (`admins/{uid}` exists) | Write `websiteContent` and Storage from the browser (rules check `isAdmin()`) |
+| Signed-in admin (`admins/{uid}` exists) | Write `websiteContent` from the browser (rules check `isAdmin()`); upload images to Vercel Blob with a token from `/api/upload`, which verifies the Firebase ID token the browser sends as `clientPayload` (`verifyIdToken(…, true)`) and that `admins/{uid}` exists before issuing it. It deliberately does not use the 5-day `session` cookie, which can expire while the admin page stays open |
 | Server (firebase-admin) | Everything — admin SDK bypasses rules |
 
 Browser writes to `guests`, `registryGifts`, and `giftSelections` are denied by
@@ -36,8 +36,8 @@ the rules; those go through server actions.
    value reaches the admin pages. Same fix: verify in the pages/actions (the
    proxy should stay a cheap redirect).
 3. **`/api/download` fetches any URL** passed in `?url=` (open proxy / SSRF).
-   Restrict it to the Firebase Storage host
-   (`firebasestorage.googleapis.com`).
+   Restrict it to the image hosts (`*.public.blob.vercel-storage.com`, plus
+   `firebasestorage.googleapis.com` while legacy URLs remain).
 4. **`guests/{code}` has `allow get: if true`.** Anyone who knows or guesses a
    used code can read that guest's name, email, phone, and message from the
    browser. The site itself only uses the server action `verifyInviteCode`, so
