@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, Variants, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Play } from 'lucide-react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { RevealImage } from '@/components/ui/RevealImage';
@@ -57,26 +57,6 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
       }
     }
   };
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.3,
-        delayChildren: 0.2,
-      }
-    }
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 30 },
-    show: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 1, ease: [0.22, 1, 0.36, 1] }
-    }
-  };
-
   const timelineItems = content.ourStory.items;
 
   return (
@@ -84,13 +64,7 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
       <ScrollContainerProvider containerRef={scrollRef}>
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
       
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-100px" }}
-        className="max-w-5xl mx-auto relative z-10 w-full"
-      >
+      <div className="max-w-5xl mx-auto relative z-10 w-full">
         <TextsReveal className="text-center mb-20 flex flex-col items-center">
           <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.ourStory.subtitle}</span>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.ourStory.title}</h2>
@@ -112,9 +86,8 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
               />
             );
             return (
-            <motion.div
+            <ScrollReveal
               key={index}
-              variants={itemVariants}
               className={`relative mb-16 md:mb-24 w-full md:w-1/2 pl-8 ${index % 2 === 0 ? 'md:pl-0 md:pr-16 md:mr-auto' : 'md:pl-16 md:ml-auto'}`}
             >
               <div className={`absolute -left-4 ${index % 2 === 0 ? 'md:left-auto md:-right-4' : 'md:-left-4'} top-0 w-8 h-8 rounded-full bg-wedding-dark border border-wedding-gold/40 flex items-center justify-center z-10`}>
@@ -124,8 +97,8 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
                 <span className="text-xs uppercase tracking-widest text-wedding-gold/70 font-semibold block mb-1">{item.date}</span>
                 <h3 className="text-2xl font-cinzel text-wedding-cream font-light mb-3">{item.title}</h3>
                 <div className="relative w-full h-64 md:h-72 mb-6 rounded-xl overflow-hidden group shadow-lg">
-                  {/* T08 proof: parallax on the first photo only; T09 decides the rest. */}
-                  {index === 0 ? <Parallax className="absolute inset-x-0 -inset-y-6">{image}</Parallax> : image}
+                  {/* Every other photo drifts, so at most one parallax layer is in view. */}
+                  {index % 2 === 0 ? <Parallax className="absolute inset-x-0 -inset-y-6">{image}</Parallax> : image}
                   {/* Cinematic gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-wedding-dark/80 via-transparent to-wedding-dark/20 opacity-80 group-hover:opacity-40 transition-opacity duration-500" />
                   <div className="absolute inset-0 ring-1 ring-inset ring-wedding-gold/20 rounded-xl" />
@@ -142,11 +115,11 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
                   </button>
                 )}
               </div>
-            </motion.div>
+            </ScrollReveal>
             );
           })}
         </div>
-      </motion.div>
+      </div>
 
       <ScrollReveal delay={0.2}>
         <div className="w-full flex justify-center mt-8 md:mt-12 relative z-20">
