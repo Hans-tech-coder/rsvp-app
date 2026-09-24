@@ -47,4 +47,22 @@ Name the real causes of three symptoms the owner reported, with evidence:
 
 ## Result
 
-(fill in at the end of the session)
+Done 2026-09-24. The baseline table, the S1 timeline, and the ranked hypotheses
+are in `findings.md`. No product code was changed.
+
+- **Confirmed:** H7′ (circular gallery open: 216 ms long task, 286 ms frame,
+  3.2 s GSAP CDN wait, dot strip CLS up to 0.0165) → T06. H2 (loading hands off
+  **late**, not early: sequential Firestore reads to 2.0 s, 1.5 s exit, hero
+  image requested at 3.46 s, 5.4 MB music preload) → T03. H3 (blank gap, text
+  at 1.1–1.3 s, full at ~2 s) → T04. H8 (Gallery ~5.1 MB of full-size photos
+  in 180 px tiles) and H4-blur (reveal `filter: blur` + permanent
+  `will-change`) → T05. H6 (TwinkleSparks full DPR + `shadowBlur`, loop never
+  pauses; code only, no desktop jank) → T06.
+- **Refuted:** H1 (no content swap; CLS ≈ 0), H4 reserved-size, H5
+  (`once: true` everywhere), H7 as stated (no per-frame state), and
+  `InkRevealCanvas`.
+- All four fix tasks keep a confirmed cause, so none is cancelled. Their Scope
+  lines are rewritten.
+- **Limits:** measured on a desktop at DPR 2 and ~165 Hz, with a warm cache and
+  no CPU throttle. Frame counts are not comparable to a 60 Hz phone, so T07
+  must use the same pane. The real-phone check was not done; T07 should do it.

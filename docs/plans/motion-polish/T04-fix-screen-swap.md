@@ -4,8 +4,12 @@
 `AnimatePresence` and `popLayout` before changing modes. Read `findings.md`
 first. Only fix the causes it assigns to T04.
 
-**Scope (T01 rewrites this line):** the sequential exit → enter → text-delay
-chain (H3), plus the back/menu button motion if T01 flags it.
+**Scope (set by T01):** the sequential chain (H3, confirmed): 0.5 s exit →
+blank frame (screenshot shows only back/menu buttons) → 0.1 s delay + 0.8 s
+enter (`pageVariants`, `page.tsx:131`) → `TextsReveal` timer 600/800 ms
+(`TextsReveal.tsx:24`). First text is revealed 1.14–1.32 s after the tap and
+fully in at ~2 s. Also the 51 ms long task when the new screen mounts. The
+back/menu buttons were not flagged.
 
 ## Files
 

@@ -4,8 +4,13 @@
 reserving space). Read `findings.md` first. Only fix the causes it assigns to
 T05.
 
-**Scope (T01 rewrites this line):** reveals that animate layout or expensive
-properties, and images without reserved space (H4, H8).
+**Scope (set by T01):** no layout-shift fix needed: CLS ≈ 0 in S1–S3 and S5,
+and `RevealImage` and Entrance images have reserved space. What remains: (a) the
+reveal CSS animates `filter: blur` (text 4 px, images 8 px) with a permanent
+`will-change: transform, opacity, filter` on every line (`globals.css:96-162`)
+(H4); (b) oversized raw `<img>` from Blob (H8): the Gallery loads ~5.1 MB of
+photos up to 2000 px for 180 px tiles, all eager, and Our Story uses PNGs.
+The circular-gallery dot shift is in T06.
 
 ## Files
 

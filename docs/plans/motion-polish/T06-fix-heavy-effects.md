@@ -4,9 +4,16 @@
 per-frame values). Read `findings.md` first. Only fix the causes it assigns to
 T06.
 
-**Scope (T01 rewrites this line):** per-frame work from canvas effects, the
-circular gallery and the slider (H6, H7), plus any cause T01 could not place
-elsewhere.
+**Scope (set by T01):** the circular gallery (`circular-image-gallery.tsx`)
+is the worst jank measured. (a) GSAP and MotionPathPlugin load one after the
+other from a CDN on first open, so the gallery appears after 3.2 s; (b) it
+mounts all 40 photos as 80 full-screen SVG `<image>`s (40 with `blur-xl`),
+which gives a 216 ms long task and a 286 ms frame on open; (c) the dot strip
+animates `left` and starts at a 1200×800 placeholder, which gives CLS
+0.0065–0.0165 per open. Also the `TwinkleSparks` canvas: full device pixel
+ratio, `shadowBlur` on each of ~33 fills per frame, and a loop that never
+pauses (H6; code-confirmed, no slow frames on desktop, needs a phone check).
+Refuted: per-frame React state (H7), `InkRevealCanvas`, `DraggableSlider`.
 
 ## Files
 

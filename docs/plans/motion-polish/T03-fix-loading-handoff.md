@@ -3,8 +3,14 @@
 **Skills:** `surgical-patch`, `motion`. Read `findings.md` first. Only fix the
 causes it assigns to T03.
 
-**Scope (T01 rewrites this line):** the causes behind S1 — the content swap
-(H1) and a premature loading exit (H2), if T01 confirms them.
+**Scope (set by T01):** S1 is slow, not shifting (CLS ≈ 0; H1 refuted). Fix
+the chain that puts Welcome text at ~5 s: (a) the 12 *sequential* `getDoc`
+calls in `WeddingContentContext.tsx:30-41` (done at ~2.0 s, parallelize);
+(b) the 1.5 s loading exit that must finish before `<main>` mounts under the
+outer `AnimatePresence mode="wait"` (`page.tsx:156`, `LoadingScreen.tsx:12`);
+(c) the Welcome hero image only requested at 3.46 s, after the loading exit
+(preload it while loading); (d) `bg-music.mp3` (5.4 MB, `preload="auto"` in
+`AudioPlayer.tsx:91`) downloading at t = 45 ms and competing for bandwidth.
 
 ## Files
 

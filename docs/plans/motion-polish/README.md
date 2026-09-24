@@ -15,12 +15,12 @@ Status: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked · ➖ cancelled
 | ID | Task | Skills | Depends on | Status | Session notes |
 | --- | --- | --- | --- | --- | --- |
 | T00 | Install Motion AI Kit (skill + free MCP), update docs | – | – | ✅ | `.claude/skills/motion/`, `.mcp.json` (`motion` server only) |
-| T01 | [Investigate the jank (read-only, baseline numbers)](T01-investigate-jank.md) | `investigate-first`, `motion` | T00 | ⬜ | |
+| T01 | [Investigate the jank (read-only, baseline numbers)](T01-investigate-jank.md) | `investigate-first`, `motion` | T00 | ✅ | Worst: circular gallery open (216 ms task, 3.2 s GSAP wait). Load handoff is late (~5 s to text), not shifting. CLS ≈ 0. No phone check yet |
 | T02 | [Migrate `framer-motion` → `motion` package](T02-migrate-to-motion.md) | `migration`, `motion` | T00 | ⬜ | |
-| T03 | [Fix: loading → first screen handoff](T03-fix-loading-handoff.md) | `surgical-patch`, `motion` | T01, T02 | ⬜ | provisional |
-| T04 | [Fix: screen-swap transitions](T04-fix-screen-swap.md) | `surgical-patch`, `motion` | T01, T02 | ⬜ | provisional |
-| T05 | [Fix: layout shift in reveals and images](T05-fix-layout-shift.md) | `surgical-patch`, `ui-ux-pro-max` | T01, T02 | ⬜ | provisional |
-| T06 | [Fix: heavy effects (canvas, gallery, slider)](T06-fix-heavy-effects.md) | `surgical-patch`, `motion` | T01, T02 | ⬜ | provisional |
+| T03 | [Fix: loading → first screen handoff](T03-fix-loading-handoff.md) | `surgical-patch`, `motion` | T01, T02 | ⬜ | scoped by T01 |
+| T04 | [Fix: screen-swap transitions](T04-fix-screen-swap.md) | `surgical-patch`, `motion` | T01, T02 | ⬜ | scoped by T01 |
+| T05 | [Fix: layout shift in reveals and images](T05-fix-layout-shift.md) | `surgical-patch`, `ui-ux-pro-max` | T01, T02 | ⬜ | scoped by T01 |
+| T06 | [Fix: heavy effects (canvas, gallery, slider)](T06-fix-heavy-effects.md) | `surgical-patch`, `motion` | T01, T02 | ⬜ | scoped by T01 |
 | T07 | [Gate: prove the jank is gone](T07-verify-jank-gate.md) | `verify-and-stop` | T03–T06 | ⬜ | |
 | T08 | [Scroll-motion foundation (shared primitives + tokens)](T08-scroll-foundation.md) | `lean-build`, `motion`, `ui-ux-pro-max` | T07 | ⬜ | |
 | T09 | [Apply scroll effects: Welcome + Our Story](T09-scroll-welcome-story.md) | `lean-build`, `motion` | T08 | ⬜ | |

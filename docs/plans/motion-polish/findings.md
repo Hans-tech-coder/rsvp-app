@@ -2,15 +2,41 @@
 
 ## Baseline (T01, production build, 375×812)
 
-| Scenario | CLS | Top shifts (value → node) | Long tasks > 50 ms | Slow frames / total |
-| --- | --- | --- | --- | --- |
-| S1 cold load → Welcome | | | | |
-| S2 Welcome → Our Story | | | | |
-| S3 scroll Our Story | | | | |
-| S4 menu → Gallery, circular gallery | | | | |
-| S5 back button chain | | | | |
+Measured 2026-09-24 in the desktop browser pane (DPR 2, ~165 Hz display, no CPU
+throttle, **warm HTTP cache**: the pane cannot disable the cache). "Slow frames"
+means frames longer than 25 ms. The total is high because the display runs at
+~165 Hz. A worst-frame column is added. Long tasks are > 50 ms.
 
-Real-phone check (one line):
+| Scenario | CLS | Top shifts (value → node) | Long tasks > 50 ms | Slow frames / total (worst) |
+| --- | --- | --- | --- | --- |
+| S1 cold load → Welcome | 0.0000 | 0.0000 → `t-digit-group` (countdown digit, harmless) | none recorded | not measurable (tool lag, see timeline) |
+| S2 Welcome → Our Story | 0 | none | 1 × 51 ms at +530 ms (new screen mounts) | 3 / 535 (49 ms); rerun 1 / 556 (36 ms) |
+| S3 scroll Our Story | 0 | none | none | 0 / 744 (7 ms) |
+| S4 menu → Gallery | 0 | none | none | 5 / 666 (41 ms) |
+| S4 circular gallery, first open (cold GSAP) | 0.0165 | 0.0020, 0.0018, 0.0016 → dot strip `absolute rounded-full border-2 …` | close: 154 ms | open 2 / 475 (59 ms); close 3 / 348 (**203 ms**) |
+| S4 circular gallery, second open (warm) | 0.0065 | 0.0044, 0.0021 → same dot strip | open: **216 ms** | open 3 / 344 (**286 ms**); next 1 / 383 (68 ms); close 0 / 413 (7 ms) |
+| S5 Gallery → Dress Code → Details (back ×2) | 0 | none | none | 1 / 713 (45 ms) |
+
+**S1 timeline** (from the resource and paint timing buffers, ms after navigation):
+first contentful paint at 56 (loading screen) · `bg-music.mp3` 5,456 KB requested
+at 45 · 12 `getDoc` calls run **one after another** (24 Listen-channel requests,
+~65 ms each), the last ends at **2,009** · loading screen exit 1.5 s · Welcome hero
+image (`/_next/image?url=…welcome-bg…`) first **requested at 3,456** · page
+enter 0.1 + 0.8 s · Welcome text `delayChildren` 0.5 s and `TextsReveal` 800 ms.
+**First Welcome text is about 4.5–5 s after navigation on a fast desktop.**
+
+**S2 timing:** the first `TextsReveal` on the new screen gets `is-shown`
+1,137 ms after the tap (back to Welcome: 1,322 ms). The stagger then runs 700 ms
+plus 60 ms per line.
+
+Screenshots (seen in session, not saved):
+- **S1**, mid-exit: the "Curating Elegance" loading screen dimming over a dark
+  background, with no Welcome content behind it yet.
+- **S2**, ~0.6 s after the tap: **a blank dark screen** with only the back and menu
+  buttons. This is the gap between the exit and the enter.
+
+Real-phone check (one line): **not done.** The session had no phone. T07 should
+record it, especially for the gallery open and the Welcome sparkles.
 
 ## Hypotheses (ranked by evidence)
 
@@ -19,7 +45,24 @@ task (T03–T06) that owns it.
 
 | # | Hypothesis | Evidence | Status | Owner task |
 | --- | --- | --- | --- | --- |
+| H7′ | Circular gallery is heavy on open (reframed H7) | 216 ms long task and 286 ms frame on a warm open. 154 ms long task and 203 ms frame on the first close. It mounts 80 SVG `<image>`s (40 with `blur-xl`) for 40 photos (`circular-image-gallery.tsx:114-130, 312-313`). GSAP and MotionPathPlugin load one after the other from a CDN (`:24-53`, 1,809 + 1,348 ms), so the first open waits **3.2 s**. The dot strip animates `left` (`:368`) and starts at a 1200×800 placeholder (`:326`), giving CLS 0.0065–0.0165 per open. | confirmed | T06 |
+| H2 | Loading hands off late and in the wrong order | The loading screen does **not** leave early. It leaves late: 12 sequential `getDoc` (`WeddingContentContext.tsx:30-41`) take until 2.0 s. Then the 1.5 s exit (`LoadingScreen.tsx:12`) must finish before `<main>` mounts (`page.tsx:156` `mode="wait"`). The hero image is requested only at 3.46 s because it mounts with Welcome (`WelcomeScreen.tsx:80`). The 5.4 MB music file (`AudioPlayer.tsx:91` `preload="auto"`) downloads from 45 ms. Fonts are `next/font` preloads fetched at 19 ms, so they are ready. CLS ≈ 0: nothing shifts, it is only slow. | confirmed (as lateness, not as a shift) | T03 |
+| H3 | Sequential screen swap reads as lag | Screenshot at ~0.6 s after the tap shows a blank screen. Text is revealed 1.14–1.32 s after the tap and fully in at ~2 s. `pageVariants` exit 0.5 s → delay 0.1 → enter 0.8 s (`page.tsx:131-153`). `TextsReveal` waits 600/800 ms from mount (`TextsReveal.tsx:24`). A 51 ms long task occurs when Our Story mounts. | confirmed | T04 |
+| H8 | Large un-optimized images | The Gallery loads ~33 photos, **~5.1 MB** in total (43–370 KB each, WebP up to 2000 px from `uploadImage.ts:24`), as raw eager `<img>` in 180 px tiles (`GalleryScreen.tsx:147,167` via `RevealImage`). Our Story has 7 PNG/JPEG files (39–173 KB, ≤ 960 px) and all load eagerly at mount. `next.config.ts` has no remote pattern for the Blob host. No stall was measured on desktop; the risk is on phones. | confirmed (weight); stall unproven | T05 |
+| H4 | Reveals animate expensive properties / images lack reserved size | **Expensive properties: yes.** `filter: blur` on every text line (4 px) and image (8 px), with a permanent `will-change: transform, opacity, filter` (`globals.css:96-162`). **Reserved size: refuted.** `RevealImage` wrappers are fixed (e.g. 238×256), the Entrance logo has `width`/`height` (`EntranceScreen.tsx:144-148`), Welcome and Entrance backgrounds use `next/image fill`, and CLS is 0 in S2, S3 and S5. | confirmed (blur) / refuted (size) | T05 |
+| H6 | Canvas effects run hidden or at full DPR | `TwinkleSparks`: canvas at full DPR (750×1624 at DPR 2; would be 1125×2436 on a DPR 3 phone, `TwinkleSparks.tsx:23-24`). `shadowBlur` is set on each of ~33 fills per frame (`:138`). The rAF loop never pauses (`:166-175`), including under the menu overlay. On desktop: 0 slow frames out of 496. `InkRevealCanvas` is refuted: its DPR is capped at 2 (`:47`) and its loop stops when idle (`:154-156`). | confirmed in code (sparks), no measured jank; needs phone | T06 |
+| H1 | JSON defaults paint, then Firestore content replaces them | Refuted. `setContent` and `setLoading(false)` run in the same async continuation (`WeddingContentContext.tsx:205-209`), so React batches them. `<main>` is not mounted while `loading` is true. S1 CLS is 0.00001 (a countdown digit only). | refuted | – |
+| H5 | `whileInView` blocks re-trigger or start together | Refuted. All 15 are `viewport={{ once: true }}`. S3 scroll: 0 slow frames out of 744, CLS 0. | refuted | – |
+| H7 | Gallery or slider sets React state every frame | Refuted as stated. The gallery animates refs through GSAP and has no per-frame `setState`. `DraggableSlider` scrolls via refs and `scrollLeft` (`:23-51`). The real gallery cost is in H7′. | refuted | – |
+
+**Ranking rationale:** H7′ is the only scenario with long tasks > 150 ms and a
+visible stall (3.2 s on first open). H2 adds ~3 s of avoidable wait on every
+cold load. H3 makes every one of ~10 screen swaps take ~2 s. H8 and H4 are costs
+that matter mainly on phones. H6 is code-level only until a phone check.
 
 ## Parking lot
 
 Out-of-scope issues found during any task. One line each, with `file:line`.
+
+- The guest page loads the Firebase Auth iframe and `apis.google.com` gapi scripts at startup (`src/lib/firebase/client.ts:18` `getAuth` at module scope), even though guests never sign in.
+- The circular gallery loads GSAP from cdnjs at runtime (`src/components/ui/circular-image-gallery.tsx:36-47`). This is a third-party script without SRI and a second animation library next to Motion. (Its load *delay* is in T06 scope. Removing GSAP is a design decision.)
