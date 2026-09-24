@@ -71,6 +71,53 @@ Real-phone check (one line): **Samsung Galaxy A56, production URL, tested by
 the owner. All smooth:** load → Welcome, screen swaps, Our Story scroll, the
 circular gallery (open, next, close, reopen), and the back button.
 
+## Final (T12, production build, after the scroll effects T08–T11)
+
+Measured 2026-09-24, same pane and protocol (warm cache, no CPU throttle,
+display ~100–165 Hz). Format: CLS · long tasks > 50 ms · slow frames / total
+(worst) · first new text after the tap. Phone width 375×812 unless noted.
+
+| Scenario | Baseline (T01) | After fixes (T07) | **Final (T12)** | Verdict |
+| --- | --- | --- | --- | --- |
+| S1 cold load → Welcome | CLS 0 · text ~4.5–5 s | CLS 0 · none · 0/351 · text 690 ms | CLS 0.00001 (countdown digit) · none · FCP 76 ms · 0/493 (10 ms) after load | pass |
+| S2 Welcome → Our Story | 0 · 51 ms · 3/535 (49) · 1,137 ms | 0 · none · 0/407 · 177 ms | 0 · none · 2/483 (46 ms) · **204 ms** | pass |
+| S3 scroll Our Story (4,931 px, 4 s) | 0 · none · 0/744 | 0 · none · 0/789 | 0 · none · **0/788 (15 ms)**, now with reveals + parallax | pass |
+| S4 menu → Gallery | 0 · none · 5/666 (41) | 0 · none · 5/442 · 222 ms | 0 · none · 7/443 (35 ms, 1.6 %) · 188 ms | pass |
+| S4 circular gallery, first open | 0.0165 · 3.2 s wait | 0 · none · 2/551 (62) | 0 · none · 2/388 (49 ms) · 2 SVG `<image>`s | pass |
+| S4 next / close | 203 ms frame · 154 ms task | 0 · none · ≤ 20 ms | 0 · none · next 1/161 (59 ms), close 0/159 (19 ms) | pass |
+| S4 second open / close | 0.0065 · **216 ms** task · 286 ms frame | 0 · none · 1/331 (51) | 0 · none · open 1/240 (43 ms), close 0/247 (14 ms) | pass |
+| S5 Gallery → Dress Code (back) | 0 · none · 1/713 (45) | 0 · none · 0/402 · 187 ms | 0 · none · 0/407 (19 ms) · 186 ms | pass |
+| S5 Dress Code → Details (back) | – | 0 · none · 0/407 · 190 ms | 0 · none · 0/309 (15 ms) · 169 ms | pass |
+
+**Full scroll of every scrolling screen** (Continue into the screen, then
+scroll top → bottom in 4 s). Swap = slow/total (worst) · first text.
+
+| Screen | Phone 375×812: swap · scroll | Desktop 1345×1274: swap · scroll |
+| --- | --- | --- |
+| Our Story | (S2) · 4,931 px 0/788 (15) | 2/394 (47) · 187 ms · 4,298 px 0/748 (15) |
+| Entourage | 0/407 (21) · 172 ms · 2,917 px 0/787 (10) | 0/407 (17) · 169 ms · 1,624 px 0/789 (12) |
+| Details | 0/413 (20) · 169 ms · 1,945 px 0/785 (11) | 0/408 (14) · 166 ms · 1,377 px 0/543 (18) |
+| Dress Code | 0/405 (20) · 174 ms · 1,151 px 0/791 (8) | 3/392 (33) · 176 ms · 484 px 0/781 (14) |
+| Gallery | 2/399 (33) · 220 ms · 352 px 0/786 (15) | 3/376 (88) · 208 ms · 236 px 1/773 (82) |
+| FAQ | 0/410 (21) · 175 ms · 892 px 0/794 (7) | 2/394 (53) · 163 ms · 502 px 0/783 (14) |
+| Registry | 0/413 (19) · 169 ms · 828 px 0/794 (7) | 0/295 (17) · 165 ms · 17 px 0/779 (21) |
+| RSVP CTA | 0/413 (13) · 161 ms · not scrollable | 0/407 (13) · 161 ms · not scrollable |
+
+CLS 0 and no long tasks in every row. After each scroll, no element was left
+at opacity 0 apart from hover overlays and faded image skeletons, so every
+`ScrollReveal` fired. Details and Registry cards still match heights on
+desktop (518/518 px, 398/398 px). The RSVP form itself was not re-scrolled;
+it needs an invite code, and T11 measured it at 0 %.
+
+**Reduced motion:** the pane cannot emulate `prefers-reduced-motion`, so it
+was checked in the code. Screen swap (`page.tsx` opacity-only 0.15 s), loader
+(instant), `TextsReveal` / `PopInNumber` / `RevealImage` (CSS media rules), and
+`ScrollReveal`, `ScrollRevealItem`, `Parallax` (static `div`) all honour it.
+Older motion that does not is listed in `docs/current-state.md`.
+
+**Real-phone check (one line):** **not done in this session.** The deployed
+preview must include T08–T11 first; deploying is the owner's call.
+
 ## Hypotheses (ranked by evidence)
 
 Status per row: confirmed · refuted · untested. Each confirmed row names the fix
@@ -97,9 +144,16 @@ that matter mainly on phones. H6 is code-level only until a phone check.
 
 Out-of-scope issues found during any task. One line each, with `file:line`.
 
+**T12: every item still open below has moved to `docs/current-state.md` →
+Known issues** (plus the three T12 items at the end). The `ScrollReveal`
+`amount` limit went to `docs/conventions.md` → Motion.
+
 - The guest page loads the Firebase Auth iframe and `apis.google.com` gapi scripts at startup (`src/lib/firebase/client.ts:18` `getAuth` at module scope), even though guests never sign in.
 - The circular gallery loads GSAP from cdnjs at runtime (`src/components/ui/circular-image-gallery.tsx:36-47`). This is a third-party script without SRI and a second animation library next to Motion. (Its load *delay* is in T06 scope. Removing GSAP is a design decision.)
 - `npm run lint` fails on `main` with 95 errors and 52 warnings, all older than T02. They are mainly `react-hooks/set-state-in-effect` (e.g. `src/components/screens/WelcomeScreen.tsx:21`, `src/components/ui/circular-image-gallery.tsx:80-81`), `@typescript-eslint/no-explicit-any` (`src/types/index.ts:14-43`), `ban-ts-comment`, and `prefer-const`. The verify step's "lint passes" cannot hold until they are fixed. T02 compared its lint against the baseline instead.
 - (T05, for T06) The circular gallery still loads the full stored photos (`src/components/ui/circular-image-gallery.tsx:312-313`, raw `href={url}`, up to 2000 px). Before T05 the Gallery tiles had already cached those files. Now the tiles load 384 px copies, so the first circular-gallery open downloads the originals cold (1 × 376 ms long task measured on open). Passing optimized URLs there belongs to T06. *(Done in T06.)*
 - (T10) `ScrollReveal` uses `viewport.amount: 0.2` (`src/components/ui/ScrollMotion.tsx:94`), so an element taller than 5× its scroll container can never reach the threshold and stays at opacity 0. No current caller is that tall (T10 wraps per column/card for this reason); a long block would need a smaller `amount` or a pixel `margin`.
 - (T06) Neither `TwinkleSparks` (`src/components/effects/TwinkleSparks.tsx`) nor the circular gallery (`src/components/ui/circular-image-gallery.tsx`) checks `prefers-reduced-motion`; the sparks drift and the hearts bounce regardless.
+- (T12) Motion that ignores `prefers-reduced-motion`: background zoom in `src/components/screens/WelcomeScreen.tsx:74` and `RsvpCtaScreen.tsx:28`, modal pop-ins (`OurStoryScreen.tsx:154`, `DetailsScreen.tsx:197`, `RegistryScreen.tsx:115`, `RsvpScreen.tsx:198`), hover lifts (`DetailsScreen.tsx:75,110`, `DressCodeScreen.tsx:44`), FAQ accordion (`FaqScreen.tsx:61`). All older than the plan.
+- (T12) `src/components/screens/FaqScreen.tsx` question cards pass `transition-all duration-300` to `ScrollReveal`, so CSS may also transition Motion's inline opacity/transform. The class is older than the plan, and no jank was measured.
+- (T12) `src/components/ui/circular-image-gallery.tsx` `closing` state never resets, so the last-closed photo stays mounted (at most 2 extra SVG `<image>`s).

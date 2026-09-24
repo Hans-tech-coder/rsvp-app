@@ -1,5 +1,8 @@
 # Motion polish plan: smooth transitions and luxury scroll
 
+**Status: Done** (2026-09-24). The only open item is the real-phone check of
+T08–T11 on the deployed site, which the owner does after deploying.
+
 **Goal.** The guest site should feel calm and expensive. Today, transitions lag,
 elements jump, and loading stutters. First find and fix the causes, then add
 subtle scroll effects.
@@ -26,7 +29,7 @@ Status: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked · ➖ cancelled
 | T09 | [Apply scroll effects: Welcome + Our Story](T09-scroll-welcome-story.md) | `lean-build`, `motion` | T08 | ✅ | Welcome: no change, not scrollable. Our Story: ad-hoc stagger → `ScrollReveal` per card; `Parallax` on every other photo (≤ 1 in view at 375×812 and 1440×900). S3 phone 0.1 % slow frames, desktop 0 %, CLS 0. Reduced motion in code only; phone check pending |
 | T10 | [Apply scroll effects: Entourage + Details + Dress Code](T10-scroll-entourage-details-dresscode.md) | `lean-build`, `motion` | T08 | ✅ | Each name column / venue card its own `ScrollReveal` (2nd delayed 120 ms); swatches stagger; no parallax (no venue image), slider untouched. Full scroll: ≤ 0.09 % slow frames, CLS 0, phone + desktop. Reduced motion in code only; phone check pending |
 | T11 | [Apply scroll effects: Gallery + FAQ + Registry + RSVP](T11-scroll-gallery-faq-registry-rsvp.md) | `lean-build`, `motion` | T08 | ✅ | Gallery grid, FAQ per-question (capped index delay), Registry per card, CTA button → `ScrollReveal`; RSVP form card motion removed (heading `TextsReveal` only). Full scroll ≤ 0.34 % slow frames, CLS 0, phone + desktop. RSVP form scroll 0 %, fields static; submit OK with test code. Reduced motion in code only; phone check pending |
-| T12 | [Final verify, review, docs sync](T12-final-verify.md) | `verify-and-stop`, `caveman-review`, `caveman-commit` | T09–T11 | ⬜ | |
+| T12 | [Final verify, review, docs sync](T12-final-verify.md) | `verify-and-stop`, `caveman-review`, `caveman-commit` | T09–T11 | ✅ | S1–S5 + full scroll of all screens, phone + desktop: CLS 0, no long tasks, ≤ 1.6 % slow frames, text 161–220 ms. Review: no real defects. Docs synced; Parking lot → `current-state.md`. Reduced motion in code only. Real-phone check pending the owner's deploy. Not committed (owner commits) |
 
 T01 and T02 do not depend on each other. T09, T10 and T11 do not depend on
 each other and can run in any order.

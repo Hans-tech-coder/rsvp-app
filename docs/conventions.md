@@ -89,6 +89,13 @@ Match the code around you. These are the patterns the codebase already uses.
     inputs; never stack a primitive on an element that already has
     `whileInView` (replace it). Under reduced motion every primitive renders a
     plain static `div`.
+  - `ScrollReveal` triggers at `viewport.amount: 0.2`, so a block taller than
+    5× its scroll container never reveals. Wrap per card/column/item, as the
+    screens do, rather than around one long block.
+- Reduced motion: any new motion must respect `prefers-reduced-motion`
+  (`useReducedMotion` in Motion code, a `@media (prefers-reduced-motion:
+  reduce)` rule in CSS). Known older exceptions are listed in
+  `docs/current-state.md`.
 - Canvas effects (`TwinkleSparks`, `InkRevealCanvas`) cancel their animation
   frame on unmount and cap the device pixel ratio at 2 — keep both in any new
   canvas effect. `TwinkleSparks` also pauses while off-screen or the tab is

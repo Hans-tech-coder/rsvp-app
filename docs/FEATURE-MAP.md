@@ -104,8 +104,7 @@ Read these by range (`grep -n` then read around the line), never whole.
 | 493 | `src/app/admin/content/FaqsEditor.tsx` |
 | 486 | `src/data/wedding-content.json` |
 | 469 | `src/app/admin/content/EventDetailsEditor.tsx` |
+| 464 | `src/app/page.tsx` |
 | 435 | `src/app/admin/content/RsvpFormEditor.tsx` |
 | 414 | `src/components/ui/circular-image-gallery.tsx` |
 | 400 | `src/app/admin/content/EntourageEditor.tsx` |
-
-`src/app/page.tsx` (397) is close to the limit.

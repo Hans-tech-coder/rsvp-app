@@ -78,6 +78,23 @@ transaction rejects when `currentCount >= maxCount`.
   `mode="wait"`, so `<main>` mounts under `LoadingScreen` while it fades out.
   The loader's exit is a CSS opacity transition on `--duration-very-slow` /
   `--ease-in-out` driven by `usePresence` (instant under reduced motion).
+  The loader stays up until content has loaded (the 12 `websiteContent` docs
+  are fetched in parallel) and fonts plus, on step 0, the Welcome hero image
+  are ready (`assetsReady`). The asset wait is capped at `LOADER_MAX_WAIT_MS`
+  (2.5 s after navigation).
+- **Scroll effects:** scrolling screens use the `ScrollMotion.tsx` primitives
+  (rules in `docs/conventions.md` → Motion). Our Story: one `ScrollReveal` per
+  timeline card, `Parallax` on every other photo. Entourage: one reveal per
+  name column, second column delayed. Details: one reveal per venue card plus
+  the order-of-events block. Dress Code: palette card with staggered swatches.
+  Gallery: the slider block. FAQ: one reveal per question (capped delay).
+  Registry: one reveal per card. Each screen's Continue button reveals too, and
+  on RSVP CTA the button follows the heading. Welcome does not scroll and has none. The RSVP
+  form has no scroll motion; only its heading uses `TextsReveal`.
+- **Circular gallery:** GSAP loads from the CDN once per page (`loadGsap`,
+  started when the Gallery screen mounts). Only the open, in-place and
+  closing photos mount full-size SVG `<image>`s, served resized through the
+  image optimizer; neighbours are pre-fetched.
 - **Text:** wrap headings/paragraphs in `<TextsReveal>` (CSS `.t-stagger` in
   `globals.css`; waits 150 ms, or 350 ms with `isHero`, so the lines rise
   while the screen fades in; the hero waits a little for the loader's fade).
@@ -89,12 +106,16 @@ transaction rejects when `currentCount >= maxCount`.
 - **Numbers:** `<PopInNumber>` (`.t-digit` CSS) for the countdown.
 - **Tokens:** durations, easings, distances, and blur live as CSS variables at
   the top of `globals.css` (`--duration-*`, `--ease-*`, `--reveal-*`,
-  `--stagger-*`, `--digit-*`). Use them; do not hard-code new timings.
+  `--stagger-*`, `--digit-*`, `--*-scroll-reveal`, `--distance-parallax`).
+  Use them; do not hard-code new timings.
+- **Reduced motion:** screen swaps, the loader, text/number/image reveals and
+  every scroll primitive respect `prefers-reduced-motion`. Some older motion
+  does not yet (see `docs/current-state.md` → Known issues).
 - The `transitions-dev` skill matches this token system — use it for new CSS
   motion. For Motion code (`motion/react`: screen swaps, `whileInView`,
   scroll effects) use the `motion` skill.
-- Planned work on jank and scroll effects is tracked in
-  `docs/plans/motion-polish/README.md`.
+- The jank fixes and scroll effects came from the finished plan in
+  `docs/plans/motion-polish/` (measurements in its `findings.md`).
 
 ## Music
 
