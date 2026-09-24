@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState } from 'react';
-import { motion, Variants, AnimatePresence, PanInfo } from 'motion/react';
+import React, { useRef, useState } from 'react';
+import { motion, AnimatePresence, PanInfo } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { CircularImageGallery, loadGsap } from '@/components/ui/circular-image-gallery';
+import { ScrollContainerProvider, ScrollReveal } from '@/components/ui/ScrollMotion';
 
 interface GalleryScreenProps {
   onContinue: () => void;
@@ -64,18 +65,7 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
     }
   };
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2, delayChildren: 0.1 }
-    }
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
-  };
+  const scrollRef = useRef<HTMLElement>(null);
 
   const lightboxVariants = {
     enter: ({ direction, isMobile }: { direction: number; isMobile: boolean }) => ({
@@ -125,23 +115,19 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
 
 
   return (
-    <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+    <section ref={scrollRef} className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+      <ScrollContainerProvider containerRef={scrollRef}>
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
 
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-50px" }}
-        className="max-w-7xl mx-auto text-center w-full relative z-10"
-      >
+      <div className="max-w-7xl mx-auto text-center w-full relative z-10">
         <TextsReveal className="mb-16 flex flex-col items-center">
           <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.galleryHeader?.subtitle || "Our Memories"}</span>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.galleryHeader?.title || "The Gallery"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
         </TextsReveal>
 
-        <div className="relative w-full max-w-full mt-8" style={{
+        <ScrollReveal className="mt-8">
+        <div className="relative w-full max-w-full" style={{
           mask: 'linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)',
           WebkitMask: 'linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)'
         }}>
@@ -178,22 +164,17 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
             </DraggableSlider>
           </div>
         </div>
-      </motion.div>
+        </ScrollReveal>
+      </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1, delay: 0.5 }}
-        className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20"
-      >
+      <ScrollReveal delay={0.2} className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
         <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
           <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
           <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
             <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>
         </button>
-      </motion.div>
+      </ScrollReveal>
 
       <EmbeddedFooter />
 
@@ -214,6 +195,7 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
           </motion.div>
         )}
       </AnimatePresence>
+      </ScrollContainerProvider>
     </section>
   );
 }

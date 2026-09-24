@@ -1,10 +1,16 @@
 "use client";
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence , Variants } from 'motion/react';
+import React, { useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
+import { ScrollContainerProvider, ScrollReveal } from '@/components/ui/ScrollMotion';
+
+// Light stagger: each question reveals on its own as it enters, and the ones
+// visible together are offset by this gap (capped so later ones never lag).
+const FAQ_STAGGER = 0.06;
+const FAQ_STAGGER_MAX = 0.24;
 
 interface FaqScreenProps {
   onContinue: () => void;
@@ -14,18 +20,7 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
   const { content } = useWeddingContent();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 }
-    }
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-  };
+  const scrollRef = useRef<HTMLElement>(null);
 
   const faqs = content.faq;
 
@@ -34,16 +29,11 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
   };
 
   return (
-    <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+    <section ref={scrollRef} className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+      <ScrollContainerProvider containerRef={scrollRef}>
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
 
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-50px" }}
-        className="max-w-4xl mx-auto w-full relative z-10"
-      >
+      <div className="max-w-4xl mx-auto w-full relative z-10">
         <TextsReveal className="text-center mb-16 flex flex-col items-center">
           <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.faqHeader?.subtitle || "Guest Information"}</span>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.faqHeader?.title || "Things You Might Want to Know"}</h2>
@@ -53,9 +43,9 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <motion.div 
-              key={index} 
-              variants={itemVariants}
+            <ScrollReveal
+              key={index}
+              delay={Math.min(index * FAQ_STAGGER, FAQ_STAGGER_MAX)}
               className="bg-wedding-dark/40 border border-wedding-gold/20 rounded-lg overflow-hidden transition-all duration-300 hover:border-wedding-gold/40"
             >
               <button 
@@ -81,27 +71,22 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </motion.div>
+            </ScrollReveal>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1, delay: 0.5 }}
-        className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20"
-      >
+      <ScrollReveal delay={0.2} className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
         <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
           <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
           <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
             <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>
         </button>
-      </motion.div>
+      </ScrollReveal>
 
       <EmbeddedFooter />
+      </ScrollContainerProvider>
     </section>
   );
 }

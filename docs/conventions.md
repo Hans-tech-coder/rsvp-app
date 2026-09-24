@@ -73,6 +73,10 @@ Match the code around you. These are the patterns the codebase already uses.
     its own `<ScrollReveal>` and delay the second by
     `SCROLL_MOTION.revealStagger`, instead of one `stagger` parent — a stagger
     parent would reveal the stacked column while it is still off-screen.
+  - Long lists (e.g. FAQ questions): same reason — one `<ScrollReveal>` per
+    item, with a light stagger from a capped index delay
+    (`Math.min(index * 0.06, 0.24)` in `FaqScreen`), so the items visible
+    together are offset and later ones never lag.
   - `<Parallax distance?>` drifts its layer on `y` by ±24 px (max 40) while it
     crosses the view. Give it classes that make it taller than an
     `overflow-hidden` parent by `distance` each side (e.g.

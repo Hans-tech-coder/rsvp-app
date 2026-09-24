@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence , Variants } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 
 interface RsvpScreenProps {
@@ -31,19 +31,6 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 }
-    }
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-  };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -82,14 +69,9 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
     <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
 
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-50px" }}
-        className="max-w-4xl mx-auto w-full relative z-10"
-      >
-        <motion.div variants={itemVariants} className="bg-wedding-dark/40 p-8 md:p-12 rounded-xl border border-wedding-burgundylight/30 shadow-lg">
+      {/* Only the heading reveals (TextsReveal); form fields never animate on scroll. */}
+      <div className="max-w-4xl mx-auto w-full relative z-10">
+        <div className="bg-wedding-dark/40 p-8 md:p-12 rounded-xl border border-wedding-burgundylight/30 shadow-lg">
           <TextsReveal className="text-center mb-12 flex flex-col items-center">
             <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-1">{formContent.header.subtitle}</span>
             <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{formContent.header.title}</h2>
@@ -200,8 +182,8 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
           </form>
 
 
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Confirmation Modal */}
       <AnimatePresence>

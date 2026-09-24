@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { InkRevealCanvas } from '@/components/ui/InkRevealCanvas';
 import { TextsReveal } from '@/components/ui/TextsReveal';
+import { ScrollReveal } from '@/components/ui/ScrollMotion';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface RsvpCtaScreenProps {
@@ -42,12 +43,15 @@ export function RsvpCtaScreen({ onContinue }: RsvpCtaScreenProps) {
             {content.rsvpCta.description}
           </p>
         </TextsReveal>
+        {/* Follows the heading lines in (TextsReveal starts ~150 ms after mount). */}
+        <ScrollReveal delay={0.6}>
         <button 
           onClick={onContinue} 
           className="px-8 py-4 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.25em] font-medium uppercase transition-all duration-500 rounded-sm shadow-lg"
         >
           {content.rsvpCta.buttonText}
         </button>
+        </ScrollReveal>
       </div>
     </section>
   );

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence , Variants } from 'motion/react';
+import React, { useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { CuratedRegistryScreen } from './CuratedRegistryScreen';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { TextsReveal } from '@/components/ui/TextsReveal';
+import { ScrollContainerProvider, ScrollReveal, SCROLL_MOTION } from '@/components/ui/ScrollMotion';
 
 interface RegistryScreenProps {
   onContinue: () => void;
@@ -17,30 +18,14 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
   const [showCuratedRegistry, setShowCuratedRegistry] = useState(false);
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 }
-    }
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-  };
+  const scrollRef = useRef<HTMLElement>(null);
 
   return (
-    <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+    <section ref={scrollRef} className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+      <ScrollContainerProvider containerRef={scrollRef}>
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
 
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-50px" }}
-        className="max-w-4xl mx-auto w-full relative z-10"
-      >
+      <div className="max-w-4xl mx-auto w-full relative z-10">
         <TextsReveal className="text-center mb-16 flex flex-col items-center">
           <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.registry?.header?.subtitle || "Wishing Well"}</span>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.registry?.header?.title || "Registry & Contributions"}</h2>
@@ -50,9 +35,10 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
           </p>
         </TextsReveal>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Card 1 */}
-          <div className="bg-wedding-dark/60 p-8 rounded-xl border border-wedding-gold/20 shadow-sm flex flex-col justify-between">
+          <ScrollReveal>
+          <div className="h-full bg-wedding-dark/60 p-8 rounded-xl border border-wedding-gold/20 shadow-sm flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 bg-wedding-gold rounded-full flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-wedding-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
@@ -75,9 +61,11 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               </div>
             </div>
           </div>
+          </ScrollReveal>
 
           {/* Card 2 */}
-          <div className="bg-wedding-dark/60 p-8 rounded-xl border border-wedding-gold/20 shadow-sm flex flex-col justify-between">
+          <ScrollReveal delay={SCROLL_MOTION.revealStagger}>
+          <div className="h-full bg-wedding-dark/60 p-8 rounded-xl border border-wedding-gold/20 shadow-sm flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 bg-wedding-gold rounded-full flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-wedding-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
@@ -94,23 +82,18 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               Visit Wedding Registry
             </button>
           </div>
-        </motion.div>
-      </motion.div>
+          </ScrollReveal>
+        </div>
+      </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1, delay: 0.5 }}
-        className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20"
-      >
+      <ScrollReveal delay={0.2} className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
         <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
           <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
           <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
             <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>
         </button>
-      </motion.div>
+      </ScrollReveal>
 
       <EmbeddedFooter />
 
@@ -170,6 +153,7 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
           </motion.div>
         )}
       </AnimatePresence>
+      </ScrollContainerProvider>
     </section>
   );
 }
