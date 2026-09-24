@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence , Variants } from 'motion/react';
+import React, { useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { TextsReveal } from '@/components/ui/TextsReveal';
+import { ScrollContainerProvider, ScrollReveal, SCROLL_MOTION } from '@/components/ui/ScrollMotion';
 
 interface DetailsScreenProps {
   onContinue: () => void;
@@ -15,18 +16,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
   const [mapUrl, setMapUrl] = useState<string | null>(null);
   const { content } = useWeddingContent();
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2, delayChildren: 0.1 }
-    }
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
-  };
+  const scrollRef = useRef<HTMLElement>(null);
 
   const openMap = (url: string) => {
     setMapUrl(url);
@@ -65,16 +55,11 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
   };
 
   return (
-    <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+    <section ref={scrollRef} className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+      <ScrollContainerProvider containerRef={scrollRef}>
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
 
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-50px" }}
-        className="max-w-6xl mx-auto relative z-10 w-full"
-      >
+      <div className="max-w-6xl mx-auto relative z-10 w-full">
         <TextsReveal className="text-center mb-16 relative z-10 flex flex-col items-center">
           <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.details.header?.subtitle || "Where & When"}</span>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">
@@ -86,7 +71,8 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Ceremony Details */}
-          <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-gold/20 hover:shadow-xl hover:border-wedding-gold/40 transition-all duration-500 flex flex-col justify-between">
+          <ScrollReveal>
+          <motion.div whileHover={{ y: -5 }} className="h-full bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-gold/20 hover:shadow-xl hover:border-wedding-gold/40 transition-all duration-500 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-6">
                 <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{(content.details.ceremony as any).subtitle || "The Vows"}</span>
@@ -117,9 +103,11 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
               </button>
             </div>
           </motion.div>
+          </ScrollReveal>
 
           {/* Reception Details */}
-          <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-gold/20 hover:shadow-xl hover:border-wedding-gold/40 transition-all duration-500 flex flex-col justify-between">
+          <ScrollReveal delay={SCROLL_MOTION.revealStagger}>
+          <motion.div whileHover={{ y: -5 }} className="h-full bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-gold/20 hover:shadow-xl hover:border-wedding-gold/40 transition-all duration-500 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-6">
                 <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{(content.details.reception as any).subtitle || "The Feast"}</span>
@@ -150,11 +138,12 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
               </button>
             </div>
           </motion.div>
+          </ScrollReveal>
         </div>
 
         {/* Order of Events Section */}
         {content.details.orderOfEventsImage && (
-          <motion.div variants={itemVariants} className="mt-24 w-full flex flex-col items-center">
+          <ScrollReveal className="mt-24 w-full flex flex-col items-center">
             <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mb-16"></div>
             
             <div className="relative w-fit max-w-full md:max-w-3xl mx-auto rounded-sm overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-wedding-gold/10 group mb-10">
@@ -180,24 +169,18 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
               )}
               <span className="relative z-10">{isDownloading ? 'Downloading...' : 'Save a Copy'}</span>
             </button>
-          </motion.div>
+          </ScrollReveal>
         )}
-      </motion.div>
+      </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1, delay: 0.5 }}
-        className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20"
-      >
+      <ScrollReveal delay={0.2} className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
         <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
           <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
           <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
             <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>
         </button>
-      </motion.div>
+      </ScrollReveal>
 
       <EmbeddedFooter />
 
@@ -229,6 +212,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
           </motion.div>
         )}
       </AnimatePresence>
+      </ScrollContainerProvider>
     </section>
   );
 }

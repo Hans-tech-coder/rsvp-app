@@ -1,12 +1,13 @@
 "use client";
 
-import React from 'react';
-import { motion , Variants } from 'motion/react';
+import React, { useRef } from 'react';
+import { motion } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
+import { ScrollContainerProvider, ScrollReveal, ScrollRevealItem } from '@/components/ui/ScrollMotion';
 
 interface DressCodeScreenProps {
   onContinue: () => void;
@@ -14,48 +15,33 @@ interface DressCodeScreenProps {
 
 export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
   const { content } = useWeddingContent();
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2, delayChildren: 0.1 }
-    }
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
-  };
+  const scrollRef = useRef<HTMLElement>(null);
 
   const colors = content.dressCode.colors;
 
   return (
-    <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+    <section ref={scrollRef} className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+      <ScrollContainerProvider containerRef={scrollRef}>
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
 
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-50px" }}
-        className="max-w-4xl mx-auto text-center w-full relative z-10"
-      >
+      <div className="max-w-4xl mx-auto text-center w-full relative z-10">
         <TextsReveal className="mb-16 flex flex-col items-center">
           <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.dressCode.header?.subtitle || "The Style Guideline"}</span>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.dressCode.header?.title || "La Palette de l'Amour"}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
         </TextsReveal>
 
-        <motion.div variants={itemVariants} className="bg-wedding-dark/60 p-8 md:p-12 rounded-xl border border-wedding-gold/20 shadow-md">
+        <ScrollReveal className="bg-wedding-dark/60 p-8 md:p-12 rounded-xl border border-wedding-gold/20 shadow-md">
           <p className="text-sm uppercase tracking-[0.2em] text-wedding-gold font-semibold mb-3">Dress Code: {content.dressCode.title}</p>
           <p className="text-base font-cormorant italic text-wedding-goldlight max-w-2xl mx-auto leading-relaxed mb-10">
             {content.dressCode.description}
           </p>
 
           {/* Suggested Color Swatches */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-10">
+          <ScrollReveal stagger delay={0.2} className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-10">
             {colors.map((color, index) => (
-              <motion.div whileHover={{ scale: 1.05 }} key={index} className={`flex flex-col items-center ${index === 4 ? 'col-span-2 sm:col-span-1' : ''}`}>
+              <ScrollRevealItem key={index} className={index === 4 ? 'col-span-2 sm:col-span-1' : undefined}>
+              <motion.div whileHover={{ scale: 1.05 }} className="flex flex-col items-center">
                 <div 
                   className="w-16 h-16 rounded-full border border-wedding-burgundy/20 shadow-inner mb-2 flex items-center justify-center mx-auto"
                   style={{ backgroundColor: color.hex }}
@@ -64,8 +50,9 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
                 </div>
                 <span className="text-[11px] uppercase tracking-wider text-wedding-cream/80 text-center">{color.name}</span>
               </motion.div>
+              </ScrollRevealItem>
             ))}
-          </div>
+          </ScrollReveal>
 
           {/* Attire Guidelines */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left border-t border-wedding-gold/20 pt-8 mb-10">
@@ -105,25 +92,20 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
               </div>
             </div>
           </div>
-        </motion.div>
-      </motion.div>
+        </ScrollReveal>
+      </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1, delay: 0.5 }}
-        className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20"
-      >
+      <ScrollReveal delay={0.2} className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
         <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
           <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
           <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
             <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>
         </button>
-      </motion.div>
+      </ScrollReveal>
 
       <EmbeddedFooter />
+      </ScrollContainerProvider>
     </section>
   );
 }

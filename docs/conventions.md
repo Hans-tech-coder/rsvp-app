@@ -69,6 +69,10 @@ Match the code around you. These are the patterns the codebase already uses.
   - `<ScrollReveal delay?>` fades and rises once (16 px, 800 ms,
     `--ease-smooth-out`). `<ScrollReveal stagger>` instead staggers its direct
     `<ScrollRevealItem>` children (120 ms apart, or pass seconds).
+  - Columns that sit side by side on desktop but stack on phones: give each
+    its own `<ScrollReveal>` and delay the second by
+    `SCROLL_MOTION.revealStagger`, instead of one `stagger` parent — a stagger
+    parent would reveal the stacked column while it is still off-screen.
   - `<Parallax distance?>` drifts its layer on `y` by ±24 px (max 40) while it
     crosses the view. Give it classes that make it taller than an
     `overflow-hidden` parent by `distance` each side (e.g.
