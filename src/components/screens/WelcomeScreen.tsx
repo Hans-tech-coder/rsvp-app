@@ -70,8 +70,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
   return (
     <header className="absolute inset-0 w-full h-full overflow-hidden bg-wedding-dark text-center">
       <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
-        <TwinkleSparks />
-        <motion.div 
+        <motion.div
           initial={{ scale: 1.1, opacity: 0 }}
           animate={{ scale: 1, opacity: 0.5 }}
           transition={{ duration: 3, ease: "easeOut" }}
@@ -88,6 +87,8 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           )}
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-b from-wedding-dark/60 via-wedding-dark/40 to-wedding-dark/80"></div>
+        {/* Above the dark gradient so the fireflies glow instead of being dimmed */}
+        <TwinkleSparks />
       </div>
 
       <motion.div 

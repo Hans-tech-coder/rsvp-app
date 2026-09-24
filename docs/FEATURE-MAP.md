@@ -42,7 +42,7 @@ All editors are in `src/app/admin/content/`.
 | Countdown digits pop-in | `src/components/ui/PopInNumber.tsx` |
 | Auto-scrolling draggable strip | `src/components/ui/DraggableSlider.tsx` |
 | Ink reveal canvas background | `src/components/ui/InkRevealCanvas.tsx` |
-| Sparkle particles (welcome) | `src/components/effects/TwinkleSparks.tsx` |
+| Firefly glow particles (welcome, drawn above the dark gradient) | `src/components/effects/TwinkleSparks.tsx` |
 | Image download proxy | `src/app/api/download/route.ts` (called from `DetailsScreen.tsx`) |
 | Image upload (admin editors) | `src/lib/blob/uploadImage.ts` (compress + client upload), `src/app/api/upload/route.ts` (admin-only Blob token) |
 
@@ -104,7 +104,7 @@ Read these by range (`grep -n` then read around the line), never whole.
 | 486 | `src/data/wedding-content.json` |
 | 469 | `src/app/admin/content/EventDetailsEditor.tsx` |
 | 435 | `src/app/admin/content/RsvpFormEditor.tsx` |
+| 414 | `src/components/ui/circular-image-gallery.tsx` |
 | 400 | `src/app/admin/content/EntourageEditor.tsx` |
 
-`src/app/page.tsx` (397) and `src/components/ui/circular-image-gallery.tsx` (383)
-are close to the limit.
+`src/app/page.tsx` (397) is close to the limit.

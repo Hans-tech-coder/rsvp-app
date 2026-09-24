@@ -2,6 +2,40 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { X } from "lucide-react"
+import { getImageProps } from "next/image"
+
+// GSAP comes from the CDN once per page. GalleryScreen calls this on mount so
+// the script is usually ready before the first tap.
+let gsapPromise: Promise<void> | null = null
+export function loadGsap(): Promise<void> {
+  if ((window as { gsap?: unknown }).gsap) return Promise.resolve()
+  if (!gsapPromise) {
+    gsapPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script")
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+      script.onload = () => resolve()
+      script.onerror = () => { gsapPromise = null; reject() }
+      document.body.appendChild(script)
+    })
+  }
+  return gsapPromise
+}
+
+// One resized copy from the Next image optimizer, at least `cssWidth` device
+// pixels wide (DPR capped at 2), instead of the full stored photo.
+function optimizedSrc(url: string, cssWidth: number): string {
+  try {
+    const { srcSet, src } = getImageProps({ src: url, alt: "", fill: true, sizes: `${cssWidth}px` }).props
+    const need = cssWidth * Math.min(window.devicePixelRatio || 1, 2)
+    const candidates = (srcSet ?? "").split(", ").map((c) => {
+      const [u, w] = c.split(" ")
+      return { u, w: parseInt(w, 10) }
+    }).filter((c) => c.u && c.w)
+    return (candidates.find((c) => c.w >= need) ?? candidates[candidates.length - 1])?.u ?? src
+  } catch {
+    return url
+  }
+}
 
 interface ImageData {
   title?: string
@@ -23,36 +57,27 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose }: Imag
   const autoplayTimer = useRef<number | null>(null)
 
   useEffect(() => {
-    // This effect loads the GSAP library and its plugin from a CDN.
-    const loadScripts = () => {
-      // @ts-ignore
-      if (window.gsap && window.MotionPathPlugin) {
-        // @ts-ignore
-        window.gsap.registerPlugin(window.MotionPathPlugin)
-        setGsapReady(true)
-        return
-      }
-
-      const gsapScript = document.createElement("script")
-      gsapScript.src = "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
-      gsapScript.onload = () => {
-        const motionPathScript = document.createElement("script")
-        motionPathScript.src = "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"
-        motionPathScript.onload = () => {
-          // @ts-ignore
-          if (window.gsap && window.MotionPathPlugin) {
-            // @ts-ignore
-            window.gsap.registerPlugin(window.MotionPathPlugin)
-            setGsapReady(true)
-          }
-        }
-        document.body.appendChild(motionPathScript)
-      }
-      document.body.appendChild(gsapScript)
-    }
-
-    loadScripts()
+    let cancelled = false
+    loadGsap().then(() => { if (!cancelled) setGsapReady(true) }).catch(() => {})
+    return () => { cancelled = true }
   }, [])
+
+  // Only the open, in-place and closing photos are visible; the rest are tiny
+  // hearts hidden under the dot strip. Mount the heavy full-screen <image>s
+  // for those few only, and warm the neighbours so next/prev open instantly.
+  const [closing, setClosing] = useState<number | null>(null)
+  const lastOpened = useRef(opened)
+  useEffect(() => {
+    if (lastOpened.current !== opened) setClosing(lastOpened.current)
+    lastOpened.current = opened
+  }, [opened])
+  useEffect(() => {
+    const w = window.innerWidth
+    for (const i of [opened + 1, opened - 1]) {
+      const image = images[(i + images.length) % images.length]
+      if (image) new window.Image().src = optimizedSrc(image.url, w)
+    }
+  }, [opened, images])
 
   const onClick = (index: number) => {
     if (!disabled) setOpened(index)
@@ -127,6 +152,7 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose }: Imag
                 inPlace={inPlace === i}
                 onInPlace={onInPlace}
                 activeIndex={opened}
+                visible={opened === i || inPlace === i || closing === i}
               />
             </div>
           ))}
@@ -169,21 +195,23 @@ interface GalleryImageProps {
   onInPlace: (id: number) => void
   total: number
   activeIndex: number
+  visible: boolean
 }
 
-function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeIndex }: GalleryImageProps) {
+function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeIndex, visible }: GalleryImageProps) {
   const [firstLoad, setLoaded] = useState(true)
   const clip = useRef<SVGPathElement>(null)
   
   // Use dynamic window size so it maps perfectly to the screen
-  const [size, setSize] = useState({ width: 1200, height: 800 })
+  // The gallery mounts only after a tap, so the window is always there.
+  const [size, setSize] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }))
   useEffect(() => {
-    setSize({ width: window.innerWidth, height: window.innerHeight })
     const handleResize = () => setSize({ width: window.innerWidth, height: window.innerHeight })
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
   const { width, height } = size
+  const src = visible ? optimizedSrc(url, width) : ""
 
   // --- Animation Constants ---
   const gap = 12
@@ -308,10 +336,12 @@ function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeI
           <rect className="clip" width={width} height={height}></rect>
         </clipPath>
       </defs>
-      <g clipPath={`url(#${id}${inPlace ? "_squareClip" : "_circleClip"})`}>
-        <image width={width} height={height} href={url} className="pointer-events-none opacity-40 blur-xl" preserveAspectRatio="xMidYMid slice"></image>
-        <image width={width} height={height} href={url} className="pointer-events-none" preserveAspectRatio="xMidYMid meet"></image>
-      </g>
+      {visible && (
+        <g clipPath={`url(#${id}${inPlace ? "_squareClip" : "_circleClip"})`}>
+          <image width={width} height={height} href={src} className="pointer-events-none opacity-40 blur-xl" preserveAspectRatio="xMidYMid slice"></image>
+          <image width={width} height={height} href={src} className="pointer-events-none" preserveAspectRatio="xMidYMid meet"></image>
+        </g>
+      )}
     </svg>
   )
 }
@@ -323,9 +353,9 @@ interface TabsProps {
 }
 
 function Tabs({ images, onSelect, activeIndex }: TabsProps) {
-  const [size, setSize] = useState({ width: 1200, height: 800 })
+  // The gallery mounts only after a tap, so the window is always there.
+  const [size, setSize] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }))
   useEffect(() => {
-    setSize({ width: window.innerWidth, height: window.innerHeight })
     const handleResize = () => setSize({ width: window.innerWidth, height: window.innerHeight })
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
@@ -365,16 +395,17 @@ function Tabs({ images, onSelect, activeIndex }: TabsProps) {
           <button
             key={`${image.url}-tab-${i}`}
             onClick={(e) => { e.stopPropagation(); onSelect(i); }}
-            className={`absolute rounded-full border-2 ${activeIndex === i ? 'border-wedding-gold scale-125 z-10' : 'border-white/70 hover:border-white'} pointer-events-auto overflow-hidden shadow-sm transition-[left,border-color,transform,z-index] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white`}
+            className={`absolute rounded-full border-2 ${activeIndex === i ? 'border-wedding-gold scale-125 z-10' : 'border-white/70 hover:border-white'} pointer-events-auto overflow-hidden shadow-sm transition-[translate,border-color,transform,z-index] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white`}
             style={{
               width: circleRadius * 2 + 4,
               height: circleRadius * 2 + 4,
-              left: x - circleRadius - 2,
-              top: y - circleRadius - 2,
+              left: 0,
+              top: 0,
+              translate: `${x - circleRadius - 2}px ${y - circleRadius - 2}px`,
             }}
             aria-label={`View image ${i + 1}`}
           >
-            <img src={image.url} className="w-full h-full object-cover" loading="lazy" alt="" />
+            <img src={optimizedSrc(image.url, 48)} className="w-full h-full object-cover" loading="lazy" decoding="async" alt="" />
           </button>
         )
       })}

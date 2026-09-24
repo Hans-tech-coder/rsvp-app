@@ -62,7 +62,10 @@ Match the code around you. These are the patterns the codebase already uses.
   (`--duration-*`, `--ease-*`, `--distance-*`, `--scale-*`, `--blur-*`).
   The main ease is `cubic-bezier(0.22, 1, 0.36, 1)` (`--ease-smooth-out`).
 - Canvas effects (`TwinkleSparks`, `InkRevealCanvas`) cancel their animation
-  frame on unmount — keep that in any new canvas effect.
+  frame on unmount and cap the device pixel ratio at 2 — keep both in any new
+  canvas effect. `TwinkleSparks` also pauses while off-screen or the tab is
+  hidden, and draws its glow from pre-rendered sprites instead of setting
+  `shadowBlur` every frame.
 - Before writing Motion code, use the `motion` skill
   (`.claude/skills/motion/`). It searches the live Motion docs through the
   free `motion` MCP server in `.mcp.json`, so API details come from the docs

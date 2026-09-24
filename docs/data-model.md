@@ -112,9 +112,10 @@ Firestore.
 | `gallery/photo` | default | GalleryEditor |
 
 Why compress: most guest screens (RevealImage without `sizes`, RSVP CTA,
-the circular gallery, video covers) render these URLs with plain
+video covers) render these URLs with plain
 `<img>`/CSS backgrounds, so guests download the stored file itself. Gallery
-tiles and Our Story images pass `sizes` to `RevealImage`, so they go through
+tiles and Our Story images pass `sizes` to `RevealImage`, and the circular
+gallery picks a viewport-sized copy for each photo and its dot, so they go through
 the Next image optimizer (`/_next/image`, allowed by the Blob entry in
 `next.config.ts` `remotePatterns`). Those resized copies count against the
 Vercel Image Optimization allowance, not Blob transfer, after the first fetch. The Vercel Hobby plan includes 1 GB Blob

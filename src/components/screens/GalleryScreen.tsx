@@ -7,7 +7,7 @@ import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { TextsReveal } from '@/components/ui/TextsReveal';
-import { CircularImageGallery } from '@/components/ui/circular-image-gallery';
+import { CircularImageGallery, loadGsap } from '@/components/ui/circular-image-gallery';
 
 interface GalleryScreenProps {
   onContinue: () => void;
@@ -25,6 +25,11 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Fetch GSAP while the guest browses, so the first photo tap opens at once.
+  React.useEffect(() => {
+    loadGsap().catch(() => {});
   }, []);
 
   // Call the callback when lightbox state changes
