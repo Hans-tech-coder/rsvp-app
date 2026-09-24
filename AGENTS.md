@@ -30,7 +30,6 @@ Active skills live in `.claude/skills/` (Claude Code) and `.agents/skills/`
 | Bug fix or small behavior change | `surgical-patch`; `investigate-first` when the cause is unknown |
 | New feature or new screen | `lean-build`; plus `ui-ux-pro-max` for UI and `transitions-dev` if it animates |
 | Animation / transition work | `transitions-dev` for CSS transitions (matches the motion tokens in `globals.css`); `motion` for Framer Motion / `motion/react` code, scroll effects, and jank checks (uses the `motion` MCP server in `.mcp.json` for live docs) |
-| Motion polish plan (jank fixes + scroll effects) | `docs/plans/motion-polish/README.md` — one task per session |
 | Refactor or splitting a large file (e.g. the big `*Editor.tsx` files) | `safe-refactor` |
 | Changing a Firestore data shape or `wedding-content.json` structure, dependency upgrade | `migration` |
 | Checking finished work | `verify-and-stop`; `caveman-review` for a diff review |

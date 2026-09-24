@@ -114,8 +114,8 @@ transaction rejects when `currentCount >= maxCount`.
 - The `transitions-dev` skill matches this token system — use it for new CSS
   motion. For Motion code (`motion/react`: screen swaps, `whileInView`,
   scroll effects) use the `motion` skill.
-- The jank fixes and scroll effects came from the finished plan in
-  `docs/plans/motion-polish/` (measurements in its `findings.md`).
+- After changing motion, loading, or scrolling, run the Motion performance
+  check in `docs/conventions.md` → Verification.
 
 ## Music
 

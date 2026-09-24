@@ -7,9 +7,9 @@ when you find or fix one of these.
 
 - 10-step guest site with Motion (`motion/react`) crossfade screen swaps,
   text/image reveal animations, scroll reveals and light parallax, circular 3D
-  gallery lightbox, background music. The motion-polish plan measured CLS 0
-  and ≤ 1.6 % slow frames on every swap and scroll (see
-  `docs/plans/motion-polish/findings.md`).
+  gallery lightbox, background music. The 2026-09 motion work measured CLS 0
+  and ≤ 1.6 % slow frames on every swap and scroll, and passed a real-phone
+  check (see `docs/conventions.md` → Motion performance check).
 - Invite-code RSVP with one-time codes (transaction-safe).
 - Curated registry with claim limits (transaction-safe) and bank-transfer info.
 - Admin: dashboard counts, invite generation + message template, RSVP list with
@@ -29,7 +29,7 @@ when you find or fix one of these.
 | `wedding-content.json` has a mixed `gallery` key and an unused `faqs` key | `src/data/wedding-content.json` | Side effect of `sync-content.js`; see `docs/data-model.md` |
 | Content merge is hand-written per doc | `WeddingContentContext.tsx` | New fields in field-by-field docs need an explicit line |
 | `RsvpScreen` falls back to `'dev-mode'` as the code | `src/app/page.tsx` | Submission fails server-side, which is the intended outcome |
-| `npm run lint` fails (89 errors, 51 warnings, all older than the motion-polish plan) | mainly `react-hooks/set-state-in-effect`, `no-explicit-any`, unused vars | `npm run build` is the working gate until they are fixed |
+| `npm run lint` fails (89 errors, 51 warnings, all older than the 2026-09 motion work) | mainly `react-hooks/set-state-in-effect`, `no-explicit-any`, unused vars | `npm run build` is the working gate until they are fixed |
 | Some motion ignores `prefers-reduced-motion` | `WelcomeScreen.tsx:74` and `RsvpCtaScreen.tsx:28` (background zoom), modal pop-ins in `OurStoryScreen.tsx:154`, `DetailsScreen.tsx:197`, `RegistryScreen.tsx:115`, `RsvpScreen.tsx:198`, hover lifts in `DetailsScreen.tsx:75,110` and `DressCodeScreen.tsx:44`, FAQ accordion `FaqScreen.tsx:61`, `TwinkleSparks`, the circular gallery | A `<MotionConfig reducedMotion="user">` around `<main>` would cover the Motion transforms; the canvas and GSAP need their own check |
 | Circular gallery loads GSAP from cdnjs at runtime | `src/components/ui/circular-image-gallery.tsx` (`loadGsap`) | Third-party script without SRI, and a second animation library next to Motion. Removing it is a design decision |
 | Guest page starts Firebase Auth (iframe + gapi scripts) though guests never sign in | `src/lib/firebase/client.ts:18` (`getAuth` at module scope) | Extra startup requests on every guest load |

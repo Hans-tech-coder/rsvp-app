@@ -128,6 +128,56 @@ There are no automated tests. Before calling work done:
    (guest site) or in `/admin` (admin). The `verify-and-stop` skill covers
    this.
 
+### Motion performance check
+
+Run this after any change to motion, a screen swap, loading, images, or
+scrolling on the guest site, to catch jank coming back.
+
+Measure on a **production build**. The dev server adds overhead and runs
+StrictMode double renders, which hide real numbers. Run `npm run build`, then
+`npm run start` (launch config `prod`). Open `http://localhost:3000` in the
+browser pane at 375×812 and paste this with the JavaScript tool (it uses
+`buffered: true`, so a reload right after still counts):
+
+```js
+window.__perf = { cls: 0, shifts: [], longtasks: [], slowFrames: 0, frames: 0 };
+new PerformanceObserver(l => { for (const e of l.getEntries()) if (!e.hadRecentInput) {
+  __perf.cls += e.value;
+  __perf.shifts.push({ v: +e.value.toFixed(4), t: Math.round(e.startTime),
+    nodes: (e.sources || []).map(s => s.node ? (s.node.id || String(s.node.className).slice(0, 60) || s.node.nodeName) : '?') });
+} }).observe({ type: 'layout-shift', buffered: true });
+new PerformanceObserver(l => { for (const e of l.getEntries())
+  __perf.longtasks.push({ d: Math.round(e.duration), t: Math.round(e.startTime) });
+}).observe({ type: 'longtask', buffered: true });
+// Count frames > 25 ms for `ms` milliseconds; start it, then trigger a transition.
+window.__fps = (ms = 3000) => new Promise(res => { let last = performance.now(), end = last + ms;
+  __perf.slowFrames = 0; __perf.frames = 0;
+  (function tick(now) { __perf.frames++; if (now - last > 25) __perf.slowFrames++; last = now;
+    now < end ? requestAnimationFrame(tick) : res({ frames: __perf.frames, slow: __perf.slowFrames }); })(last); });
+```
+
+| Scenario | Pass when |
+| --- | --- |
+| S1 cold load → loading screen → Welcome | CLS < 0.05, first Welcome text ≤ ~700 ms |
+| S2 Welcome → Our Story (tap Continue) | first new text ≤ ~300 ms after the tap |
+| S3 scroll Our Story top → bottom | slow frames ≤ 5 % |
+| S4 menu → Gallery, open/close the circular gallery | no long task > 50 ms |
+| S5 Details → Dress Code → Gallery with the back button | same as S2 |
+
+All scenarios also need CLS < 0.05, no long task > 50 ms, and slow frames
+≤ 5 %.
+
+- The step is saved in `localStorage`. Reset `wedding_currentStep` before S1,
+  and raise `wedding_highestVisitedStep` so the menu can reach Gallery for S4.
+- Reload with `location.reload()`, not `navigate`. The pane hides the tab
+  during `navigate`, which pauses rAF and skips FCP.
+- The pane cannot throttle the CPU or emulate `prefers-reduced-motion`. Check
+  reduced motion in the code, and check the feel on a real phone.
+- **Baseline (2026-09-24, after the jank fixes and scroll effects):** CLS 0 in
+  every scenario, no long tasks, at most 1.6 % slow frames, and new text
+  161–220 ms after a tap. Smooth on a real Samsung Galaxy A56. The full tables
+  are in git: `git show 308e0a6:docs/plans/motion-polish/findings.md`.
+
 ## Commits
 
 Conventional Commits (`feat:`, `fix:`, `refactor:`, `docs:` …), imperative,
