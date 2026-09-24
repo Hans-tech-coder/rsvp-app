@@ -111,9 +111,13 @@ Firestore.
 | `website/order-of-events` | default | EventDetailsEditor |
 | `gallery/photo` | default | GalleryEditor |
 
-Why compress: the guest screens (gallery, RevealImage, RSVP CTA, Our Story
-covers) render these URLs with plain `<img>`/CSS backgrounds, so guests
-download the stored file itself. The Vercel Hobby plan includes 1 GB Blob
+Why compress: most guest screens (RevealImage without `sizes`, RSVP CTA,
+the circular gallery, video covers) render these URLs with plain
+`<img>`/CSS backgrounds, so guests download the stored file itself. Gallery
+tiles and Our Story images pass `sizes` to `RevealImage`, so they go through
+the Next image optimizer (`/_next/image`, allowed by the Blob entry in
+`next.config.ts` `remotePatterns`). Those resized copies count against the
+Vercel Image Optimization allowance, not Blob transfer, after the first fetch. The Vercel Hobby plan includes 1 GB Blob
 storage and 10 GB Blob data transfer per month, **shared by every project in
 the account**; going over blocks Blob for up to 30 days.
 

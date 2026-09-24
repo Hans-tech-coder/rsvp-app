@@ -55,7 +55,9 @@ Match the code around you. These are the patterns the codebase already uses.
   from `motion/react`. The old `framer-motion` package is gone; never add it back.
 - Text, number, and skeleton reveals: CSS classes in `globals.css`
   (`.t-stagger`, `.t-digit`, `.t-skel`) driven by `TextsReveal`,
-  `PopInNumber`, and friends.
+  `PopInNumber`, and friends. Text reveals move with `transform` and
+  `opacity` only; `filter: blur` is kept for the image blur-up and ends at
+  `filter: none`. Do not add a permanent `will-change`.
 - Timing values come from the CSS variables at the top of `globals.css`
   (`--duration-*`, `--ease-*`, `--distance-*`, `--scale-*`, `--blur-*`).
   The main ease is `cubic-bezier(0.22, 1, 0.36, 1)` (`--ease-smooth-out`).

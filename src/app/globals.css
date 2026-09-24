@@ -89,7 +89,6 @@
   --stagger-dur: 700ms;
   --stagger-distance: 24px;
   --stagger-stagger: 60ms;
-  --stagger-blur: 4px;
   --stagger-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -97,12 +96,10 @@
   display: block;
   opacity: 0;
   transform: translateY(var(--stagger-distance));
-  filter: blur(var(--stagger-blur));
+  /* transform + opacity only: no per-line blur or permanent will-change (T05) */
   transition:
     opacity   var(--stagger-dur) var(--stagger-ease),
-    transform var(--stagger-dur) var(--stagger-ease),
-    filter    var(--stagger-dur) var(--stagger-ease);
-  will-change: transform, opacity, filter;
+    transform var(--stagger-dur) var(--stagger-ease);
   /* Use CSS var for dynamic index calculation from React */
   transition-delay: calc(var(--stagger-stagger) * var(--stagger-idx, 0));
 }
@@ -110,17 +107,14 @@
 .t-stagger.is-shown .t-stagger-line {
   opacity: 1;
   transform: translateY(0);
-  filter: blur(0);
 }
 
 .t-stagger.is-hiding .t-stagger-line {
   opacity: 0;
   transform: translateY(0);
-  filter: blur(0);
   transition:
     opacity 200ms ease,
-    transform 0s linear,
-    filter 0s linear;
+    transform 0s linear;
   transition-delay: 0s;
 }
 
@@ -139,10 +133,7 @@
 .t-skel-skeleton {
   z-index: 1;
   opacity: 1;
-  filter: blur(0);
-  transition:
-    opacity var(--reveal-dur) var(--reveal-ease),
-    filter  var(--reveal-dur) var(--reveal-ease);
+  transition: opacity var(--reveal-dur) var(--reveal-ease);
 }
 .t-skel-content {
   z-index: 2;
@@ -154,11 +145,11 @@
 }
 .t-skel.is-revealed .t-skel-skeleton {
   opacity: 0;
-  filter: blur(var(--reveal-blur));
 }
+/* Blur-up stays on the image only; it ends at `none` so no filter layer lingers. */
 .t-skel.is-revealed .t-skel-content {
   opacity: 1;
-  filter: blur(0);
+  filter: none;
 }
 .t-skel.is-resetting .t-skel-skeleton,
 .t-skel.is-resetting .t-skel-content {

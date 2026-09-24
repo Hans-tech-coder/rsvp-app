@@ -81,7 +81,11 @@ transaction rejects when `currentCount >= maxCount`.
 - **Text:** wrap headings/paragraphs in `<TextsReveal>` (CSS `.t-stagger` in
   `globals.css`; waits 150 ms, or 350 ms with `isHero`, so the lines rise
   while the screen fades in; the hero waits a little for the loader's fade).
-- **Images:** use `<RevealImage>` instead of a bare `<img>`.
+- **Images:** use `<RevealImage>` instead of a bare `<img>`. It is lazy and
+  `decoding="async"` by default. For photos, pass `sizes` (the rendered
+  width): it then serves a resized srcset through the Next image optimizer
+  (`getImageProps`) instead of the full stored file. Gallery tiles and Our
+  Story covers do this; other callers still load the stored file.
 - **Numbers:** `<PopInNumber>` (`.t-digit` CSS) for the countdown.
 - **Tokens:** durations, easings, distances, and blur live as CSS variables at
   the top of `globals.css` (`--duration-*`, `--ease-*`, `--reveal-*`,

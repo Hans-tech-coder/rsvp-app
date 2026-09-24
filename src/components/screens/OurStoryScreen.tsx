@@ -116,6 +116,7 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
                     alt={item.title} 
                     className="w-full h-full object-cover object-[center_25%] transform group-hover:scale-105 transition-transform duration-700 ease-out" 
                     wrapperClassName="absolute inset-0 w-full h-full"
+                    sizes="(min-width: 768px) 440px, calc(100vw - 112px)"
                   />
                   {/* Cinematic gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-wedding-dark/80 via-transparent to-wedding-dark/20 opacity-80 group-hover:opacity-40 transition-opacity duration-500" />
