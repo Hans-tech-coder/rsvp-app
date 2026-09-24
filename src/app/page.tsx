@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, Variants } from 'motion/react';
+import { motion, AnimatePresence, Variants, useReducedMotion } from 'motion/react';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { OurStoryScreen } from '@/components/screens/OurStoryScreen';
 import { EntourageScreen } from '@/components/screens/EntourageScreen';
@@ -46,6 +46,7 @@ function MainApp() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const reduceMotion = useReducedMotion();
   const [validatedInviteCode, setValidatedInviteCode] = useState<string | null>(null);
 
   useEffect(() => {
@@ -162,30 +163,59 @@ function MainApp() {
     setValidatedInviteCode(null);
   };
 
-  // Variants for a luxury cinematic transition
-  const pageVariants: Variants = {
-    initial: { 
-      opacity: 0, 
-      scale: 0.95
-    },
-    animate: { 
-      opacity: 1, 
-      scale: 1,
-      transition: { 
-        duration: 0.8, 
-        ease: [0.22, 1, 0.36, 1], // Custom slow out ease
-        delay: 0.1
+  // Screen swap is a crossfade: screens are absolute inset-0, so the new one
+  // starts entering on the tap and fades in on top of the old one (no blank gap).
+  // Only opacity + a transform string animate, so both run on WAAPI.
+  // zIndex/pointerEvents flip instantly so the exiting screen never covers or
+  // catches taps meant for the new one.
+  const instant = { duration: 0 };
+  const pageVariants: Variants = reduceMotion
+    ? {
+        initial: { opacity: 0, zIndex: 1 },
+        animate: {
+          opacity: 1,
+          zIndex: 1,
+          pointerEvents: 'auto',
+          transition: { duration: 0.15, ease: 'linear', zIndex: instant, pointerEvents: instant }
+        },
+        exit: {
+          opacity: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
+          transition: { duration: 0.15, ease: 'linear', zIndex: instant, pointerEvents: instant }
+        }
       }
-    },
-    exit: { 
-      opacity: 0, 
-      scale: 1.02,
-      transition: { 
-        duration: 0.5, 
-        ease: [0.64, 0, 0.78, 0] // Custom slow in ease
-      }
-    }
-  };
+    : {
+        initial: {
+          opacity: 0,
+          transform: 'scale(0.97)',
+          zIndex: 1
+        },
+        animate: {
+          opacity: 1,
+          transform: 'scale(1)',
+          zIndex: 1,
+          pointerEvents: 'auto',
+          transition: {
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1], // --ease-smooth-out
+            zIndex: instant,
+            pointerEvents: instant
+          }
+        },
+        exit: {
+          opacity: 0,
+          transform: 'scale(1.02)',
+          zIndex: 0,
+          pointerEvents: 'none',
+          transition: {
+            duration: 0.45,
+            ease: [0.4, 0, 1, 1], // slow in, gone by the time the new text reveals
+            zIndex: instant,
+            pointerEvents: instant
+          }
+        }
+      };
 
   return (
     // No mode="wait": the loader fades out over <main> (crossfade, no blank gap).
@@ -241,7 +271,8 @@ function MainApp() {
 
           {/* Screens with Framer Motion */}
           <div className="absolute inset-0 z-10 pointer-events-none">
-            <AnimatePresence mode="wait">
+            {/* No mode="wait": old and new screens overlap as a crossfade. */}
+            <AnimatePresence>
               {currentStep === 0 && (
                 <motion.div
                   key="welcome-screen"

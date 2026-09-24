@@ -38,4 +38,57 @@ motion tokens at the top of `src/app/globals.css`.
 
 ## Result
 
-(fill in at the end of the session)
+**Done 2026-09-24.** Files: `src/app/page.tsx` (`pageVariants`, screen
+`AnimatePresence`), `src/components/ui/TextsReveal.tsx` (delay),
+`docs/guest-site.md` (transitions section). `globals.css` unchanged.
+
+**What changed**
+
+- Screen `AnimatePresence` drops `mode="wait"`, so the swap is a crossfade.
+  The new screen mounts on the tap and enters with opacity plus
+  `transform: scale(0.97)→scale(1)`, 0.7 s, `[0.22, 1, 0.36, 1]`
+  (`--ease-smooth-out`), with no delay. The old screen exits with opacity plus
+  `scale(1.02)`, 0.45 s, `[0.4, 0, 1, 1]`. Both use a `transform` string, so
+  they run on WAAPI.
+- On exit, `zIndex: 0` and `pointerEvents: 'none'` apply instantly
+  (`duration: 0` per value), and the entering screen has `zIndex: 1`. The new
+  screen is always on top in both directions, and the fading screen cannot catch
+  taps. Sampled mid-swap: old `0.96 z0 pe:none` with new `0.40 z1` at 74 ms, and
+  old gone by ~510 ms.
+- Reduced motion (`useReducedMotion`): opacity only, 0.15 s linear in and out.
+- `TextsReveal` delay goes from 600/800 ms to **150/350 ms** (hero). The lines
+  now rise while the screen fades in.
+
+**Numbers** (production build, browser pane, warm cache, ~165 Hz display, no
+CPU throttle; "visible" = the new screen layer has opacity > 0.1; "text" = its
+first `.t-stagger` gets `is-shown`; both measured from the tap)
+
+| Scenario | Before (T01) | After |
+| --- | --- | --- |
+| S2 Welcome → Our Story, cold (first Continue after reload) | visible ≥ 600 ms (0.5 s exit + 0.1 s delay; blank frame at ~0.6 s) · text 1,137 ms · long task 51 ms at +530 · slow 3/535 (49 ms) | visible **28 ms** · text **185 ms** · **no long tasks** · slow **0/409** (worst 24 ms) · CLS 0 |
+| S2 repeat (warm), 2 runs | – | visible 30 / 30 ms · text 184 / 170 ms · no long tasks · slow 0/410, 0/412 |
+| S2 back, Our Story → Welcome (hero), 2 runs | text 1,322 ms | visible 30 / 39 ms · text 372 / 371 ms · no long tasks · slow 0/389, 0/389 |
+| S5 Gallery → Dress Code → Details (back ×2) | slow 1/713 (45 ms) | visible 43 / 25 ms · text 208 / 181 ms · no long tasks · slow 1/407 (30 ms), 0/412 · CLS 0 |
+| Desktop 1345 px, Welcome ⇄ Our Story | – | visible 33 / 108 ms · text 190 / 369 ms · no long tasks · slow 3/391, 1/369 |
+
+- **Scroll to top:** the Details container scrolled to 800 px, back to the
+  previous screen → the new screen's scroll container is at 0 (it remounts).
+  Checked on every swap above.
+- **51 ms long task:** gone in all runs, including cold S2. React now mounts the
+  new screen at the tap, while the WAAPI exit runs off the main thread, instead
+  of mounting it after a 500 ms wait. No code targeted it directly. If it comes
+  back on a phone, the next lever is `startTransition` around `setCurrentStep`.
+- **Lint:** 95 errors / 52 warnings, the same as the baseline. The touched files
+  have only the older `set-state-in-effect` at `page.tsx:53`. **Build:** OK.
+
+**Not verified**
+
+- **Reduced motion in the browser.** The pane cannot emulate
+  `prefers-reduced-motion`. The reduced branch is checked by code only: opacity
+  0.15 s, and `.t-stagger-line` already has `transition: none` under reduce.
+- **S1 first Welcome text.** The pane cannot attach a probe before a reload.
+  Estimate from the code and T03's numbers (`<main>` at 336 ms): the hero
+  stagger now starts at ~690 ms instead of ~1,140 ms. The loader (500 ms fade)
+  is at ~30% opacity then, so the text rises through the end of the crossfade.
+  T07 should measure it.
+- **Real phone.** No phone in this session (same as T01).

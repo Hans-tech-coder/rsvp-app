@@ -66,15 +66,21 @@ transaction rejects when `currentCount >= maxCount`.
 
 ## Transitions and motion
 
-- **Screen swap:** `pageVariants` in `page.tsx` (fade + scale, 0.8 s in with
-  `[0.22, 1, 0.36, 1]`, 0.5 s out) inside `AnimatePresence mode="wait"`.
+- **Screen swap:** `pageVariants` in `page.tsx` is a crossfade inside an
+  `AnimatePresence` with no `mode="wait"`. The new screen enters from the tap
+  (opacity + `transform: scale(0.97→1)`, 0.7 s, `[0.22, 1, 0.36, 1]`) on top of
+  the old one, which fades out in 0.45 s. The exiting screen flips to
+  `zIndex: 0` and `pointerEvents: none` at once, so it never covers or catches
+  taps. Under reduced motion it is an opacity-only 0.15 s fade
+  (`useReducedMotion`). Screens are `absolute inset-0` and remount on each
+  swap, so every screen opens scrolled to the top.
 - **Loader → first screen:** the outer `AnimatePresence` in `page.tsx` has no
   `mode="wait"`, so `<main>` mounts under `LoadingScreen` while it fades out.
   The loader's exit is a CSS opacity transition on `--duration-very-slow` /
   `--ease-in-out` driven by `usePresence` (instant under reduced motion).
 - **Text:** wrap headings/paragraphs in `<TextsReveal>` (CSS `.t-stagger` in
-  `globals.css`; waits 600 ms, or 800 ms with `isHero`, so it starts after the
-  screen fade).
+  `globals.css`; waits 150 ms, or 350 ms with `isHero`, so the lines rise
+  while the screen fades in; the hero waits a little for the loader's fade).
 - **Images:** use `<RevealImage>` instead of a bare `<img>`.
 - **Numbers:** `<PopInNumber>` (`.t-digit` CSS) for the countdown.
 - **Tokens:** durations, easings, distances, and blur live as CSS variables at

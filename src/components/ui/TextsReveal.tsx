@@ -18,10 +18,10 @@ export function TextsReveal({ children, className = "", isHero = false }: TextsR
   useIsomorphicLayoutEffect(() => {
     if (!isInView) return;
 
-    // The entire page transitions in over 800ms via Motion in page.tsx.
-    // If this triggers immediately on mount, we must wait for the page to be visible
-    // otherwise the CSS blur-stagger is hidden by the parent's opacity fade.
-    const delay = isHero ? 800 : 600; 
+    // The screen crossfades in from the tap (0.7s in page.tsx). Start the stagger
+    // once the screen is partly visible so the lines rise with it, not after it.
+    // The hero waits a little longer for the loader's fade on first load.
+    const delay = isHero ? 350 : 150;
     
     const timer = setTimeout(() => {
       if (containerRef.current) {
