@@ -16,7 +16,7 @@ Status: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked · ➖ cancelled
 | --- | --- | --- | --- | --- | --- |
 | T00 | Install Motion AI Kit (skill + free MCP), update docs | – | – | ✅ | `.claude/skills/motion/`, `.mcp.json` (`motion` server only) |
 | T01 | [Investigate the jank (read-only, baseline numbers)](T01-investigate-jank.md) | `investigate-first`, `motion` | T00 | ✅ | Worst: circular gallery open (216 ms task, 3.2 s GSAP wait). Load handoff is late (~5 s to text), not shifting. CLS ≈ 0. No phone check yet |
-| T02 | [Migrate `framer-motion` → `motion` package](T02-migrate-to-motion.md) | `migration`, `motion` | T00 | ⬜ | |
+| T02 | [Migrate `framer-motion` → `motion` package](T02-migrate-to-motion.md) | `migration`, `motion` | T00 | ✅ | `motion` ^12.43.0 via `motion/react`; lint unchanged (95 errors, all older); build OK; S1/S2/S4 same as before |
 | T03 | [Fix: loading → first screen handoff](T03-fix-loading-handoff.md) | `surgical-patch`, `motion` | T01, T02 | ⬜ | scoped by T01 |
 | T04 | [Fix: screen-swap transitions](T04-fix-screen-swap.md) | `surgical-patch`, `motion` | T01, T02 | ⬜ | scoped by T01 |
 | T05 | [Fix: layout shift in reveals and images](T05-fix-layout-shift.md) | `surgical-patch`, `ui-ux-pro-max` | T01, T02 | ⬜ | scoped by T01 |
@@ -58,8 +58,6 @@ Run task T0X from docs/plans/motion-polish/. Read README.md and that task file o
    only the task's own files.
 7. **Out of budget mid-task?** Set the row to 🟨, write what is done and what is
    next in **Result**, and stop. The next session continues from there.
-8. **Until T02 is done,** new code in a file matches that file's existing import
-   (`framer-motion`). Never mix `framer-motion` and `motion/react` in one file.
 
 ## Measurement protocol (same for every task)
 

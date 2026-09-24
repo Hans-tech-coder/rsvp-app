@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence , Variants } from 'framer-motion';
+import { motion, AnimatePresence , Variants } from 'motion/react';
 import { GiftSelectionModal } from './GiftSelectionModal';
 
 import { RegistryGift } from '@/types';

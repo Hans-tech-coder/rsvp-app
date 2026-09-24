@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { motion , Variants } from 'framer-motion';
+import { motion , Variants } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { RevealImage } from '@/components/ui/RevealImage';

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence , Variants } from 'framer-motion';
+import { motion, AnimatePresence , Variants } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 
 interface RsvpScreenProps {

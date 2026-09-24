@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useLayoutEffect } from 'react';
-import { useInView } from 'framer-motion';
+import { useInView } from 'motion/react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -18,7 +18,7 @@ export function TextsReveal({ children, className = "", isHero = false }: TextsR
   useIsomorphicLayoutEffect(() => {
     if (!isInView) return;
 
-    // The entire page transitions in over 800ms via framer-motion in page.tsx.
+    // The entire page transitions in over 800ms via Motion in page.tsx.
     // If this triggers immediately on mount, we must wait for the page to be visible
     // otherwise the CSS blur-stagger is hidden by the parent's opacity fade.
     const delay = isHero ? 800 : 600; 

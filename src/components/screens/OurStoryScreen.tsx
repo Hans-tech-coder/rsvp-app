@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion, Variants, AnimatePresence } from 'framer-motion';
+import { motion, Variants, AnimatePresence } from 'motion/react';
 import { Play } from 'lucide-react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { RevealImage } from '@/components/ui/RevealImage';

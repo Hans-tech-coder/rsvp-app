@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'motion/react';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { OurStoryScreen } from '@/components/screens/OurStoryScreen';
 import { EntourageScreen } from '@/components/screens/EntourageScreen';

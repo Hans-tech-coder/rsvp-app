@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { RevealImage } from '@/components/ui/RevealImage';
 
 interface CanvasMenuProps {

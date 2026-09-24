@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { InkRevealCanvas } from '@/components/ui/InkRevealCanvas';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';

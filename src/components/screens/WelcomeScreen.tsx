@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion , Variants } from 'framer-motion';
+import { motion , Variants } from 'motion/react';
 import Image from 'next/image';
 import { TwinkleSparks } from '@/components/effects/TwinkleSparks';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';

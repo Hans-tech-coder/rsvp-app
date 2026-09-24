@@ -46,8 +46,8 @@ admin portal. Production URL: `https://hans-czay-wedding.vercel.app`.
   deprecated).
 - **Tailwind CSS v4** (config lives in `src/app/globals.css` under `@theme`,
   there is no `tailwind.config.js`).
-- **Framer Motion 12** for screen transitions; CSS classes in `globals.css` for
-  text/number reveals.
+- **Motion 12** (`motion/react`, formerly Framer Motion) for screen
+  transitions; CSS classes in `globals.css` for text/number reveals.
 - **Firebase 12** client SDK (browser reads, admin content writes, Auth) and
   **firebase-admin 12** (server actions and server pages).
 - **Vercel Blob** (`@vercel/blob`) for admin image uploads; Hobby quota is

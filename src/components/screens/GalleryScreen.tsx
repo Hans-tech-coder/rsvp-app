@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, Variants, AnimatePresence, PanInfo } from 'framer-motion';
+import { motion, Variants, AnimatePresence, PanInfo } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
