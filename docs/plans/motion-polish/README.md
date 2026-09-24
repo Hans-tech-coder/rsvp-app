@@ -17,7 +17,7 @@ Status: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked · ➖ cancelled
 | T00 | Install Motion AI Kit (skill + free MCP), update docs | – | – | ✅ | `.claude/skills/motion/`, `.mcp.json` (`motion` server only) |
 | T01 | [Investigate the jank (read-only, baseline numbers)](T01-investigate-jank.md) | `investigate-first`, `motion` | T00 | ✅ | Worst: circular gallery open (216 ms task, 3.2 s GSAP wait). Load handoff is late (~5 s to text), not shifting. CLS ≈ 0. No phone check yet |
 | T02 | [Migrate `framer-motion` → `motion` package](T02-migrate-to-motion.md) | `migration`, `motion` | T00 | ✅ | `motion` ^12.43.0 via `motion/react`; lint unchanged (95 errors, all older); build OK; S1/S2/S4 same as before |
-| T03 | [Fix: loading → first screen handoff](T03-fix-loading-handoff.md) | `surgical-patch`, `motion` | T01, T02 | ⬜ | scoped by T01 |
+| T03 | [Fix: loading → first screen handoff](T03-fix-loading-handoff.md) | `surgical-patch`, `motion` | T01, T02 | ✅ | First text ~4.7 s → 1.15 s; `<main>` at 336 ms; CLS 0; crossfade, no gap; mp3 no longer preloaded. Cold cache/slow network unverified |
 | T04 | [Fix: screen-swap transitions](T04-fix-screen-swap.md) | `surgical-patch`, `motion` | T01, T02 | ⬜ | scoped by T01 |
 | T05 | [Fix: layout shift in reveals and images](T05-fix-layout-shift.md) | `surgical-patch`, `ui-ux-pro-max` | T01, T02 | ⬜ | scoped by T01 |
 | T06 | [Fix: heavy effects (canvas, gallery, slider)](T06-fix-heavy-effects.md) | `surgical-patch`, `motion` | T01, T02 | ⬜ | scoped by T01 |

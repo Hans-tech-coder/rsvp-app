@@ -1,16 +1,30 @@
 "use client";
 
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useEffect } from 'react';
+import { motion, usePresence, useReducedMotion } from 'motion/react';
 
+// Rendered inside <AnimatePresence>. The exit is a CSS opacity fade on the motion
+// tokens, so the first screen mounts underneath and the two crossfade.
 export function LoadingScreen() {
+  const [isPresent, safeToRemove] = usePresence();
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!isPresent && reduceMotion) safeToRemove();
+  }, [isPresent, reduceMotion, safeToRemove]);
+
   return (
-    <motion.div
-      key="loading-screen"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 1.5, ease: [0.64, 0, 0.78, 0] } }}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-wedding-dark overflow-hidden"
+    <div
+      aria-hidden={!isPresent}
+      onTransitionEnd={(e) => {
+        if (!isPresent && e.target === e.currentTarget) safeToRemove();
+      }}
+      style={{
+        transitionProperty: 'opacity',
+        transitionDuration: reduceMotion ? '0ms' : 'var(--duration-very-slow)',
+        transitionTimingFunction: 'var(--ease-in-out)',
+      }}
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-wedding-dark overflow-hidden ${isPresent ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
     >
       <div className="absolute inset-0 bg-gradient-to-b from-wedding-dark/80 via-wedding-deepburgundy/30 to-wedding-dark/90 pointer-events-none"></div>
 
@@ -64,6 +78,6 @@ export function LoadingScreen() {
           Please wait
         </motion.p>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

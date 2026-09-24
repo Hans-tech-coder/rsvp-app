@@ -26,19 +26,14 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        // Fetch all the overrides
-        const welcomeDoc = await getDoc(doc(db, 'websiteContent', 'welcomeScreen'));
-        const globalDoc = await getDoc(doc(db, 'websiteContent', 'globalSettings'));
-        const entranceDoc = await getDoc(doc(db, 'websiteContent', 'entranceScreen'));
-        const ourStoryDoc = await getDoc(doc(db, 'websiteContent', 'ourStory'));
-        const entourageDoc = await getDoc(doc(db, 'websiteContent', 'entourage'));
-        const detailsDoc = await getDoc(doc(db, 'websiteContent', 'details'));
-        const dressCodeDoc = await getDoc(doc(db, 'websiteContent', 'dressCode'));
-        const galleryDoc = await getDoc(doc(db, 'websiteContent', 'gallery'));
-        const faqDoc = await getDoc(doc(db, 'websiteContent', 'faq'));
-        const registryDoc = await getDoc(doc(db, 'websiteContent', 'registry'));
-        const rsvpCtaDoc = await getDoc(doc(db, 'websiteContent', 'rsvpCta'));
-        const rsvpFormDoc = await getDoc(doc(db, 'websiteContent', 'rsvpForm'));
+        // Fetch all the overrides in parallel (one after another took ~2 s)
+        const [
+          welcomeDoc, globalDoc, entranceDoc, ourStoryDoc, entourageDoc, detailsDoc,
+          dressCodeDoc, galleryDoc, faqDoc, registryDoc, rsvpCtaDoc, rsvpFormDoc,
+        ] = await Promise.all([
+          'welcomeScreen', 'globalSettings', 'entranceScreen', 'ourStory', 'entourage', 'details',
+          'dressCode', 'gallery', 'faq', 'registry', 'rsvpCta', 'rsvpForm',
+        ].map((id) => getDoc(doc(db, 'websiteContent', id))));
         
         let newContent = { ...weddingContentDefault };
         

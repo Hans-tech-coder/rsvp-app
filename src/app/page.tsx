@@ -16,9 +16,29 @@ import { EntranceScreen } from '@/components/screens/EntranceScreen';
 import { CanvasMenu } from '@/components/layout/CanvasMenu';
 import { LoadingScreen } from '@/components/screens/LoadingScreen';
 import { WeddingContentProvider, useWeddingContent } from '@/contexts/WeddingContentContext';
+import { getImageProps } from 'next/image';
+
+// Longest the loader waits for fonts and the hero image (ms after navigation),
+// so a slow network never traps guests on it. Content itself is always awaited.
+const LOADER_MAX_WAIT_MS = 2500;
+
+// Warm the cache with the same srcset/sizes the Welcome <Image fill> requests.
+function preloadImage(src: string): Promise<unknown> {
+  try {
+    const { props } = getImageProps({ src, alt: '', fill: true });
+    const img = new window.Image();
+    if (props.sizes) img.sizes = props.sizes;
+    if (props.srcSet) img.srcset = props.srcSet;
+    img.src = props.src;
+    return img.decode().catch(() => {});
+  } catch {
+    return Promise.resolve();
+  }
+}
 
 function MainApp() {
-  const { loading } = useWeddingContent();
+  const { loading, content } = useWeddingContent();
+  const [assetsReady, setAssetsReady] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showEntranceScreen, setShowEntranceScreen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -54,6 +74,21 @@ function MainApp() {
       console.error('Error loading from localStorage:', error);
     }
   }, []);
+
+  // Keep the loader up until fonts and the first screen's hero image are ready.
+  useEffect(() => {
+    if (loading || !mounted || assetsReady) return;
+    let cancelled = false;
+    const waits: Promise<unknown>[] = [document.fonts.ready];
+    if (currentStep === 0) waits.push(preloadImage(content.welcomeScreen.backgroundImage));
+    const cap = new Promise((resolve) =>
+      setTimeout(resolve, Math.max(0, LOADER_MAX_WAIT_MS - performance.now()))
+    );
+    Promise.race([Promise.all(waits), cap]).then(() => {
+      if (!cancelled) setAssetsReady(true);
+    });
+    return () => { cancelled = true; };
+  }, [loading, mounted, assetsReady, currentStep, content]);
 
   // Save state changes to localStorage
   useEffect(() => {
@@ -153,8 +188,9 @@ function MainApp() {
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {loading ? (
+    // No mode="wait": the loader fades out over <main> (crossfade, no blank gap).
+    <AnimatePresence>
+      {loading || !assetsReady ? (
         <LoadingScreen key="loading" />
       ) : (
         <main key="main" className="relative w-full h-[100dvh] overflow-hidden bg-wedding-dark">

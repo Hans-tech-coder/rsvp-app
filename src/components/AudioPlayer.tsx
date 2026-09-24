@@ -88,7 +88,7 @@ export function AudioPlayer() {
         ref={audioRef} 
         src="/bg-music.mp3" 
         loop 
-        preload="auto" 
+        preload="none"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
       />

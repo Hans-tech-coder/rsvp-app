@@ -37,4 +37,51 @@ the loading branch of `src/app/page.tsx` (~lines 150–165), and the fonts in
 
 ## Result
 
-(fill in at the end of the session)
+**Done 2026-09-24.** Changes:
+
+- (a) `WeddingContentContext.tsx`: the 12 `getDoc` calls run through `Promise.all`.
+  Error handling is unchanged: any failure falls back to the JSON defaults.
+- (b) `page.tsx`: the outer `AnimatePresence` no longer uses `mode="wait"`, so
+  `<main>` mounts under the loader. `LoadingScreen.tsx`: the outer element is a
+  plain `div` whose exit is a CSS opacity transition on `--duration-very-slow` /
+  `--ease-in-out`. `usePresence` removes it on `transitionend`, or at once under
+  reduced motion. This replaces the hard-coded 1.5 s Motion exit.
+- (c) `page.tsx`: the loader stays until content, `document.fonts.ready` and
+  (on step 0) the Welcome hero are decoded. The hero is preloaded with
+  `getImageProps` using the same srcset and sizes as `<Image fill>`, so Welcome
+  reuses it. There is exactly one `/_next/image` request. The font and image wait
+  is capped at `LOADER_MAX_WAIT_MS = 2500` ms after navigation. Content is still
+  always awaited, so default text never flashes.
+- (d) `AudioPlayer.tsx`: `preload="none"`. The mp3 downloads on the first
+  `.play()` (first tap).
+
+**Measurement.** Production build, 375×812 and desktop, warm cache (same as T01).
+The pane was *hidden* this session, which pauses rAF, so the JS tool's ~5 s
+post-reload lag and paused frames made the protocol snippet unusable for S1.
+Instead, a same-origin page loaded `/` in a full-size iframe and timed DOM
+milestones with a `MutationObserver`. Resource and layout-shift data came from
+the iframe's buffered timeline. Screenshots were taken back to back so frames
+advanced.
+
+| S1 metric (ms after navigation) | Baseline (T01) | After T03 |
+| --- | --- | --- |
+| Firestore content done | 2,009 (24 requests, one after another) | ≤ 336 (3 Listen-channel requests; `<main>`, which needs content, mounted at 336) |
+| Welcome hero requested | 3,456 | 351–378 (preload, while loader is up) |
+| `<main>` mounts | ~3,500 (after the 1.5 s exit) | **336** (375 wide) / 355 (desktop) |
+| Loader removed | ~3,500 | 859 / 885 (500 ms crossfade) |
+| First Welcome text `is-shown` | ~4,500–5,000 | **1,148** / 1,182 |
+| `bg-music.mp3` during load | 5,456 KB from t = 45 | not requested |
+| CLS | 0.0000 | **0** (no shifts) |
+| Long tasks > 50 ms | none | none |
+| Slow frames | not measurable | not measurable (hidden pane) |
+
+- Frames show a crossfade: the Welcome hero and sparkles are visible through
+  the fading loader, with no blank dark gap. No text or image swaps.
+- Reduced motion (`matchMedia` overridden in the iframe before hydration): the
+  loader is removed 9 ms after `<main>` mounts.
+- `npm run lint` on the four touched files: 3 errors and 2 warnings, **the same
+  5 as before the change** (all older, see the parking lot). `npm run build` OK.
+- **Not verified:** a truly cold cache, and the 2.5 s cap on a slow network. The
+  pane cannot disable the cache or throttle. T07 should check both on a phone.
+- The remaining ~0.8 s from `<main>` mount to the first text is Welcome's own
+  entrance (`delayChildren`, `TextsReveal` 800 ms). That is T04's scope (H3).

@@ -17,8 +17,9 @@ useWeddingContent().content        (read by every screen)
 
 1. `WeddingContentProvider` (wraps the guest page in `src/app/page.tsx`) starts
    with the JSON as `content` and `loading = true`.
-2. On mount it `getDoc`s all twelve `websiteContent` docs with the **browser
-   SDK** (public read is allowed by `firestore.rules`).
+2. On mount it `getDoc`s all twelve `websiteContent` docs **in parallel**
+   (`Promise.all`) with the **browser SDK** (public read is allowed by
+   `firestore.rules`). One failing read falls back to the JSON for everything.
 3. It merges each doc over the JSON default. The merge is **written by hand per
    doc** in the provider — there is no generic merge. Patterns used:
    - shallow spread: `welcomeScreen`, `entranceScreen`, `registry`, `rsvpCta`, `rsvpForm`
@@ -29,7 +30,12 @@ useWeddingContent().content        (read by every screen)
      `faq` doc → `content.faq` = `items[]`, `content.faqHeader` = `header`
    - `globalSettings` also writes into `details.ceremony` / `details.reception`
      (time, location, address) — it overrides the `details` doc for those fields.
-4. `loading` turns false → `LoadingScreen` exits and the step flow renders.
+4. `loading` turns false → `page.tsx` also waits for `document.fonts.ready` and,
+   when the first screen is Welcome, preloads its hero image (same srcset as
+   `<Image fill>`, via `getImageProps`). That extra wait is capped at 2.5 s after
+   navigation (`LOADER_MAX_WAIT_MS`). Then the step flow mounts and
+   `LoadingScreen` crossfades out over it. Content is always awaited, so default
+   text never flashes.
 
 The type of `content` is `typeof wedding-content.json`, so **a key must exist in
 the JSON to be typed**.

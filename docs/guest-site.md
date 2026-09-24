@@ -68,6 +68,10 @@ transaction rejects when `currentCount >= maxCount`.
 
 - **Screen swap:** `pageVariants` in `page.tsx` (fade + scale, 0.8 s in with
   `[0.22, 1, 0.36, 1]`, 0.5 s out) inside `AnimatePresence mode="wait"`.
+- **Loader → first screen:** the outer `AnimatePresence` in `page.tsx` has no
+  `mode="wait"`, so `<main>` mounts under `LoadingScreen` while it fades out.
+  The loader's exit is a CSS opacity transition on `--duration-very-slow` /
+  `--ease-in-out` driven by `usePresence` (instant under reduced motion).
 - **Text:** wrap headings/paragraphs in `<TextsReveal>` (CSS `.t-stagger` in
   `globals.css`; waits 600 ms, or 800 ms with `isHero`, so it starts after the
   screen fade).
@@ -85,7 +89,8 @@ transaction rejects when `currentCount >= maxCount`.
 ## Music
 
 `AudioPlayer` (mounted in `layout.tsx`) renders `<audio id="wedding-bg-music"
-src="/bg-music.mp3">` and a toggle. Browsers block autoplay, so `nextStep` on
+src="/bg-music.mp3" preload="none">` and a toggle. It downloads only when
+`.play()` is first called, so the 5.4 MB file does not compete with the first load. Browsers block autoplay, so `nextStep` on
 step 0 (the first user tap) calls `.play()`. `OurStoryScreen` also reaches the
 element by id.
 
