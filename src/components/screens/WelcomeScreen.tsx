@@ -97,13 +97,15 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         animate="show"
         className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col"
       >
-        <div className="flex-1 flex flex-col justify-center lg:justify-between items-center min-h-full w-full py-16 lg:py-0 gap-10 lg:gap-0">
-        <motion.div variants={itemVariants} className="lg:pt-20 w-full">
+        <div className="flex-1 flex flex-col justify-between items-center min-h-full w-full py-16 lg:py-0 gap-10 lg:gap-0">
+        {/* Top group: subtitle + names sit at the top, countdown stays at the bottom */}
+        <div className="w-full flex flex-col items-center lg:pt-16">
+        <motion.div variants={itemVariants} className="w-full">
           <p className="text-[11px] uppercase tracking-[0.4em] text-wedding-cream/80 font-medium">{content.welcomeScreen.subtitle}</p>
           <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-4 mb-2"></div>
         </motion.div>
 
-        <TextsReveal isHero className="px-4 w-full max-w-4xl lg:py-12">
+        <TextsReveal isHero className="px-4 w-full max-w-4xl mt-6 lg:mt-8">
           <span className="text-sm font-cormorant italic text-wedding-cream/90 tracking-widest block mb-4">{content.welcomeScreen.topText}</span>
           <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-cinzel text-wedding-cream font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
             {content.global.groomName} <span className="text-wedding-gold italic font-serif text-3xl sm:text-4xl md:text-6xl font-light">&</span> {content.global.brideName}
@@ -112,6 +114,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           <p className="text-xs uppercase tracking-[0.3em] text-wedding-cream/90 mb-3">{content.welcomeScreen.bottomText1}</p>
           <p className="text-lg md:text-2xl font-cormorant italic text-wedding-cream tracking-wider drop-shadow-md">{content.welcomeScreen.bottomText2}</p>
         </TextsReveal>
+        </div>
 
         <motion.div variants={itemVariants} className="lg:pb-8 w-full max-w-3xl px-4 flex flex-col items-center">
           <div className="grid grid-cols-4 gap-2 md:gap-8 bg-wedding-dark/50 backdrop-blur-md px-4 md:px-6 py-4 rounded-xl border border-wedding-gold/20 w-full max-w-md mb-6 shadow-xl">
