@@ -61,6 +61,26 @@ Match the code around you. These are the patterns the codebase already uses.
 - Timing values come from the CSS variables at the top of `globals.css`
   (`--duration-*`, `--ease-*`, `--distance-*`, `--scale-*`, `--blur-*`).
   The main ease is `cubic-bezier(0.22, 1, 0.36, 1)` (`--ease-smooth-out`).
+- Scroll motion: use the primitives in `src/components/ui/ScrollMotion.tsx`,
+  not ad-hoc `whileInView`/`useScroll`. The page never scrolls, so a scrolling
+  screen puts a ref on its own scroll element and wraps its content in
+  `<ScrollContainerProvider containerRef={ref}>`; the primitives read it for
+  `viewport.root` and `useScroll({ container })`.
+  - `<ScrollReveal delay?>` fades and rises once (16 px, 800 ms,
+    `--ease-smooth-out`). `<ScrollReveal stagger>` instead staggers its direct
+    `<ScrollRevealItem>` children (120 ms apart, or pass seconds).
+  - `<Parallax distance?>` drifts its layer on `y` by ±24 px (max 40) while it
+    crosses the view. Give it classes that make it taller than an
+    `overflow-hidden` parent by `distance` each side (e.g.
+    `absolute inset-x-0 -inset-y-6`). Images and decorative layers only.
+  - Tokens: `--duration-scroll-reveal`, `--distance-scroll-reveal`,
+    `--stagger-scroll-reveal`, `--distance-parallax` in `globals.css`,
+    mirrored by `SCROLL_MOTION`; change both together.
+  - Rules: no bounce; reveals play once; text only reveals, never parallax;
+    at most one parallax element per viewport; no scroll effects on form
+    inputs; never stack a primitive on an element that already has
+    `whileInView` (replace it). Under reduced motion every primitive renders a
+    plain static `div`.
 - Canvas effects (`TwinkleSparks`, `InkRevealCanvas`) cancel their animation
   frame on unmount and cap the device pixel ratio at 2 — keep both in any new
   canvas effect. `TwinkleSparks` also pauses while off-screen or the tab is

@@ -56,4 +56,42 @@ own scroll container** (see `docs/guest-site.md` → Layout rules). So:
 
 ## Result
 
-(fill in at the end of the session: chosen intensity, primitive names and APIs)
+**Chosen intensity (owner, 2026-09-24):** reveal + gentle hero parallax. No
+scroll-progress line.
+
+**Primitives** — `src/components/ui/ScrollMotion.tsx`:
+
+- `ScrollContainerProvider({ containerRef })` / `useScrollContainer()`: a
+  screen shares its scroll element; falls back to the viewport when absent.
+- `ScrollReveal({ delay?, stagger?, className })`: fade + rise 16 px, once,
+  800 ms `--ease-smooth-out`, `whileInView` with `viewport.root` = container,
+  `amount: 0.2`. With `stagger` (true = 120 ms, or seconds) it staggers direct
+  `ScrollRevealItem` children instead of moving itself.
+- `Parallax({ distance? = 24, className })`: `useScroll({ container, target,
+  offset: ['start end', 'end start'] })` → `useTransform` to `y` +distance →
+  −distance. Caller oversizes the layer inside an `overflow-hidden` parent.
+- All render a plain `div` under `useReducedMotion()`.
+- Tokens: `--duration-scroll-reveal` 800ms, `--distance-scroll-reveal` 16px,
+  `--stagger-scroll-reveal` 120ms, `--distance-parallax` 24px in
+  `globals.css`, mirrored by `SCROLL_MOTION`.
+
+**Proof on Our Story:** the Continue block's `whileInView` was replaced by
+`<ScrollReveal delay={0.2}>`, and the first timeline photo is wrapped in
+`<Parallax className="absolute inset-x-0 -inset-y-6">` (the other photos are
+left for T09). Section has `ref` + `ScrollContainerProvider`.
+
+**Measurements (production build, S3 = scroll Our Story top → bottom in 5 s):**
+
+| Viewport | Slow frames | CLS | Long tasks > 50 ms |
+| --- | --- | --- | --- |
+| 375×812 | 1 / 970 (0.1 %) | 0 | none |
+| desktop 1345 px | 1 / 626 (0.16 %) | 0 | none |
+
+Parallax layer moved +10.8 → −24 px (clamped) across 0–900 px of scroll; layer
+304 px in a 256 px clip, so no edge shows. Continue block ends at opacity 1,
+`transform: none`.
+
+**Checks:** changed files lint clean, total lint unchanged (141 problems, all
+older); build OK. Reduced motion verified in code only (the browser pane
+cannot emulate `prefers-reduced-motion`); each primitive returns a static
+`div` when `useReducedMotion()` is true. No phone check this session.

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, Variants, AnimatePresence } from 'motion/react';
 import { Play } from 'lucide-react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
+import { ScrollContainerProvider, ScrollReveal, Parallax } from '@/components/ui/ScrollMotion';
 
 interface OurStoryScreenProps {
   onContinue: () => void;
@@ -17,6 +18,7 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
   const { content } = useWeddingContent();
   const [activeVideo, setActiveVideo] = useState<{link: string, coverImage: string} | null>(null);
   const [wasMusicPlaying, setWasMusicPlaying] = useState(false);
+  const scrollRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (activeVideo) {
@@ -78,7 +80,8 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
   const timelineItems = content.ourStory.items;
 
   return (
-    <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+    <section ref={scrollRef} className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+      <ScrollContainerProvider containerRef={scrollRef}>
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
       
       <motion.div 
@@ -98,8 +101,18 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
         <div className="relative border-l border-wedding-gold/20 ml-4 md:border-l-0 md:ml-0 md:flex md:flex-col md:items-center">
           <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-[1px] bg-wedding-gold/10"></div>
 
-          {timelineItems.map((item, index) => (
-            <motion.div 
+          {timelineItems.map((item, index) => {
+            const image = (
+              <RevealImage
+                src={item.image}
+                alt={item.title}
+                className="w-full h-full object-cover object-[center_25%] transform group-hover:scale-105 transition-transform duration-700 ease-out"
+                wrapperClassName="absolute inset-0 w-full h-full"
+                sizes="(min-width: 768px) 440px, calc(100vw - 112px)"
+              />
+            );
+            return (
+            <motion.div
               key={index}
               variants={itemVariants}
               className={`relative mb-16 md:mb-24 w-full md:w-1/2 pl-8 ${index % 2 === 0 ? 'md:pl-0 md:pr-16 md:mr-auto' : 'md:pl-16 md:ml-auto'}`}
@@ -111,13 +124,8 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
                 <span className="text-xs uppercase tracking-widest text-wedding-gold/70 font-semibold block mb-1">{item.date}</span>
                 <h3 className="text-2xl font-cinzel text-wedding-cream font-light mb-3">{item.title}</h3>
                 <div className="relative w-full h-64 md:h-72 mb-6 rounded-xl overflow-hidden group shadow-lg">
-                  <RevealImage 
-                    src={item.image} 
-                    alt={item.title} 
-                    className="w-full h-full object-cover object-[center_25%] transform group-hover:scale-105 transition-transform duration-700 ease-out" 
-                    wrapperClassName="absolute inset-0 w-full h-full"
-                    sizes="(min-width: 768px) 440px, calc(100vw - 112px)"
-                  />
+                  {/* T08 proof: parallax on the first photo only; T09 decides the rest. */}
+                  {index === 0 ? <Parallax className="absolute inset-x-0 -inset-y-6">{image}</Parallax> : image}
                   {/* Cinematic gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-wedding-dark/80 via-transparent to-wedding-dark/20 opacity-80 group-hover:opacity-40 transition-opacity duration-500" />
                   <div className="absolute inset-0 ring-1 ring-inset ring-wedding-gold/20 rounded-xl" />
@@ -135,16 +143,12 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
                 )}
               </div>
             </motion.div>
-          ))}
+            );
+          })}
         </div>
       </motion.div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1, delay: 0.5 }}
-      >
+      <ScrollReveal delay={0.2}>
         <div className="w-full flex justify-center mt-8 md:mt-12 relative z-20">
           <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
             <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
@@ -153,7 +157,7 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
             </div>
           </button>
         </div>
-      </motion.div>
+      </ScrollReveal>
 
       <EmbeddedFooter />
 
@@ -218,6 +222,7 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
           </motion.div>
         )}
       </AnimatePresence>
+      </ScrollContainerProvider>
     </section>
   );
 }

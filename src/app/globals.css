@@ -32,6 +32,13 @@
   --blur-medium: 3px;
   --blur-large: 8px;
 
+  /* Scroll motion (ScrollReveal / Parallax); mirrored in SCROLL_MOTION in
+     src/components/ui/ScrollMotion.tsx. Uses --ease-smooth-out, no bounce. */
+  --duration-scroll-reveal: 800ms;
+  --distance-scroll-reveal: 16px;
+  --stagger-scroll-reveal: 120ms;
+  --distance-parallax: 24px;
+
   /* Skeleton Reveal Specific Tokens */
   --pulse-dur: 1000ms;
   --pulse-count: infinite;

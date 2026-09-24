@@ -38,6 +38,7 @@ All editors are in `src/app/admin/content/`.
 | Fonts, OG/Twitter metadata, theme script | `src/app/layout.tsx` |
 | Colors, fonts, motion tokens, reveal CSS | `src/app/globals.css` |
 | Staggered text reveal on scroll | `src/components/ui/TextsReveal.tsx` |
+| Scroll motion: scroll-container context, `ScrollReveal`/`ScrollRevealItem` (reveal once), `Parallax` (image drift), `SCROLL_MOTION` constants | `src/components/ui/ScrollMotion.tsx` |
 | Image fade/blur reveal | `src/components/ui/RevealImage.tsx` |
 | Countdown digits pop-in | `src/components/ui/PopInNumber.tsx` |
 | Auto-scrolling draggable strip | `src/components/ui/DraggableSlider.tsx` |
