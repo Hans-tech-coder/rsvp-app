@@ -60,6 +60,11 @@ Match the code around you. These are the patterns the codebase already uses.
   The main ease is `cubic-bezier(0.22, 1, 0.36, 1)` (`--ease-smooth-out`).
 - Canvas effects (`TwinkleSparks`, `InkRevealCanvas`) cancel their animation
   frame on unmount — keep that in any new canvas effect.
+- Before writing Framer Motion code, use the `motion` skill
+  (`.claude/skills/motion/`). It searches the live Motion docs through the
+  free `motion` MCP server in `.mcp.json`, so API details come from the docs
+  rather than memory. The Motion+ features (MotionScore audits, example
+  source, transition editor) are not set up.
 
 ## Admin styling
 

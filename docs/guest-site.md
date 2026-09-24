@@ -76,7 +76,11 @@ transaction rejects when `currentCount >= maxCount`.
 - **Tokens:** durations, easings, distances, and blur live as CSS variables at
   the top of `globals.css` (`--duration-*`, `--ease-*`, `--reveal-*`,
   `--stagger-*`, `--digit-*`). Use them; do not hard-code new timings.
-- The `transitions-dev` skill matches this token system — use it for new motion.
+- The `transitions-dev` skill matches this token system — use it for new CSS
+  motion. For Framer Motion code (screen swaps, `whileInView`, scroll effects)
+  use the `motion` skill.
+- Planned work on jank and scroll effects is tracked in
+  `docs/plans/motion-polish/README.md`.
 
 ## Music
 
