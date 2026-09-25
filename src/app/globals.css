@@ -328,6 +328,30 @@
 .t-vol-range:focus-visible { outline: none; }
 .t-vol-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--color-wedding-gold); }
 .t-vol-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--color-wedding-gold); }
+
+/* Wedding-ring cursor (WeddingCursor.tsx). `t-cursor-on` sits on <html> only
+   for a mouse/trackpad without reduced motion; text fields keep the I-beam. */
+html.t-cursor-on, html.t-cursor-on * { cursor: none !important; }
+html.t-cursor-on :is(textarea, [contenteditable=""], [contenteditable="true"], input:not([type="checkbox"], [type="radio"], [type="range"], [type="submit"], [type="button"], [type="reset"], [type="file"], [type="color"])) {
+  cursor: text !important;
+}
+.t-cursor {
+  opacity: 0;
+  transition: opacity var(--duration-quick) var(--ease-out);
+}
+.t-cursor[data-visible="true"] { opacity: 1; }
+/* Drawn so the diamond tip (13,1) is the hotspot; the ring tilts around it */
+.t-cursor-ring {
+  display: block;
+  margin: -1px 0 0 -13px;
+  transform-origin: 13px 1px;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.5));
+  transition: transform var(--duration-medium) var(--ease-smooth-out);
+}
+.t-cursor[data-hover="true"] .t-cursor-ring {
+  transform: scale(1.3) rotate(-16deg);
+  transition-timing-function: var(--ease-bounce);
+}
 @custom-variant dark (&:where(.dark, .dark *));
 @theme {
   --color-wedding-cream: #FCFAF6;

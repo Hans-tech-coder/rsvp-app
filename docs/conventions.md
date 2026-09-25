@@ -72,6 +72,8 @@ Match the code around you. These are the patterns the codebase already uses.
   focus change nothing. A modal moves focus in on open, traps Tab, and
   returns focus to its opener on close (see `circular-image-gallery.tsx`).
   Decorative duplicates (loop copies) are `aria-hidden` with `tabIndex={-1}`.
+  The same role also makes the wedding-ring cursor tilt over it; a clickable
+  element with no role gets `data-cursor="hover"` instead (`WeddingCursor.tsx`).
 - Timing values come from the CSS variables at the top of `globals.css`
   (`--duration-*`, `--ease-*`, `--distance-*`, `--scale-*`, `--blur-*`).
   The main ease is `cubic-bezier(0.22, 1, 0.36, 1)` (`--ease-smooth-out`).

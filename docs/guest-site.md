@@ -168,6 +168,24 @@ transaction rejects when `currentCount >= maxCount`.
 - After changing motion, loading, or scrolling, run the Motion performance
   check in `docs/conventions.md` → Verification.
 
+## Custom cursor
+
+`WeddingCursor` (mounted in `Home` in `page.tsx`, so never on `/admin`)
+replaces the cursor with a gold solitaire ring whose diamond tip is the
+hotspot. Moving leaves a trail of twinkling gold stardust. Hovering anything
+clickable tilts and grows the ring with a bounce and a few sparkles, and a
+click throws a gold sparkle burst. The particles are drawn on one fixed canvas
+(`z-[9998]`, ring `z-[9999]`) whose loop stops when idle.
+
+- **Mouse/trackpad only.** It runs only under `(hover: hover) and (pointer:
+  fine)` without `prefers-reduced-motion`, and it adds `t-cursor-on` to
+  `<html>` to hide the native cursor. Phones, touch and reduced-motion guests
+  get the normal cursor and no effects.
+- **Clickable detection** is a selector list (`CLICKABLE`): links, buttons,
+  `role="button"`/`link`/`tab`/`menuitem`, labels, selects, checkboxes, radios,
+  ranges, and `[data-cursor="hover"]`.
+- **Text fields** keep the native I-beam and the ring hides over them.
+
 ## Music
 
 `AudioPlayer` (mounted in `layout.tsx`) renders `<audio id="wedding-bg-music"

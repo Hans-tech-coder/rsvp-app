@@ -15,6 +15,7 @@ import { RsvpScreen } from '@/components/screens/RsvpScreen';
 import { EntranceScreen } from '@/components/screens/EntranceScreen';
 import { CanvasMenu } from '@/components/layout/CanvasMenu';
 import { LoadingScreen } from '@/components/screens/LoadingScreen';
+import { WeddingCursor } from '@/components/effects/WeddingCursor';
 import { WeddingContentProvider, useWeddingContent } from '@/contexts/WeddingContentContext';
 import { getImageProps } from 'next/image';
 
@@ -459,6 +460,7 @@ export default function Home() {
   return (
     <WeddingContentProvider>
       <MainApp />
+      <WeddingCursor />
     </WeddingContentProvider>
   );
 }
