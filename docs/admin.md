@@ -7,12 +7,18 @@ wedding palette.
 
 ## Login and session
 
-1. `/admin/login` (`login/page.tsx`, client): `signInWithEmailAndPassword`
-   (Firebase client Auth) → `getIdToken()` → server action
-   `createSessionCookie(idToken)` (`actions/auth.ts`).
-2. `createSessionCookie` verifies the ID token, refuses users with no
-   `admins/{uid}` doc ("This account is not an admin."), then makes a 5-day
-   Firebase **session cookie** named `session` (`httpOnly`, `secure`, path `/`).
+1. `/admin/login` (`login/page.tsx`, client): one **Sign in with Google**
+   button → `signInWithPopup` (`prompt: 'select_account'`; a popup, because
+   the redirect flow breaks when third-party cookies are blocked on
+   `*.vercel.app`) → `getIdToken()` → server action
+   `createSessionCookie(idToken)` (`actions/auth.ts`). On failure the page
+   shows the error and signs the Firebase client out.
+2. `createSessionCookie` verifies the ID token (with revocation), requires
+   `sign_in_provider === 'google.com'`, `email_verified`, and a sign-in within
+   the last 5 minutes, claims any `adminAllowlist/{email}` entry (see
+   `docs/data-model.md`), and refuses users with no `admins/{uid}` doc ("This
+   Google account is not an admin."). Then it makes a 5-day Firebase
+   **session cookie** named `session` (`httpOnly`, `secure`, path `/`).
 3. `src/proxy.ts` redirects `/admin/**` to `/admin/login` when the cookie is
    missing, and `/admin/login` to `/admin/dashboard` when present. It does not
    verify the cookie; each admin server page calls `requireAdminPage()`
@@ -20,9 +26,11 @@ wedding palette.
    session to `/api/logout` (clears the cookie, then `/admin/login`).
 4. Sign out (`layout.tsx`): `auth.signOut()` + `clearSessionCookie()`.
 
-Adding an admin: the user must exist in Firebase Auth, then
-`node scripts/add-admin.js <email>` (needs `GOOGLE_APPLICATION_CREDENTIALS`)
-creates `admins/{uid}`. See `docs/security.md` for what is and is not checked.
+Adding an admin: `node scripts/add-admin.js <email> [--super]` (reads `FIREBASE_ADMIN_*`
+from `.env.local`, or `GOOGLE_APPLICATION_CREDENTIALS`) writes `adminAllowlist/{email}`. The person
+does not need to exist yet; they become an admin on their next Google
+sign-in. `--super` is the only way to make a super admin. See
+`docs/security.md` for what is and is not checked.
 
 ## Page pattern
 

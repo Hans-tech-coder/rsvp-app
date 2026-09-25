@@ -33,7 +33,7 @@ admin portal. Production URL: `https://hans-czay-wedding.vercel.app`.
 | Who | What they do | Where |
 | --- | --- | --- |
 | **Guests** (no account) | Step through a 10-screen story (welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/` (one page, screens swap in place) |
-| **Admins** (Firebase Auth user whose UID is in `admins`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text and image on the guest site. | `/admin/**` |
+| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text and image on the guest site. | `/admin/**` |
 
 ---
 
@@ -62,7 +62,7 @@ npm run dev            # local dev server on :3000
 npm run build          # production build (the main correctness gate)
 npm run lint           # eslint
 npm run sync-content   # PULL Firestore websiteContent -> src/data/wedding-content.json
-node scripts/add-admin.js <email>   # needs GOOGLE_APPLICATION_CREDENTIALS
+node scripts/add-admin.js <email> [--super]   # allowlist an admin; reads FIREBASE_ADMIN_* from .env.local
 ```
 
 ### Environment (`.env.local`, template in `.env.local.example`)

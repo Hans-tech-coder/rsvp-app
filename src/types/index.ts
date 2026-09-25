@@ -36,9 +36,13 @@ export interface GiftSelection {
   selectedAt: Date | any; // Firestore Timestamp
 }
 
+export type AdminRole = 'super' | 'admin';
+
 export interface AdminUser {
   id?: string; // Firebase Auth UID
   email: string;
   name: string;
+  role?: AdminRole; // missing on docs created before roles; treat as 'admin'
   addedAt: Date | any; // Firestore Timestamp
+  addedBy?: string; // UID of the super admin who added them, or 'script'
 }

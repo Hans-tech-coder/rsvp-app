@@ -1,48 +1,55 @@
 const admin = require('firebase-admin');
+const path = require('path');
 
-async function addAdmin(email) {
+// Load environment variables from .env.local
+require('dotenv').config({ path: path.join(__dirname, '../.env.local'), quiet: true });
+
+// Writes `adminAllowlist/{email}`. The person becomes an admin (with this
+// role) the next time they sign in with Google; see createSessionCookie in
+// src/app/actions/auth.ts. Works before they have ever signed in, and also
+// sets the role on an existing admin. This script is the only way to create
+// a super admin, and the break-glass path if every super admin is locked out.
+async function addAdmin(email, role) {
   try {
-    if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-      console.error('Error: GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.');
-      process.exit(1);
+    if (!admin.apps.length) {
+      if (process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
+        admin.initializeApp({
+          credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          })
+        });
+      } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        admin.initializeApp({
+          credential: admin.credential.applicationDefault()
+        });
+      } else {
+        console.error('Error: Firebase Admin credentials not found. Set FIREBASE_ADMIN_* in .env.local or GOOGLE_APPLICATION_CREDENTIALS.');
+        process.exit(1);
+      }
     }
 
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.applicationDefault()
-      });
-    }
-    
-    const db = admin.firestore();
-    const auth = admin.auth();
-    
-    // Get user by email
-    const userRecord = await auth.getUserByEmail(email);
-    console.log(`Found user: ${userRecord.email} with UID: ${userRecord.uid}`);
-    
-    // Add to admins collection with the UID as the document ID
-    await db.collection('admins').doc(userRecord.uid).set({
-      email: userRecord.email,
-      addedAt: admin.firestore.FieldValue.serverTimestamp()
+    await admin.firestore().collection('adminAllowlist').doc(email).set({
+      role,
+      addedAt: admin.firestore.FieldValue.serverTimestamp(),
+      addedBy: 'script'
     });
-    
-    console.log(`Successfully added ${email} to the admins collection!`);
-    
-  } catch (error) {
-    if (error.code === 'auth/user-not-found') {
-      console.error(`Error: No user found with email ${email}. Make sure they signed up first.`);
-    } else {
-      console.error('Error adding admin:', error);
-    }
-  } finally {
+
+    console.log(`Allowlisted ${email} as ${role}. It takes effect on their next Google sign-in.`);
     process.exit(0);
+  } catch (error) {
+    console.error('Error adding admin:', error);
+    process.exit(1);
   }
 }
 
-const targetEmail = process.argv[2];
-if (!targetEmail) {
-  console.error('Please provide an email address. Usage: node scripts/add-admin.js <email>');
+const args = process.argv.slice(2);
+const role = args.includes('--super') ? 'super' : 'admin';
+const targetEmail = args.find((arg) => !arg.startsWith('--'))?.trim().toLowerCase();
+if (!targetEmail || !/^[^\s@/]+@[^\s@/]+\.[^\s@/]+$/.test(targetEmail)) {
+  console.error('Please provide an email address. Usage: node scripts/add-admin.js <email> [--super]');
   process.exit(1);
 }
 
-addAdmin(targetEmail);
+addAdmin(targetEmail, role);

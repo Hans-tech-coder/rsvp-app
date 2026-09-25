@@ -71,7 +71,7 @@ server actions and then `router.refresh()`.
 
 | Route | Server page | Client component | Data |
 | --- | --- | --- | --- |
-| `/admin/login` | `src/app/admin/login/page.tsx` (client) | – | Firebase Auth → session cookie |
+| `/admin/login` | `src/app/admin/login/page.tsx` (client) | – | Google popup sign-in → session cookie (allowlist claim in `auth.ts`) |
 | `/admin/dashboard` | `src/app/admin/dashboard/page.tsx` | – (stat cards inline) | `guests`, `registryGifts` |
 | `/admin/invites` | `src/app/admin/invites/page.tsx` | `InviteListClient.tsx` | `guests` (all codes), `settings/inviteTemplate` |
 | `/admin/guests` | `src/app/admin/guests/page.tsx` | `GuestListClient.tsx` (CSV export via papaparse) | `guests` |
@@ -86,14 +86,14 @@ server actions and then `router.refresh()`.
 | Feature | Files |
 | --- | --- |
 | `/admin` redirect when no cookie | `src/proxy.ts` |
-| Admin check (session cookie + `admins/{uid}`) for actions and pages | `src/lib/requireAdmin.ts` (`requireAdmin`, `requireAdminPage`, `getAdminUid`) |
+| Admin check (session cookie + `admins/{uid}`) for actions and pages | `src/lib/requireAdmin.ts` (`getAdmin`, `getAdminUid`, `requireAdmin`, `requireSuperAdmin`, `requireAdminPage`) |
 | Clear a bad session and go to login | `src/app/api/logout/route.ts` |
 | Firebase client init | `src/lib/firebase/client.ts` |
 | Firebase admin init (env parsing) | `src/lib/firebase/admin.ts` |
 | Firestore / Storage rules | `firestore.rules`, `storage.rules`, `firebase.json`, `.firebaserc` |
 | Shared types | `src/types/index.ts` |
 | Pull Firestore content into JSON | `scripts/sync-content.js` |
-| Grant admin to a user | `scripts/add-admin.js` |
+| Allowlist an admin or super admin (`--super`) | `scripts/add-admin.js` |
 | Next config (remote image hosts, dev origin) | `next.config.ts` |
 
 ## Files over 400 lines

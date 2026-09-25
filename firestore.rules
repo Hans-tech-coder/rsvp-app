@@ -13,6 +13,12 @@ service cloud.firestore {
       allow write: if false; // Only manageable from Firebase Console natively for now
     }
 
+    // Admin allowlist (pending admins, keyed by lowercased email): server only.
+    // Written by scripts/add-admin.js, claimed by createSessionCookie.
+    match /adminAllowlist/{email} {
+      allow read, write: if false;
+    }
+
     // Guests Collection
     match /guests/{inviteCode} {
       // Admins have full access

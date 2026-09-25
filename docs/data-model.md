@@ -13,7 +13,8 @@ field, update this file.
 | `guests` | the invite code (e.g. `K7MPQ2`) | server actions (`admin.ts`, `rsvp.ts`) | admin pages; `verifyInviteCode` |
 | `registryGifts` | auto ID | server actions (`admin.ts`, `registry.ts`) | `getRegistryGifts`; admin gifts/dashboard |
 | `giftSelections` | auto ID | `claimGift`; deleted by `resetRegistryGift` / `deleteGiftSelection` | admin registry page |
-| `admins` | Firebase Auth UID | `scripts/add-admin.js` (or Console) | `firestore.rules`, `storage.rules` (`isAdmin()`) |
+| `admins` | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry) | `firestore.rules`, `storage.rules` (`isAdmin()`), `requireAdmin.ts` |
+| `adminAllowlist` | lowercased email | `scripts/add-admin.js` | `createSessionCookie` (server only; rules deny all browser access) |
 | `settings` | `inviteTemplate` | `updateInviteMessageTemplate` | `getInviteMessageTemplate` |
 | `websiteContent` | one doc per screen (below) + `<doc>_backup` | admin editors, **from the browser** | `WeddingContentContext` (browser), `layout.tsx` (OG image, admin SDK) |
 
@@ -50,7 +51,16 @@ Invariant: `isFull === currentCount >= maxCount`. Every action that changes
 
 ### `admins/{uid}`
 
-`email`, `addedAt`. Its existence is what makes a user an admin.
+`email`, `role` (`'super' | 'admin'`; a doc without it counts as `'admin'`),
+`addedAt`, `addedBy` (UID of the super admin who added them, or `'script'`).
+Its existence is what makes a user an admin. Type `AdminUser`, `AdminRole`.
+
+### `adminAllowlist/{email}`
+
+`role`, `addedAt`, `addedBy`. A pending grant for someone who **may** become an
+admin. On their next Google sign-in, `createSessionCookie` copies it onto
+`admins/{uid}` in a transaction (creating the doc, or setting `role` on an
+existing one) and deletes the entry.
 
 ### `settings/inviteTemplate`
 
