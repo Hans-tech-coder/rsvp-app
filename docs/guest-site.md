@@ -51,7 +51,13 @@ and the table in `docs/FEATURE-MAP.md`.
    calls `onStartUnlock` (unlocks, moves to step 9 behind the overlay), then
    `onUnlock(code)` (stores the code, closes the overlay).
 3. `RsvpScreen` calls `submitRsvp(inviteCode, formData)`. The action runs a
-   Firestore transaction that fails if the code is already `used`.
+   Firestore transaction that fails if the code is already `used`. After it
+   succeeds, `after()` sends the guest a confirmation email
+   (`src/lib/email/sendRsvpConfirmation.ts`, Gmail SMTP via nodemailer): their
+   answers, plus date, ceremony/reception venues and dress code when attending.
+   Content follows the same precedence as `WeddingContentContext` (JSON defaults,
+   then `websiteContent/details`, `dressCode`, `globalSettings`). Missing Gmail
+   env vars or a failed send are logged and never fail the RSVP.
 4. On success, `onSubmitSuccess` relocks (`isUnlocked = false`, code cleared).
 
 `RsvpScreen` receives `'dev-mode'` if no code is stored; submitting with it fails

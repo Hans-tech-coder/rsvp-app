@@ -4,6 +4,8 @@ import { getAdminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { Guest } from '@/types';
 import weddingContent from '@/data/wedding-content.json';
+import { after } from 'next/server';
+import { sendRsvpConfirmation } from '@/lib/email/sendRsvpConfirmation';
 
 export async function verifyInviteCode(inviteCode: string) {
   try {
@@ -64,6 +66,15 @@ export async function submitRsvp(
         message: formData.message || '',
         submittedAt: FieldValue.serverTimestamp(),
       });
+    });
+
+    // Confirmation email runs after the response; a failed send never fails the RSVP.
+    after(async () => {
+      try {
+        await sendRsvpConfirmation(formData);
+      } catch (error) {
+        console.error('RSVP confirmation email failed:', error);
+      }
     });
 
     return { success: true };

@@ -91,6 +91,7 @@ server actions and then `router.refresh()`.
 | `/admin` redirect when no cookie | `src/proxy.ts` |
 | Admin check (session cookie + `admins/{uid}`) for actions and pages | `src/lib/requireAdmin.ts` (`getAdmin`, `getAdminUid`, `requireAdmin`, `requireSuperAdmin`, `requireAdminPage`) |
 | Clear a bad session and go to login | `src/app/api/logout/route.ts` |
+| RSVP confirmation email to the guest (Gmail SMTP) | `src/lib/email/sendRsvpConfirmation.ts`, called via `after()` in `submitRsvp` |
 | Firebase client init | `src/lib/firebase/client.ts` |
 | Firebase admin init (env parsing) | `src/lib/firebase/admin.ts` |
 | Firestore / Storage rules | `firestore.rules`, `storage.rules`, `firebase.json`, `.firebaserc` |

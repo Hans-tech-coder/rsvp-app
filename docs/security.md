@@ -63,6 +63,8 @@ redirect). The real check is in `src/lib/requireAdmin.ts`:
 
 - `FIREBASE_ADMIN_*` are server-only. Never import `src/lib/firebase/admin.ts`
   from a `'use client'` file.
+- `GMAIL_USER` / `GMAIL_APP_PASSWORD` (RSVP confirmation sender) are server-only;
+  the password is a Google App Password, never the account login password.
 - `NEXT_PUBLIC_FIREBASE_*` are public by design (they ship to the browser).
 - `.env*` is git-ignored except `.env.local.example`. Do not print or commit
   real values.

@@ -68,8 +68,10 @@ node scripts/add-admin.js <email> [--super]   # allowlist an admin; reads FIREBA
 ### Environment (`.env.local`, template in `.env.local.example`)
 
 `NEXT_PUBLIC_FIREBASE_*` (six client keys) and `FIREBASE_ADMIN_PROJECT_ID`,
-`FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`, and `BLOB_READ_WRITE_TOKEN`
-(from the connected Blob store, `vercel env pull`). Never print,
+`FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`, `BLOB_READ_WRITE_TOKEN`
+(from the connected Blob store, `vercel env pull`), and `GMAIL_USER` +
+`GMAIL_APP_PASSWORD` (sender for RSVP confirmation emails; optional, emails are
+skipped without them). Never print,
 commit, or paste their values.
 
 ---
@@ -100,6 +102,7 @@ src/
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
   lib/blob/uploadImage.ts    compress + upload an image to Vercel Blob (all editors)
   lib/requireAdmin.ts        admin check for server actions and admin pages (server only)
+  lib/email/sendRsvpConfirmation.ts   guest RSVP confirmation email via Gmail SMTP (server only)
   types/index.ts             Guest, RegistryGift, GiftSelection, AdminUser
   proxy.ts                   /admin/** redirect when no session cookie
 scripts/                     sync-content.js, add-admin.js
