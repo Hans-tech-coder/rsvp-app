@@ -179,7 +179,7 @@
 
 /* "View" hover on slider photo cards (Gallery, Dress Code); markup in
    src/components/ui/ViewOverlay.tsx. Only pointers that can hover get it: on
-   touch the card opens the lightbox on tap. The filter goes on the RevealImage
+   touch the card opens the lightbox on tap (keyboard focus: below). The filter goes on the RevealImage
    wrapper (.t-view-media), not the <img>, whose blur-up ends at `filter: none`. */
 .t-view-media {
   transition:
@@ -209,10 +209,34 @@
     transition-delay: var(--duration-stagger);
   }
 }
+/* Keyboard focus gets the same reveal as hover, on every device (a touch
+   tablet with a keyboard too), plus a gold ring. The ring is drawn inside the
+   card because the slider's overflow would clip an outer one. */
+.t-view-card:focus-visible { outline: none; }
+.t-view-card:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  border: 2px solid var(--color-wedding-gold);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.t-view-card:focus-visible .t-view-media {
+  transform: scale(1.06);
+  filter: blur(var(--blur-small)) brightness(0.6);
+}
+.t-view-card:focus-visible .t-view-scrim { opacity: 1; }
+.t-view-card:focus-visible .t-view-button {
+  opacity: 1;
+  transform: none;
+  transition-delay: var(--duration-stagger);
+}
 @media (prefers-reduced-motion: reduce) {
   .t-view-media { transition: filter var(--duration-quick) var(--ease-linear); }
   .t-view-button { transform: none; transition: opacity var(--duration-quick) var(--ease-linear); }
-  .t-view-card:hover .t-view-media { transform: none; }
+  .t-view-card:hover .t-view-media,
+  .t-view-card:focus-visible .t-view-media { transform: none; }
 }
 @custom-variant dark (&:where(.dark, .dark *));
 @theme {

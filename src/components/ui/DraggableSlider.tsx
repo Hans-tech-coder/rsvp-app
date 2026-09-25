@@ -2,6 +2,10 @@
 
 import React, { useRef, useEffect } from 'react';
 
+// The screens fade each slider's edges with a mask, transparent over the outer
+// 10% on each side. A keyboard-focused card is scrolled clear of it.
+const EDGE_FADE = 0.1;
+
 interface DraggableSliderProps {
   children: React.ReactNode;
   reverse?: boolean;
@@ -16,6 +20,7 @@ export function DraggableSlider({ children, reverse = false, className = "", spe
   const startX = useRef(0);
   const scrollLeft = useRef(0);
   const isHovered = useRef(false);
+  const isFocused = useRef(false);
   const isDragging = useRef(false);
   const accumulatedScroll = useRef(0);
 
@@ -25,7 +30,7 @@ export function DraggableSlider({ children, reverse = false, className = "", spe
     if (!slider) return;
 
     const scrollStep = () => {
-      if (!isDown.current && !isHovered.current && set1Ref.current) {
+      if (!isDown.current && !isHovered.current && !isFocused.current && set1Ref.current) {
         accumulatedScroll.current += speed;
         if (accumulatedScroll.current >= 1) {
           const step = Math.floor(accumulatedScroll.current);
@@ -107,6 +112,42 @@ export function DraggableSlider({ children, reverse = false, className = "", spe
     }
   };
 
+  // Keyboard focus on a card pauses the strip and brings the card fully into
+  // the unfaded middle. Mouse and touch focus (not :focus-visible) change
+  // nothing. The first card sits at scrollLeft 0, so while focus is inside, a
+  // left padding gives it room to clear the left fade; it is removed on
+  // focusout with the scroll offset kept, so nothing visibly jumps.
+  const releaseFocus = () => {
+    const slider = sliderRef.current;
+    isFocused.current = false;
+    if (slider?.style.paddingLeft) {
+      const pad = parseFloat(slider.style.paddingLeft);
+      slider.style.paddingLeft = '';
+      slider.scrollLeft -= pad;
+    }
+  };
+
+  const onFocus = (e: React.FocusEvent) => {
+    const slider = sliderRef.current;
+    const card = e.target as HTMLElement;
+    if (!slider || card === slider) return;
+    if (!card.matches(':focus-visible')) { releaseFocus(); return; }
+    isFocused.current = true;
+    const inset = slider.clientWidth * EDGE_FADE;
+    if (!slider.style.paddingLeft) {
+      slider.style.paddingLeft = `${inset}px`;
+      slider.scrollLeft += inset;
+    }
+    const s = slider.getBoundingClientRect();
+    const c = card.getBoundingClientRect();
+    if (c.left < s.left + inset) slider.scrollLeft -= s.left + inset - c.left;
+    else if (c.right > s.right - inset) slider.scrollLeft += c.right - (s.right - inset);
+  };
+
+  const onBlur = (e: React.FocusEvent) => {
+    if (!sliderRef.current?.contains(e.relatedTarget as Node | null)) releaseFocus();
+  };
+
   const onTouchStart = () => { isHovered.current = true; };
   const onTouchEnd = () => { isHovered.current = false; };
 
@@ -122,6 +163,8 @@ export function DraggableSlider({ children, reverse = false, className = "", spe
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       onClickCapture={onClickCapture}
+      onFocus={onFocus}
+      onBlur={onBlur}
       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
     >
       <style dangerouslySetInnerHTML={{__html: `
@@ -132,8 +175,14 @@ export function DraggableSlider({ children, reverse = false, className = "", spe
       <div ref={set1Ref} className="flex gap-4 flex-nowrap flex-shrink-0">
         {children}
       </div>
-      <div className="flex gap-4 flex-nowrap flex-shrink-0">
-        {children}
+      {/* Loop copy: visible and clickable, but out of the Tab order and hidden
+          from screen readers (not `inert`, which would also block clicks). */}
+      <div aria-hidden="true" className="flex gap-4 flex-nowrap flex-shrink-0">
+        {React.Children.map(children, (child) =>
+          React.isValidElement<{ tabIndex?: number }>(child) && child.props.tabIndex !== undefined
+            ? React.cloneElement(child, { tabIndex: -1 })
+            : child
+        )}
       </div>
     </div>
   );

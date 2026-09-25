@@ -109,12 +109,25 @@ transaction rejects when `currentCount >= maxCount`.
   (`getImageProps`) instead of the full stored file. Gallery tiles and Our
   Story covers do this; other callers still load the stored file.
 - **Slider photo cards that open a lightbox** (Gallery, Dress Code outfit
-  inspiration): the card gets `t-view-card` and `onClick`, its
-  `RevealImage` gets `wrapperClassName="t-view-media …"`, and it renders
-  `<ViewOverlay />`. On hover (mouse only) the photo scales, blurs 2 px and
-  dims, and a gold-framed "View" chip rises in. Touch shows nothing extra:
-  a tap opens the lightbox. Keep the filter on the wrapper, never on the
-  `<img>`, whose blur-up rule ends at `filter: none` and would override it.
+  inspiration): the card gets `t-view-card` and
+  `{...viewCardProps(label, open)}` (from `ViewOverlay.tsx`: role="button",
+  one Tab stop, Enter/Space, `aria-label` such as "View photo 3" or "View
+  Guest - Ladies outfit"), its `RevealImage` gets
+  `wrapperClassName="t-view-media …"`, and it renders `<ViewOverlay />`. A
+  Dress Code card with an empty `url` gets none of these and stays
+  unreachable. On hover (mouse only) the photo scales, blurs 2 px and dims,
+  and a gold-framed "View" chip rises in; `:focus-visible` shows the same
+  plus a gold ring, on every device. Touch shows nothing extra: a tap opens
+  the lightbox. Keep the filter on the wrapper, never on the `<img>`, whose
+  blur-up rule ends at `filter: none` and would override it.
+  `DraggableSlider` renders its children twice for the loop: the second copy
+  is `aria-hidden` and its cards get `tabIndex={-1}` (not `inert`, which
+  would block clicks on a visible copy). Keyboard focus inside a slider
+  pauses its auto-scroll and scrolls the card clear of the screens' 10% edge
+  fade (`EDGE_FADE`; change both together). The lightbox
+  (`CircularImageGallery`) is a modal dialog: focus moves to its close button
+  on open, Tab cycles inside it, and focus returns to the opening card when
+  it unmounts.
 - **Numbers:** `<PopInNumber>` (`.t-digit` CSS) for the countdown.
 - **Tokens:** durations, easings, distances, and blur live as CSS variables at
   the top of `globals.css` (`--duration-*`, `--ease-*`, `--reveal-*`,

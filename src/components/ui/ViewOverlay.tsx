@@ -1,3 +1,5 @@
+import type { KeyboardEvent } from 'react';
+
 // Hover "View" chip for slider photo cards (Gallery, Dress Code). Put it inside
 // a card with `t-view-card` whose image wrapper has `t-view-media`; the motion
 // lives in globals.css. Decorative only: the card itself is the click target.
@@ -12,4 +14,23 @@ export function ViewOverlay() {
       </span>
     </div>
   );
+}
+
+// Spread on a `t-view-card` to make it a keyboard button: one Tab stop, Enter
+// opens on keydown and Space on keyup, like a native <button>. Opening on
+// keyup keeps the Space press from also hitting the lightbox's close button.
+export function viewCardProps(label: string, onOpen: () => void) {
+  return {
+    role: 'button',
+    tabIndex: 0,
+    'aria-label': label,
+    onClick: onOpen,
+    onKeyDown: (e: KeyboardEvent) => {
+      if (e.key === 'Enter') { e.preventDefault(); onOpen(); }
+      else if (e.key === ' ') e.preventDefault();
+    },
+    onKeyUp: (e: KeyboardEvent) => {
+      if (e.key === ' ') onOpen();
+    },
+  };
 }

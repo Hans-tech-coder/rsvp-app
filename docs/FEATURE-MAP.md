@@ -40,9 +40,9 @@ All editors are in `src/app/admin/content/`.
 | Staggered text reveal on scroll | `src/components/ui/TextsReveal.tsx` |
 | Scroll motion: scroll-container context, `ScrollReveal`/`ScrollRevealItem` (reveal once), `Parallax` (image drift), `SCROLL_MOTION` constants | `src/components/ui/ScrollMotion.tsx` |
 | Image fade/blur reveal | `src/components/ui/RevealImage.tsx` |
-| Hover "View" chip on slider photo cards (Gallery, Dress Code) | `src/components/ui/ViewOverlay.tsx` + `.t-view-*` in `globals.css` |
+| Hover/focus "View" chip and keyboard-button props (`viewCardProps`) for slider photo cards (Gallery, Dress Code) | `src/components/ui/ViewOverlay.tsx` + `.t-view-*` in `globals.css` |
 | Countdown digits pop-in | `src/components/ui/PopInNumber.tsx` |
-| Auto-scrolling draggable strip | `src/components/ui/DraggableSlider.tsx` |
+| Auto-scrolling draggable strip (pauses on hover and keyboard focus; hidden loop copy) | `src/components/ui/DraggableSlider.tsx` |
 | Ink reveal canvas background | `src/components/ui/InkRevealCanvas.tsx` |
 | Firefly glow particles (welcome, drawn above the dark gradient) | `src/components/effects/TwinkleSparks.tsx` |
 | Image download proxy | `src/app/api/download/route.ts` (called from `DetailsScreen.tsx`) |
@@ -104,8 +104,8 @@ Read these by range (`grep -n` then read around the line), never whole.
 | 498 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
 | 493 | `src/app/admin/content/FaqsEditor.tsx` |
 | 486 | `src/data/wedding-content.json` |
+| 471 | `src/components/ui/circular-image-gallery.tsx` |
 | 469 | `src/app/admin/content/EventDetailsEditor.tsx` |
 | 464 | `src/app/page.tsx` |
-| 447 | `src/components/ui/circular-image-gallery.tsx` |
 | 435 | `src/app/admin/content/RsvpFormEditor.tsx` |
 | 400 | `src/app/admin/content/EntourageEditor.tsx` |

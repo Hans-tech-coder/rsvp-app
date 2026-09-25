@@ -61,6 +61,17 @@ Match the code around you. These are the patterns the codebase already uses.
   `ViewOverlay.tsx`), which sits on the image wrapper. Hover-only effects go
   under `@media (hover: hover) and (pointer: fine)` so they never stick on
   touch. Do not add a permanent `will-change`.
+- Focus pattern: anything clickable is keyboard-reachable. A non-button
+  element that opens something (e.g. a photo card) gets role="button",
+  `tabIndex={0}`, an `aria-label`, Enter on keydown and Space on keyup
+  (`viewCardProps` in `ViewOverlay.tsx` does this). Its hover reveal is
+  repeated for `:focus-visible` *outside* the hover media query, with a
+  visible gold ring (`--color-wedding-gold`); draw the ring inside the
+  element when a scroll container would clip it. React to keyboard focus
+  only when the target `matches(':focus-visible')`, so mouse and touch
+  focus change nothing. A modal moves focus in on open, traps Tab, and
+  returns focus to its opener on close (see `circular-image-gallery.tsx`).
+  Decorative duplicates (loop copies) are `aria-hidden` with `tabIndex={-1}`.
 - Timing values come from the CSS variables at the top of `globals.css`
   (`--duration-*`, `--ease-*`, `--distance-*`, `--scale-*`, `--blur-*`).
   The main ease is `cubic-bezier(0.22, 1, 0.36, 1)` (`--ease-smooth-out`).

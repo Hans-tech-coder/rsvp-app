@@ -65,6 +65,17 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose, shape 
   const [disabled, setDisabled] = useState(false)
   const [gsapReady, setGsapReady] = useState(false)
   const autoplayTimer = useRef<number | null>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
+
+  // Focus moves to the close button on open and back to whatever opened the
+  // lightbox (the photo card) when it unmounts. preventScroll: the slider
+  // itself scrolls a keyboard-focused card into view.
+  useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null
+    closeRef.current?.focus()
+    return () => { if (opener?.isConnected) opener.focus({ preventScroll: true }) }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -116,9 +127,21 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose, shape 
   useEffect(() => setDisabled(false), [inPlace])
 
   // Esc closes; the arrow keys follow the on-screen buttons, disabled included.
+  // Tab cycles through the lightbox's enabled buttons and never leaves it.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose?.()
+      if (e.key === "Tab") {
+        const root = rootRef.current
+        const items = root?.querySelectorAll<HTMLElement>("button:not([disabled])")
+        if (!root || !items?.length) return
+        const first = items[0]
+        const last = items[items.length - 1]
+        const active = document.activeElement
+        if (!root.contains(active)) { e.preventDefault(); first.focus() }
+        else if (e.shiftKey && active === first) { e.preventDefault(); last.focus() }
+        else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus() }
+      }
+      else if (e.key === "Escape") onClose?.()
       else if (e.key === "ArrowLeft" && !disabled) prev()
       else if (e.key === "ArrowRight" && !disabled) next()
     }
@@ -147,9 +170,10 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose, shape 
   }, [opened, gsapReady, next])
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md font-sans touch-none">
+    <div ref={rootRef} role="dialog" aria-modal="true" aria-label="Photo viewer" className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md font-sans touch-none">
       {onClose && (
         <button 
+          ref={closeRef}
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           className="absolute top-4 right-4 md:top-6 md:right-6 text-wedding-cream/70 hover:text-wedding-cream transition-colors z-[110] bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
           aria-label="Close gallery"

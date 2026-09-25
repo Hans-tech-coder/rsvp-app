@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { RevealImage } from '@/components/ui/RevealImage';
-import { ViewOverlay } from '@/components/ui/ViewOverlay';
+import { ViewOverlay, viewCardProps } from '@/components/ui/ViewOverlay';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal, ScrollRevealItem } from '@/components/ui/ScrollMotion';
@@ -108,7 +108,7 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
               <div className="outfit-slider-wrapper w-full py-4">
                 <DraggableSlider speed={0.5}>
                   {inspirationImages.map((img, index) => (
-                    <div key={index} onClick={() => openOutfit(index)} className={`w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative shadow-sm border border-wedding-gold/20 flex-shrink-0${img.url ? ' t-view-card cursor-pointer' : ''}`}>
+                    <div key={index} {...(img.url ? viewCardProps(`View ${img.type} outfit`, () => openOutfit(index)) : {})} className={`w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative shadow-sm border border-wedding-gold/20 flex-shrink-0${img.url ? ' t-view-card cursor-pointer' : ''}`}>
                       <RevealImage src={img.url} alt={`${img.type} Inspiration ${index + 1}`} className="w-full h-full object-cover pointer-events-none" wrapperClassName="t-view-media w-full h-full" />
                       {img.url && <ViewOverlay />}
                       <div className="absolute bottom-0 inset-x-0 z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-8 pb-2.5 px-2 text-center pointer-events-none">

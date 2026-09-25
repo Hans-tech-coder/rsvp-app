@@ -6,7 +6,7 @@ import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { RevealImage } from '@/components/ui/RevealImage';
-import { ViewOverlay } from '@/components/ui/ViewOverlay';
+import { ViewOverlay, viewCardProps } from '@/components/ui/ViewOverlay';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { CircularImageGallery, loadGsap } from '@/components/ui/circular-image-gallery';
 import { ScrollContainerProvider, ScrollReveal } from '@/components/ui/ScrollMotion';
@@ -135,7 +135,7 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
           <div className="slider-wrapper w-full py-2 relative">
             <DraggableSlider speed={0.4}>
               {topRowImages.map((src: string, index: number) => (
-                <div key={`top-${index}`} className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] t-view-card relative overflow-hidden rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-wedding-gold/10 cursor-pointer flex-shrink-0" onClick={() => setLightboxIndex(index)}>
+                <div key={`top-${index}`} className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] t-view-card relative overflow-hidden rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-wedding-gold/10 cursor-pointer flex-shrink-0" {...viewCardProps(`View photo ${index + 1}`, () => setLightboxIndex(index))}>
                   <RevealImage src={src} alt={`Engagement ${index + 1}`} className="w-full h-full object-cover pointer-events-none" wrapperClassName="t-view-media w-full h-full" sizes="(min-width: 768px) 280px, (min-width: 640px) 220px, 180px" />
                   <ViewOverlay />
                 </div>
@@ -152,7 +152,7 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
                 <div 
                   key={`bottom-${index}`}
                   className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] t-view-card rounded-md overflow-hidden relative cursor-pointer shadow-md border border-wedding-gold/10 flex-shrink-0"
-                  onClick={() => { setDirection(0); setLightboxIndex(originalIndex); }}
+                  {...viewCardProps(`View photo ${originalIndex + 1}`, () => { setDirection(0); setLightboxIndex(originalIndex); })}
                 >
                   <RevealImage src={src} alt={`Memory ${originalIndex + 1}`} className="w-full h-full object-cover pointer-events-none" wrapperClassName="t-view-media w-full h-full" sizes="(min-width: 768px) 280px, (min-width: 640px) 220px, 180px" />
                   <ViewOverlay />
