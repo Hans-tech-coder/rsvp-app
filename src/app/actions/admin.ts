@@ -1,6 +1,7 @@
 'use server';
 
 import { getAdminDb } from '@/lib/firebase/admin';
+import { requireAdmin } from '@/lib/requireAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import crypto from 'crypto';
 
@@ -20,6 +21,7 @@ function generateCode(length = 6): string {
 
 export async function generateInviteCodes(count: number) {
   try {
+    await requireAdmin();
     const batch = getAdminDb().batch();
     const generatedCodes: string[] = [];
     const guestsRef = getAdminDb().collection('guests');
@@ -46,6 +48,7 @@ export async function generateInviteCodes(count: number) {
 
 export async function deleteInviteCode(code: string) {
   try {
+    await requireAdmin();
     await getAdminDb().collection('guests').doc(code).delete();
     return { success: true };
   } catch (error: any) {
@@ -55,6 +58,7 @@ export async function deleteInviteCode(code: string) {
 
 export async function regenerateInviteCode(oldCode: string) {
   try {
+    await requireAdmin();
     const guestsRef = getAdminDb().collection('guests');
     const newCode = generateCode(6);
     
@@ -79,6 +83,7 @@ export async function regenerateInviteCode(oldCode: string) {
 
 export async function addRegistryGift(data: { name: string; link: string; maxCount: number }) {
   try {
+    await requireAdmin();
     const giftRef = getAdminDb().collection('registryGifts').doc();
     await giftRef.set({
       ...data,
@@ -94,6 +99,7 @@ export async function addRegistryGift(data: { name: string; link: string; maxCou
 
 export async function updateRegistryGift(giftId: string, data: Partial<{ name: string; link: string; maxCount: number }>) {
   try {
+    await requireAdmin();
     const giftRef = getAdminDb().collection('registryGifts').doc(giftId);
     
     await getAdminDb().runTransaction(async (transaction) => {
@@ -119,6 +125,7 @@ export async function updateRegistryGift(giftId: string, data: Partial<{ name: s
 
 export async function deleteRegistryGift(giftId: string) {
   try {
+    await requireAdmin();
     await getAdminDb().collection('registryGifts').doc(giftId).delete();
     return { success: true };
   } catch (error: any) {
@@ -153,6 +160,7 @@ Hans & Czay`;
 
 export async function getInviteMessageTemplate() {
   try {
+    await requireAdmin();
     const doc = await getAdminDb().collection('settings').doc('inviteTemplate').get();
     if (doc.exists) {
       return doc.data()?.template || DEFAULT_INVITE_TEMPLATE;
@@ -166,6 +174,7 @@ export async function getInviteMessageTemplate() {
 
 export async function updateInviteMessageTemplate(template: string) {
   try {
+    await requireAdmin();
     await getAdminDb().collection('settings').doc('inviteTemplate').set({ template });
     return { success: true };
   } catch (error: any) {
@@ -175,6 +184,7 @@ export async function updateInviteMessageTemplate(template: string) {
 
 export async function resetRegistryGift(giftId: string) {
   try {
+    await requireAdmin();
     const batch = getAdminDb().batch();
     
     // 1. Reset the gift
@@ -203,6 +213,7 @@ export async function resetRegistryGift(giftId: string) {
 
 export async function deleteGiftSelection(selectionId: string, giftId: string) {
   try {
+    await requireAdmin();
     const selectionRef = getAdminDb().collection('giftSelections').doc(selectionId);
     const giftRef = getAdminDb().collection('registryGifts').doc(giftId);
 
@@ -231,6 +242,7 @@ export async function deleteGiftSelection(selectionId: string, giftId: string) {
 
 export async function toggleInviteCopiedStatus(code: string, isCopied: boolean) {
   try {
+    await requireAdmin();
     const guestsRef = getAdminDb().collection('guests').doc(code);
     await guestsRef.update({
       isCopied,

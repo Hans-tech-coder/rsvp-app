@@ -1,4 +1,5 @@
 import { getAdminDb } from '@/lib/firebase/admin';
+import { requireAdminPage } from '@/lib/requireAdmin';
 import InviteListClient from './InviteListClient';
 import { Guest } from '@/types';
 import { getInviteMessageTemplate } from '@/app/actions/admin';
@@ -7,6 +8,8 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function InvitesPage() {
+  await requireAdminPage();
+
   const [snapshot, template] = await Promise.all([
     getAdminDb()
       .collection('guests')

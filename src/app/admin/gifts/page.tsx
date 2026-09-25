@@ -1,10 +1,13 @@
 import { getAdminDb } from '@/lib/firebase/admin';
+import { requireAdminPage } from '@/lib/requireAdmin';
 import { RegistryGift } from '@/types';
 import GiftsClient from './GiftsClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function GiftsPage() {
+  await requireAdminPage();
+
   let gifts: RegistryGift[] = [];
   let errorMsg = null;
 

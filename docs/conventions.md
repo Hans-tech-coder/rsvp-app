@@ -10,7 +10,10 @@ Match the code around you. These are the patterns the codebase already uses.
   plus `config.matcher`). Do not create `middleware.ts`.
 - `cookies()` is async: `const store = await cookies()`.
 - Server actions: file starts with `'use server'`, lives in `src/app/actions/`.
-- Admin data pages use `export const dynamic = 'force-dynamic'`.
+- Admin data pages use `export const dynamic = 'force-dynamic'` and call
+  `await requireAdminPage()` first. Every admin server action calls
+  `await requireAdmin()` as the first line inside its `try` (see
+  `docs/security.md`).
 - Remote images must be on a host listed in `next.config.ts`
   (`images.unsplash.com`, `firebasestorage.googleapis.com`).
 

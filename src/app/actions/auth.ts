@@ -1,11 +1,16 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { getAdminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
 
 export async function createSessionCookie(idToken: string) {
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
   try {
+    // Only users listed in `admins` get a session.
+    const { uid } = await getAdminAuth().verifyIdToken(idToken, true);
+    const admin = await getAdminDb().collection('admins').doc(uid).get();
+    if (!admin.exists) return { success: false, error: 'This account is not an admin.' };
+
     const sessionCookie = await getAdminAuth().createSessionCookie(idToken, { expiresIn });
     const cookieStore = await cookies();
     cookieStore.set('session', sessionCookie, {

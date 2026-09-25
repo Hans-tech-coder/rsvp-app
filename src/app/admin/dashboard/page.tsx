@@ -1,4 +1,5 @@
 import { getAdminDb } from '@/lib/firebase/admin';
+import { requireAdminPage } from '@/lib/requireAdmin';
 import { Guest, RegistryGift } from '@/types';
 import { Users, UserCheck, UserX, Gift, CheckCircle2 } from 'lucide-react';
 
@@ -6,6 +7,8 @@ import { Users, UserCheck, UserX, Gift, CheckCircle2 } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
+  await requireAdminPage();
+
   let totalCodes = 0, unusedCodes = 0, attendingCount = 0, notAttendingCount = 0;
   let totalGifts = 0, fullyClaimedGifts = 0, availableGifts = 0;
   let errorMsg = null;

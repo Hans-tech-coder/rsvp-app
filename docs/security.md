@@ -4,13 +4,36 @@
 
 | Actor | Can |
 | --- | --- |
-| Anyone | Read `websiteContent`, `registryGifts`, and any single `guests/{code}` doc from the browser (`firestore.rules`); read all uploaded images (public Vercel Blob URLs); call any server action; call `/api/download` |
+| Anyone | Read `websiteContent`, `registryGifts`, and any single `guests/{code}` doc from the browser (`firestore.rules`); read all uploaded images (public Vercel Blob URLs); call the guest server actions (`rsvp.ts`, `registry.ts`); call `/api/download` |
 | Guest with a valid unused code | Submit one RSVP (`submitRsvp` transaction flips `codeStatus` to `used`) |
 | Signed-in admin (`admins/{uid}` exists) | Write `websiteContent` from the browser (rules check `isAdmin()`); upload images to Vercel Blob with a token from `/api/upload`, which verifies the Firebase ID token the browser sends as `clientPayload` (`verifyIdToken(…, true)`) and that `admins/{uid}` exists before issuing it. It deliberately does not use the 5-day `session` cookie, which can expire while the admin page stays open |
 | Server (firebase-admin) | Everything — admin SDK bypasses rules |
 
 Browser writes to `guests`, `registryGifts`, and `giftSelections` are denied by
 the rules; those go through server actions.
+
+## Admin check on the server (`src/lib/requireAdmin.ts`)
+
+`src/proxy.ts` only checks that a `session` cookie **exists** (a cheap
+redirect). The real check is in `src/lib/requireAdmin.ts`:
+
+- `getAdminUid()` reads the `session` cookie,
+  `verifySessionCookie(cookie, true)` (signature, expiry, revocation), and
+  checks `admins/{uid}` exists. Memoized per request with React `cache`.
+- `requireAdmin()` throws `Unauthorized`. **Every** function in
+  `src/app/actions/admin.ts` calls it first inside its `try`, so an
+  unauthenticated call returns `{ success: false, error: 'Unauthorized' }`.
+  Any new admin action must do the same.
+- `requireAdminPage()` is the first line of every admin server page
+  (`dashboard`, `invites`, `guests`, `gifts`, `registry`). On failure it
+  redirects to `/api/logout`, which deletes the cookie and redirects to
+  `/admin/login` (going straight to login would loop, because the proxy
+  bounces any cookie holder from login to the dashboard).
+- `createSessionCookie` refuses to issue a cookie unless the ID token's user
+  has an `admins/{uid}` doc.
+
+`/admin/content` is a client page; its writes go through Firestore rules
+(`isAdmin()`) and `/api/upload`, not through these helpers.
 
 ## Secrets
 
@@ -22,29 +45,16 @@ the rules; those go through server actions.
 
 ## Known gaps (not fixed yet — read before touching auth)
 
-1. **Admin server actions do not check the caller.** Every function in
-   `src/app/actions/admin.ts` (generate/delete/regenerate codes, gift CRUD,
-   reset claims, delete selections, edit the invite template) runs with the
-   admin SDK and no session or `admins` check. Server actions are public POST
-   endpoints, so anyone who can obtain an action ID can call them.
-   **Fix pattern:** a `requireAdmin()` helper that reads the `session` cookie,
-   `getAdminAuth().verifySessionCookie(cookie, true)`, and checks
-   `admins/{uid}` exists; call it first in every admin action and admin
-   server page.
-2. **`src/proxy.ts` only checks that a `session` cookie exists**, not that it is
-   valid. Server pages then read Firestore with the admin SDK, so a fake cookie
-   value reaches the admin pages. Same fix: verify in the pages/actions (the
-   proxy should stay a cheap redirect).
-3. **`/api/download` fetches any URL** passed in `?url=` (open proxy / SSRF).
+1. **`/api/download` fetches any URL** passed in `?url=` (open proxy / SSRF).
    Restrict it to the image hosts (`*.public.blob.vercel-storage.com`, plus
    `firebasestorage.googleapis.com` while legacy URLs remain).
-4. **`guests/{code}` has `allow get: if true`.** Anyone who knows or guesses a
+2. **`guests/{code}` has `allow get: if true`.** Anyone who knows or guesses a
    used code can read that guest's name, email, phone, and message from the
    browser. The site itself only uses the server action `verifyInviteCode`, so
    this rule can likely be `false`.
-5. **No rate limit on `verifyInviteCode`.** 32^6 ≈ 1.07 billion codes makes
+3. **No rate limit on `verifyInviteCode`.** 32^6 ≈ 1.07 billion codes makes
    guessing slow, but there is no throttle.
-6. `firestore.rules` has overlapping `allow` lines per collection
+4. `firestore.rules` has overlapping `allow` lines per collection
    (e.g. `allow read, write: if isAdmin()` and `allow write: if false`); rules
    are OR-ed, so the `false` lines do nothing. Read them as "admin OR public
    read".

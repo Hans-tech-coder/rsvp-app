@@ -1,10 +1,13 @@
 import { getAdminDb } from '@/lib/firebase/admin';
+import { requireAdminPage } from '@/lib/requireAdmin';
 import { Guest } from '@/types';
 import GuestListClient from './GuestListClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function GuestsPage() {
+  await requireAdminPage();
+
   let guests: Guest[] = [];
   let errorMsg = null;
 

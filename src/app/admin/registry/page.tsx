@@ -1,10 +1,13 @@
 import { getAdminDb } from '@/lib/firebase/admin';
+import { requireAdminPage } from '@/lib/requireAdmin';
 import { GiftSelection } from '@/types';
 import { RegistrySelectionsClient } from './RegistrySelectionsClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function RegistryPage() {
+  await requireAdminPage();
+
   let selections: GiftSelection[] = [];
   let errorMsg = null;
 

@@ -20,9 +20,8 @@ when you find or fix one of these.
 
 | Issue | Where | Notes |
 | --- | --- | --- |
-| Admin server actions and pages do not verify the session/admin | `src/app/actions/admin.ts`, `src/proxy.ts` | See `docs/security.md` gap 1–2 |
-| `/api/download` is an open proxy | `src/app/api/download/route.ts` | Security gap 3 |
-| Guest PII readable by code from the browser | `firestore.rules` `guests` | Security gap 4 |
+| `/api/download` is an open proxy | `src/app/api/download/route.ts` | Security gap 1 |
+| Guest PII readable by code from the browser | `firestore.rules` `guests` | Security gap 2 |
 | Welcome 3D scene fetches the photo twice | `DepthParallaxScene.tsx` loads the raw Blob URL; the loader preloads the `next/image` srcset URL | ~220 KB extra on first visit. Feed the scene the same optimized URL to share the cache |
 | No collision check when generating invite codes | `generateCode()` in `admin.ts` | A duplicate overwrites an existing guest doc |
 | Replaced images are never deleted from Blob | all editors | Counts against the shared 1 GB Hobby Blob quota |

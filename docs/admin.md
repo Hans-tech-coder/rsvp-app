@@ -10,10 +10,14 @@ wedding palette.
 1. `/admin/login` (`login/page.tsx`, client): `signInWithEmailAndPassword`
    (Firebase client Auth) → `getIdToken()` → server action
    `createSessionCookie(idToken)` (`actions/auth.ts`).
-2. `createSessionCookie` makes a 5-day Firebase **session cookie** named
-   `session` (`httpOnly`, `secure`, path `/`).
+2. `createSessionCookie` verifies the ID token, refuses users with no
+   `admins/{uid}` doc ("This account is not an admin."), then makes a 5-day
+   Firebase **session cookie** named `session` (`httpOnly`, `secure`, path `/`).
 3. `src/proxy.ts` redirects `/admin/**` to `/admin/login` when the cookie is
-   missing, and `/admin/login` to `/admin/dashboard` when present.
+   missing, and `/admin/login` to `/admin/dashboard` when present. It does not
+   verify the cookie; each admin server page calls `requireAdminPage()`
+   (`src/lib/requireAdmin.ts`), which sends an invalid, revoked, or non-admin
+   session to `/api/logout` (clears the cookie, then `/admin/login`).
 4. Sign out (`layout.tsx`): `auth.signOut()` + `clearSessionCookie()`.
 
 Adding an admin: the user must exist in Firebase Auth, then

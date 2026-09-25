@@ -85,6 +85,7 @@ src/
     actions/                 server actions: rsvp.ts, registry.ts, admin.ts, auth.ts
     api/download/route.ts    image download proxy (used by DetailsScreen)
     api/upload/route.ts      admin-only Vercel Blob upload token
+    api/logout/route.ts      clears the session cookie, redirects to /admin/login
     admin/                   admin portal (layout.tsx = sidebar)
       content/               Content manager: page.tsx (tabs) + one *Editor.tsx per screen
       components/            AdminModal, TablePagination
@@ -98,6 +99,7 @@ src/
   data/wedding-content.json  default/fallback content for every screen
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
   lib/blob/uploadImage.ts    compress + upload an image to Vercel Blob (all editors)
+  lib/requireAdmin.ts        admin check for server actions and admin pages (server only)
   types/index.ts             Guest, RegistryGift, GiftSelection, AdminUser
   proxy.ts                   /admin/** redirect when no session cookie
 scripts/                     sync-content.js, add-admin.js
