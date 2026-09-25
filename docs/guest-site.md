@@ -176,6 +176,34 @@ src="/bg-music.mp3" preload="none">` and a toggle. It downloads only when
 step 0 (the first user tap) calls `.play()`. `OurStoryScreen` also reaches the
 element by id.
 
+The controls sit bottom-right (`#audio-controls`, hidden while
+`body.video-modal-open`):
+
+- **Mute button.** A tap/click pauses or resumes the music. The icon follows the
+  state (`VolumeX` muted, `Volume1` below 50 %, `Volume2` otherwise).
+- **Volume slider** (0–100 %, default 50 %). A solid pill that slides out of
+  the button to the left (400 ms smooth-out) and back into it (350 ms
+  ease-in-out), transform only and no fade: its left border leads out, and on
+  close the right side goes in first and the left border last
+  (`.t-vol-panel` window / `.t-vol-pill` / `.t-vol-range` in `globals.css`). Desktop: opens
+  on hover and closes 400 ms after the mouse leaves. Touch: a tap on the button
+  mutes *and* opens it; it closes after 3.5 s idle or a tap outside. Keyboard:
+  opens when the button gets `:focus-visible`, then Tab reaches the slider.
+  Slider at 0 pauses; raising it from a muted state plays again.
+- **Onboarding hint.** The first time the music plays in a page load, a
+  "Music is playing" bubble points at the button 1.8 s later (so the first
+  screen swap finishes) with a gold ripple ring, and leaves after 7 s or on
+  any touch/focus of the controls. Copy follows the input the guest actually
+  used (the pointer type of their latest press, so the tap or click that
+  started the music): "Click to mute · hover for volume" for a mouse, "Tap to
+  mute or change the volume" for touch or pen. The `(hover: hover)` media
+  query is only the fallback (keyboard start), because some phones report
+  hover wrongly. The same check decides whether a button tap opens the slider.
+- **iOS volume.** iOS ignores `audio.volume`, so there the slider starts at
+  100 % (the true level) and the first slider touch routes the element through
+  a Web Audio `GainNode` (`ensureGain`), with `navigator.audioSession.type =
+  'playback'` so the ringer switch does not silence it on iOS 17+.
+
 ## Layout rules
 
 - Every screen is `absolute inset-0` inside a `100dvh` `<main>` with

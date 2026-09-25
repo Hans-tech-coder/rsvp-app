@@ -34,7 +34,7 @@ All editors are in `src/app/admin/content/`.
 | Content loading (JSON defaults + Firestore overrides) | `src/contexts/WeddingContentContext.tsx`, `src/data/wedding-content.json` |
 | Step menu overlay | `src/components/layout/CanvasMenu.tsx` |
 | Footer at the bottom of scrolling screens | `src/components/layout/EmbeddedFooter.tsx` |
-| Background music + floating toggle | `src/components/AudioPlayer.tsx`, `public/bg-music.mp3` |
+| Background music + floating toggle, volume slider, "music is playing" hint | `src/components/AudioPlayer.tsx`, `.t-vol-*` in `src/app/globals.css`, `public/bg-music.mp3` |
 | Fonts, OG/Twitter metadata, theme script | `src/app/layout.tsx` |
 | Colors, fonts, motion tokens, reveal CSS | `src/app/globals.css` |
 | Staggered text reveal on scroll | `src/components/ui/TextsReveal.tsx` |

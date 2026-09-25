@@ -257,6 +257,77 @@
 @media (prefers-reduced-motion: reduce) {
   .t-hint-sway, .t-hint-tilt { animation: none; }
 }
+
+/* Music volume panel (AudioPlayer.tsx): a solid pill that slides out of the
+   mute button to the left and back into it. Nothing fades: .t-vol-panel is a
+   fixed pill-shaped window flush with the button, and .t-vol-pill slides inside
+   it on transform only, so on open the left border leads out of the icon and on
+   close the right side goes in first and the left border last. Hidden with
+   visibility once it is back inside so it cannot be tabbed to. */
+.t-vol-panel {
+  clip-path: inset(0 round 9999px);
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear var(--duration-medium);
+}
+.t-vol-panel[data-open="true"] {
+  visibility: visible;
+  pointer-events: auto;
+  transition: visibility 0s;
+}
+.t-vol-pill {
+  transform: translateX(100%);
+  transition: transform var(--duration-medium) var(--ease-in-out);
+}
+.t-vol-panel[data-open="true"] .t-vol-pill {
+  transform: none;
+  transition: transform var(--duration-slow) var(--ease-smooth-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .t-vol-panel, .t-vol-panel[data-open="true"],
+  .t-vol-pill, .t-vol-panel[data-open="true"] .t-vol-pill { transition: none; }
+}
+/* The input is 28px tall for a comfortable touch target; the track is 4px */
+.t-vol-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+.t-vol-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--color-wedding-gold) var(--vol), color-mix(in srgb, var(--color-wedding-cream) 20%, transparent) var(--vol));
+}
+.t-vol-range::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--color-wedding-gold) var(--vol), color-mix(in srgb, var(--color-wedding-cream) 20%, transparent) var(--vol));
+}
+.t-vol-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border-radius: 9999px;
+  background: var(--color-wedding-goldlight);
+  border: 2px solid var(--color-wedding-dark);
+  box-shadow: 0 0 0 1px var(--color-wedding-gold);
+}
+.t-vol-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: var(--color-wedding-goldlight);
+  border: 2px solid var(--color-wedding-dark);
+  box-shadow: 0 0 0 1px var(--color-wedding-gold);
+}
+.t-vol-range:focus-visible { outline: none; }
+.t-vol-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--color-wedding-gold); }
+.t-vol-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--color-wedding-gold); }
 @custom-variant dark (&:where(.dark, .dark *));
 @theme {
   --color-wedding-cream: #FCFAF6;
