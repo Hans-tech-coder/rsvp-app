@@ -33,7 +33,7 @@ admin portal. Production URL: `https://hans-czay-wedding.vercel.app`.
 | Who | What they do | Where |
 | --- | --- | --- |
 | **Guests** (no account) | Step through a 10-screen story (welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/` (one page, screens swap in place) |
-| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text and image on the guest site. | `/admin/**` |
+| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text and image on the guest site. Super admins also add and remove admins from **Manage Admins** in the sidebar. | `/admin/**` |
 
 ---
 
@@ -82,13 +82,13 @@ src/
     page.tsx                 guest site: the whole 10-step flow (client component)
     layout.tsx               fonts, theme script, OG metadata (reads Firestore), <AudioPlayer/>
     globals.css              Tailwind @theme colors/fonts + motion tokens + reveal CSS
-    actions/                 server actions: rsvp.ts, registry.ts, admin.ts, auth.ts
+    actions/                 server actions: rsvp.ts, registry.ts, admin.ts, admins.ts, auth.ts
     api/download/route.ts    image download proxy (used by DetailsScreen)
     api/upload/route.ts      admin-only Vercel Blob upload token
     api/logout/route.ts      clears the session cookie, redirects to /admin/login
     admin/                   admin portal (layout.tsx = sidebar)
       content/               Content manager: page.tsx (tabs) + one *Editor.tsx per screen
-      components/            AdminModal, TablePagination
+      components/            AdminModal, ManageAdminsModal, TablePagination
       dashboard|invites|guests|gifts|registry|login/
   components/
     screens/                 one file per guest screen (+ GiftSelectionModal, LoadingScreen)

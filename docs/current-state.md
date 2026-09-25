@@ -14,7 +14,8 @@ when you find or fix one of these.
 - Curated registry with claim limits (transaction-safe) and bank-transfer info.
 - Admin: dashboard counts, invite generation + message template, RSVP list with
   CSV export, gift CRUD, claim list, content editors for all 12 screens with
-  one-step backup/restore.
+  one-step backup/restore. Google sign-in with an email allowlist; super admins
+  add and remove regular admins from the Manage Admins modal in the sidebar.
 
 ## Known issues
 

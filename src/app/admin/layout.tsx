@@ -1,24 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { clearSessionCookie } from '@/app/actions/auth';
+import { getMyAdminRole } from '@/app/actions/admins';
+import type { AdminRole } from '@/types';
+import { ManageAdminsModal } from './components/ManageAdminsModal';
 import { auth } from '@/lib/firebase/client';
-import { LayoutDashboard, Users, Gift, LogOut, Key, ClipboardList, Image as ImageIcon, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, Gift, LogOut, Key, ClipboardList, Image as ImageIcon, Menu, X, ShieldCheck } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [role, setRole] = useState<AdminRole | null>(null);
+  const [isManageAdminsOpen, setIsManageAdminsOpen] = useState(false);
+  const isLoginPage = pathname === '/admin/login';
+
+  // Decides whether to show "Manage Admins". UI only: the admin actions
+  // themselves check requireSuperAdmin(). Re-runs after leaving the login page,
+  // because this layout stays mounted across the sign-in navigation.
+  useEffect(() => {
+    if (isLoginPage) return;
+    let cancelled = false;
+    getMyAdminRole().then((r) => {
+      if (!cancelled) setRole(r);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoginPage]);
 
   // If on login page, don't show the layout
-  if (pathname === '/admin/login') {
+  if (isLoginPage) {
     return <>{children}</>;
   }
 
   const handleLogout = async () => {
+    setRole(null);
     await auth.signOut();
     await clearSessionCookie();
     router.refresh();
@@ -81,6 +102,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </Link>
             );
           })}
+          {role === 'super' && (
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsManageAdminsOpen(true);
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800/50 hover:text-gray-900 dark:hover:text-zinc-100"
+            >
+              <ShieldCheck className="w-5 h-5" />
+              Manage Admins
+            </button>
+          )}
         </nav>
         <div className="p-4 border-t border-gray-200 dark:border-zinc-800 flex justify-between items-center gap-2 shrink-0">
           <button
@@ -124,6 +157,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
       </main>
+
+      {isManageAdminsOpen && <ManageAdminsModal onClose={() => setIsManageAdminsOpen(false)} />}
     </div>
   );
 }

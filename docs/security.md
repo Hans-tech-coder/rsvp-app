@@ -6,7 +6,8 @@
 | --- | --- |
 | Anyone | Read `websiteContent`, `registryGifts`, and any single `guests/{code}` doc from the browser (`firestore.rules`); read all uploaded images (public Vercel Blob URLs); call the guest server actions (`rsvp.ts`, `registry.ts`); call `/api/download` |
 | Guest with a valid unused code | Submit one RSVP (`submitRsvp` transaction flips `codeStatus` to `used`) |
-| Signed-in admin (`admins/{uid}` exists; role `super` or `admin`, which are identical until the Manage Admins UI lands) | Write `websiteContent` from the browser (rules check `isAdmin()`); upload images to Vercel Blob with a token from `/api/upload`, which verifies the Firebase ID token the browser sends as `clientPayload` (`verifyIdToken(…, true)`) and that `admins/{uid}` exists before issuing it. It deliberately does not use the 5-day `session` cookie, which can expire while the admin page stays open |
+| Signed-in admin (`admins/{uid}` exists; role `super` or `admin`) | Write `websiteContent` from the browser (rules check `isAdmin()`); upload images to Vercel Blob with a token from `/api/upload`, which verifies the Firebase ID token the browser sends as `clientPayload` (`verifyIdToken(…, true)`) and that `admins/{uid}` exists before issuing it. It deliberately does not use the 5-day `session` cookie, which can expire while the admin page stays open |
+| Super admin (`role: 'super'`) | Everything a signed-in admin can, plus add a regular admin to `adminAllowlist`, cancel a pending regular admin, and remove a regular admin (`src/app/actions/admins.ts`). Cannot create, remove, or cancel a super admin from the UI; only `scripts/add-admin.js --super` (or the Firebase console) can |
 | Server (firebase-admin) | Everything — admin SDK bypasses rules |
 
 Browser writes to `guests`, `registryGifts`, and `giftSelections` are denied by
@@ -26,8 +27,17 @@ redirect). The real check is in `src/lib/requireAdmin.ts`:
   `src/app/actions/admin.ts` calls it first inside its `try`, so an
   unauthenticated call returns `{ success: false, error: 'Unauthorized' }`.
   Any new admin action must do the same. `requireSuperAdmin()` also throws
-  `Unauthorized` unless the role is `super`; use it for admin-management
-  actions.
+  `Unauthorized` unless the role is `super`. Every action in
+  `src/app/actions/admins.ts` calls it first, except `getMyAdminRole()`,
+  which only reports the caller's role so the sidebar can hide the
+  Manage Admins button. Hiding the button is UI only; the actions are the
+  boundary.
+- `removeAdmin(uid)` deletes `admins/{uid}` and then calls
+  `revokeRefreshTokens(uid)`, so `verifySessionCookie(…, true)` rejects the
+  removed admin's 5-day session on their **next request**. Their browser
+  Firestore access stops at the next ID-token refresh (at most 1 hour), and the
+  rules deny them from then on because `admins/{uid}` is gone. It refuses to
+  remove the caller or a `super`.
 - `requireAdminPage()` is the first line of every admin server page
   (`dashboard`, `invites`, `guests`, `gifts`, `registry`). On failure it
   redirects to `/api/logout`, which deletes the cookie and redirects to
@@ -39,8 +49,10 @@ redirect). The real check is in `src/lib/requireAdmin.ts`:
   an `admins/{uid}` doc (or an `adminAllowlist/{email}` entry, which it turns
   into one). Being able to sign in with Google does not make anyone an admin;
   the allowlist does. There is no email-domain check.
-- `adminAllowlist` is written only by `scripts/add-admin.js` (and read only by
-  the server); `firestore.rules` denies all browser access to it. Until the
+- `adminAllowlist` is written only by `scripts/add-admin.js` and the
+  super-admin actions in `admins.ts` (and read only by the server);
+  `addAdmin` uses `create()`, so it never overwrites (downgrades) an existing
+  pending super entry; `firestore.rules` denies all browser access to it. Until the
   Email/Password provider is disabled in the Firebase Console, a password
   user can still sign in to Firebase, but gets no session cookie.
 

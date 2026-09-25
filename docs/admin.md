@@ -32,6 +32,33 @@ does not need to exist yet; they become an admin on their next Google
 sign-in. `--super` is the only way to make a super admin. See
 `docs/security.md` for what is and is not checked.
 
+## Manage Admins (super admins only)
+
+Day-to-day admin changes happen in the portal, not the script. There is no
+page or route for this: a **Manage Admins** button (`ShieldCheck` icon) sits
+under the regular `navItems` in the sidebar (the same `<aside>` is the mobile
+slide-in menu). `layout.tsx` calls `getMyAdminRole()` when it mounts and again
+after leaving `/admin/login`, and renders the button only when the result is
+`'super'`. Nothing renders while the call is pending, so a regular admin never
+sees it flash.
+
+The button opens `components/ManageAdminsModal.tsx`, which the layout mounts
+only while it is open. The modal loads `listAdmins()` each time it opens and shows:
+
+- an **Add admin** email field → `addAdmin(email)` writes
+  `adminAllowlist/{email}` with `role: 'admin'`. It refuses an email that is
+  already an admin or already pending;
+- **Active** admins (email, role, date added). Each has a Remove button, which
+  is hidden for yourself and for super admins. It asks for confirmation in
+  `AdminModal`, then calls `removeAdmin(uid)`;
+- **Pending** allowlist entries, each with **Cancel** →
+  `cancelPendingAdmin(email)`. The button is hidden for pending super entries.
+
+The modal closes on Esc (Esc closes an open confirmation first) and on a
+backdrop click. The list scrolls inside the panel on small screens. The UI
+never creates, removes, or cancels a super admin; use `add-admin.js --super`,
+or delete the doc in the Firebase console.
+
 ## Page pattern
 
 Data pages are split in two:

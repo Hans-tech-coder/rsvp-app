@@ -13,8 +13,8 @@ field, update this file.
 | `guests` | the invite code (e.g. `K7MPQ2`) | server actions (`admin.ts`, `rsvp.ts`) | admin pages; `verifyInviteCode` |
 | `registryGifts` | auto ID | server actions (`admin.ts`, `registry.ts`) | `getRegistryGifts`; admin gifts/dashboard |
 | `giftSelections` | auto ID | `claimGift`; deleted by `resetRegistryGift` / `deleteGiftSelection` | admin registry page |
-| `admins` | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry) | `firestore.rules`, `storage.rules` (`isAdmin()`), `requireAdmin.ts` |
-| `adminAllowlist` | lowercased email | `scripts/add-admin.js` | `createSessionCookie` (server only; rules deny all browser access) |
+| `admins` | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); deleted by `removeAdmin` (`admins.ts`, super only) | `firestore.rules`, `storage.rules` (`isAdmin()`), `requireAdmin.ts` |
+| `adminAllowlist` | lowercased email | `scripts/add-admin.js`; `addAdmin` / `cancelPendingAdmin` (`admins.ts`, super only) | `createSessionCookie`, `listAdmins` (server only; rules deny all browser access) |
 | `settings` | `inviteTemplate` | `updateInviteMessageTemplate` | `getInviteMessageTemplate` |
 | `websiteContent` | one doc per screen (below) + `<doc>_backup` | admin editors, **from the browser** | `WeddingContentContext` (browser), `layout.tsx` (OG image, admin SDK) |
 
