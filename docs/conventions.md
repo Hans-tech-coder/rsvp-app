@@ -182,3 +182,18 @@ All scenarios also need CLS < 0.05, no long task > 50 ms, and slow frames
 
 Conventional Commits (`feat:`, `fix:`, `refactor:`, `docs:` …), imperative,
 short subject. The `caveman-commit` skill writes these.
+
+## Plans
+
+- Implementation plans for features and fixes live in `docs/plans/<name>/`
+  (a `README.md`, plus task files if the plan is split). The folder is in
+  `.gitignore`, so plans stay on this machine and never reach a commit or push.
+- Never commit a plan, and never force-add one (`git add -f`). Do not link a
+  plan from a tracked doc as if it will exist later.
+- Before closing a plan, move anything durable into the matching `docs/` file
+  (see "Keeping this guide updated" in `PROJECT_GUIDE.md`): results, baselines,
+  quirks, parking-lot items. Then delete the plan folder.
+- Plans are local, so a fresh git worktree or another machine will not have
+  them. Run a plan from this checkout.
+- Older plans committed before this rule are only in git history (e.g. the
+  motion-polish baseline cited under Verification).

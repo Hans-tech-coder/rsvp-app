@@ -124,6 +124,10 @@ legacy/                      old static site — reference only, not built
 6. **Keep the guest site mobile-first.** Every screen fills `100dvh`; check
    phone width first.
 7. **One feature per session.** Finish, verify, then start fresh.
+8. **Plans are never committed.** Implementation plans go in
+   `docs/plans/<name>/`, which is git-ignored. Anything that must outlive the
+   plan goes into the matching `docs/` file. See Plans in
+   `docs/conventions.md`.
 
 ---
 

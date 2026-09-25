@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# implementation plans stay local (see docs/conventions.md → Plans)
+/docs/plans/
+
 # vercel
 .vercel
 
