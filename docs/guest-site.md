@@ -83,7 +83,8 @@ transaction rejects when `currentCount >= maxCount`.
   are ready (`assetsReady`). The asset wait is capped at `LOADER_MAX_WAIT_MS`
   (2.5 s after navigation).
 - **Welcome background:** `DepthParallaxScene` draws the photo in WebGL, shifted
-  per pixel by a depth map (mouse on desktop, tilt on Android; after 1.5 s
+  per pixel by a depth map (mouse on desktop, tilt on phones: full swing at
+  12 degrees, re-centring on the grip angle over ~4 s, ~23 px on a phone; after 1.5 s
   without input an idle drift fades in, ~28 px desktop / ~18 px phone on a
   ~16 s loop; iOS gets the drift only, since tilt needs a permission prompt). The
   fireflies fly at their own depths, hide behind the couple and blur out of

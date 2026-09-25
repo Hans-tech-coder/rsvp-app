@@ -26,6 +26,12 @@ interface DepthParallaxSceneProps {
 const PIVOT = 0.45;
 // Depth-of-field focus: the couple's depth in the map. Fireflies here are sharp.
 const FOCUS_Z = 0.8;
+// Degrees of tilt for the full parallax swing. People tilt a phone ~5-15 degrees
+// when they try it, so a wider range barely moves the scene.
+const TILT_RANGE = 12;
+// How quickly the tilt re-centres on the way the phone is being held (ms), so the
+// scene answers to movement rather than to the grip angle
+const TILT_RECENTER_MS = 4000;
 const DARK = [0x12 / 255, 0x10 / 255, 0x0e / 255]; // --color-wedding-dark
 // Fireflies near the couple also light the photo; each one is a light in the shader.
 const MAX_LIGHTS = 16;
@@ -324,10 +330,22 @@ export const DepthParallaxScene = memo(function DepthParallaxScene({ imageSrc, d
       setTarget((e.clientX / window.innerWidth - 0.5) * 2, (e.clientY / window.innerHeight - 0.5) * 2);
     };
     let baseBeta: number | null = null;
+    let baseGamma = 0;
+    let lastTiltAt = 0;
+    const clampUnit = (v: number) => Math.max(-1, Math.min(1, v));
     const onTilt = (e: DeviceOrientationEvent) => {
       if (e.gamma == null || e.beta == null) return;
-      if (baseBeta === null) baseBeta = e.beta;
-      setTarget(Math.max(-1, Math.min(1, e.gamma / 30)), Math.max(-1, Math.min(1, (e.beta - baseBeta) / 30)));
+      const t = performance.now();
+      if (baseBeta === null) {
+        baseBeta = e.beta;
+        baseGamma = e.gamma;
+      } else {
+        const k = Math.min(1, (t - lastTiltAt) / TILT_RECENTER_MS);
+        baseBeta += (e.beta - baseBeta) * k;
+        baseGamma += (e.gamma - baseGamma) * k;
+      }
+      lastTiltAt = t;
+      setTarget(clampUnit((e.gamma - baseGamma) / TILT_RANGE), clampUnit((e.beta - baseBeta) / TILT_RANGE));
     };
     window.addEventListener('pointermove', onPointer);
     window.addEventListener('deviceorientation', onTilt);
@@ -412,7 +430,8 @@ export const DepthParallaxScene = memo(function DepthParallaxScene({ imageSrc, d
         const driftX = Math.sin(elapsed * 0.38) * 0.75 + Math.sin(elapsed * 0.17 + 2) * 0.25;
         const driftY = Math.sin(elapsed * 0.31 + 1) * 0.6 + Math.sin(elapsed * 0.13) * 0.2;
         // Moderate: enough to feel the depth, below the point where the stretched edges show
-        const amp = Math.min(30, 0.016 * Math.max(cssW, cssH)); // css px at full input
+        // Same 30 px on desktop; on phones the input swing is now larger than the idle drift
+        const amp = Math.min(30, 0.028 * Math.max(cssW, cssH)); // css px at full input
         const idleAmp = Math.min(28, 0.022 * Math.max(cssW, cssH)); // css px at full drift
         const cap = Math.max(amp, idleAmp) * 1.15;
         const pxX = Math.max(-cap, Math.min(cap, current.x * amp * (1 - idle * 0.5) + driftX * idleAmp * idle));
