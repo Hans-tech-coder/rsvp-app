@@ -337,7 +337,7 @@ function MainApp() {
                   exit="exit"
                   className="absolute inset-0 w-full h-full pointer-events-auto"
                 >
-                  <DressCodeScreen onContinue={nextStep} />
+                  <DressCodeScreen onContinue={nextStep} onLightboxChange={setIsLightboxOpen} />
                 </motion.div>
               )}
 

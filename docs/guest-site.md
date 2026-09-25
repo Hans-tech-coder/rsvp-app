@@ -23,7 +23,7 @@ must stay in sync: the `currentStep === n` blocks in `page.tsx` and
 | 9 | `RsvpScreen` (locked) | RSVP |
 
 Every screen takes `onContinue` (→ `nextStep`). Some also take
-`onLightboxChange` (Our Story, Gallery) so `page.tsx` can hide the back/menu
+`onLightboxChange` (Our Story, Gallery, Dress Code) so `page.tsx` can hide the back/menu
 buttons and add `body.lightbox-open`.
 
 To **add, remove, or reorder a screen**: edit the step blocks in `page.tsx`,
@@ -92,9 +92,14 @@ transaction rejects when `currentCount >= maxCount`.
   on RSVP CTA the button follows the heading. Welcome does not scroll and has none. The RSVP
   form has no scroll motion; only its heading uses `TextsReveal`.
 - **Circular gallery:** GSAP loads from the CDN once per page (`loadGsap`,
-  started when the Gallery screen mounts). Only the open, in-place and
-  closing photos mount full-size SVG `<image>`s, served resized through the
-  image optimizer; neighbours are pre-fetched.
+  started when the Gallery or Dress Code screen mounts). Only the open,
+  in-place and closing photos mount full-size SVG `<image>`s, served resized
+  through the image optimizer; neighbours are pre-fetched. The `shape` prop
+  picks the clip the photo grows out of: `"heart"` (default, Gallery) or
+  `"circle"` (Dress Code outfit inspiration, which skips cards with an empty
+  URL). An image's `title` shows as a caption above the dot strip once the
+  photo is in place (Dress Code passes the outfit label; Gallery passes none).
+  Esc closes it; the left and right arrow keys step like the on-screen buttons.
 - **Text:** wrap headings/paragraphs in `<TextsReveal>` (CSS `.t-stagger` in
   `globals.css`; waits 150 ms, or 350 ms with `isHero`, so the lines rise
   while the screen fades in; the hero waits a little for the loader's fade).
@@ -103,6 +108,13 @@ transaction rejects when `currentCount >= maxCount`.
   width): it then serves a resized srcset through the Next image optimizer
   (`getImageProps`) instead of the full stored file. Gallery tiles and Our
   Story covers do this; other callers still load the stored file.
+- **Slider photo cards that open a lightbox** (Gallery, Dress Code outfit
+  inspiration): the card gets `t-view-card` and `onClick`, its
+  `RevealImage` gets `wrapperClassName="t-view-media …"`, and it renders
+  `<ViewOverlay />`. On hover (mouse only) the photo scales, blurs 2 px and
+  dims, and a gold-framed "View" chip rises in. Touch shows nothing extra:
+  a tap opens the lightbox. Keep the filter on the wrapper, never on the
+  `<img>`, whose blur-up rule ends at `filter: none` and would override it.
 - **Numbers:** `<PopInNumber>` (`.t-digit` CSS) for the countdown.
 - **Tokens:** durations, easings, distances, and blur live as CSS variables at
   the top of `globals.css` (`--duration-*`, `--ease-*`, `--reveal-*`,

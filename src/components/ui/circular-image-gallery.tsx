@@ -42,14 +42,24 @@ interface ImageData {
   url: string
 }
 
+type ClipShape = "heart" | "circle"
+
+// Both paths are about 10 units in radius around 0,0, so the GSAP scale math
+// below works for either.
+const SHAPE_PATHS: Record<ClipShape, string> = {
+  heart: "M 8.84 -7.39 a 5.5 5.5 0 0 0 -7.78 0 L 0 -6.33 l -1.06 -1.06 a 5.5 5.5 0 0 0 -7.78 7.78 l 1.06 1.06 L 0 9.23 l 7.78 -7.78 l 1.06 -1.06 a 5.5 5.5 0 0 0 0 -7.78 z",
+  circle: "M 0 -10 A 10 10 0 1 1 0 10 A 10 10 0 1 1 0 -10 Z",
+}
+
 interface ImageGalleryProps {
   images: ImageData[]
   initialIndex?: number
   onClose?: () => void
+  shape?: ClipShape
 }
 
 // Main component for the Image Gallery
-export function CircularImageGallery({ images, initialIndex = 0, onClose }: ImageGalleryProps) {
+export function CircularImageGallery({ images, initialIndex = 0, onClose, shape = "heart" }: ImageGalleryProps) {
   const [opened, setOpened] = useState(initialIndex)
   const [inPlace, setInPlace] = useState(initialIndex)
   const [disabled, setDisabled] = useState(false)
@@ -63,7 +73,7 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose }: Imag
   }, [])
 
   // Only the open, in-place and closing photos are visible; the rest are tiny
-  // hearts hidden under the dot strip. Mount the heavy full-screen <image>s
+  // shapes hidden under the dot strip. Mount the heavy full-screen <image>s
   // for those few only, and warm the neighbours so next/prev open instantly.
   const [closing, setClosing] = useState<number | null>(null)
   const lastOpened = useRef(opened)
@@ -104,6 +114,19 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose }: Imag
   // Disable clicks during animation transitions
   useEffect(() => setDisabled(true), [opened])
   useEffect(() => setDisabled(false), [inPlace])
+
+  // Esc closes; the arrow keys follow the on-screen buttons, disabled included.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose?.()
+      else if (e.key === "ArrowLeft" && !disabled) prev()
+      else if (e.key === "ArrowRight" && !disabled) next()
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [onClose, prev, next, disabled])
+
+  const caption = images[opened]?.title
 
   // Autoplay and timer reset logic
   useEffect(() => {
@@ -147,7 +170,7 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose }: Imag
                 total={images.length}
                 id={i}
                 url={image.url}
-                title={image.title || ""}
+                shape={shape}
                 open={opened === i}
                 inPlace={inPlace === i}
                 onInPlace={onInPlace}
@@ -159,6 +182,16 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose }: Imag
         <div className="absolute left-0 top-0 z-[100] h-full w-full pointer-events-none">
           <Tabs images={images} onSelect={onClick} activeIndex={opened} />
         </div>
+        {caption && (
+          <div
+            aria-live="polite"
+            className={`absolute inset-x-0 bottom-[120px] md:bottom-[80px] z-[101] flex justify-center px-4 pointer-events-none transition-opacity duration-[var(--duration-medium)] ease-[var(--ease-smooth-out)] motion-reduce:transition-none ${inPlace === opened ? "opacity-100" : "opacity-0"}`}
+          >
+            <span className="rounded-full bg-black/55 backdrop-blur-sm px-4 py-1.5 text-xs sm:text-sm uppercase tracking-widest text-wedding-cream drop-shadow-sm">
+              {caption}
+            </span>
+          </div>
+        )}
       </div>
 
       <button
@@ -188,7 +221,7 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose }: Imag
 
 interface GalleryImageProps {
   url: string
-  title: string
+  shape: ClipShape
   open: boolean
   inPlace: boolean
   id: number
@@ -198,7 +231,7 @@ interface GalleryImageProps {
   visible: boolean
 }
 
-function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeIndex, visible }: GalleryImageProps) {
+function GalleryImage({ url, shape, open, inPlace, id, onInPlace, total, activeIndex, visible }: GalleryImageProps) {
   const [firstLoad, setLoaded] = useState(true)
   const clip = useRef<SVGPathElement>(null)
   
@@ -216,13 +249,13 @@ function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeI
   // --- Animation Constants ---
   const gap = 12
   const circleRadius = 8
-  const heartBaseRadius = 10 // Approximate radius of our heart SVG path
+  const shapeBaseRadius = 10 // Radius of the clip path (see SHAPE_PATHS)
   const defaults = { transformOrigin: "center center" }
   const duration = 0.4
   const viewportDiagonal = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
-  const maxScale = (viewportDiagonal / 2) / heartBaseRadius * 1.5 // Ensure it safely covers corners
+  const maxScale = (viewportDiagonal / 2) / shapeBaseRadius * 1.5 // Ensure it safely covers corners
   
-  const bigSize = heartBaseRadius * maxScale
+  const bigSize = shapeBaseRadius * maxScale
   const overlap = 0
 
   // --- Position Calculation Functions ---
@@ -232,9 +265,9 @@ function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeI
       let diff = id - activeIndex;
       if (diff > total / 2) diff -= total;
       else if (diff < -total / 2) diff += total;
-      return { x: width / 2 + diff * (circleRadius * 2 + gap), y: height - 90, scale: circleRadius / heartBaseRadius };
+      return { x: width / 2 + diff * (circleRadius * 2 + gap), y: height - 90, scale: circleRadius / shapeBaseRadius };
     }
-    return { x: width / 2 - (total * (circleRadius * 2 + gap) - gap) / 2 + id * (circleRadius * 2 + gap), y: height - 50, scale: circleRadius / heartBaseRadius };
+    return { x: width / 2 - (total * (circleRadius * 2 + gap) - gap) / 2 + id * (circleRadius * 2 + gap), y: height - 50, scale: circleRadius / shapeBaseRadius };
   }
   
   const getPosSmallAbove = () => {
@@ -243,12 +276,12 @@ function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeI
       let diff = id - activeIndex;
       if (diff > total / 2) diff -= total;
       else if (diff < -total / 2) diff += total;
-      return { x: width / 2 + diff * (circleRadius * 2 + gap), y: height / 2, scale: (circleRadius * 2) / heartBaseRadius };
+      return { x: width / 2 + diff * (circleRadius * 2 + gap), y: height / 2, scale: (circleRadius * 2) / shapeBaseRadius };
     }
-    return { x: width / 2 - (total * (circleRadius * 2 + gap) - gap) / 2 + id * (circleRadius * 2 + gap), y: height / 2, scale: (circleRadius * 2) / heartBaseRadius };
+    return { x: width / 2 - (total * (circleRadius * 2 + gap) - gap) / 2 + id * (circleRadius * 2 + gap), y: height / 2, scale: (circleRadius * 2) / shapeBaseRadius };
   }
   
-  const getPosCenter = () => ({ x: width / 2, y: height / 2, scale: (circleRadius * 7) / heartBaseRadius })
+  const getPosCenter = () => ({ x: width / 2, y: height / 2, scale: (circleRadius * 7) / shapeBaseRadius })
   const getPosEnd = () => ({ x: width / 2 - bigSize + overlap, y: height / 2, scale: maxScale })
   const getPosStart = () => ({ x: width / 2 + bigSize - overlap, y: height / 2, scale: maxScale })
 
@@ -329,15 +362,15 @@ function GalleryImage({ url, title, open, inPlace, id, onInPlace, total, activeI
       className="h-full w-full"
     >
       <defs>
-        <clipPath id={`${id}_circleClip`}>
-          <path className="clip" d="M 8.84 -7.39 a 5.5 5.5 0 0 0 -7.78 0 L 0 -6.33 l -1.06 -1.06 a 5.5 5.5 0 0 0 -7.78 7.78 l 1.06 1.06 L 0 9.23 l 7.78 -7.78 l 1.06 -1.06 a 5.5 5.5 0 0 0 0 -7.78 z" ref={clip}></path>
+        <clipPath id={`${id}_shapeClip`}>
+          <path className="clip" d={SHAPE_PATHS[shape]} ref={clip}></path>
         </clipPath>
         <clipPath id={`${id}_squareClip`}>
           <rect className="clip" width={width} height={height}></rect>
         </clipPath>
       </defs>
       {visible && (
-        <g clipPath={`url(#${id}${inPlace ? "_squareClip" : "_circleClip"})`}>
+        <g clipPath={`url(#${id}${inPlace ? "_squareClip" : "_shapeClip"})`}>
           <image width={width} height={height} href={src} className="pointer-events-none opacity-40 blur-xl" preserveAspectRatio="xMidYMid slice"></image>
           <image width={width} height={height} href={src} className="pointer-events-none" preserveAspectRatio="xMidYMid meet"></image>
         </g>

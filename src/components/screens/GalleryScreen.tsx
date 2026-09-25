@@ -6,6 +6,7 @@ import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { RevealImage } from '@/components/ui/RevealImage';
+import { ViewOverlay } from '@/components/ui/ViewOverlay';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { CircularImageGallery, loadGsap } from '@/components/ui/circular-image-gallery';
 import { ScrollContainerProvider, ScrollReveal } from '@/components/ui/ScrollMotion';
@@ -134,11 +135,9 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
           <div className="slider-wrapper w-full py-2 relative">
             <DraggableSlider speed={0.4}>
               {topRowImages.map((src: string, index: number) => (
-                <div key={`top-${index}`} className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] relative group overflow-hidden rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-wedding-gold/10 cursor-pointer flex-shrink-0" onClick={() => setLightboxIndex(index)}>
-                  <RevealImage src={src} alt={`Engagement ${index + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-50 pointer-events-none" wrapperClassName="w-full h-full" sizes="(min-width: 768px) 280px, (min-width: 640px) 220px, 180px" />
-                  <div className="absolute inset-0 bg-wedding-dark/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none z-10">
-                    <span className="text-wedding-goldlight text-xs font-medium uppercase tracking-[0.4em] border border-wedding-gold/50 px-6 py-2.5 bg-wedding-dark/50 backdrop-blur-sm pointer-events-none drop-shadow-md transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">View</span>
-                  </div>
+                <div key={`top-${index}`} className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] t-view-card relative overflow-hidden rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-wedding-gold/10 cursor-pointer flex-shrink-0" onClick={() => setLightboxIndex(index)}>
+                  <RevealImage src={src} alt={`Engagement ${index + 1}`} className="w-full h-full object-cover pointer-events-none" wrapperClassName="t-view-media w-full h-full" sizes="(min-width: 768px) 280px, (min-width: 640px) 220px, 180px" />
+                  <ViewOverlay />
                 </div>
               ))}
             </DraggableSlider>
@@ -152,13 +151,11 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
                 return (
                 <div 
                   key={`bottom-${index}`}
-                  className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] rounded-md overflow-hidden relative group cursor-pointer shadow-md border border-wedding-gold/10 flex-shrink-0"
+                  className="w-[180px] sm:w-[220px] md:w-[280px] aspect-[4/5] t-view-card rounded-md overflow-hidden relative cursor-pointer shadow-md border border-wedding-gold/10 flex-shrink-0"
                   onClick={() => { setDirection(0); setLightboxIndex(originalIndex); }}
                 >
-                  <RevealImage src={src} alt={`Memory ${originalIndex + 1}`} className="w-full h-full object-cover transform duration-700 group-hover:scale-110 group-hover:brightness-50 pointer-events-none" wrapperClassName="w-full h-full" sizes="(min-width: 768px) 280px, (min-width: 640px) 220px, 180px" />
-                  <div className="absolute inset-0 bg-wedding-dark/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none z-10">
-                    <span className="text-wedding-goldlight text-xs font-medium uppercase tracking-[0.4em] border border-wedding-gold/50 px-6 py-2.5 bg-wedding-dark/50 backdrop-blur-sm pointer-events-none drop-shadow-md transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">View</span>
-                  </div>
+                  <RevealImage src={src} alt={`Memory ${originalIndex + 1}`} className="w-full h-full object-cover pointer-events-none" wrapperClassName="t-view-media w-full h-full" sizes="(min-width: 768px) 280px, (min-width: 640px) 220px, 180px" />
+                  <ViewOverlay />
                 </div>
               )})}
             </DraggableSlider>

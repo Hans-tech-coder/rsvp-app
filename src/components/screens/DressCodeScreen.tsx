@@ -1,23 +1,50 @@
 "use client";
 
-import React, { useRef } from 'react';
-import { motion } from 'motion/react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { RevealImage } from '@/components/ui/RevealImage';
+import { ViewOverlay } from '@/components/ui/ViewOverlay';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal, ScrollRevealItem } from '@/components/ui/ScrollMotion';
+import { CircularImageGallery, loadGsap } from '@/components/ui/circular-image-gallery';
 
 interface DressCodeScreenProps {
   onContinue: () => void;
+  onLightboxChange?: (isOpen: boolean) => void;
 }
 
-export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
+export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScreenProps) {
   const { content } = useWeddingContent();
   const scrollRef = useRef<HTMLElement>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const colors = content.dressCode.colors;
+  const inspirationImages = content.dressCode.inspirationImages;
+
+  // Cards with no photo yet (admin added an empty slot) stay out of the lightbox.
+  const viewable = useMemo(
+    () => inspirationImages
+      .map((img, index) => ({ url: img.url, title: img.type, index }))
+      .filter((img) => img.url),
+    [inspirationImages]
+  );
+
+  // Fetch GSAP while the guest browses, so the first tap opens at once.
+  useEffect(() => {
+    loadGsap().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    onLightboxChange?.(lightboxIndex !== null);
+  }, [lightboxIndex, onLightboxChange]);
+
+  const openOutfit = (index: number) => {
+    const i = viewable.findIndex((img) => img.index === index);
+    if (i !== -1) setLightboxIndex(i);
+  };
 
   return (
     <section ref={scrollRef} className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
@@ -80,9 +107,10 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
             }}>
               <div className="outfit-slider-wrapper w-full py-4">
                 <DraggableSlider speed={0.5}>
-                  {content.dressCode.inspirationImages.map((img, index) => (
-                    <div key={index} className="w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative group shadow-sm border border-wedding-gold/20 flex-shrink-0">
-                      <RevealImage src={img.url} alt={`${img.type} Inspiration ${index + 1}`} className="w-full h-full object-cover transform duration-500 group-hover:scale-105 pointer-events-none" wrapperClassName="w-full h-full" />
+                  {inspirationImages.map((img, index) => (
+                    <div key={index} onClick={() => openOutfit(index)} className={`w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative shadow-sm border border-wedding-gold/20 flex-shrink-0${img.url ? ' t-view-card cursor-pointer' : ''}`}>
+                      <RevealImage src={img.url} alt={`${img.type} Inspiration ${index + 1}`} className="w-full h-full object-cover pointer-events-none" wrapperClassName="t-view-media w-full h-full" />
+                      {img.url && <ViewOverlay />}
                       <div className="absolute bottom-0 inset-x-0 z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-8 pb-2.5 px-2 text-center pointer-events-none">
                         <span className="block text-[10px] sm:text-[11px] uppercase tracking-widest text-wedding-cream drop-shadow-sm">{img.type}</span>
                       </div>
@@ -105,6 +133,25 @@ export function DressCodeScreen({ onContinue }: DressCodeScreenProps) {
       </ScrollReveal>
 
       <EmbeddedFooter />
+
+      {/* Outfit lightbox: outside every ScrollReveal, whose transform would break position: fixed */}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100]"
+          >
+            <CircularImageGallery
+              shape="circle"
+              images={viewable}
+              initialIndex={lightboxIndex}
+              onClose={() => setLightboxIndex(null)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
       </ScrollContainerProvider>
     </section>
   );

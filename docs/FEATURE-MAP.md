@@ -16,7 +16,7 @@ values in `src/app/page.tsx`.
 | 1 | Our Story timeline | `src/components/screens/OurStoryScreen.tsx` | `ourStory` | `OurStoryEditor.tsx` |
 | 2 | Entourage | `src/components/screens/EntourageScreen.tsx` | `entourage` | `EntourageEditor.tsx` |
 | 3 | Event details (ceremony, reception, order of events download) | `src/components/screens/DetailsScreen.tsx` | `details` (+ `global` venue/time fields) | `EventDetailsEditor.tsx`, `GlobalSettingsEditor.tsx` |
-| 4 | Dress code (palette, guidelines, inspiration slider) | `src/components/screens/DressCodeScreen.tsx` | `dressCode` | `DressCodeEditor.tsx` |
+| 4 | Dress code (palette, guidelines, inspiration slider + circular lightbox) | `src/components/screens/DressCodeScreen.tsx`, `src/components/ui/circular-image-gallery.tsx` | `dressCode` | `DressCodeEditor.tsx` |
 | 5 | Gallery (slider + circular 3D lightbox) | `src/components/screens/GalleryScreen.tsx`, `src/components/ui/circular-image-gallery.tsx` | `gallery`, `galleryHeader` | `GalleryEditor.tsx` |
 | 6 | FAQs | `src/components/screens/FaqScreen.tsx` | `faq`, `faqHeader` | `FaqsEditor.tsx` |
 | 7 | Registry (bank transfer + curated gifts) | `src/components/screens/RegistryScreen.tsx`, `CuratedRegistryScreen.tsx`, `GiftSelectionModal.tsx` | `registry` (+ `rsvpForm` labels in modal) | `RegistryEditor.tsx`; gifts in `/admin/gifts` |
@@ -40,6 +40,7 @@ All editors are in `src/app/admin/content/`.
 | Staggered text reveal on scroll | `src/components/ui/TextsReveal.tsx` |
 | Scroll motion: scroll-container context, `ScrollReveal`/`ScrollRevealItem` (reveal once), `Parallax` (image drift), `SCROLL_MOTION` constants | `src/components/ui/ScrollMotion.tsx` |
 | Image fade/blur reveal | `src/components/ui/RevealImage.tsx` |
+| Hover "View" chip on slider photo cards (Gallery, Dress Code) | `src/components/ui/ViewOverlay.tsx` + `.t-view-*` in `globals.css` |
 | Countdown digits pop-in | `src/components/ui/PopInNumber.tsx` |
 | Auto-scrolling draggable strip | `src/components/ui/DraggableSlider.tsx` |
 | Ink reveal canvas background | `src/components/ui/InkRevealCanvas.tsx` |
@@ -105,6 +106,6 @@ Read these by range (`grep -n` then read around the line), never whole.
 | 486 | `src/data/wedding-content.json` |
 | 469 | `src/app/admin/content/EventDetailsEditor.tsx` |
 | 464 | `src/app/page.tsx` |
+| 447 | `src/components/ui/circular-image-gallery.tsx` |
 | 435 | `src/app/admin/content/RsvpFormEditor.tsx` |
-| 414 | `src/components/ui/circular-image-gallery.tsx` |
 | 400 | `src/app/admin/content/EntourageEditor.tsx` |

@@ -176,6 +176,44 @@
   }
   .t-skel-skeleton.is-pulsing { animation: none !important; }
 }
+
+/* "View" hover on slider photo cards (Gallery, Dress Code); markup in
+   src/components/ui/ViewOverlay.tsx. Only pointers that can hover get it: on
+   touch the card opens the lightbox on tap. The filter goes on the RevealImage
+   wrapper (.t-view-media), not the <img>, whose blur-up ends at `filter: none`. */
+.t-view-media {
+  transition:
+    transform var(--duration-very-slow) var(--ease-smooth-out),
+    filter    var(--duration-very-slow) var(--ease-smooth-out);
+}
+.t-view-scrim {
+  opacity: 0;
+  transition: opacity var(--duration-medium) var(--ease-smooth-out);
+}
+.t-view-button {
+  opacity: 0;
+  transform: translateY(var(--distance-base)) scale(var(--scale-large));
+  transition:
+    opacity   var(--duration-medium) var(--ease-smooth-out),
+    transform var(--duration-medium) var(--ease-smooth-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .t-view-card:hover .t-view-media {
+    transform: scale(1.06);
+    filter: blur(var(--blur-small)) brightness(0.6);
+  }
+  .t-view-card:hover .t-view-scrim { opacity: 1; }
+  .t-view-card:hover .t-view-button {
+    opacity: 1;
+    transform: none;
+    transition-delay: var(--duration-stagger);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .t-view-media { transition: filter var(--duration-quick) var(--ease-linear); }
+  .t-view-button { transform: none; transition: opacity var(--duration-quick) var(--ease-linear); }
+  .t-view-card:hover .t-view-media { transform: none; }
+}
 @custom-variant dark (&:where(.dark, .dark *));
 @theme {
   --color-wedding-cream: #FCFAF6;

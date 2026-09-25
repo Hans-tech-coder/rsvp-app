@@ -57,7 +57,10 @@ Match the code around you. These are the patterns the codebase already uses.
   (`.t-stagger`, `.t-digit`, `.t-skel`) driven by `TextsReveal`,
   `PopInNumber`, and friends. Text reveals move with `transform` and
   `opacity` only; `filter: blur` is kept for the image blur-up and ends at
-  `filter: none`. Do not add a permanent `will-change`.
+  `filter: none`, and for the slider cards' hover dim (`.t-view-*`, see
+  `ViewOverlay.tsx`), which sits on the image wrapper. Hover-only effects go
+  under `@media (hover: hover) and (pointer: fine)` so they never stick on
+  touch. Do not add a permanent `will-change`.
 - Timing values come from the CSS variables at the top of `globals.css`
   (`--duration-*`, `--ease-*`, `--distance-*`, `--scale-*`, `--blur-*`).
   The main ease is `cubic-bezier(0.22, 1, 0.36, 1)` (`--ease-smooth-out`).
