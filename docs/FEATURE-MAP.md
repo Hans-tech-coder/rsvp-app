@@ -44,7 +44,9 @@ All editors are in `src/app/admin/content/`.
 | Countdown digits pop-in | `src/components/ui/PopInNumber.tsx` |
 | Auto-scrolling draggable strip (pauses on hover and keyboard focus; hidden loop copy) | `src/components/ui/DraggableSlider.tsx` |
 | Ink reveal canvas background | `src/components/ui/InkRevealCanvas.tsx` |
-| Firefly glow particles (welcome, drawn above the dark gradient) | `src/components/effects/TwinkleSparks.tsx` |
+| Welcome 3D background: depth-parallax photo + depth-aware fireflies that light the couple (WebGL); map and couple area paired to the photo in `DEPTH_MAPS` in `WelcomeScreen.tsx`, asset `public/images/welcome-depth.webp` | `src/components/effects/DepthParallaxScene.tsx` |
+| Welcome motion onboarding hint ("Move your mouse" / "Tilt your phone", iOS tap-to-enable), every page load, repeats up to 3 times until tried | `src/components/ui/MotionHint.tsx` (icon keyframes `t-hint-*` in `globals.css`) |
+| Firefly glow particles (welcome fallback, drawn above the dark gradient) | `src/components/effects/TwinkleSparks.tsx` |
 | Image download proxy | `src/app/api/download/route.ts` (called from `DetailsScreen.tsx`) |
 | Image upload (admin editors) | `src/lib/blob/uploadImage.ts` (compress + client upload), `src/app/api/upload/route.ts` (admin-only Blob token) |
 

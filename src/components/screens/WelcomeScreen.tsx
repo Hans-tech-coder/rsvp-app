@@ -1,12 +1,25 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion , Variants } from 'motion/react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion , Variants, useReducedMotion } from 'motion/react';
 import Image from 'next/image';
 import { TwinkleSparks } from '@/components/effects/TwinkleSparks';
+import { DepthParallaxScene } from '@/components/effects/DepthParallaxScene';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { PopInNumber } from '@/components/ui/PopInNumber';
 import { TextsReveal } from '@/components/ui/TextsReveal';
+import { MotionHint } from '@/components/ui/MotionHint';
+
+// A depth map only fits the photo it was made from. When the admin swaps the
+// background, the screen falls back to the flat photo until a new map is added here.
+type Rect = readonly [number, number, number, number];
+const DEPTH_MAPS: Record<string, { depth: string; subject: Rect; unlit?: Rect }> = {
+  'https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/welcome-bg-axudzflkDlVGWsNhY7twkhYJRWfWLI.webp': {
+    depth: '/images/welcome-depth.webp',
+    subject: [0.33, 0.3, 0.67, 0.95], // the couple, in image uv
+    unlit: [0.517, 0.39, 0.048, 0.058], // groom's hair: ellipse centre + radii, in image uv
+  },
+};
 
 interface WelcomeScreenProps {
   onContinue: () => void;
@@ -16,6 +29,11 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
   const { content, loading } = useWeddingContent();
   const [timeLeft, setTimeLeft] = useState({ days: '00', hours: '00', minutes: '00', seconds: '00' });
   const [mounted, setMounted] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const [sceneFailed, setSceneFailed] = useState(false);
+  const handleSceneFail = useCallback(() => setSceneFailed(true), []);
+  const depthMap = DEPTH_MAPS[content.welcomeScreen.backgroundImage];
+  const use3d = !loading && !reduceMotion && !!depthMap && !sceneFailed;
 
   useEffect(() => {
     setMounted(true);
@@ -70,6 +88,23 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
   return (
     <header className="absolute inset-0 w-full h-full overflow-hidden bg-wedding-dark text-center">
       <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
+        {use3d ? (
+          <motion.div
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 3, ease: "easeOut" }}
+            className="absolute inset-0"
+          >
+            <DepthParallaxScene
+              imageSrc={content.welcomeScreen.backgroundImage}
+              depthSrc={depthMap.depth}
+              subject={depthMap.subject}
+              unlit={depthMap.unlit}
+              onFail={handleSceneFail}
+            />
+          </motion.div>
+        ) : (
+        <>
         <motion.div
           initial={{ scale: 1.1, opacity: 0 }}
           animate={{ scale: 1, opacity: 0.5 }}
@@ -89,6 +124,8 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         <div className="absolute inset-0 bg-gradient-to-b from-wedding-dark/60 via-wedding-dark/40 to-wedding-dark/80"></div>
         {/* Above the dark gradient so the fireflies glow instead of being dimmed */}
         <TwinkleSparks />
+        </>
+        )}
       </div>
 
       <motion.div 
@@ -116,7 +153,9 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         </TextsReveal>
         </div>
 
-        <motion.div variants={itemVariants} className="lg:pb-8 w-full max-w-3xl px-4 flex flex-col items-center">
+        <motion.div variants={itemVariants} className="relative lg:pb-8 w-full max-w-3xl px-4 flex flex-col items-center">
+          {/* Anchored to the top of the countdown; absolute, so it never shifts the layout */}
+          {use3d && <MotionHint />}
           <div className="grid grid-cols-4 gap-2 md:gap-8 bg-wedding-dark/50 backdrop-blur-md px-4 md:px-6 py-4 rounded-xl border border-wedding-gold/20 w-full max-w-md mb-6 shadow-xl">
             <div className="text-center">
               <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">

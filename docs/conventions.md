@@ -114,7 +114,8 @@ Match the code around you. These are the patterns the codebase already uses.
   frame on unmount and cap the device pixel ratio at 2 — keep both in any new
   canvas effect. `TwinkleSparks` also pauses while off-screen or the tab is
   hidden, and draws its glow from pre-rendered sprites instead of setting
-  `shadowBlur` every frame.
+  `shadowBlur` every frame. `DepthParallaxScene` (WebGL) caps the ratio at 1.5
+  instead, since every pixel samples the photo twice, and pauses the same way.
 - Before writing Motion code, use the `motion` skill
   (`.claude/skills/motion/`). It searches the live Motion docs through the
   free `motion` MCP server in `.mcp.json`, so API details come from the docs

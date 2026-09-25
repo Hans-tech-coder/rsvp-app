@@ -238,6 +238,25 @@
   .t-view-card:hover .t-view-media,
   .t-view-card:focus-visible .t-view-media { transform: none; }
 }
+
+/* Welcome motion hint icons (MotionHint.tsx): the mouse sways, the phone rocks */
+@keyframes t-hint-sway {
+  0%, 100% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+}
+@keyframes t-hint-tilt {
+  0%, 100% { transform: rotate(-14deg); }
+  50% { transform: rotate(14deg); }
+}
+.t-hint-sway { animation: t-hint-sway 1.8s var(--ease-in-out) infinite; }
+.t-hint-tilt {
+  animation: t-hint-tilt 1.8s var(--ease-in-out) infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 85%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .t-hint-sway, .t-hint-tilt { animation: none; }
+}
 @custom-variant dark (&:where(.dark, .dark *));
 @theme {
   --color-wedding-cream: #FCFAF6;

@@ -82,6 +82,31 @@ transaction rejects when `currentCount >= maxCount`.
   are fetched in parallel) and fonts plus, on step 0, the Welcome hero image
   are ready (`assetsReady`). The asset wait is capped at `LOADER_MAX_WAIT_MS`
   (2.5 s after navigation).
+- **Welcome background:** `DepthParallaxScene` draws the photo in WebGL, shifted
+  per pixel by a depth map (mouse on desktop, tilt on Android; after 1.5 s
+  without input an idle drift fades in, ~28 px desktop / ~18 px phone on a
+  ~16 s loop; iOS gets the drift only, since tilt needs a permission prompt). The
+  fireflies fly at their own depths, hide behind the couple and blur out of
+  focus. Up to 16 of them stay in the couple's area (`subject` rect, image uv,
+  in `DEPTH_MAPS`) and light the photo there: the background shader multiplies
+  a warm light into surfaces at the firefly's depth (the photo's own color only,
+  so dark areas do not turn orange). The optional `unlit` ellipse gets no light;
+  it is set on the groom's hair. It runs only when the photo URL has
+  a map in `DEPTH_MAPS`
+  (`WelcomeScreen.tsx`); otherwise, under reduced motion, or without WebGL, the
+  flat photo + `TwinkleSparks` render. With the scene on, `MotionHint` shows
+  just above the countdown (absolute inside the countdown group; one line and
+  more compact on screens under 700 px tall) 2.6 s after
+  the Welcome mounts: "Move your mouse" on hover/fine-pointer
+  devices, "Tilt your phone" on touch devices, and on iOS a "Tap to enable
+  motion" button that asks for the tilt permission. Each showing lasts 5 s (7 s
+  on iOS); if the guest has not tried it, it returns after 9 s, up to 3
+  showings. Trying it (300 px of mouse travel or 10 degrees of tilt, counted only
+  after the hint has been up 1.5 s, or the iOS tap) hides it 1.2 s later and
+  stops it for the rest of the visit (a module-level flag, so returning to the
+  Welcome does not bring it back). Nothing is stored: every page load shows it
+  again. A new photo needs a new map: Depth
+  Anything V2, R = depth, G = dilated + blurred depth, 960 px WebP.
 - **Scroll effects:** scrolling screens use the `ScrollMotion.tsx` primitives
   (rules in `docs/conventions.md` → Motion). Our Story: one `ScrollReveal` per
   timeline card, `Parallax` on every other photo. Entourage: one reveal per
