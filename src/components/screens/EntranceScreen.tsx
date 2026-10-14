@@ -102,7 +102,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
             background: linear-gradient(to right, transparent 0%, rgba(252, 250, 246, 0.02) 40%, rgba(252, 250, 246, 0.1) 50%, rgba(252, 250, 246, 0.02) 60%, transparent 100%);
             transform: skewX(-30deg);
         }
-        .group:hover .shimmer-sweep {
+        :where(.t-mouse) .group:hover .shimmer-sweep {
             animation: sweep 4s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
         }
         @keyframes sweep {

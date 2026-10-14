@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
+import { hasMouse } from '@/lib/pointer';
 
 // Guest-site cursor: a solitaire wedding ring (hotspot = diamond tip), a gold
 // stardust trail, a bouncy tilt over anything clickable and a sparkle burst on
 // click. Mouse/trackpad only and never with reduced motion; everyone else keeps
 // the native cursor. Hover/text-field rules: `.t-cursor-*` in globals.css.
 
-const FINE_POINTER = '(hover: hover) and (pointer: fine)';
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
 // Hovering these tilts the ring. A clickable div/span needs role="button"
@@ -28,14 +28,15 @@ type Particle = {
 const useFinePointer = () => {
   const [enabled, setEnabled] = useState(false);
   useEffect(() => {
-    const fine = window.matchMedia(FINE_POINTER);
+    const root = document.documentElement;
     const reduced = window.matchMedia(REDUCED_MOTION);
-    const update = () => setEnabled(fine.matches && !reduced.matches);
+    const update = () => setEnabled(hasMouse() && !reduced.matches);
     update();
-    fine.addEventListener('change', update);
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
     reduced.addEventListener('change', update);
     return () => {
-      fine.removeEventListener('change', update);
+      observer.disconnect();
       reduced.removeEventListener('change', update);
     };
   }, []);

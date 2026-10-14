@@ -110,8 +110,9 @@ transaction rejects when `currentCount >= maxCount`.
   flat photo + `TwinkleSparks` render. With the scene on, `MotionHint` shows
   just above the countdown (absolute inside the countdown group; one line and
   more compact on screens under 700 px tall) 2.6 s after
-  the Welcome mounts: "Move your mouse" on hover/fine-pointer
-  devices, "Tilt your phone" on touch devices, and on iOS a "Tap to enable
+  the Welcome mounts: "Move your mouse" when `hasMouse()` (`src/lib/pointer.ts`)
+  is true, "Tilt your phone" on touch devices (if neither is known yet and the
+  pointer is not coarse, the mouse hint waits for the first real mouse move), and on iOS a "Tap to enable
   motion" button that asks for the tilt permission. Each showing lasts 5 s (7 s
   on iOS); if the guest has not tried it, it returns after 9 s, up to 3
   showings. Trying it (300 px of mouse travel or 10 degrees of tilt, counted only
@@ -189,10 +190,13 @@ clickable tilts and grows the ring with a bounce and a few sparkles, and a
 click throws a gold sparkle burst. The particles are drawn on one fixed canvas
 (`z-[9998]`, ring `z-[9999]`) whose loop stops when idle.
 
-- **Mouse/trackpad only.** It runs only under `(hover: hover) and (pointer:
-  fine)` without `prefers-reduced-motion`, and it adds `t-cursor-on` to
-  `<html>` to hide the native cursor. Phones, touch and reduced-motion guests
-  get the normal cursor and no effects.
+- **Mouse/trackpad only.** It runs only while `<html>` has `t-mouse` (set by
+  the `pointer-init` script in `layout.tsx` from the `(hover: hover) and
+  (pointer: fine)` query or the first real mouse move, since some Chrome
+  installs report `hover: none` with a mouse; a touch clears it) and without
+  `prefers-reduced-motion`. It adds `t-cursor-on` to `<html>` to hide the
+  native cursor. Phones, touch and reduced-motion guests get the normal
+  cursor and no effects.
 - **Clickable detection** is a selector list (`CLICKABLE`): links, buttons,
   `role="button"`/`link`/`tab`/`menuitem`, labels, selects, checkboxes, radios,
   ranges, and `[data-cursor="hover"]`.
@@ -226,9 +230,9 @@ The controls sit bottom-right (`#audio-controls`, hidden while
   any touch/focus of the controls. Copy follows the input the guest actually
   used (the pointer type of their latest press, so the tap or click that
   started the music): "Click to mute · hover for volume" for a mouse, "Tap to
-  mute or change the volume" for touch or pen. The `(hover: hover)` media
-  query is only the fallback (keyboard start), because some phones report
-  hover wrongly. The same check decides whether a button tap opens the slider.
+  mute or change the volume" for touch or pen. The shared mouse check
+  (`hasMouse()`, `src/lib/pointer.ts`) is only the fallback (keyboard start),
+  because some phones report hover wrongly. The same check decides whether a button tap opens the slider.
 - **iOS volume.** iOS ignores `audio.volume`, so there the slider starts at
   100 % (the true level) and the first slider touch routes the element through
   a Web Audio `GainNode` (`ensureGain`), with `navigator.audioSession.type =

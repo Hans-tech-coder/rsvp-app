@@ -61,9 +61,14 @@ Match the code around you. These are the patterns the codebase already uses.
   `PopInNumber`, and friends. Text reveals move with `transform` and
   `opacity` only; `filter: blur` is kept for the image blur-up and ends at
   `filter: none`, and for the slider cards' hover dim (`.t-view-*`, see
-  `ViewOverlay.tsx`), which sits on the image wrapper. Hover-only effects go
-  under `@media (hover: hover) and (pointer: fine)` so they never stick on
-  touch. Do not add a permanent `will-change`.
+  `ViewOverlay.tsx`), which sits on the image wrapper. Hover-only effects are
+  gated on the `t-mouse` class on `<html>`, never on `@media (hover: hover)`:
+  some Chrome installs report `hover: none` with a real mouse. An inline
+  script in `layout.tsx` sets `t-mouse` from the `(hover: hover) and
+  (pointer: fine)` query or the first mouse move, and a touch clears it, so
+  hovers never stick on touch. Tailwind's `hover:` (and `group-hover:`) is
+  redefined in `globals.css` to use it; in hand-written CSS write
+  `:where(.t-mouse) .x:hover`. Do not add a permanent `will-change`.
 - Focus pattern: anything clickable is keyboard-reachable. A non-button
   element that opens something (e.g. a photo card) gets role="button",
   `tabIndex={0}`, an `aria-label`, Enter on keydown and Space on keyup

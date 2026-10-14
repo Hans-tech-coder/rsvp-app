@@ -48,6 +48,7 @@ All editors are in `src/app/admin/content/`.
 | Welcome motion onboarding hint ("Move your mouse" / "Tilt your phone", iOS tap-to-enable), every page load, repeats up to 3 times until tried | `src/components/ui/MotionHint.tsx` (icon keyframes `t-hint-*` in `globals.css`) |
 | Firefly glow particles (welcome fallback, drawn above the dark gradient) | `src/components/effects/TwinkleSparks.tsx` |
 | Wedding-ring cursor: gold stardust trail, tilt over clickables, sparkle burst on click (mouse/trackpad only, mounted in `Home` in `page.tsx`) | `src/components/effects/WeddingCursor.tsx` + `.t-cursor*` in `globals.css` |
+| Mouse detection (`t-mouse` on `<html>`) that gates every hover style, the ring cursor and the mouse hint | `pointer-init` script in `src/app/layout.tsx`, `hasMouse()` in `src/lib/pointer.ts`, `@custom-variant hover` in `globals.css` |
 | Image download proxy | `src/app/api/download/route.ts` (called from `DetailsScreen.tsx`); host allowlist + filename sanitizer in `src/lib/downloadProxy.ts`, tested by `src/lib/downloadProxy.test.ts` |
 | Image upload (admin editors) | `src/lib/blob/uploadImage.ts` (compress + client upload), `src/app/api/upload/route.ts` (admin-only Blob token) |
 

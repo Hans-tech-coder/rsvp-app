@@ -88,6 +88,18 @@ export default function RootLayout({
         <Script id="theme-init" strategy="beforeInteractive">
           {getThemeScript({ attribute: 'class', defaultTheme: 'system' })}
         </Script>
+        {/* `t-mouse` on <html> gates every hover style and the ring cursor
+            (globals.css, WeddingCursor.tsx). Some Chrome installs report
+            `hover: none` with a real mouse, so a mouse move also sets it and a
+            touch clears it. */}
+        <Script id="pointer-init" strategy="beforeInteractive">
+          {`(function(){var r=document.documentElement,c='t-mouse';
+function set(on){if(r.classList.contains(c)!==on)r.classList.toggle(c,on)}
+if(matchMedia('(hover: hover) and (pointer: fine)').matches)set(true);
+function on(e){if(e.pointerType==='mouse')set(true);else if(e.pointerType==='touch')set(false)}
+addEventListener('pointermove',on,{passive:true,capture:true});
+addEventListener('pointerdown',on,{passive:true,capture:true})})()`}
+        </Script>
       </head>
       <body className="min-h-screen bg-wedding-softdark text-wedding-cream overflow-hidden selection:bg-wedding-cream/10 selection:text-wedding-cream font-inter" suppressHydrationWarning>
         <ThemeProvider

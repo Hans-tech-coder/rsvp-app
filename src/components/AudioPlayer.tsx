@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Volume1, Volume2, VolumeX } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { usePathname } from 'next/navigation';
+import { hasMouse } from '@/lib/pointer';
 
 const DEFAULT_VOLUME = 0.5;
 // Onboarding hint: shown once per page load, a moment after the music first
@@ -43,11 +44,12 @@ export function AudioPlayer() {
 
   // Hover only exists for a mouse. Trust the input the guest actually used (the
   // tap or click that started the music) over the media query, which some
-  // phones get wrong (e.g. Samsung models that report hover for their stylus)
+  // phones get wrong (e.g. Samsung models that report hover for their stylus).
+  // The fallback is the shared mouse check (src/lib/pointer.ts)
   const usesMouse = () =>
     lastPointer.current
       ? lastPointer.current === 'mouse'
-      : window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      : hasMouse();
 
   useEffect(() => {
     if (isAdmin) return;

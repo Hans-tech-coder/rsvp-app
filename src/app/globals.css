@@ -197,17 +197,16 @@
     opacity   var(--duration-medium) var(--ease-smooth-out),
     transform var(--duration-medium) var(--ease-smooth-out);
 }
-@media (hover: hover) and (pointer: fine) {
-  .t-view-card:hover .t-view-media {
-    transform: scale(1.06);
-    filter: blur(var(--blur-small)) brightness(0.6);
-  }
-  .t-view-card:hover .t-view-scrim { opacity: 1; }
-  .t-view-card:hover .t-view-button {
-    opacity: 1;
-    transform: none;
-    transition-delay: var(--duration-stagger);
-  }
+/* `t-mouse`: see layout.tsx. :where keeps the reduced-motion override below winning. */
+:where(.t-mouse) .t-view-card:hover .t-view-media {
+  transform: scale(1.06);
+  filter: blur(var(--blur-small)) brightness(0.6);
+}
+:where(.t-mouse) .t-view-card:hover .t-view-scrim { opacity: 1; }
+:where(.t-mouse) .t-view-card:hover .t-view-button {
+  opacity: 1;
+  transform: none;
+  transition-delay: var(--duration-stagger);
 }
 /* Keyboard focus gets the same reveal as hover, on every device (a touch
    tablet with a keyboard too), plus a gold ring. The ring is drawn inside the
@@ -353,6 +352,10 @@ html.t-cursor-on :is(textarea, [contenteditable=""], [contenteditable="true"], i
   transition-timing-function: var(--ease-bounce);
 }
 @custom-variant dark (&:where(.dark, .dark *));
+/* Tailwind's default `hover:` is gated on `@media (hover: hover)`, which some
+   Chrome installs get wrong with a real mouse. Gate on `t-mouse` instead (set
+   in layout.tsx from the media query or an actual mouse move). */
+@custom-variant hover (&:where(.t-mouse *):hover);
 @theme {
   --color-wedding-cream: #FCFAF6;
   --color-wedding-ivory: #F7F4EB;

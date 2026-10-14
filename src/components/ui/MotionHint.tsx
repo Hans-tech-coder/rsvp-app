@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { hasMouse } from '@/lib/pointer';
 
 // Onboarding hint for the welcome 3D scene: "move your mouse" on desktop, "tilt
 // your phone" on phones. Appears after the intro and leaves after a few seconds.
@@ -35,7 +36,7 @@ type OrientationWithPermission = typeof DeviceOrientationEvent & {
 };
 
 function detectMode(): Mode | null {
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return 'mouse';
+  if (hasMouse()) return 'mouse';
   if (!window.matchMedia('(pointer: coarse)').matches || !('DeviceOrientationEvent' in window)) return null;
   // Newer Chrome also has requestPermission (it grants at once), so check for iOS itself
   const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -55,6 +56,9 @@ export function MotionHint() {
     let finished = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
     let current: Mode | null = null;
+    // Nothing detected at first-show time, but not a phone either: Chrome may
+    // not know about the mouse yet, so the first real mouse move shows the hint
+    let awaitingMouse = false;
 
     const schedule = (fn: () => void, ms: number) => {
       if (timer) clearTimeout(timer);
@@ -96,6 +100,12 @@ export function MotionHint() {
     let lastY = 0;
     const onPointer = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse') return;
+      if (awaitingMouse) {
+        awaitingMouse = false;
+        current = 'mouse';
+        setMode(current);
+        show();
+      }
       if (lastX !== null && isUp) travelled += Math.abs(e.clientX - lastX) + Math.abs(e.clientY - lastY);
       lastX = e.clientX;
       lastY = e.clientY;
@@ -117,7 +127,10 @@ export function MotionHint() {
     schedule(() => {
       if (finishedThisLoad) return;
       current = detectMode();
-      if (!current) return;
+      if (!current) {
+        awaitingMouse = !window.matchMedia('(pointer: coarse)').matches;
+        return;
+      }
       setMode(current);
       show();
     }, FIRST_SHOW_MS);
