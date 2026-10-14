@@ -28,6 +28,7 @@ export function GlobalSettingsEditor() {
     groomName: weddingContent.global.groomName,
     venueShort: weddingContent.global.venueShort,
     targetDate: weddingContent.global.targetDate,
+    footerTagline: weddingContent.global.footerTagline,
     ceremonyTime: weddingContent.details.ceremony.time,
     ceremonyLocation: weddingContent.details.ceremony.location,
     ceremonyAddress: weddingContent.details.ceremony.address,
@@ -298,7 +299,7 @@ export function GlobalSettingsEditor() {
       <div className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Global Date & Location</h3>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">These are the primary display dates and locations used in headers, footers, and the Welcome screen.</p>
+          <p className="text-sm text-gray-500 dark:text-zinc-400">These are the primary display dates and locations used on the Welcome and Entrance screens and in the footer.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2 md:col-span-2">
@@ -323,8 +324,30 @@ export function GlobalSettingsEditor() {
               placeholder="e.g. December 20, 2026 15:00:00"
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
             />
-            <p className="text-xs text-gray-500 dark:text-zinc-500">Format: Month DD, YYYY HH:MM:SS. Used for the countdown timer on the Welcome screen.</p>
+            <p className="text-xs text-gray-500 dark:text-zinc-500">Format: Month DD, YYYY HH:MM:SS. Used for the countdown timer on the Welcome screen and the date in the footer (shown as DD.MM.YYYY).</p>
           </div>
+        </div>
+      </div>
+
+      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
+
+      {/* Footer Section */}
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Footer</h3>
+          <p className="text-sm text-gray-500 dark:text-zinc-400">Shown at the bottom of every scrolling screen. The monogram uses the couple&apos;s initials and the date comes from the Target Date above.</p>
+        </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Footer Tagline</label>
+          <input
+            type="text"
+            name="footerTagline"
+            value={formData.footerTagline}
+            onChange={handleChange}
+            placeholder="e.g. Together is a beautiful place to be"
+            className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+          />
+          <p className="text-xs text-gray-500 dark:text-zinc-500">Quotation marks are added automatically. Leave blank to use the default tagline.</p>
         </div>
       </div>
 

@@ -75,7 +75,7 @@ if present, overrides it (merge rules in `docs/content-system.md`).
 
 | Firestore doc | JSON key(s) the site reads | Editor |
 | --- | --- | --- |
-| `globalSettings` | `global` (logo, names, dates, `targetDate`, `ogImage`) **and** `details.ceremony` / `details.reception` time, location, address | `GlobalSettingsEditor.tsx` |
+| `globalSettings` | `global` (logo, names, dates, `targetDate`, `ogImage`, `footerTagline`) **and** `details.ceremony` / `details.reception` time, location, address | `GlobalSettingsEditor.tsx` |
 | `welcomeScreen` | `welcomeScreen` | `WelcomeScreenEditor.tsx` |
 | `entranceScreen` | `entranceScreen` | `EntranceScreenEditor.tsx` |
 | `ourStory` | `ourStory` (`subtitle`, `title`, `description`, `items[]`) | `OurStoryEditor.tsx` |

@@ -33,7 +33,7 @@ All editors are in `src/app/admin/content/`.
 | Step state, back/menu buttons, screen transitions, RSVP lock, localStorage | `src/app/page.tsx` |
 | Content loading (JSON defaults + Firestore overrides) | `src/contexts/WeddingContentContext.tsx`, `src/data/wedding-content.json` |
 | Step menu overlay | `src/components/layout/CanvasMenu.tsx` |
-| Footer at the bottom of scrolling screens | `src/components/layout/EmbeddedFooter.tsx` |
+| Footer at the bottom of scrolling screens (monogram from `global.groomName`/`brideName` initials, tagline `global.footerTagline`, date `global.targetDate` as DD.MM.YYYY; all edited in `GlobalSettingsEditor.tsx`) | `src/components/layout/EmbeddedFooter.tsx` |
 | Background music + floating toggle, volume slider, "music is playing" hint | `src/components/AudioPlayer.tsx`, `.t-vol-*` in `src/app/globals.css`, `public/bg-music.mp3` |
 | Fonts, OG/Twitter metadata, theme script | `src/app/layout.tsx` |
 | 404 page for any unknown URL (couple's photo inside the "404", days-to-wedding line, "Back to the celebration" → `/`; same burgundy backdrop and button style as the inner screens; embossed logo `.t-emboss` in `globals.css`; also mounts `FallingPetals` and `WeddingCursor`) | `src/app/not-found.tsx` (metadata) → `src/components/screens/NotFoundScreen.tsx` |
@@ -113,10 +113,10 @@ Read these by range (`grep -n` then read around the line), never whole.
 | 700 | `src/app/admin/content/DressCodeEditor.tsx` |
 | 661 | `src/app/admin/content/RegistryEditor.tsx` |
 | 597 | `src/app/admin/content/OurStoryEditor.tsx` |
-| 594 | `src/data/wedding-content.json` |
+| 595 | `src/data/wedding-content.json` |
 | 557 | `src/app/admin/content/GalleryEditor.tsx` |
 | 538 | `src/app/admin/content/EntourageEditor.tsx` |
-| 498 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
+| 517 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
 | 493 | `src/app/admin/content/FaqsEditor.tsx` |
 | 471 | `src/components/ui/circular-image-gallery.tsx` |
 | 469 | `src/app/admin/content/EventDetailsEditor.tsx` |

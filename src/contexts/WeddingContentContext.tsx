@@ -84,6 +84,7 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
             dateFull: globalData.dateFull || newContent.global.dateFull,
             venueShort: globalData.venueShort || newContent.global.venueShort,
             targetDate: globalData.targetDate || newContent.global.targetDate,
+            footerTagline: globalData.footerTagline || newContent.global.footerTagline,
           };
 
           // Map to newContent.details
