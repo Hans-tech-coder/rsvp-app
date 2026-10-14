@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Upload, Image as ImageIcon, Save, Check, RotateCcw, History } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
+import { EditorSaveBar } from './EditorSaveBar';
+import { CharCount, TEXT_LIMITS } from './CharCount';
 import { revalidateGuestSite } from '@/app/actions/admin';
 
 export function GlobalSettingsEditor() {
@@ -359,6 +361,7 @@ export function GlobalSettingsEditor() {
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Footer Tagline</label>
           <input
+            maxLength={TEXT_LIMITS.cardTitle}
             type="text"
             name="footerTagline"
             value={formData.footerTagline}
@@ -366,6 +369,7 @@ export function GlobalSettingsEditor() {
             placeholder="e.g. Together is a beautiful place to be"
             className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
           />
+          <CharCount value={formData.footerTagline} max={TEXT_LIMITS.cardTitle} />
           <p className="text-xs text-gray-500 dark:text-zinc-500">Quotation marks are added automatically. Leave blank to use the default tagline.</p>
         </div>
       </div>
@@ -456,48 +460,7 @@ export function GlobalSettingsEditor() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6 border-t border-gray-200 dark:border-zinc-800 mt-12">
-        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
-          {hasChanges && (
-            <button
-              onClick={handleUndo}
-              disabled={saving}
-              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Undo Changes
-            </button>
-          )}
-          {hasBackup && (
-            <button
-              onClick={() => setIsRestoreModalOpen(true)}
-              disabled={saving}
-              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-            >
-              <History className="w-4 h-4" />
-              Restore Previous Save
-            </button>
-          )}
-          <button
-            onClick={() => setShowConfirmModal(true)}
-            disabled={saving || !hasChanges}
-            className={`flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 rounded-lg transition-colors ${
-              !hasChanges 
-                ? 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed'
-                : 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800 dark:hover:bg-zinc-200'
-            }`}
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : saved ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
-          </button>
-        </div>
-      </div>
+      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
 
       <AdminModal
         isOpen={isRestoreModalOpen}

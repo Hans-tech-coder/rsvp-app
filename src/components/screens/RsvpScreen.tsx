@@ -119,7 +119,6 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
   const formContent = content.rsvpForm;
   const text = useSiteText();
 
-  const [showGifts, setShowGifts] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [attendance, setAttendance] = useState<'Yes' | 'No' | null>(null);
 
@@ -188,11 +187,6 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
       cancelled = true;
     };
   }, []);
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    alert('IBAN Details Copied!');
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

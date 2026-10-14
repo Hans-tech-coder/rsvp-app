@@ -14,9 +14,16 @@ import { RegistryEditor } from './RegistryEditor';
 import { RsvpCtaEditor } from './RsvpCtaEditor';
 import { RsvpFormEditor } from './RsvpFormEditor';
 import { SiteTextEditor } from './SiteTextEditor';
+import { UnsavedChangesProvider, useUnsavedChangesGuard } from './unsavedChanges';
 
 export default function ContentManagerPage() {
   const [activeTab, setActiveTab] = useState('global-settings');
+  const { setDirty, guard, dialog } = useUnsavedChangesGuard();
+
+  // Switching tabs unmounts the editor, so unsaved edits are asked about first.
+  const selectTab = (id: string) => {
+    if (id !== activeTab) guard(() => setActiveTab(id));
+  };
 
   const tabs = [
     { id: 'global-settings', label: 'Global Settings' },
@@ -50,7 +57,7 @@ export default function ContentManagerPage() {
           <div className="p-4 md:hidden relative">
             <select
               value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value)}
+              onChange={(e) => selectTab(e.target.value)}
               className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm font-medium text-gray-900 dark:text-zinc-100 outline-none appearance-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-zinc-100"
             >
               {tabs.map((tab) => (
@@ -71,7 +78,7 @@ export default function ContentManagerPage() {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => selectTab(tab.id)}
                 className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-sm'
@@ -86,12 +93,13 @@ export default function ContentManagerPage() {
 
         {/* Main Content Area */}
         <div className="flex-1 p-6 lg:p-8 overflow-y-auto bg-white dark:bg-zinc-900">
+          <UnsavedChangesProvider value={setDirty}>
           {activeTab === 'global-settings' && <GlobalSettingsEditor />}
           {activeTab === 'welcome' && <WelcomeScreenEditor />}
           {activeTab === 'entrance' && <EntranceScreenEditor />}
           {activeTab === 'our-story' && <OurStoryEditor />}
           {activeTab === 'entourage' && <EntourageEditor />}
-          {activeTab === 'event-details' && <EventDetailsEditor />}
+          {activeTab === 'event-details' && <EventDetailsEditor onEditGlobalSettings={() => selectTab('global-settings')} />}
           {activeTab === 'dress-code' && <DressCodeEditor />}
           {activeTab === 'gallery' && <GalleryEditor />}
           {activeTab === 'faqs' && <FaqsEditor />}
@@ -110,8 +118,10 @@ export default function ContentManagerPage() {
               </p>
             </div>
           )}
+          </UnsavedChangesProvider>
         </div>
       </div>
+      {dialog}
     </div>
   );
 }

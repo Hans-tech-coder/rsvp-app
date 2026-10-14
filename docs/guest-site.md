@@ -132,7 +132,7 @@ transaction rejects when `currentCount >= maxCount`.
   so dark areas do not turn orange). The optional `unlit` ellipse gets no light;
   it is set on the groom's hair. It runs only when the photo URL has
   a map in `DEPTH_MAPS`
-  (`WelcomeScreen.tsx`); otherwise, under reduced motion, or without WebGL, the
+  (`src/lib/welcomeDepthMaps.ts`); otherwise, under reduced motion, or without WebGL, the
   flat photo + `TwinkleSparks` render. With the scene on, `MotionHint` shows
   just above the countdown (absolute inside the countdown group; one line and
   more compact on screens under 700 px tall) 2.6 s after

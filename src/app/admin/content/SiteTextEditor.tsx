@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Save, Check, RotateCcw, History, Search, ChevronDown } from 'lucide-react';
+import { Loader2, Search, ChevronDown } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { DEFAULT_SITE_TEXT, mergeSiteText, type SiteText } from '@/lib/siteText';
 import { revalidateGuestSite } from '@/app/actions/admin';
 import { AdminModal } from '../components/AdminModal';
+import { EditorSaveBar } from './EditorSaveBar';
+import { CharCount } from './CharCount';
 import { SITE_TEXT_GROUPS, type SiteTextField } from './siteTextFields';
 
 // Small wording on the guest site (buttons, labels, hints, error messages),
@@ -209,9 +211,11 @@ export function SiteTextEditor() {
                           value={value}
                           onChange={(e) => handleChange(field.path, e.target.value)}
                           placeholder={fallback}
+                          maxLength={field.max}
                           className={inputClass}
                         />
                       )}
+                      {field.max && <CharCount value={value} max={field.max} />}
                       {field.hint && <p className="text-xs text-gray-500 dark:text-zinc-500">{field.hint}</p>}
                     </div>
                   );
@@ -225,48 +229,7 @@ export function SiteTextEditor() {
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6 border-t border-gray-200 dark:border-zinc-800 mt-12">
-        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
-          {hasChanges && (
-            <button
-              onClick={handleUndo}
-              disabled={saving}
-              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Undo Changes
-            </button>
-          )}
-          {hasBackup && (
-            <button
-              onClick={() => setIsRestoreModalOpen(true)}
-              disabled={saving}
-              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-            >
-              <History className="w-4 h-4" />
-              Restore Previous Save
-            </button>
-          )}
-          <button
-            onClick={() => setShowConfirmModal(true)}
-            disabled={saving || !hasChanges}
-            className={`flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 rounded-lg transition-colors ${
-              !hasChanges
-                ? 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed'
-                : 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800 dark:hover:bg-zinc-200'
-            }`}
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : saved ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
-          </button>
-        </div>
-      </div>
+      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
 
       <AdminModal
         isOpen={isRestoreModalOpen}

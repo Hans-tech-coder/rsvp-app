@@ -2,12 +2,16 @@
 // `siteText` (src/data/wedding-content.json). A key missing here is not
 // editable, so add a field to both places.
 
+import { TEXT_LIMITS } from './CharCount';
+
 export type SiteTextField = {
   path: string;
   label: string;
   /** Shown under the field, e.g. which {placeholders} the text may use. */
   hint?: string;
   multiline?: boolean;
+  /** Character limit (input stops there, counter shown). */
+  max?: number;
 };
 
 export type SiteTextGroup = {
@@ -23,8 +27,8 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
     title: 'Every screen',
     description: 'Wording shared by all screens.',
     fields: [
-      { path: 'common.continue', label: '"Continue" button at the bottom of each screen' },
-      { path: 'common.view', label: '"View" label on Gallery and Dress Code photos (computers, on hover)' },
+      { path: 'common.continue', label: '"Continue" button at the bottom of each screen', max: TEXT_LIMITS.button },
+      { path: 'common.view', label: '"View" label on Gallery and Dress Code photos (computers, on hover)', max: TEXT_LIMITS.button },
     ],
   },
   {
@@ -32,16 +36,16 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
     title: 'Menu',
     description: 'Names of the screens in the menu (top-right button).',
     fields: [
-      { path: 'menu.welcome', label: 'Welcome' },
-      { path: 'menu.ourStory', label: 'Our Story' },
-      { path: 'menu.entourage', label: 'Entourage' },
-      { path: 'menu.details', label: 'Event Details' },
-      { path: 'menu.dressCode', label: 'Dress Code' },
-      { path: 'menu.gallery', label: 'Gallery' },
-      { path: 'menu.faqs', label: 'FAQs' },
-      { path: 'menu.registry', label: 'Registry' },
-      { path: 'menu.rsvpCta', label: 'RSVP call to action' },
-      { path: 'menu.rsvp', label: 'RSVP form' },
+      { path: 'menu.welcome', label: 'Welcome', max: TEXT_LIMITS.button },
+      { path: 'menu.ourStory', label: 'Our Story', max: TEXT_LIMITS.button },
+      { path: 'menu.entourage', label: 'Entourage', max: TEXT_LIMITS.button },
+      { path: 'menu.details', label: 'Event Details', max: TEXT_LIMITS.button },
+      { path: 'menu.dressCode', label: 'Dress Code', max: TEXT_LIMITS.button },
+      { path: 'menu.gallery', label: 'Gallery', max: TEXT_LIMITS.button },
+      { path: 'menu.faqs', label: 'FAQs', max: TEXT_LIMITS.button },
+      { path: 'menu.registry', label: 'Registry', max: TEXT_LIMITS.button },
+      { path: 'menu.rsvpCta', label: 'RSVP call to action', max: TEXT_LIMITS.button },
+      { path: 'menu.rsvp', label: 'RSVP form', max: TEXT_LIMITS.button },
     ],
   },
   {
@@ -88,8 +92,8 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
       { path: 'entrance.eyebrow', label: 'Small heading above the names' },
       { path: 'entrance.instructions', label: 'Instructions', hint: 'Press Enter for a new line. Lines do not wrap, so keep them short.', multiline: true },
       { path: 'entrance.codePlaceholder', label: 'Code box placeholder' },
-      { path: 'entrance.button', label: 'Button' },
-      { path: 'entrance.validating', label: 'Button while checking the code' },
+      { path: 'entrance.button', label: 'Button', max: TEXT_LIMITS.button },
+      { path: 'entrance.validating', label: 'Button while checking the code', max: TEXT_LIMITS.button },
       { path: 'entrance.granted', label: 'Message when the code is accepted' },
       { path: 'entrance.preparing', label: 'Line below it' },
       { path: 'entrance.errors.invalid', label: 'Error: code does not exist' },
@@ -126,11 +130,11 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
     fields: [
       { path: 'details.location', label: 'Location label' },
       { path: 'details.address', label: 'Address label' },
-      { path: 'details.viewLocation', label: 'Map button' },
-      { path: 'details.addToCalendar', label: 'Calendar button' },
+      { path: 'details.viewLocation', label: 'Map button', max: TEXT_LIMITS.button },
+      { path: 'details.addToCalendar', label: 'Calendar button', max: TEXT_LIMITS.button },
       { path: 'details.mapTitle', label: 'Map window title' },
-      { path: 'details.saveCopy', label: 'Order of events: download button' },
-      { path: 'details.downloading', label: 'Download button while saving' },
+      { path: 'details.saveCopy', label: 'Order of events: download button', max: TEXT_LIMITS.button },
+      { path: 'details.downloading', label: 'Download button while saving', max: TEXT_LIMITS.button },
     ],
   },
   {
@@ -148,7 +152,7 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
     title: 'Registry',
     description: 'Buttons and the bank QR window.',
     fields: [
-      { path: 'registry.visitRegistry', label: 'Button that opens the gift list' },
+      { path: 'registry.visitRegistry', label: 'Button that opens the gift list', max: TEXT_LIMITS.button },
       { path: 'registry.scanQr', label: 'QR window: instruction' },
       { path: 'registry.thankYou', label: 'QR window: thank-you line' },
       { path: 'registry.qrMissing', label: 'QR window: text when a bank has no QR image', hint: '{bank} is replaced by the bank name.' },
@@ -161,9 +165,9 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
     fields: [
       { path: 'curatedRegistry.title', label: 'Title' },
       { path: 'curatedRegistry.intro', label: 'Intro', multiline: true },
-      { path: 'curatedRegistry.viewItem', label: 'Link to the item' },
-      { path: 'curatedRegistry.selectGift', label: 'Select button' },
-      { path: 'curatedRegistry.selected', label: 'Button when the gift is taken' },
+      { path: 'curatedRegistry.viewItem', label: 'Link to the item', max: TEXT_LIMITS.button },
+      { path: 'curatedRegistry.selectGift', label: 'Select button', max: TEXT_LIMITS.button },
+      { path: 'curatedRegistry.selected', label: 'Button when the gift is taken', max: TEXT_LIMITS.button },
       { path: 'curatedRegistry.errors.notFound', label: 'Error: gift was removed' },
       { path: 'curatedRegistry.errors.full', label: 'Error: gift already taken' },
       { path: 'curatedRegistry.errors.failed', label: 'Error: could not save the choice' },
@@ -182,7 +186,7 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
       { path: 'giftModal.emailPlaceholder', label: 'Email example' },
       { path: 'giftModal.messageLabel', label: 'Message label' },
       { path: 'giftModal.messagePlaceholder', label: 'Message example' },
-      { path: 'giftModal.submit', label: 'Button' },
+      { path: 'giftModal.submit', label: 'Button', max: TEXT_LIMITS.button },
     ],
   },
   {
@@ -246,7 +250,7 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
       { path: 'notFound.pageTitle', label: 'Browser tab title', hint: '{couple} = couple names from Global Settings.' },
       { path: 'notFound.heading', label: 'Heading' },
       { path: 'notFound.description', label: 'Description', multiline: true },
-      { path: 'notFound.button', label: 'Button' },
+      { path: 'notFound.button', label: 'Button', max: TEXT_LIMITS.button },
       { path: 'notFound.resumeNote', label: 'Line under the button' },
       { path: 'notFound.daysLeftOne', label: 'Countdown line, 1 day left', hint: '{days}, {couple}, {venue}.' },
       { path: 'notFound.daysLeftMany', label: 'Countdown line, several days left', hint: '{days}, {couple}, {venue}.' },

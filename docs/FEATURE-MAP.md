@@ -47,7 +47,7 @@ All editors are in `src/app/admin/content/`.
 | Countdown digits pop-in | `src/components/ui/PopInNumber.tsx` |
 | Auto-scrolling draggable strip (pauses on hover and keyboard focus; hidden loop copy) | `src/components/ui/DraggableSlider.tsx` |
 | Ink reveal canvas background | `src/components/ui/InkRevealCanvas.tsx` |
-| Welcome 3D background: depth-parallax photo + depth-aware fireflies that light the couple (WebGL); map and couple area paired to the photo in `DEPTH_MAPS` in `WelcomeScreen.tsx`, asset `public/images/welcome-depth.webp` | `src/components/effects/DepthParallaxScene.tsx` |
+| Welcome 3D background: depth-parallax photo + depth-aware fireflies that light the couple (WebGL); map and couple area paired to the photo in `DEPTH_MAPS` in `src/lib/welcomeDepthMaps.ts` (`hasDepthMap()` also drives the 3D warning in `WelcomeScreenEditor.tsx`), asset `public/images/welcome-depth.webp` | `src/components/effects/DepthParallaxScene.tsx` |
 | Welcome motion onboarding hint ("Move your mouse" / "Tilt your phone", iOS tap-to-enable), every page load, repeats up to 3 times until tried | `src/components/ui/MotionHint.tsx` (icon keyframes `t-hint-*` in `globals.css`) |
 | Firefly glow particles (welcome fallback, drawn above the dark gradient) | `src/components/effects/TwinkleSparks.tsx` |
 | Slow falling rose petals, burgundy/red/white, CSS only (404 page) | `src/components/effects/FallingPetals.tsx` + `.t-petal*` in `globals.css` |
@@ -87,6 +87,7 @@ server actions and then `router.refresh()`.
 | `/admin/gifts` | `src/app/admin/gifts/page.tsx` | `GiftsClient.tsx` | `registryGifts` |
 | `/admin/registry` | `src/app/admin/registry/page.tsx` | `RegistrySelectionsClient.tsx` | `giftSelections` |
 | `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder ("Site Text" tab = `SiteTextEditor.tsx`) | `websiteContent/*` + Vercel Blob |
+| Content editors' shared pieces: sticky Undo / Restore / Save row with live status (`EditorSaveBar.tsx`), "Leave without saving?" guard for tab switch, admin links and page close (`unsavedChanges.tsx`), character limits + counter (`CharCount.tsx`, `TEXT_LIMITS`) | `src/app/admin/content/page.tsx` | `EditorSaveBar.tsx`, `unsavedChanges.tsx`, `CharCount.tsx` | – |
 | sidebar/nav | `src/app/admin/layout.tsx` | – | – |
 | Manage Admins (sidebar button, super admins only; no route) | `src/app/admin/layout.tsx` | `src/app/admin/components/ManageAdminsModal.tsx` | `admins`, `adminAllowlist` |
 | shared UI | `src/app/admin/components/AdminModal.tsx`, `TablePagination.tsx` | | |
@@ -114,15 +115,15 @@ Read these by range (`grep -n` then read around the line), never whole.
 | Lines | File |
 | --- | --- |
 | 765 | `src/data/wedding-content.json` |
-| 700 | `src/app/admin/content/DressCodeEditor.tsx` |
-| 661 | `src/app/admin/content/RegistryEditor.tsx` |
-| 597 | `src/app/admin/content/OurStoryEditor.tsx` |
-| 557 | `src/app/admin/content/GalleryEditor.tsx` |
-| 547 | `src/components/screens/RsvpScreen.tsx` |
-| 538 | `src/app/admin/content/EntourageEditor.tsx` |
-| 536 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
-| 493 | `src/app/admin/content/FaqsEditor.tsx` |
+| 667 | `src/app/admin/content/DressCodeEditor.tsx` |
+| 628 | `src/app/admin/content/RegistryEditor.tsx` |
+| 562 | `src/app/admin/content/OurStoryEditor.tsx` |
+| 541 | `src/components/screens/RsvpScreen.tsx` |
+| 512 | `src/app/admin/content/GalleryEditor.tsx` |
+| 506 | `src/app/admin/content/EntourageEditor.tsx` |
+| 499 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
+| 477 | `src/app/admin/content/EventDetailsEditor.tsx` |
 | 471 | `src/components/ui/circular-image-gallery.tsx` |
-| 469 | `src/app/admin/content/EventDetailsEditor.tsx` |
-| 464 | `src/app/page.tsx` |
-| 435 | `src/app/admin/content/RsvpFormEditor.tsx` |
+| 466 | `src/app/page.tsx` |
+| 458 | `src/app/admin/content/FaqsEditor.tsx` |
+| 408 | `src/app/admin/content/RsvpFormEditor.tsx` |

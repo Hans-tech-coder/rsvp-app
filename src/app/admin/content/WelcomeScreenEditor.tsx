@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Upload, Image as ImageIcon, Save, Check, RotateCcw, History } from 'lucide-react';
+import { Loader2, Upload, Image as ImageIcon, Info, AlertTriangle } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import Image from 'next/image';
 import { AdminModal } from '../components/AdminModal';
+import { EditorSaveBar } from './EditorSaveBar';
+import { CharCount, TEXT_LIMITS } from './CharCount';
+import { hasDepthMap } from '@/lib/welcomeDepthMaps';
 
 export function WelcomeScreenEditor() {
   const [loading, setLoading] = useState(true);
@@ -187,6 +190,17 @@ export function WelcomeScreenEditor() {
               This image is displayed full-screen when the user first opens the website. 
               Recommended size: 1920x1080 pixels. High quality portrait or landscape photos work best.
             </p>
+            {hasDepthMap(formData.backgroundImage) ? (
+              <p className="flex gap-2 p-3 text-sm rounded-lg bg-blue-50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+                <Info className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
+                This photo has the 3D motion effect. A new photo shows still (no 3D) until a developer makes a depth map for it.
+              </p>
+            ) : (
+              <p className="flex gap-2 p-3 text-sm rounded-lg bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
+                The 3D motion effect is off for this photo: it has no depth map, so guests see it still. Ask a developer to make one to turn the effect back on.
+              </p>
+            )}
             <div>
               <input 
                 type="file" 
@@ -217,91 +231,58 @@ export function WelcomeScreenEditor() {
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Subtitle / Tagline</label>
             <input 
+              maxLength={TEXT_LIMITS.heading}
               type="text" 
               name="subtitle"
               value={formData.subtitle}
               onChange={handleChange}
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 focus:ring-1 focus:ring-gray-400 dark:focus:ring-zinc-500 transition-all"
             />
+            <CharCount value={formData.subtitle} max={TEXT_LIMITS.heading} />
           </div>
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Top Text</label>
             <input 
+              maxLength={TEXT_LIMITS.cardTitle}
               type="text" 
               name="topText"
               value={formData.topText}
               onChange={handleChange}
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 focus:ring-1 focus:ring-gray-400 dark:focus:ring-zinc-500 transition-all"
             />
+            <CharCount value={formData.topText} max={TEXT_LIMITS.cardTitle} />
           </div>
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Bottom Text 1</label>
             <input 
+              maxLength={TEXT_LIMITS.cardTitle}
               type="text" 
               name="bottomText1"
               value={formData.bottomText1}
               onChange={handleChange}
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 focus:ring-1 focus:ring-gray-400 dark:focus:ring-zinc-500 transition-all"
             />
+            <CharCount value={formData.bottomText1} max={TEXT_LIMITS.cardTitle} />
           </div>
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Bottom Text 2</label>
             <input 
+              maxLength={TEXT_LIMITS.sentence}
               type="text" 
               name="bottomText2"
               value={formData.bottomText2}
               onChange={handleChange}
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 focus:ring-1 focus:ring-gray-400 dark:focus:ring-zinc-500 transition-all"
             />
+            <CharCount value={formData.bottomText2} max={TEXT_LIMITS.sentence} />
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6 border-t border-gray-200 dark:border-zinc-800 mt-12">
-        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
-          {hasChanges && (
-            <button
-              onClick={handleUndo}
-              disabled={saving}
-              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Undo Changes
-            </button>
-          )}
-          {hasBackup && (
-            <button
-              onClick={() => setIsRestoreModalOpen(true)}
-              disabled={saving}
-              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-            >
-              <History className="w-4 h-4" />
-              Restore Previous Save
-            </button>
-          )}
-          <button
-            onClick={() => setShowConfirmModal(true)}
-            disabled={saving || !hasChanges}
-            className={`flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 rounded-lg transition-colors ${
-              !hasChanges 
-                ? 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed'
-                : 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800 dark:hover:bg-zinc-200'
-            }`}
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : saved ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
-          </button>
-        </div>
-      </div>
+      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
 
       <AdminModal
         isOpen={isRestoreModalOpen}

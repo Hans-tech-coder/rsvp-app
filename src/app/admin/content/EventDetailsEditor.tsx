@@ -1,14 +1,33 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Loader2, Save, Check, RotateCcw, History, Upload, ImageIcon, X } from 'lucide-react';
+import { Loader2, Upload, X, Settings } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
+import { EditorSaveBar } from './EditorSaveBar';
+import { CharCount, TEXT_LIMITS } from './CharCount';
 
-export function EventDetailsEditor() {
+// Time, location and address come from Global Settings (the guest site reads
+// them from there), so they are shown here read-only.
+type VenueFacts = Record<'ceremony' | 'reception', { time: string; location: string; address: string }>;
+
+const venueFactsFrom = (global: Record<string, string | undefined>): VenueFacts => ({
+  ceremony: {
+    time: global.ceremonyTime || weddingContent.details.ceremony.time,
+    location: global.ceremonyLocation || weddingContent.details.ceremony.location,
+    address: global.ceremonyAddress || weddingContent.details.ceremony.address,
+  },
+  reception: {
+    time: global.receptionTime || weddingContent.details.reception.time,
+    location: global.receptionLocation || weddingContent.details.reception.location,
+    address: global.receptionAddress || weddingContent.details.reception.address,
+  },
+});
+
+export function EventDetailsEditor({ onEditGlobalSettings }: { onEditGlobalSettings: () => void }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -20,6 +39,7 @@ export function EventDetailsEditor() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [venueFacts, setVenueFacts] = useState<VenueFacts>(() => venueFactsFrom({}));
   
   // State for the form fields
   const [data, setData] = useState({ ...weddingContent.details, orderOfEventsImage: '' });
@@ -58,6 +78,11 @@ export function EventDetailsEditor() {
         const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
+        }
+
+        const globalSnap = await getDoc(doc(db, 'websiteContent', 'globalSettings'));
+        if (globalSnap.exists()) {
+          setVenueFacts(venueFactsFrom(globalSnap.data()));
         }
       } catch (error) {
         console.error("Error fetching content:", error);
@@ -188,22 +213,26 @@ export function EventDetailsEditor() {
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Card Subtitle (e.g., The Vows)</label>
             <input 
+              maxLength={TEXT_LIMITS.cardTitle}
               type="text" 
               name="subtitle"
               value={(data[section] as any).subtitle || ""}
               onChange={(e) => handleSectionChange(section, e)}
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
             />
+            <CharCount value={data[section].subtitle} max={TEXT_LIMITS.cardTitle} />
           </div>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Title</label>
             <input 
+              maxLength={TEXT_LIMITS.cardTitle}
               type="text" 
               name="title"
               value={data[section].title}
               onChange={(e) => handleSectionChange(section, e)}
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
             />
+            <CharCount value={data[section].title} max={TEXT_LIMITS.cardTitle} />
           </div>
         </div>
         <div className="space-y-2">
@@ -260,9 +289,27 @@ export function EventDetailsEditor() {
           </div>
         </div>
         
-        <div className="p-4 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-lg mt-2">
-          <p className="text-sm text-blue-800 dark:text-blue-300">
-            <strong>Note:</strong> Time, Location, and Address fields are edited in the <strong>Global Settings</strong> tab to ensure they match everywhere on the site.
+        <div className="p-4 bg-gray-50 dark:bg-zinc-950/50 border border-gray-200 dark:border-zinc-800 rounded-lg">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+              <dt className="text-gray-500 dark:text-zinc-400">Time</dt>
+              <dd className="text-gray-900 dark:text-zinc-100">{venueFacts[section].time}</dd>
+              <dt className="text-gray-500 dark:text-zinc-400">Location</dt>
+              <dd className="text-gray-900 dark:text-zinc-100">{venueFacts[section].location}</dd>
+              <dt className="text-gray-500 dark:text-zinc-400">Address</dt>
+              <dd className="text-gray-900 dark:text-zinc-100">{venueFacts[section].address}</dd>
+            </dl>
+            <button
+              type="button"
+              onClick={onEditGlobalSettings}
+              className="inline-flex items-center justify-center gap-2 shrink-0 px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors"
+            >
+              <Settings className="w-4 h-4" aria-hidden="true" />
+              Edit in Global Settings
+            </button>
+          </div>
+          <p className="mt-3 text-xs text-gray-500 dark:text-zinc-400">
+            Time, location and address are set once in Global Settings so they match everywhere on the site.
           </p>
         </div>
       </div>
@@ -290,22 +337,26 @@ export function EventDetailsEditor() {
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Subtitle</label>
               <input 
+                maxLength={TEXT_LIMITS.heading}
                 type="text" 
                 name="subtitle"
                 value={data.header?.subtitle || ""}
                 onChange={handleHeaderChange}
                 className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
               />
+              <CharCount value={data.header?.subtitle || ""} max={TEXT_LIMITS.heading} />
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Title</label>
               <input 
+                maxLength={TEXT_LIMITS.heading}
                 type="text" 
                 name="title"
                 value={data.header?.title || ""}
                 onChange={handleHeaderChange}
                 className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
               />
+              <CharCount value={data.header?.title || ""} max={TEXT_LIMITS.heading} />
             </div>
           </div>
           <div className="space-y-2">
@@ -387,48 +438,7 @@ export function EventDetailsEditor() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6 border-t border-gray-200 dark:border-zinc-800 mt-12">
-        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
-          {hasChanges && (
-            <button
-              onClick={handleUndo}
-              disabled={saving}
-              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Undo Changes
-            </button>
-          )}
-          {hasBackup && (
-            <button
-              onClick={() => setIsRestoreModalOpen(true)}
-              disabled={saving}
-              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-            >
-              <History className="w-4 h-4" />
-              Restore Previous Save
-            </button>
-          )}
-          <button
-            onClick={() => setShowConfirmModal(true)}
-            disabled={saving || !hasChanges}
-            className={`flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 rounded-lg transition-colors ${
-              !hasChanges 
-                ? 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed'
-                : 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800 dark:hover:bg-zinc-200'
-            }`}
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : saved ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
-          </button>
-        </div>
-      </div>
+      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
 
       <AdminModal
         isOpen={isRestoreModalOpen}

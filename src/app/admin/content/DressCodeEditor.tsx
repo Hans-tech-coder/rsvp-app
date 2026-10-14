@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Save, Check, RotateCcw, History, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-react';
+import { Loader2, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { AdminModal } from '../components/AdminModal';
+import { EditorSaveBar } from './EditorSaveBar';
+import { CharCount, TEXT_LIMITS } from './CharCount';
 import { nanoid } from 'nanoid';
 import {
   DndContext,
@@ -76,6 +78,8 @@ export function DressCodeEditor() {
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [lastBackup, setLastBackup] = useState<any>(null);
+
+  const hasChanges = !!originalData && JSON.stringify(data) !== JSON.stringify(originalData);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -331,22 +335,26 @@ export function DressCodeEditor() {
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Subtitle</label>
               <input 
+                maxLength={TEXT_LIMITS.heading}
                 type="text" 
                 name="subtitle"
                 value={data.header?.subtitle || ""}
                 onChange={handleHeaderChange}
                 className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
               />
+              <CharCount value={data.header?.subtitle || ""} max={TEXT_LIMITS.heading} />
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Title</label>
               <input 
+                maxLength={TEXT_LIMITS.heading}
                 type="text" 
                 name="title"
                 value={data.header?.title || ""}
                 onChange={handleHeaderChange}
                 className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
               />
+              <CharCount value={data.header?.title || ""} max={TEXT_LIMITS.heading} />
             </div>
           </div>
         </div>
@@ -360,12 +368,14 @@ export function DressCodeEditor() {
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Dress Code Main Title</label>
             <input 
+              maxLength={TEXT_LIMITS.cardTitle}
               type="text" 
               name="title"
               value={data.title}
               onChange={handleChange}
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
             />
+            <CharCount value={data.title} max={TEXT_LIMITS.cardTitle} />
           </div>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Description</label>
@@ -509,48 +519,7 @@ export function DressCodeEditor() {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6 border-t border-gray-200 dark:border-zinc-800 mt-12">
-        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
-          {originalData && JSON.stringify(data) !== JSON.stringify(originalData) && (
-            <button
-              onClick={handleUndo}
-              disabled={isSaving}
-              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Undo Changes
-            </button>
-          )}
-          {lastBackup && (
-            <button
-              onClick={() => setShowRestoreModal(true)}
-              disabled={isSaving}
-              className="flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-            >
-              <History className="w-4 h-4" />
-              Restore Previous Save
-            </button>
-          )}
-          <button
-            onClick={() => setShowConfirmModal(true)}
-            disabled={isSaving || !(originalData && JSON.stringify(data) !== JSON.stringify(originalData))}
-            className={`flex justify-center items-center gap-2 w-full sm:w-auto px-6 py-2.5 rounded-lg transition-colors ${
-              !(originalData && JSON.stringify(data) !== JSON.stringify(originalData)) 
-                ? 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed'
-                : 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800 dark:hover:bg-zinc-200'
-            }`}
-          >
-            {isSaving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : saved ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            {isSaving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
-          </button>
-        </div>
-      </div>
+      <EditorSaveBar hasChanges={hasChanges} saving={isSaving} saved={saved} hasBackup={!!lastBackup} onUndo={handleUndo} onRestore={() => setShowRestoreModal(true)} onSave={() => setShowConfirmModal(true)} />
 
       <AdminModal
         isOpen={showConfirmModal}

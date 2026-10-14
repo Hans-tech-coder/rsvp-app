@@ -37,6 +37,8 @@ when you find or fix one of these.
 | Music volume on iOS goes through Web Audio after the first slider touch | `AudioPlayer.tsx` (`ensureGain`) | Only checked in a desktop browser. On iOS < 17 the ringer switch may silence the music once that happens; the AudioContext is resumed on each `play` |
 | A few guest-visible words are still in code | loader monogram "H&C" (`LoadingScreen.tsx`); country names in `phoneCountries.ts`; dates formatted with `en-US` (`EntranceScreen`, metadata `{date}`); image `alt` and `aria-*` labels | The loader shows before content loads, so its monogram needs server-side global settings (planned with per-event server content) |
 | Site text, metadata and the 404 page update only through an admin save | `revalidateGuestSite` in `admin.ts` | `/` and the 404 page are static. A change made outside the admin (Firestore console, script) shows after the next deploy or the next Site Text / Global Settings save. Facebook and Messenger cache link previews on their side |
+| Event Details `calendarStart` repeats the time set in Global Settings | `EventDetailsEditor.tsx` ("Calendar Start"), `globalSettings.ceremonyTime` / `receptionTime` | Changing the time in Global Settings does not move the Add to Calendar time; edit both |
+| Sign Out does not warn about unsaved content edits | `src/app/admin/layout.tsx` (`handleLogout`) | Tab switch, admin links and page close do (`unsavedChanges.tsx`) |
 | Circular gallery keeps the last-closed photo mounted | `circular-image-gallery.tsx` (`closing` state never resets) | Two extra SVG `<image>`s at most; harmless |
 
 ## Unused code and dependencies

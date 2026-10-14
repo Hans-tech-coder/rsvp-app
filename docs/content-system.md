@@ -102,6 +102,29 @@ a new one):
    handler before changing this.
 7. Lists (story items, FAQs, gallery, dress-code images, banks) are sortable with
    `@dnd-kit` and get ids from `nanoid`.
+8. **Save row:** render `<EditorSaveBar hasChanges saving saved hasBackup onUndo
+   onRestore onSave />` (`EditorSaveBar.tsx`), never a hand-made button row. It
+   sticks to the bottom of the editor, says "Unsaved changes" / "Saved. Live on
+   the website now." / "All changes are live", and reports `hasChanges` to the
+   content page. While an editor has unsaved changes, `page.tsx` (through
+   `useUnsavedChangesGuard()` in `unsavedChanges.tsx`) asks "Leave without
+   saving?" before switching tabs or following a link to another admin page,
+   and the browser asks before closing or reloading. Sign Out is not guarded.
+9. **Character limits:** short display text (titles, the small heading above
+   them, card titles, buttons) gets `maxLength={TEXT_LIMITS.<kind>}` and a
+   `<CharCount value max />` under the input (`CharCount.tsx`). Site Text
+   fields take a `max` in `siteTextFields.ts`; buttons and menu names have one.
+   An older saved value over the limit is kept and the counter turns red.
+
+**Venue and time have one source.** Ceremony / reception time, location and
+address are edited only in Global Settings (the provider overrides the
+`details` doc with them). The Event Details editor reads `globalSettings` and
+shows them read-only with an "Edit in Global Settings" button (switches tab
+through the unsaved-changes guard).
+
+**Welcome background:** `WelcomeScreenEditor` tells the admin whether the
+current photo has a depth map (`hasDepthMap()` in `src/lib/welcomeDepthMaps.ts`).
+A new photo has none, so the 3D effect turns off until a developer adds a map.
 
 Editors write to Firestore **directly from the browser**; this works because
 the admin is signed in with the Firebase client SDK and `firestore.rules`
