@@ -19,19 +19,10 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Guests Collection
+    // Guests Collection: holds guest PII. Code checks, RSVPs and admin views all
+    // go through server actions / server pages with firebase-admin, which bypasses rules.
     match /guests/{inviteCode} {
-      // Admins have full access
-      allow read, write: if isAdmin();
-      
-      // Public can ONLY read a single document if they query its exact ID (the invite code)
-      // This is used to validate the code on the landing page form unlock
-      allow get: if true;
-      allow list: if false; // Cannot list all guests
-      
-      // Writes are strictly disabled from the client.
-      // RSVP submissions are handled by the Server Action using firebase-admin to ensure transactions
-      allow write: if false; 
+      allow read, write: if false; // server-only via firebase-admin
     }
 
     // Registry Gifts Collection

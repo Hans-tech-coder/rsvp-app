@@ -4,14 +4,18 @@
 
 | Actor | Can |
 | --- | --- |
-| Anyone | Read `websiteContent`, `registryGifts`, and any single `guests/{code}` doc from the browser (`firestore.rules`); read all uploaded images (public Vercel Blob URLs); call the guest server actions (`rsvp.ts`, `registry.ts`); call `/api/download` |
+| Anyone | Read `websiteContent` and `registryGifts` from the browser (`firestore.rules`); read all uploaded images (public Vercel Blob URLs); call the guest server actions (`rsvp.ts`, `registry.ts`). **Cannot** read or write `guests` from the browser (`allow read, write: if false`); invite-code checks and RSVPs go through `verifyInviteCode` / `submitRsvp` |
+| Anyone, via `/api/download` | Download an image only from an allowed host (`isAllowedImageUrl` in `src/lib/downloadProxy.ts`): `https:`, default port, no credentials, and either a `*.public.blob.vercel-storage.com` host (`endsWith`, not `includes`) or `firebasestorage.googleapis.com` with a path under `/v0/b/${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/` (legacy URLs). Anything else gets 400 before any fetch. The fetch uses `redirect: 'error'`; a non-`image/*` reply gets 415, more than 15 MB gets 413 (by `content-length`, and by a byte count while reading when the header is missing or wrong). Upstream errors return a generic 502/500; details go to `console.error` only. `filename` is cut down to `[A-Za-z0-9._-]`, max 100 chars, fallback `download.jpg` (`sanitizeFilename`), so no header injection. Response sets `Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`. Tests: `npm test` (`src/lib/downloadProxy.test.ts`) |
 | Guest with a valid unused code | Submit one RSVP (`submitRsvp` transaction flips `codeStatus` to `used`) |
 | Signed-in admin (`admins/{uid}` exists; role `super` or `admin`) | Write `websiteContent` from the browser (rules check `isAdmin()`); upload images to Vercel Blob with a token from `/api/upload`, which verifies the Firebase ID token the browser sends as `clientPayload` (`verifyIdToken(…, true)`) and that `admins/{uid}` exists before issuing it. It deliberately does not use the 5-day `session` cookie, which can expire while the admin page stays open |
 | Super admin (`role: 'super'`) | Everything a signed-in admin can, plus add a regular admin to `adminAllowlist`, cancel a pending regular admin, and remove a regular admin (`src/app/actions/admins.ts`). Cannot create, remove, or cancel a super admin from the UI; only `scripts/add-admin.js --super` (or the Firebase console) can |
 | Server (firebase-admin) | Everything — admin SDK bypasses rules |
 
 Browser writes to `guests`, `registryGifts`, and `giftSelections` are denied by
-the rules; those go through server actions.
+the rules; those go through server actions. `guests` (guest PII) is also
+unreadable from the browser: every read is `getAdminDb()` in `rsvp.ts`,
+`admin.ts`, or an admin server page. A new browser read of `guests` would be
+denied by the rules; add a server action instead.
 
 ## Admin check on the server (`src/lib/requireAdmin.ts`)
 
@@ -71,19 +75,13 @@ redirect). The real check is in `src/lib/requireAdmin.ts`:
 
 ## Known gaps (not fixed yet — read before touching auth)
 
-1. **`/api/download` fetches any URL** passed in `?url=` (open proxy / SSRF).
-   Restrict it to the image hosts (`*.public.blob.vercel-storage.com`, plus
-   `firebasestorage.googleapis.com` while legacy URLs remain).
-2. **`guests/{code}` has `allow get: if true`.** Anyone who knows or guesses a
-   used code can read that guest's name, email, phone, and message from the
-   browser. The site itself only uses the server action `verifyInviteCode`, so
-   this rule can likely be `false`.
-3. **No rate limit on `verifyInviteCode`.** 32^6 ≈ 1.07 billion codes makes
+1. **No rate limit on `verifyInviteCode`.** 32^6 ≈ 1.07 billion codes makes
    guessing slow, but there is no throttle.
-4. `firestore.rules` has overlapping `allow` lines per collection
-   (e.g. `allow read, write: if isAdmin()` and `allow write: if false`); rules
-   are OR-ed, so the `false` lines do nothing. Read them as "admin OR public
-   read".
+2. `firestore.rules` has overlapping `allow` lines for `registryGifts` and
+   `giftSelections` (e.g. `allow read, write: if isAdmin()` and
+   `allow write: if false`); rules are OR-ed, so the `false` lines do nothing.
+   Read them as "admin OR public read". (`guests` no longer has this: it is a
+   single `allow read, write: if false`.)
 
 ## Rules deployment
 

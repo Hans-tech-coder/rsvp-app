@@ -140,11 +140,15 @@ Match the code around you. These are the patterns the codebase already uses.
 
 ## Verification
 
-There are no automated tests. Before calling work done:
+The only automated tests are unit tests for the `/api/download` URL allowlist
+(`src/lib/downloadProxy.test.ts`, Vitest; `npm test` runs `src/` only, so the
+skill test files under `.claude/` and `.agents/` are not picked up). Before
+calling work done:
 
 1. `npm run lint`
 2. `npm run build` (type errors show here)
-3. Run `npm run dev` and check the change in the browser at phone width
+3. `npm test` if you touched `/api/download` or `src/lib/downloadProxy.ts`
+4. Run `npm run dev` and check the change in the browser at phone width
    (guest site) or in `/admin` (admin). The `verify-and-stop` skill covers
    this.
 

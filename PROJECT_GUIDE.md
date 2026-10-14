@@ -52,8 +52,9 @@ admin portal. Production URL: `https://hans-czay-wedding.vercel.app`.
   **firebase-admin 12** (server actions and server pages).
 - **Vercel Blob** (`@vercel/blob`) for admin image uploads; Hobby quota is
   shared with the account's other projects (see `docs/data-model.md`).
-- **Node 22.x.** Deployed on **Vercel**. No test suite exists — verify with
-  `npm run lint`, `npm run build`, and the running app.
+- **Node 22.x.** Deployed on **Vercel**. No real test suite: the only tests
+  are Vitest unit tests for the `/api/download` allowlist (`npm test`). Verify
+  with `npm run lint`, `npm run build`, and the running app.
 
 ### Commands
 
@@ -61,6 +62,7 @@ admin portal. Production URL: `https://hans-czay-wedding.vercel.app`.
 npm run dev            # local dev server on :3000
 npm run build          # production build (the main correctness gate)
 npm run lint           # eslint
+npm test               # vitest, src/ only (download-proxy allowlist tests)
 npm run sync-content   # PULL Firestore websiteContent -> src/data/wedding-content.json
 node scripts/add-admin.js <email> [--super]   # allowlist an admin; reads FIREBASE_ADMIN_* from .env.local
 ```
@@ -102,6 +104,7 @@ src/
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
   lib/blob/uploadImage.ts    compress + upload an image to Vercel Blob (all editors)
   lib/requireAdmin.ts        admin check for server actions and admin pages (server only)
+  lib/downloadProxy.ts       URL allowlist + filename sanitizer for /api/download (+ .test.ts)
   lib/email/sendRsvpConfirmation.ts   guest RSVP confirmation email via Gmail SMTP (server only)
   types/index.ts             Guest, RegistryGift, GiftSelection, AdminUser
   proxy.ts                   /admin/** redirect when no session cookie
