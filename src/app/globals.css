@@ -414,3 +414,45 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(128, 0, 32, 0.8);
 }
+
+/* Falling rose petals (FallingPetals.tsx, 404 page). Each petal falls, sways
+   and tumbles on three nested layers, transform only. Per-petal timings come in
+   as --petal-* custom properties. */
+.t-petal {
+  position: absolute;
+  top: -32px;
+  animation: t-petal-fall var(--petal-fall) linear var(--petal-delay) infinite;
+}
+.t-petal-sway {
+  display: block;
+  animation: t-petal-sway var(--petal-sway-dur) var(--ease-in-out) var(--petal-delay) infinite alternate;
+}
+.t-petal-spin {
+  display: block;
+  animation: t-petal-spin var(--petal-spin-dur) linear infinite;
+}
+@keyframes t-petal-fall {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, calc(100dvh + 64px), 0); }
+}
+@keyframes t-petal-sway {
+  from { transform: translateX(calc(var(--petal-sway) * -1)); }
+  to   { transform: translateX(var(--petal-sway)); }
+}
+@keyframes t-petal-spin {
+  from { transform: rotate(var(--petal-tilt)) rotate3d(1, 0.4, 0.2, 0deg); }
+  to   { transform: rotate(var(--petal-tilt)) rotate3d(1, 0.4, 0.2, 360deg); }
+}
+
+/* Embossed logo (NotFoundScreen.tsx): a light edge above-left and a dark edge
+   below-right make the monogram look pressed up from the page. Static. */
+.t-emboss {
+  filter:
+    drop-shadow(-1px -1px 0 color-mix(in srgb, var(--color-wedding-cream) 55%, transparent))
+    drop-shadow(2px 3px 1px color-mix(in srgb, black 85%, transparent))
+    drop-shadow(0 6px 10px color-mix(in srgb, black 40%, transparent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-petals { display: none; }
+}

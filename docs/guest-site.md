@@ -177,7 +177,9 @@ transaction rejects when `currentCount >= maxCount`.
   does not yet (see `docs/current-state.md` → Known issues).
 - The `transitions-dev` skill matches this token system — use it for new CSS
   motion. For Motion code (`motion/react`: screen swaps, `whileInView`,
-  scroll effects) use the `motion` skill.
+  scroll effects) use the `motion` skill. For layout and visual design of
+  guest pages use `design-taste-frontend`; its motion recipes are generic, so
+  map them onto these tokens instead of adding new timings.
 - After changing motion, loading, or scrolling, run the Motion performance
   check in `docs/conventions.md` → Verification.
 
@@ -246,3 +248,21 @@ The controls sit bottom-right (`#audio-controls`, hidden while
 - Fixed controls: back (top-left) and menu (top-right) at `z-[40]`; menu overlay
   `z-[60]`; entrance overlay `z-[100]`.
 - Colors and fonts: see `docs/conventions.md`.
+
+## 404 page
+
+Any unknown URL renders `src/app/not-found.tsx` (the root `not-found`, HTTP
+404, title "Page not found | Hans & Czay"), which shows `NotFoundScreen`. It is
+not a step and sits outside `WeddingContentProvider`, so it reads names, logo,
+venue, wedding date and the Welcome photo straight from
+`src/data/wedding-content.json`; an admin change to those shows here only after
+`npm run sync-content`. The days-to-wedding line is read on the client
+(`useSyncExternalStore`), because the page is prerendered. It uses the inner
+screens' burgundy backdrop and their burgundy button (text in `goldlight` for
+contrast). The logo is the original monogram, static, with an embossed
+look (`.t-emboss` in `globals.css`), and `FallingPetals`
+drifts behind the text (24 petals, 12 on phones; seeded values so server and
+client match; transform-only CSS). Under reduced motion the petals are hidden.
+Its one action links
+to `/`, which resumes the guest's saved step from `localStorage`. `AudioPlayer`
+(from the root layout) shows here too.

@@ -97,7 +97,7 @@ src/
   components/
     screens/                 one file per guest screen (+ GiftSelectionModal, LoadingScreen)
     ui/                      reusable visual pieces (TextsReveal, RevealImage, sliders, gallery…)
-    effects/                 TwinkleSparks (used), FallingPetals (unused)
+    effects/                 TwinkleSparks, FallingPetals (404 page), WeddingCursor, DepthParallaxScene
     layout/                  CanvasMenu (step menu), EmbeddedFooter
   contexts/WeddingContentContext.tsx   JSON defaults + Firestore overrides -> useWeddingContent()
   data/wedding-content.json  default/fallback content for every screen

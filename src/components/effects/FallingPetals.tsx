@@ -1,86 +1,80 @@
-"use client";
+import { memo } from 'react';
 
-import React, { useEffect, useState, memo } from 'react';
+// Slow falling rose petals (burgundy, red and white). Pure CSS: each petal
+// falls (`.t-petal`), sways side to side (`.t-petal-sway`) and tumbles in 3D
+// (`.t-petal-spin`); keyframes and the reduced-motion rule live in globals.css.
+// Values come from a seeded generator, so server and client render the same
+// petals (no hydration mismatch, no effect). Half the petals are hidden on
+// phones. Place it inside a positioned parent, behind the text.
 
-// Pre-calculate random values to avoid hydration mismatch
-const PETAL_COUNT = 35;
+const PETAL_COUNT = 24;
 
-interface PetalData {
-  id: number;
-  left: string;
-  animationDuration: string;
-  animationDelay: string;
-  width: string;
-  height: string;
-  colorClass: string;
-  rotation: string;
+const PETAL_COLORS = [
+  'text-wedding-burgundylight/85',
+  'text-wedding-burgundy/90',
+  'text-wedding-burgundylight/70',
+  'text-wedding-cream/50',
+  'text-wedding-cream/35',
+];
+
+// mulberry32: tiny deterministic PRNG
+function seeded(seed: number) {
+  return () => {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
-const FallingPetals = memo(() => {
-  const [petals, setPetals] = useState<PetalData[]>([]);
+const rand = seeded(20261220);
+const PETALS = Array.from({ length: PETAL_COUNT }, (_, i) => {
+  const fall = 16 + rand() * 12; // 16–28 s from top to bottom
+  return {
+    id: i,
+    left: `${(i / PETAL_COUNT) * 100 + rand() * (100 / PETAL_COUNT)}%`,
+    size: Math.round(12 + rand() * 12), // 12–24 px
+    color: PETAL_COLORS[Math.floor(rand() * PETAL_COLORS.length)],
+    style: {
+      '--petal-fall': `${fall.toFixed(1)}s`,
+      '--petal-delay': `-${(rand() * fall).toFixed(1)}s`,
+      '--petal-sway': `${Math.round(18 + rand() * 30)}px`,
+      '--petal-sway-dur': `${(3.5 + rand() * 3).toFixed(1)}s`,
+      '--petal-spin-dur': `${(6 + rand() * 6).toFixed(1)}s`,
+      '--petal-tilt': `${Math.round(rand() * 360)}deg`,
+    } as React.CSSProperties,
+  };
+});
 
-  useEffect(() => {
-    // Generate petals only on the client side
-    const generatedPetals: PetalData[] = Array.from({ length: PETAL_COUNT }).map((_, i) => {
-      const isBurgundy = Math.random() > 0.4; // 60% burgundy, 40% white
-      const size = Math.random() * 10 + 8; // 8px to 18px
-
-      return {
-        id: i,
-        left: `${Math.random() * 100}%`,
-        animationDuration: `${Math.random() * 10 + 10}s`, // 10-20s fall time
-        animationDelay: `-${Math.random() * 20}s`, // Start at different times
-        width: `${size}px`,
-        height: `${size * 1.2}px`, // Slightly oval
-        colorClass: isBurgundy ? 'bg-wedding-burgundy/60' : 'bg-wedding-cream/60',
-        rotation: `${Math.random() * 360}deg`
-      };
-    });
-    setPetals(generatedPetals);
-  }, []);
-
-  if (petals.length === 0) return null;
-
+const FallingPetals = memo(function FallingPetals() {
   return (
-    <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden" aria-hidden="true">
-      <style>{`
-        @keyframes fall {
-          0% {
-            transform: translateY(-10vh) rotateZ(0deg) rotateX(0deg) rotateY(0deg);
-          }
-          100% {
-            transform: translateY(110vh) rotateZ(360deg) rotateX(180deg) rotateY(180deg);
-          }
-        }
-        .petal {
-          position: absolute;
-          top: -10%;
-          animation-name: fall;
-          animation-timing-function: linear;
-          animation-iteration-count: infinite;
-          border-radius: 150px 0 150px 0; /* Leaf/petal shape */
-          box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
-        }
-      `}</style>
-      
-      {petals.map((petal) => (
-        <div
+    <div className="t-petals pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      {PETALS.map((petal) => (
+        <span
           key={petal.id}
-          className={`petal ${petal.colorClass} backdrop-blur-[1px]`}
-          style={{
-            left: petal.left,
-            width: petal.width,
-            height: petal.height,
-            animationDuration: petal.animationDuration,
-            animationDelay: petal.animationDelay,
-            transform: `rotate(${petal.rotation})`,
-          }}
-        />
+          className={`t-petal ${petal.id % 2 ? 'max-sm:hidden' : ''}`}
+          style={{ left: petal.left, ...petal.style }}
+        >
+          <span className="t-petal-sway">
+            <svg
+              viewBox="0 0 20 24"
+              width={petal.size}
+              height={Math.round(petal.size * 1.2)}
+              className={`t-petal-spin ${petal.color}`}
+            >
+              {/* Rose petal: notched top, narrow base, lighter centre */}
+              <path
+                fill="currentColor"
+                d="M10 24C3 19 0 11 2 5c1-3 4-4 6-2l2 2 2-2c2-2 5-1 6 2 2 6-1 14-8 19Z"
+              />
+              <path fill="var(--color-wedding-cream)" opacity="0.18" d="M10 21C6 17 5 11 7 7l3 3 3-3c2 4 1 10-3 14Z" />
+            </svg>
+          </span>
+        </span>
       ))}
     </div>
   );
 });
-
-FallingPetals.displayName = 'FallingPetals';
 
 export { FallingPetals };

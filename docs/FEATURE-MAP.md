@@ -36,6 +36,7 @@ All editors are in `src/app/admin/content/`.
 | Footer at the bottom of scrolling screens | `src/components/layout/EmbeddedFooter.tsx` |
 | Background music + floating toggle, volume slider, "music is playing" hint | `src/components/AudioPlayer.tsx`, `.t-vol-*` in `src/app/globals.css`, `public/bg-music.mp3` |
 | Fonts, OG/Twitter metadata, theme script | `src/app/layout.tsx` |
+| 404 page for any unknown URL (couple's photo inside the "404", days-to-wedding line, "Back to the celebration" → `/`; same burgundy backdrop and button style as the inner screens; embossed logo `.t-emboss` in `globals.css`; also mounts `FallingPetals` and `WeddingCursor`) | `src/app/not-found.tsx` (metadata) → `src/components/screens/NotFoundScreen.tsx` |
 | Colors, fonts, motion tokens, reveal CSS | `src/app/globals.css` |
 | Staggered text reveal on scroll | `src/components/ui/TextsReveal.tsx` |
 | Scroll motion: scroll-container context, `ScrollReveal`/`ScrollRevealItem` (reveal once), `Parallax` (image drift), `SCROLL_MOTION` constants | `src/components/ui/ScrollMotion.tsx` |
@@ -47,6 +48,7 @@ All editors are in `src/app/admin/content/`.
 | Welcome 3D background: depth-parallax photo + depth-aware fireflies that light the couple (WebGL); map and couple area paired to the photo in `DEPTH_MAPS` in `WelcomeScreen.tsx`, asset `public/images/welcome-depth.webp` | `src/components/effects/DepthParallaxScene.tsx` |
 | Welcome motion onboarding hint ("Move your mouse" / "Tilt your phone", iOS tap-to-enable), every page load, repeats up to 3 times until tried | `src/components/ui/MotionHint.tsx` (icon keyframes `t-hint-*` in `globals.css`) |
 | Firefly glow particles (welcome fallback, drawn above the dark gradient) | `src/components/effects/TwinkleSparks.tsx` |
+| Slow falling rose petals, burgundy/red/white, CSS only (404 page) | `src/components/effects/FallingPetals.tsx` + `.t-petal*` in `globals.css` |
 | Wedding-ring cursor: gold stardust trail, tilt over clickables, sparkle burst on click (mouse/trackpad only, mounted in `Home` in `page.tsx`) | `src/components/effects/WeddingCursor.tsx` + `.t-cursor*` in `globals.css` |
 | Mouse detection (`t-mouse` on `<html>`) that gates every hover style, the ring cursor and the mouse hint | `pointer-init` script in `src/app/layout.tsx`, `hasMouse()` in `src/lib/pointer.ts`, `@custom-variant hover` in `globals.css` |
 | Image download proxy | `src/app/api/download/route.ts` (called from `DetailsScreen.tsx`); host allowlist + filename sanitizer in `src/lib/downloadProxy.ts`, tested by `src/lib/downloadProxy.test.ts` |

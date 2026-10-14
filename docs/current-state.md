@@ -38,7 +38,6 @@ when you find or fix one of these.
 
 ## Unused code and dependencies
 
-- `src/components/effects/FallingPetals.tsx` — not imported anywhere.
 - `recharts`, `@tanstack/react-table` — in `package.json`, not imported.
 - `refactor_editors.py` — one-off script with a hard-coded macOS path.
 - `legacy/` — the old static site, reference only.

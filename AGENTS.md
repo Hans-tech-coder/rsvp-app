@@ -32,6 +32,10 @@ Active skills live in `.claude/skills/` (Claude Code) and `.agents/skills/`
 | Animation / transition work | `transitions-dev` for CSS transitions (matches the motion tokens in `globals.css`); `motion` for Framer Motion / `motion/react` code, scroll effects, and jank checks (uses the `motion` MCP server in `.mcp.json` for live docs) |
 | Refactor or splitting a large file (e.g. the big `*Editor.tsx` files) | `safe-refactor` |
 | Changing a Firestore data shape or `wedding-content.json` structure, dependency upgrade | `migration` |
+| Designing or restyling a guest-facing page or section | `design-taste-frontend` (art direction + browser inspector; the site has a brand, so draw with `--keep palette,type` and save found pictures with `assets.mjs --get … --to public/…`). Not for admin screens — use `ui-ux-pro-max` there |
+| Auditing / polishing an existing screen's look | `redesign-existing-projects`; `ui-ux-pro-max` for accessibility and UX rules |
+| A fixed visual style the user asks for by name | `high-end-visual-design` (soft, agency look) or `minimalist-ui` (editorial, monochrome) — only on request; they conflict with `design-taste-frontend` house rules |
+| Agent keeps truncating code or leaving placeholders | `full-output-enforcement` |
 | Checking finished work | `verify-and-stop`; `caveman-review` for a diff review |
 | Stress-testing a plan | `grilling` |
 | Ending a session mid-work | `handoff` |
