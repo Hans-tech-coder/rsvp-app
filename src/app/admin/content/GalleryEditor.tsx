@@ -5,6 +5,7 @@ import { Loader2, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-r
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { AdminModal } from '../components/AdminModal';
@@ -239,6 +240,7 @@ export function GalleryEditor({ eventId }: { eventId: string }) {
 
       const imageUrls = gallery.map(item => item.url).filter(url => url !== '');
       await setDoc(currentDocRef, { images: imageUrls, header });
+      await refreshGuestSite(eventId);
       setOriginalHeader(header);
       setOriginalGallery(gallery);
 
@@ -262,6 +264,7 @@ export function GalleryEditor({ eventId }: { eventId: string }) {
         
       const docRef = doc(db, paths.content(eventId, 'gallery'));
       await setDoc(docRef, lastBackup);
+      await refreshGuestSite(eventId);
         
       const mergedData = lastBackup.images ?? weddingContent.gallery;
       setGallery(mergedData.map((url: string) => ({ id: nanoid(), url })));

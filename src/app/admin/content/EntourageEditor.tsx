@@ -5,6 +5,7 @@ import { Loader2, Plus, Trash2, ChevronDown } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { refreshGuestSite } from './refreshGuestSite';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
@@ -179,6 +180,7 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
 
       const docRef = doc(db, paths.content(eventId, 'entourage'));
       await setDoc(docRef, data, { merge: true });
+      await refreshGuestSite(eventId);
       
       setOriginalData(data);
       setHasBackup(true);

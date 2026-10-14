@@ -2,12 +2,9 @@ import type { Metadata } from "next";
 import { Cinzel, Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { AudioPlayer } from "@/components/AudioPlayer";
 import Script from "next/script";
 import { getThemeScript } from "@teispace/next-themes/server";
-import { SiteTextProvider } from "@/contexts/SiteTextContext";
-import { getSiteContent, formatEventDate } from "@/lib/siteContentServer";
-import { fillText } from "@/lib/siteText";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -26,49 +23,18 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { global, siteText } = await getSiteContent();
-  const values = { couple: global.coupleNameFormat, date: formatEventDate(global.targetDate), venue: global.venueShort };
-  const title = fillText(siteText.seo.title, values);
-  const description = fillText(siteText.seo.description, values);
-  const ogImage = global.ogImage;
+// Event pages and the 404 set their own title, icon and link preview
+// (src/app/[event]/page.tsx); this title is what the admin pages show.
+export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
+  title: 'Event Admin',
+};
 
-  return {
-    title,
-    description,
-    icons: {
-      icon: global.logo,
-    },
-    openGraph: {
-      title,
-      description,
-      url: "https://hans-czay-wedding.vercel.app/",
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [ogImage],
-    },
-  };
-}
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { siteText } = await getSiteContent();
-
   return (
     <html
       lang="en"
@@ -100,10 +66,7 @@ addEventListener('pointerdown',on,{passive:true,capture:true})})()`}
           disableTransitionOnChange
           noScript
         >
-          <SiteTextProvider value={siteText}>
-            {children}
-            <AudioPlayer />
-          </SiteTextProvider>
+          {children}
         </ThemeProvider>
       </body>
     </html>

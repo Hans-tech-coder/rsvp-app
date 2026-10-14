@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { motion, usePresence, useReducedMotion } from 'motion/react';
 import { useSiteText } from '@/contexts/SiteTextContext';
+import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 // Rendered inside <AnimatePresence>. The exit is a CSS opacity fade on the motion
 // tokens, so the first screen mounts underneath and the two crossfade.
@@ -10,6 +11,9 @@ export function LoadingScreen() {
   const [isPresent, safeToRemove] = usePresence();
   const reduceMotion = useReducedMotion();
   const text = useSiteText();
+  // Initials of the event's names; the content comes with the page.
+  const { groomName, brideName } = useWeddingContent().content.global;
+  const initial = (name: string) => name.trim().charAt(0).toUpperCase();
 
   useEffect(() => {
     if (!isPresent && reduceMotion) safeToRemove();
@@ -53,7 +57,7 @@ export function LoadingScreen() {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             className="text-wedding-gold text-2xl font-cinzel tracking-widest"
           >
-            H<span className="text-wedding-goldlight text-lg mx-1">&</span>C
+            {initial(groomName)}<span className="text-wedding-goldlight text-lg mx-1">&</span>{initial(brideName)}
           </motion.div>
         </div>
 

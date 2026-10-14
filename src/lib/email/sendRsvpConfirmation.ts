@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import { getAdminDb } from '@/lib/firebase/admin';
 import weddingContent from '@/data/wedding-content.json';
 import { paths } from '@/lib/eventPaths';
+import { getEventUrl } from '@/lib/siteUrl';
 
 // Server only. Sends the guest a confirmation of their RSVP through the
 // couple's Gmail account (SMTP + App Password). Needs GMAIL_USER and
@@ -108,8 +109,6 @@ const font = {
   inter: "'Inter','Helvetica Neue',Helvetica,Arial,sans-serif",
 };
 
-const SITE_URL = 'https://hans-czay-wedding.vercel.app';
-
 const eyebrow = (text: string) =>
   `<div style="font-family:${font.inter};font-size:10px;letter-spacing:4px;text-transform:uppercase;color:${c.gold};font-weight:600;">${text}</div>`;
 
@@ -155,7 +154,7 @@ const swatches = (colors: { hex: string; name: string }[]) =>
       </tr></table>`
     : '';
 
-function buildEmail(data: RsvpEmailData, content: Awaited<ReturnType<typeof loadEmailContent>>) {
+function buildEmail(data: RsvpEmailData, content: Awaited<ReturnType<typeof loadEmailContent>>, siteUrl: string) {
   const attending = data.willAttend === 'Yes';
   // A guest who declines but sends a proxy still gets the venue details to pass on.
   const showDetails = attending || Boolean(data.proxyName);
@@ -241,7 +240,7 @@ function buildEmail(data: RsvpEmailData, content: Awaited<ReturnType<typeof load
           ${eventDetails}
           <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:40px auto 0;"><tr>
             <td bgcolor="${c.burgundy}" style="background:${c.burgundy};border:1px solid ${c.gold};border-radius:2px;">
-              <a href="${SITE_URL}" style="display:inline-block;padding:15px 30px;font-family:${font.inter};font-size:11px;font-weight:500;letter-spacing:4px;text-transform:uppercase;color:${c.gold};text-decoration:none;">Visit Our Website</a>
+              <a href="${escapeHtml(siteUrl)}" style="display:inline-block;padding:15px 30px;font-family:${font.inter};font-size:11px;font-weight:500;letter-spacing:4px;text-transform:uppercase;color:${c.gold};text-decoration:none;">Visit Our Website</a>
             </td>
           </tr></table>
           <div style="text-align:center;margin-top:40px;">
@@ -252,7 +251,7 @@ function buildEmail(data: RsvpEmailData, content: Awaited<ReturnType<typeof load
       </table>
       <div style="max-width:600px;font-family:${font.inter};font-size:11px;line-height:1.7;color:${c.muted};text-align:center;margin-top:20px;">
         If any of these details need to change, simply reply to this email.<br>
-        <a href="${SITE_URL}" style="color:${c.gold};text-decoration:none;">hans-czay-wedding.vercel.app</a>
+        <a href="${escapeHtml(siteUrl)}" style="color:${c.gold};text-decoration:none;">${escapeHtml(siteUrl.replace(/^https?:\/\//, ''))}</a>
       </div>
     </td></tr>
   </table>
@@ -303,7 +302,7 @@ export async function sendRsvpConfirmation(eventId: string, data: RsvpEmailData)
   }
 
   const content = await loadEmailContent(eventId);
-  const { subject, html, text } = buildEmail(data, content);
+  const { subject, html, text } = buildEmail(data, content, getEventUrl(eventId));
 
   const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user, pass } });
   await transporter.sendMail({

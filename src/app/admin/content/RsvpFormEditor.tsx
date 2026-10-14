@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { refreshGuestSite } from './refreshGuestSite';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
@@ -85,6 +86,7 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
       }
 
       await setDoc(docRef, formData);
+      await refreshGuestSite(eventId);
       setOriginalData(formData);
       setSaved(true);
       setShowConfirmModal(false);
@@ -108,6 +110,7 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
       if (backupSnap.exists()) {
         const backupData = backupSnap.data() as typeof weddingContent.rsvpForm;
         await setDoc(docRef, backupData);
+        await refreshGuestSite(eventId);
         setFormData(backupData);
         setOriginalData(backupData);
         setSaved(true);

@@ -5,8 +5,8 @@ import { Loader2, Search, ChevronDown } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { refreshGuestSite } from './refreshGuestSite';
 import { DEFAULT_SITE_TEXT, mergeSiteText, type SiteText } from '@/lib/siteText';
-import { revalidateGuestSite } from '@/app/actions/admin';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
 import { CharCount } from './CharCount';
@@ -14,7 +14,7 @@ import { SITE_TEXT_GROUPS, type SiteTextField } from './siteTextFields';
 
 // Small wording on the guest site (buttons, labels, hints, error messages),
 // stored in the event's content/siteText. The guest pages read it on the server, so
-// a save also asks Next.js to regenerate them (revalidateGuestSite).
+// a save also asks Next.js to regenerate them (refreshGuestSite).
 
 function getText(text: SiteText, path: string): string {
   return path.split('.').reduce<unknown>((node, key) => (node as Record<string, unknown>)?.[key], text) as string;
@@ -82,10 +82,7 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
     try {
       await setDoc(doc(db, paths.content(eventId, 'siteText_backup')), originalData);
       await setDoc(doc(db, paths.content(eventId, 'siteText')), formData);
-
-      // The text is live in Firestore now; this makes the cached pages show it.
-      const refresh = await revalidateGuestSite();
-      if (!refresh.success) console.error('Guest site refresh failed:', refresh.error);
+      await refreshGuestSite(eventId);
 
       setOriginalData(formData);
       setHasBackup(true);

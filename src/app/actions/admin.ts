@@ -5,7 +5,9 @@ import { requireAdmin } from '@/lib/requireAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import crypto from 'crypto';
 import { revalidatePath } from 'next/cache';
-import { paths } from '@/lib/eventPaths';
+import { DEFAULT_EVENT_ID, isValidEventId, paths } from '@/lib/eventPaths';
+import { getSiteContent } from '@/lib/siteContentServer';
+import { getEventUrl } from '@/lib/siteUrl';
 
 /**
  * Generate unique alphanumeric invite codes.
@@ -148,7 +150,8 @@ export async function deleteRegistryGift(eventId: string, giftId: string) {
   }
 }
 
-const DEFAULT_INVITE_TEMPLATE = `You're Invited!
+function defaultInviteTemplate(siteUrl: string, couple: string) {
+  return `You're Invited!
 
 Dear Guest,
 
@@ -156,7 +159,7 @@ We are delighted to invite you to celebrate our wedding with us! Your presence o
 
 To view all the details of our wedding and confirm your attendance, please visit our wedding website:
 
-🌐 Wedding Website: https://hans-czay-wedding.vercel.app
+🌐 Wedding Website: ${siteUrl}
 
 To access the RSVP page, use your One-Time RSVP Code below:
 
@@ -171,19 +174,23 @@ Before submitting your RSVP, please take a moment to read the FAQs section for i
 We look forward to celebrating this unforgettable day with you!
 
 With love,
-Hans & Czay`;
+${couple}`;
+}
+
+/** Used until the admin saves their own; links to this event's site. */
+async function getDefaultInviteTemplate(eventId: string) {
+  const { global } = await getSiteContent(eventId);
+  return defaultInviteTemplate(getEventUrl(eventId), global.coupleNameFormat);
+}
 
 export async function getInviteMessageTemplate(eventId: string) {
   try {
     await requireAdmin();
     const doc = await getAdminDb().doc(paths.setting(eventId, 'inviteTemplate')).get();
-    if (doc.exists) {
-      return doc.data()?.template || DEFAULT_INVITE_TEMPLATE;
-    }
-    return DEFAULT_INVITE_TEMPLATE;
+    return doc.data()?.template || await getDefaultInviteTemplate(eventId);
   } catch (error) {
     console.error('Failed to fetch invite template:', error);
-    return DEFAULT_INVITE_TEMPLATE;
+    return defaultInviteTemplate(getEventUrl(eventId), '');
   }
 }
 
@@ -271,14 +278,17 @@ export async function toggleInviteCopiedStatus(eventId: string, code: string, is
 
 
 /**
- * Regenerate the static guest pages (home, 404, metadata) on their next visit.
- * They read site text and global settings on the server at build time, so the
- * Site Text and Global Settings editors call this after a save.
+ * Rebuild an event's cached guest page (content, title, link preview) on its
+ * next visit. Every content editor calls this after it writes the event's
+ * content. The 404 page shows the default event, so saving that event
+ * refreshes the whole site.
  */
-export async function revalidateGuestSite() {
+export async function revalidateGuestSite(eventId: string) {
   try {
     await requireAdmin();
-    revalidatePath('/', 'layout');
+    if (!isValidEventId(eventId)) throw new Error('Invalid event');
+    if (eventId === DEFAULT_EVENT_ID) revalidatePath('/', 'layout');
+    else revalidatePath(`/${eventId}`);
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to refresh the guest site' };

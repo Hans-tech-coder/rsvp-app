@@ -5,6 +5,7 @@ import { Loader2, Upload, X, Settings } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
@@ -115,6 +116,7 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
 
       const docRef = doc(db, paths.content(eventId, 'details'));
       await setDoc(docRef, data, { merge: true });
+      await refreshGuestSite(eventId);
       
       setOriginalData(data);
       setHasBackup(true);

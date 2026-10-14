@@ -17,7 +17,7 @@ interface WelcomeScreenProps {
 }
 
 export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
-  const { content, loading } = useWeddingContent();
+  const { content } = useWeddingContent();
   const text = useSiteText();
   const [timeLeft, setTimeLeft] = useState({ days: '00', hours: '00', minutes: '00', seconds: '00' });
   const [mounted, setMounted] = useState(false);
@@ -25,7 +25,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
   const [sceneFailed, setSceneFailed] = useState(false);
   const handleSceneFail = useCallback(() => setSceneFailed(true), []);
   const depthMap = DEPTH_MAPS[content.welcomeScreen.backgroundImage];
-  const use3d = !loading && !reduceMotion && !!depthMap && !sceneFailed;
+  const use3d = !reduceMotion && !!depthMap && !sceneFailed;
 
   useEffect(() => {
     setMounted(true);
@@ -103,15 +103,13 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           transition={{ duration: 3, ease: "easeOut" }}
           className="absolute inset-0 mix-blend-overlay"
         >
-          {!loading && (
-            <Image 
-              src={content.welcomeScreen.backgroundImage}
-              alt="Wedding Background"
-              fill
-              priority
-              className="object-cover object-center"
-            />
-          )}
+          <Image 
+            src={content.welcomeScreen.backgroundImage}
+            alt="Wedding Background"
+            fill
+            priority
+            className="object-cover object-center"
+          />
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-b from-wedding-dark/60 via-wedding-dark/40 to-wedding-dark/80"></div>
         {/* Above the dark gradient so the fireflies glow instead of being dimmed */}

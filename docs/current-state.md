@@ -26,16 +26,16 @@ when you find or fix one of these.
 | Replaced images are never deleted from Blob | all editors | Counts against the shared 1 GB Hobby Blob quota |
 | Legacy Firebase Storage URLs return 402 | Firestore `events/hans-and-czay/content/*` (and the old root `websiteContent/*` copy), `wedding-content.json` |Google billing account closed; replace by re-uploading in the admin, then `npm run sync-content`. See `docs/data-model.md` |
 | `wedding-content.json` has a mixed `gallery` key and an unused `faqs` key | `src/data/wedding-content.json` | Side effect of `sync-content.js`; see `docs/data-model.md` |
-| Content merge is hand-written per doc | `WeddingContentContext.tsx` | New fields in field-by-field docs need an explicit line |
-| `RsvpScreen` falls back to `'dev-mode'` as the code | `src/app/page.tsx` | Submission fails server-side, which is the intended outcome |
+| Content merge is hand-written per doc | `mergeWeddingContent()` in `src/lib/weddingContent.ts` | New fields in field-by-field docs need an explicit line |
+| `RsvpScreen` falls back to `'dev-mode'` as the code | `src/app/[event]/GuestSite.tsx` | Submission fails server-side, which is the intended outcome |
 | `npm run lint` fails (89 errors, 51 warnings, all older than the 2026-09 motion work) | mainly `react-hooks/set-state-in-effect`, `no-explicit-any`, unused vars | `npm run build` is the working gate until they are fixed |
 | Some motion ignores `prefers-reduced-motion` | `WelcomeScreen.tsx:74` and `RsvpCtaScreen.tsx:28` (background zoom), modal pop-ins in `OurStoryScreen.tsx:154`, `DetailsScreen.tsx:197`, `RegistryScreen.tsx:115`, `RsvpScreen.tsx:436`, hover lifts in `DetailsScreen.tsx:75,110` and `DressCodeScreen.tsx:71`, FAQ accordion `FaqScreen.tsx:61`, `TwinkleSparks`, the circular gallery | A `<MotionConfig reducedMotion="user">` around `<main>` would cover the Motion transforms; the canvas and GSAP need their own check |
 | Circular gallery loads GSAP from cdnjs at runtime | `src/components/ui/circular-image-gallery.tsx` (`loadGsap`) | Third-party script without SRI, and a second animation library next to Motion. Removing it is a design decision |
 | Guest page starts Firebase Auth (iframe + gapi scripts) though guests never sign in | `src/lib/firebase/client.ts:18` (`getAuth` at module scope) | Extra startup requests on every guest load |
 | FAQ question cards keep `transition-all` while Motion animates them | `FaqScreen.tsx` (`ScrollReveal` className) | CSS may also transition Motion's inline opacity/transform; no jank measured |
 | Music volume on iOS goes through Web Audio after the first slider touch | `AudioPlayer.tsx` (`ensureGain`) | Only checked in a desktop browser. On iOS < 17 the ringer switch may silence the music once that happens; the AudioContext is resumed on each `play` |
-| A few guest-visible words are still in code | loader monogram "H&C" (`LoadingScreen.tsx`); country names in `phoneCountries.ts`; dates formatted with `en-US` (`EntranceScreen`, metadata `{date}`); image `alt` and `aria-*` labels | The loader shows before content loads, so its monogram needs server-side global settings (planned with per-event server content) |
-| Site text, metadata and the 404 page update only through an admin save | `revalidateGuestSite` in `admin.ts` | `/` and the 404 page are static. A change made outside the admin (Firestore console, script) shows after the next deploy or the next Site Text / Global Settings save. Facebook and Messenger cache link previews on their side |
+| A few guest-visible words are still in code | country names in `phoneCountries.ts`; dates formatted with `en-US` (`EntranceScreen`, metadata `{date}`); image `alt` and `aria-*` labels; "Visit Our Website" in the RSVP email | |
+| A content change made outside the admin shows within the hour | `src/app/[event]/page.tsx` (`revalidate = 3600`), `revalidateGuestSite` in `admin.ts` | Event pages are cached; an admin save rebuilds them at once. A Firestore console or script edit waits for the hourly rebuild (the 404 page: the next default-event save or deploy). Facebook and Messenger cache link previews on their side |
 | Root collections still hold a copy of the event data | Firestore root `websiteContent`, `guests`, `registryGifts`, `giftSelections`, `settings` + their block in `firestore.rules` | Kept on purpose after the F3 move to `events/hans-and-czay` (rollback path). Re-sync with `scripts/migrate-to-events.js --write --overwrite` right before the F3 deploy; remove later as its own step. See `docs/data-model.md` |
 | F3 admin side checked by query, not by a signed-in session | `src/app/admin/**` | The admin pages' exact queries and the deployed rules were run against `events/hans-and-czay`; no real admin Save, invite generation or gift edit was done after the move |
 | Event Details `calendarStart` repeats the time set in Global Settings |`EventDetailsEditor.tsx` ("Calendar Start"), `globalSettings.ceremonyTime` / `receptionTime` | Changing the time in Global Settings does not move the Add to Calendar time; edit both |
@@ -59,7 +59,10 @@ Remove them only when asked.
 Vercel (Node 22). Image uploads need a **public** Vercel Blob store connected
 to the project (`BLOB_READ_WRITE_TOKEN`). Firestore/Storage rules are deployed separately with the
 Firebase CLI. The Vercel project must have all `FIREBASE_ADMIN_*` and
-`NEXT_PUBLIC_FIREBASE_*` variables set at **build** time too: `layout.tsx` and
-`not-found.tsx` read Firestore when the static pages are built or regenerated,
-and every admin page calls
-the admin SDK at request time.
+`NEXT_PUBLIC_FIREBASE_*` variables set at **build** time too: `not-found.tsx`
+reads Firestore when the static 404 is built, event pages when they are
+(re)generated, and every admin page calls the admin SDK at request time.
+Links that leave the site (link previews, invite message, RSVP email) use
+`getSiteUrl()` (`src/lib/siteUrl.ts`): `NEXT_PUBLIC_SITE_URL` if set, else
+Vercel's `VERCEL_PROJECT_PRODUCTION_URL`, else `http://localhost:3000`. Set
+`NEXT_PUBLIC_SITE_URL` when a custom domain is added.

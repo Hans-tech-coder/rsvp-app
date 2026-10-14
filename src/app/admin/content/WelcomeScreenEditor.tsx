@@ -5,6 +5,7 @@ import { Loader2, Upload, Image as ImageIcon, Info, AlertTriangle } from 'lucide
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import Image from 'next/image';
@@ -106,6 +107,7 @@ export function WelcomeScreenEditor({ eventId }: { eventId: string }) {
 
       const docRef = doc(db, paths.content(eventId, 'welcomeScreen'));
       await setDoc(docRef, formData, { merge: true });
+      await refreshGuestSite(eventId);
       
       setOriginalData(formData);
       setHasBackup(true);

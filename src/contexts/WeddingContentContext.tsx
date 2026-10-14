@@ -1,220 +1,30 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import weddingContentDefault from '@/data/wedding-content.json';
-import { db } from '@/lib/firebase/client';
-import { doc, getDoc } from 'firebase/firestore';
-import { normalizePrincipalSponsors } from '@/lib/principalSponsors';
-import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
+import { DEFAULT_EVENT_ID } from '@/lib/eventPaths';
+import type { WeddingContent } from '@/lib/weddingContent';
 
-type WeddingContent = typeof weddingContentDefault;
+// The event's content is read and merged on the server (getEventContent in
+// src/lib/siteContentServer.ts) and handed in by src/app/[event]/page.tsx, so
+// the guest site never reads Firestore content from the browser.
 
 interface WeddingContentContextType {
   /** The event whose content this is; guest server actions take it too. */
   eventId: string;
   content: WeddingContent;
-  loading: boolean;
 }
 
 const WeddingContentContext = createContext<WeddingContentContextType>({
   eventId: DEFAULT_EVENT_ID,
   content: weddingContentDefault,
-  loading: true,
 });
 
 export const useWeddingContent = () => useContext(WeddingContentContext);
 
-export function WeddingContentProvider({ eventId, children }: { eventId: string; children: React.ReactNode }) {
-  const [content, setContent] = useState<WeddingContent>(weddingContentDefault);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchContent = async () => {
-      try {
-        // Fetch all the overrides in parallel (one after another took ~2 s)
-        const [
-          welcomeDoc, globalDoc, entranceDoc, ourStoryDoc, entourageDoc, detailsDoc,
-          dressCodeDoc, galleryDoc, faqDoc, registryDoc, rsvpCtaDoc, rsvpFormDoc,
-        ] = await Promise.all([
-          'welcomeScreen', 'globalSettings', 'entranceScreen', 'ourStory', 'entourage', 'details',
-          'dressCode', 'gallery', 'faq', 'registry', 'rsvpCta', 'rsvpForm',
-        ].map((id) => getDoc(doc(db, paths.content(eventId, id)))));
-        
-        let newContent = { ...weddingContentDefault };
-        
-        if (welcomeDoc.exists()) {
-          newContent.welcomeScreen = {
-            ...newContent.welcomeScreen,
-            ...welcomeDoc.data()
-          };
-        }
-
-        if (entranceDoc.exists()) {
-          newContent.entranceScreen = {
-            ...newContent.entranceScreen,
-            ...entranceDoc.data()
-          };
-        }
-
-        if (detailsDoc.exists()) {
-          const detailsData = detailsDoc.data();
-          newContent.details = {
-            ...newContent.details,
-            header: {
-              ...newContent.details.header,
-              ...(detailsData.header || {})
-            },
-            ceremony: {
-              ...newContent.details.ceremony,
-              ...(detailsData.ceremony || {})
-            },
-            reception: {
-              ...newContent.details.reception,
-              ...(detailsData.reception || {})
-            },
-            orderOfEventsImage: detailsData.orderOfEventsImage ?? newContent.details.orderOfEventsImage
-          };
-        }
-
-        if (globalDoc.exists()) {
-          const globalData = globalDoc.data();
-          
-          // Map to newContent.global
-          newContent.global = {
-            ...newContent.global,
-            logo: globalData.logo || newContent.global.logo,
-            brideName: globalData.brideName || newContent.global.brideName,
-            groomName: globalData.groomName || newContent.global.groomName,
-            venueShort: globalData.venueShort || newContent.global.venueShort,
-            targetDate: globalData.targetDate || newContent.global.targetDate,
-            footerTagline: globalData.footerTagline || newContent.global.footerTagline,
-          };
-
-          // Map to newContent.details
-          newContent.details = {
-            ...newContent.details,
-            ceremony: {
-              ...newContent.details.ceremony,
-              time: globalData.ceremonyTime || newContent.details.ceremony.time,
-              location: globalData.ceremonyLocation || newContent.details.ceremony.location,
-              address: globalData.ceremonyAddress || newContent.details.ceremony.address,
-            },
-            reception: {
-              ...newContent.details.reception,
-              time: globalData.receptionTime || newContent.details.reception.time,
-              location: globalData.receptionLocation || newContent.details.reception.location,
-              address: globalData.receptionAddress || newContent.details.reception.address,
-            }
-          };
-        }
-
-        if (ourStoryDoc.exists()) {
-          const ourStoryData = ourStoryDoc.data();
-          newContent.ourStory = {
-            ...newContent.ourStory,
-            subtitle: ourStoryData.subtitle ?? newContent.ourStory.subtitle,
-            title: ourStoryData.title ?? newContent.ourStory.title,
-            description: ourStoryData.description ?? newContent.ourStory.description,
-            items: ourStoryData.items ?? newContent.ourStory.items
-          };
-        }
-
-        if (entourageDoc.exists()) {
-          const entourageData = entourageDoc.data();
-          newContent.entourage = {
-            ...newContent.entourage,
-            subtitle: entourageData.subtitle ?? newContent.entourage.subtitle,
-            title: entourageData.title ?? newContent.entourage.title,
-            principalSponsors: normalizePrincipalSponsors(entourageData.principalSponsors) ?? newContent.entourage.principalSponsors,
-            honorAttendants: entourageData.honorAttendants ?? newContent.entourage.honorAttendants,
-            bridesmaids: entourageData.bridesmaids ?? newContent.entourage.bridesmaids,
-            groomsmen: entourageData.groomsmen ?? newContent.entourage.groomsmen,
-            parents: entourageData.parents ?? newContent.entourage.parents,
-            flowerGirls: entourageData.flowerGirls ?? newContent.entourage.flowerGirls,
-            ringBearers: entourageData.ringBearers ?? newContent.entourage.ringBearers
-          };
-        }
-
-        if (dressCodeDoc.exists()) {
-          const dressCodeData = dressCodeDoc.data();
-          newContent.dressCode = {
-            ...newContent.dressCode,
-            header: {
-              ...newContent.dressCode.header,
-              ...(dressCodeData.header || {})
-            },
-            title: dressCodeData.title ?? newContent.dressCode.title,
-            description: dressCodeData.description ?? newContent.dressCode.description,
-            colors: dressCodeData.colors ?? newContent.dressCode.colors,
-            ladiesGuideline: dressCodeData.ladiesGuideline ?? newContent.dressCode.ladiesGuideline,
-            gentlemenGuideline: dressCodeData.gentlemenGuideline ?? newContent.dressCode.gentlemenGuideline,
-            inspirationImages: dressCodeData.inspirationImages ?? newContent.dressCode.inspirationImages
-          };
-        }
-
-        if (galleryDoc.exists()) {
-          const galleryData = galleryDoc.data();
-          if (galleryData.images && Array.isArray(galleryData.images)) {
-            (newContent.gallery as any) = galleryData.images;
-          }
-          if (galleryData.header) {
-            newContent.galleryHeader = {
-              ...newContent.galleryHeader,
-              ...galleryData.header
-            };
-          }
-        }
-        
-        if (faqDoc.exists()) {
-          const faqData = faqDoc.data();
-          if (faqData.items && Array.isArray(faqData.items)) {
-            newContent.faq = faqData.items;
-          }
-          if (faqData.header) {
-            newContent.faqHeader = {
-              ...newContent.faqHeader,
-              ...faqData.header
-            };
-          }
-        }
-        
-        if (registryDoc.exists()) {
-          const registryData = registryDoc.data();
-          newContent.registry = {
-            ...newContent.registry,
-            ...registryData
-          };
-        }
-
-        if (rsvpCtaDoc.exists()) {
-          const rsvpCtaData = rsvpCtaDoc.data();
-          newContent.rsvpCta = {
-            ...newContent.rsvpCta,
-            ...rsvpCtaData
-          };
-        }
-
-        if (rsvpFormDoc.exists()) {
-          const rsvpFormData = rsvpFormDoc.data();
-          newContent.rsvpForm = {
-            ...newContent.rsvpForm,
-            ...rsvpFormData
-          };
-        }
-        
-        setContent(newContent);
-      } catch (error) {
-        console.error("Error fetching website content overrides:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchContent();
-  }, [eventId]);
-
+export function WeddingContentProvider({ eventId, content, children }: { eventId: string; content: WeddingContent; children: React.ReactNode }) {
   return (
-    <WeddingContentContext.Provider value={{ eventId, content, loading }}>
+    <WeddingContentContext.Provider value={{ eventId, content }}>
       {children}
     </WeddingContentContext.Provider>
   );

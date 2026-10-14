@@ -53,7 +53,7 @@ redirect). The real check is in `src/lib/requireAdmin.ts`:
   checks `admins/{uid}` exists. Returns `{ uid, role }` (missing `role` =
   `'admin'`). Memoized per request with React `cache`. `getAdminUid()` returns
   just the UID.
-- `requireAdmin()` throws `Unauthorized` (it also guards `revalidateGuestSite`, which only regenerates cached pages). **Every** function in
+- `requireAdmin()` throws `Unauthorized` (it also guards `revalidateGuestSite(eventId)`, which only regenerates cached pages and checks the ID with `isValidEventId`). **Every** function in
   `src/app/actions/admin.ts` calls it first inside its `try`, so an
   unauthenticated call returns `{ success: false, error: 'Unauthorized' }`.
   Any new admin action must do the same. `requireSuperAdmin()` also throws

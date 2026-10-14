@@ -5,6 +5,7 @@ import { Loader2, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-r
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { AdminModal } from '../components/AdminModal';
@@ -271,6 +272,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
       }
 
       await setDoc(docRef, payloadToSave, { merge: true });
+      await refreshGuestSite(eventId);
       
       setOriginalData(data);
       setSaved(true);
@@ -291,6 +293,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
     try {
       const docRef = doc(db, paths.content(eventId, 'dressCode'));
       await setDoc(docRef, lastBackup);
+      await refreshGuestSite(eventId);
       
       const mergedData = {
         header: {

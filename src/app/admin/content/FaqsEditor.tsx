@@ -5,6 +5,7 @@ import { Loader2, Plus, Trash2, GripVertical } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { refreshGuestSite } from './refreshGuestSite';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
@@ -182,6 +183,7 @@ export function FaqsEditor({ eventId }: { eventId: string }) {
         items: dataToSave,
         updatedAt: new Date().toISOString() 
       });
+      await refreshGuestSite(eventId);
       
       setOriginalHeader(header);
       setOriginalItems(items.map(item => ({ ...item })));
@@ -229,6 +231,7 @@ export function FaqsEditor({ eventId }: { eventId: string }) {
           updatedAt: new Date().toISOString(),
           restoredAt: new Date().toISOString()
         });
+        await refreshGuestSite(eventId);
 
         setIsRestoreModalOpen(false);
         setIsSuccessModalOpen(true);

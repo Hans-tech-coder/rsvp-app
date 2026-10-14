@@ -10,15 +10,21 @@
 //   settings/{doc}       e.g. `inviteTemplate`
 // Admin accounts stay global (`admins`, `adminAllowlist`) until per-event roles.
 
-/** The only event until routing (F4) and the event switcher (F11) exist. */
-export const DEFAULT_EVENT_ID = 'hans-and-czay';
-
 const EVENT_ID = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
 
 /** Lowercase letters, digits and inner hyphens, at most 64 characters. */
 export function isValidEventId(eventId: unknown): eventId is string {
   return typeof eventId === 'string' && EVENT_ID.test(eventId);
 }
+
+/**
+ * The event `/` redirects to, and the one the admin edits until the event
+ * switcher (F11). The event ID is also its URL: `site.com/<eventId>`.
+ * Override with NEXT_PUBLIC_DEFAULT_EVENT_ID (read at build time).
+ */
+export const DEFAULT_EVENT_ID = isValidEventId(process.env.NEXT_PUBLIC_DEFAULT_EVENT_ID)
+  ? process.env.NEXT_PUBLIC_DEFAULT_EVENT_ID
+  : 'hans-and-czay';
 
 // A slash in an ID would point the path at another document.
 function segment(id: string): string {

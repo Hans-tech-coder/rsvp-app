@@ -5,6 +5,7 @@ import { Loader2, Plus, Trash2, GripVertical, Image as ImageIcon, Upload } from 
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
@@ -239,6 +240,7 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
         curatedRegistry,
         updatedAt: new Date().toISOString() 
       });
+      await refreshGuestSite(eventId);
       
       setOriginalHeader(header);
       setOriginalBankTransfer(bankTransfer);
@@ -292,6 +294,7 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
           updatedAt: new Date().toISOString(),
           restoredAt: new Date().toISOString()
         });
+        await refreshGuestSite(eventId);
 
         setIsRestoreModalOpen(false);
         setIsSuccessModalOpen(true);

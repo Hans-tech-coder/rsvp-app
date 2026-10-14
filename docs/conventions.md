@@ -214,8 +214,9 @@ window.__fps = (ms = 3000) => new Promise(res => { let last = performance.now(),
 All scenarios also need CLS < 0.05, no long task > 50 ms, and slow frames
 ≤ 5 %.
 
-- The step is saved in `localStorage`. Reset `wedding_currentStep` before S1,
-  and raise `wedding_highestVisitedStep` so the menu can reach Gallery for S4.
+- The step is saved in `localStorage`. Reset `event:hans-and-czay:currentStep`
+  before S1, and raise `event:hans-and-czay:highestVisitedStep` so the menu can
+  reach Gallery for S4.
 - Reload with `location.reload()`, not `navigate`. The pane hides the tab
   during `navigate`, which pauses rAF and skips FCP.
 - The pane cannot throttle the CPU or emulate `prefers-reduced-motion`. Check

@@ -5,6 +5,7 @@ import { Loader2, Upload, Image as ImageIcon, Plus, Trash2, GripVertical } from 
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
@@ -212,6 +213,7 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
 
       const docRef = doc(db, paths.content(eventId, 'ourStory'));
       await setDoc(docRef, payload, { merge: true });
+      await refreshGuestSite(eventId);
       
       setOriginalItems(items);
       setOriginalHeader(header);

@@ -28,11 +28,13 @@ and when they disagree, fix the doc in the same change.
 ## 1. What the product is
 
 A **single-couple wedding website with RSVP and gift registry**, plus a private
-admin portal. Production URL: `https://hans-czay-wedding.vercel.app`.
+admin portal. Production URL: `https://hans-czay-wedding.vercel.app` (`/`
+redirects to the event, `/hans-and-czay`). Being turned into a multi-event
+platform: data and guest URLs are already per event (`/<eventId>`).
 
 | Who | What they do | Where |
 | --- | --- | --- |
-| **Guests** (no account) | Step through a 10-screen story (welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/` (one page, screens swap in place) |
+| **Guests** (no account) | Step through a 10-screen story (welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/<eventId>` (one page, screens swap in place; `/` → default event) |
 | **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text and image on the guest site. Super admins also add and remove admins from **Manage Admins** in the sidebar. | `/admin/**` |
 
 ---
@@ -48,7 +50,7 @@ admin portal. Production URL: `https://hans-czay-wedding.vercel.app`.
   there is no `tailwind.config.js`).
 - **Motion 12** (`motion/react`, formerly Framer Motion) for screen
   transitions; CSS classes in `globals.css` for text/number reveals.
-- **Firebase 12** client SDK (browser reads, admin content writes, Auth) and
+- **Firebase 12** client SDK (guest registry reads, admin content writes, Auth) and
   **firebase-admin 12** (server actions and server pages).
 - **Vercel Blob** (`@vercel/blob`) for admin image uploads; Hobby quota is
   shared with the account's other projects (see `docs/data-model.md`).
@@ -74,8 +76,10 @@ node scripts/add-admin.js <email> [--super]   # allowlist an admin; reads FIREBA
 `FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`, `BLOB_READ_WRITE_TOKEN`
 (from the connected Blob store, `vercel env pull`), and `GMAIL_USER` +
 `GMAIL_APP_PASSWORD` (sender for RSVP confirmation emails; optional, emails are
-skipped without them). Never print,
-commit, or paste their values.
+skipped without them). Optional, not secret: `NEXT_PUBLIC_DEFAULT_EVENT_ID`
+(where `/` goes; default `hans-and-czay`) and `NEXT_PUBLIC_SITE_URL` (public
+address for links that leave the site; on Vercel the production domain is used
+without it). Never print, commit, or paste the secret values.
 
 ---
 
@@ -84,8 +88,11 @@ commit, or paste their values.
 ```
 src/
   app/
-    page.tsx                 guest site: the whole 10-step flow (client component)
-    layout.tsx               fonts, theme script, metadata + SiteTextProvider (reads Firestore), <AudioPlayer/>
+    page.tsx                 redirects / to the default event
+    [event]/page.tsx         one event's guest site: server read, metadata, ISR cache, providers, <AudioPlayer/>
+    [event]/GuestSite.tsx    the whole 10-step flow (client component)
+    layout.tsx               fonts, theme script, metadataBase (reads no Firestore)
+    not-found.tsx            404 for unknown URLs/events (default event's look)
     globals.css              Tailwind @theme colors/fonts + motion tokens + reveal CSS
     actions/                 server actions: rsvp.ts, registry.ts, admin.ts, admins.ts, auth.ts
     api/download/route.ts    image download proxy (used by DetailsScreen)
@@ -100,15 +107,17 @@ src/
     ui/                      reusable visual pieces (TextsReveal, RevealImage, sliders, gallery…)
     effects/                 TwinkleSparks, FallingPetals (404 page), WeddingCursor, DepthParallaxScene
     layout/                  CanvasMenu (step menu), EmbeddedFooter
-  contexts/WeddingContentContext.tsx   JSON defaults + Firestore overrides -> useWeddingContent()
-  contexts/SiteTextContext.tsx         site text (buttons, labels, errors) from the root layout -> useSiteText()
+  contexts/WeddingContentContext.tsx   server-merged content + eventId from [event]/page.tsx -> useWeddingContent()
+  contexts/SiteTextContext.tsx         site text (buttons, labels, errors) from [event]/page.tsx -> useSiteText()
   data/wedding-content.json  default/fallback content for every screen
   lib/eventPaths.ts          every Firestore path (events/{eventId}/content|guests|registryGifts|giftSelections|settings, admins) (+ .test.ts)
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
   lib/blob/uploadImage.ts    compress + upload an image to Vercel Blob (all editors)
   lib/requireAdmin.ts        admin check for server actions and admin pages (server only)
   lib/siteText.ts            SiteText type, merge, {placeholder} fill (+ .test.ts)
-  lib/siteContentServer.ts   getSiteContent(): globalSettings + siteText via admin SDK (server only)
+  lib/siteContentServer.ts   getEventContent() (event page), getSiteContent() (404) via admin SDK (server only)
+  lib/weddingContent.ts      JSON defaults + content docs merge (mergeWeddingContent, mergeGlobal)
+  lib/siteUrl.ts             getSiteUrl(), getEventUrl() for links that leave the site (server only)
   lib/downloadProxy.ts       URL allowlist + filename sanitizer for /api/download (+ .test.ts)
   lib/email/sendRsvpConfirmation.ts   guest RSVP confirmation email via Gmail SMTP (server only)
   types/index.ts             Guest, RegistryGift, GiftSelection, AdminUser

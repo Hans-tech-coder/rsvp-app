@@ -15,22 +15,25 @@ collection (the Node scripts keep their own copy of the names). The rest of the
 docs write event subcollections short: `guests` means
 `events/{eventId}/guests`, `content/<doc>` means `events/{eventId}/content/<doc>`.
 
-There is one event, `hans-and-czay` (`DEFAULT_EVENT_ID`). Until per-event
-routing (F4) and the admin event switcher (F11) exist, the guest page
-(`page.tsx` → `WeddingContentProvider eventId`) and every admin page
-(`const eventId = DEFAULT_EVENT_ID`) use it. Guest components get the ID from
-`useWeddingContent().eventId`; admin client components and content editors get
-it as an `eventId` prop. Every server action takes `eventId` as its first
-argument (except `revalidateGuestSite` and the global admin actions).
+There is one event, `hans-and-czay` (`DEFAULT_EVENT_ID`, override with
+`NEXT_PUBLIC_DEFAULT_EVENT_ID`). The event ID is also its URL: the guest site
+is `/<eventId>` (`src/app/[event]/page.tsx`), and an ID without an
+`events/{eventId}` doc is a 404. Until the admin event switcher (F11) exists,
+every admin page (`const eventId = DEFAULT_EVENT_ID`) edits the default event.
+Guest components get the ID from `useWeddingContent().eventId`; admin client
+components and content editors get it as an `eventId` prop. Every server
+action takes `eventId` as its first argument (except the global admin
+actions). Event IDs that equal a top-level route (`admin`, `api`) would be
+shadowed by it; F11 must refuse them.
 
 | Path | Doc ID | Written by | Read by |
 | --- | --- | --- | --- |
-| `events/{eventId}` | event ID: lowercase letters, digits, inner hyphens, max 64 (`isValidEventId`) | `scripts/migrate-to-events.js` | nothing yet (F4/F11). Fields: `slug`, `type` (`'wedding'`), `status` (`'active'`), `createdAt` |
+| `events/{eventId}` | event ID: lowercase letters, digits, inner hyphens, max 64 (`isValidEventId`) | `scripts/migrate-to-events.js` | `getEventContent` (exists → the event's page is served; fields not read yet). Fields: `slug` (= the ID), `type` (`'wedding'`), `status` (`'active'`), `createdAt` |
 | `…/guests` | the invite code (e.g. `K7MPQ2`), unique per event | server actions (`admin.ts`, `rsvp.ts`) | admin pages; `verifyInviteCode` |
 | `…/registryGifts` | auto ID | server actions (`admin.ts`, `registry.ts`) | `getRegistryGifts`; admin gifts/dashboard |
 | `…/giftSelections` | auto ID | `claimGift`; deleted by `resetRegistryGift` / `deleteGiftSelection` | admin registry page |
 | `…/settings` | `inviteTemplate` | `updateInviteMessageTemplate` | `getInviteMessageTemplate` |
-| `…/content` | one doc per screen (below) + `<doc>_backup` | admin editors, **from the browser** | `WeddingContentContext` (browser); `globalSettings` + `siteText` also on the server by `getSiteContent(eventId)` (`src/lib/siteContentServer.ts`, admin SDK) for the root layout, metadata and the 404 page; `globalSettings`, `details`, `dressCode` by the RSVP email |
+| `…/content` | one doc per screen (below) + `<doc>_backup` | admin editors, **from the browser** | the server only (admin SDK, `src/lib/siteContentServer.ts`): all screen docs + `siteText` by `getEventContent(eventId)` for the cached event page and its metadata; `globalSettings` + `siteText` by `getSiteContent(eventId)` for the 404 page and the default invite message; `globalSettings`, `details`, `dressCode` by the RSVP email. The browser no longer reads `content` (the public read rule stays) |
 | `admins` (global) | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); deleted by `removeAdmin` (`admins.ts`, super only) | `firestore.rules`, `storage.rules` (`isAdmin()`), `requireAdmin.ts` |
 | `adminAllowlist` (global) | lowercased email | `scripts/add-admin.js`; `addAdmin` / `cancelPendingAdmin` (`admins.ts`, super only) | `createSessionCookie`, `listAdmins` (server only; rules deny all browser access) |
 
@@ -133,7 +136,7 @@ if present, overrides it (merge rules in `docs/content-system.md`).
 | `registry` | `registry` (`header`, `bankTransfer`, `curatedRegistry`) | `RegistryEditor.tsx` |
 | `rsvpCta` | `rsvpCta` | `RsvpCtaEditor.tsx` |
 | `rsvpForm` | `rsvpForm` (`header`, `labels`, `attendanceOptions`, `actions`, `successModal`) | `RsvpFormEditor.tsx` |
-| `siteText` | `siteText`: small UI wording grouped by screen (`common`, `menu`, `loading`, `welcome`, `motionHint`, `music`, `entrance`, `ourStory`, `entourage`, `details`, `dressCode`, `registry`, `curatedRegistry`, `giftModal`, `rsvp`, `phone`, `footer`, `notFound`, `seo`), every leaf a string. Read **on the server only** (not by `WeddingContentContext`). | `SiteTextEditor.tsx` ("Site Text" tab) |
+| `siteText` | `siteText`: small UI wording grouped by screen (`common`, `menu`, `loading`, `welcome`, `motionHint`, `music`, `entrance`, `ourStory`, `entourage`, `details`, `dressCode`, `registry`, `curatedRegistry`, `giftModal`, `rsvp`, `phone`, `footer`, `notFound`, `seo`), every leaf a string. Read **on the server only**, into `SiteTextProvider` (not `WeddingContentContext`). | `SiteTextEditor.tsx` ("Site Text" tab) |
 
 `global.coupleNameFormat` ("Hans & Czay") is the couple's names as written in a
 sentence: metadata, the 404 page, the RSVP email, `{couple}` in site text.

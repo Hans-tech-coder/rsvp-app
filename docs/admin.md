@@ -79,11 +79,11 @@ the client checks `success` and shows the error.
 | Route | What it does | Actions |
 | --- | --- | --- |
 | `/admin/dashboard` | Counts: total/unused codes, attending/not attending, gifts total/full/available | – |
-| `/admin/invites` | Generate N codes; copy the invite message (template with `{{CODE}}`), mark as copied; regenerate or delete a code; edit the template | `generateInviteCodes`, `regenerateInviteCode`, `deleteInviteCode`, `toggleInviteCopiedStatus`, `updateInviteMessageTemplate` |
+| `/admin/invites` | Generate N codes; copy the invite message (template with `{{CODE}}`; until one is saved, the default links to the event's own URL, `getEventUrl(eventId)`, and is signed with its `coupleNameFormat`), mark as copied; regenerate or delete a code; edit the template | `generateInviteCodes`, `regenerateInviteCode`, `deleteInviteCode`, `toggleInviteCopiedStatus`, `updateInviteMessageTemplate` |
 | `/admin/guests` | RSVP list with search/filter and CSV export (papaparse); delete an entry | `deleteInviteCode` |
 | `/admin/gifts` | Registry gift CRUD (`name`, `link`, `maxCount`); reset claims | `addRegistryGift`, `updateRegistryGift`, `deleteRegistryGift`, `resetRegistryGift` |
 | `/admin/registry` | Who claimed which gift; delete a claim (decrements the gift count) | `deleteGiftSelection` |
-| `/admin/content` | Tabbed editors for every guest screen, plus **Site Text** (every button, label, hint and error message, grouped by screen, with a search box; empty field = default) | none for the content itself — editors write Firestore from the browser (see `docs/content-system.md`); Site Text and Global Settings then call `revalidateGuestSite` |
+| `/admin/content` | Tabbed editors for every guest screen, plus **Site Text** (every button, label, hint and error message, grouped by screen, with a search box; empty field = default) | none for the content itself — editors write Firestore from the browser (see `docs/content-system.md`), then every editor calls `refreshGuestSite(eventId)` → `revalidateGuestSite` so the cached guest page rebuilds |
 
 ## Adding an admin page
 

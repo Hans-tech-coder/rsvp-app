@@ -9,35 +9,55 @@ the screen, and the checklist for adding a new editable field.
 ```
 src/data/wedding-content.json      (defaults, bundled at build time)
           +
-Firestore events/{eventId}/content/<doc>   (overrides, fetched in the browser)
-          │  merged in src/contexts/WeddingContentContext.tsx
+Firestore events/{eventId}/content/<doc>   (overrides, read on the server with the admin SDK)
+          │  getEventContent(eventId) in src/lib/siteContentServer.ts
+          │  merged by mergeWeddingContent() in src/lib/weddingContent.ts
           ▼
-useWeddingContent().content        (read by every screen)
+src/app/[event]/page.tsx  ->  <WeddingContentProvider content>  ->  useWeddingContent().content
 ```
 
-1. `WeddingContentProvider` (wraps the guest page in `src/app/page.tsx`) starts
-   with the JSON as `content` and `loading = true`.
-2. On mount it `getDoc`s all twelve screen docs of the event's `content` (not `siteText`) **in parallel**
-   (`Promise.all`) with the **browser SDK** (public read is allowed by
-   `firestore.rules`). One failing read falls back to the JSON for everything.
-3. It merges each doc over the JSON default. The merge is **written by hand per
-   doc** in the provider — there is no generic merge. Patterns used:
+1. `src/app/[event]/page.tsx` (a server component) calls
+   `getEventContent(eventId)`. It reads `events/{eventId}` first (missing →
+   `null` → 404, so a made-up URL costs one read), then the twelve screen docs
+   plus `siteText` in one `getAll`. A Firestore error throws (the cached page
+   stays up instead of being replaced by the defaults).
+2. `mergeWeddingContent()` merges each doc over the JSON default. The merge is
+   **written by hand per doc** — there is no generic merge. Patterns used:
    - shallow spread: `welcomeScreen`, `entranceScreen`, `registry`, `rsvpCta`, `rsvpForm`
    - one level deeper for nested objects: `details.header/ceremony/reception`, `dressCode.header`
    - field-by-field with `??`: `ourStory`, `entourage`, `dressCode` fields
      (`entourage.principalSponsors` goes through `normalizePrincipalSponsors()`
      first, see `docs/data-model.md`)
-   - field-by-field with `||` (empty string falls back to default): `globalSettings`
+   - `globalSettings` → `content.global` with `mergeGlobal()`: every key of the
+     JSON `global`; an empty or non-text value keeps the default (the same rule
+     as the 404 page)
    - special: `gallery` doc → `content.gallery` = `images[]`, `content.galleryHeader` = `header`;
      `faq` doc → `content.faq` = `items[]`, `content.faqHeader` = `header`
    - `globalSettings` also writes into `details.ceremony` / `details.reception`
      (time, location, address) — it overrides the `details` doc for those fields.
-4. `loading` turns false → `page.tsx` also waits for `document.fonts.ready` and,
-   when the first screen is Welcome, preloads its hero image (same srcset as
-   `<Image fill>`, via `getImageProps`). That extra wait is capped at 2.5 s after
+3. The page hands the merged content (plain JSON) and the event ID to
+   `WeddingContentProvider`; the browser never reads content from Firestore.
+4. `GuestSite.tsx` keeps `LoadingScreen` up until `document.fonts.ready` and,
+   when the first screen is Welcome, its hero image is preloaded (same srcset as
+   `<Image fill>`, via `getImageProps`). That wait is capped at 2.5 s after
    navigation (`LOADER_MAX_WAIT_MS`). Then the step flow mounts and
-   `LoadingScreen` crossfades out over it. Content is always awaited, so default
-   text never flashes.
+   `LoadingScreen` crossfades out over it.
+
+### Caching and refresh after a save
+
+- `/[event]` is generated on its first visit and cached (ISR,
+  `generateStaticParams` returns `[]`). Visits after that cost no Firestore
+  reads.
+- Every editor calls `refreshGuestSite(eventId)`
+  (`src/app/admin/content/refreshGuestSite.ts`) after each write to a live
+  `content` doc (save, undo/restore that writes). It calls the
+  `revalidateGuestSite(eventId)` server action: the default event revalidates
+  the whole site (`revalidatePath('/', 'layout')`, because the 404 page shows
+  it); any other event only `/<eventId>`. The next visit rebuilds the page.
+- A failed refresh is only logged (the save itself succeeded). The page also
+  rebuilds itself at most hourly (`revalidate = 3600`), which is the bound for
+  a missed refresh or a change made outside the admin (Firestore console,
+  script).
 
 The type of `content` is `typeof wedding-content.json`, so **a key must exist in
 the JSON to be typed**.
@@ -52,20 +72,17 @@ preview title) lives in `siteText`, **not** in `WeddingContentContext`:
 src/data/wedding-content.json  siteText   (defaults)
           +
 Firestore events/{eventId}/content/siteText   (read with the admin SDK on the server)
-          │  getSiteContent() in src/lib/siteContentServer.ts (also reads globalSettings)
+          │  getEventContent(eventId) (with the screen docs) / getSiteContent(eventId) (404 only)
           ▼
-src/app/layout.tsx  ->  <SiteTextProvider>  ->  useSiteText()   (every client component)
-                    ->  generateMetadata (title, description, OG, favicon = global.logo)
-src/app/not-found.tsx -> NotFoundScreen (site = merged global) + its <title>
+src/app/[event]/page.tsx -> <SiteTextProvider> -> useSiteText()   (every guest component, AudioPlayer)
+                         -> generateMetadata (title, description, OG, favicon = global.logo)
+src/app/not-found.tsx    -> its own <SiteTextProvider> + NotFoundScreen (default event) + its <title>
 ```
 
-- Server-read so the text is right on first paint, also outside the guest
-  page's provider (loading screen, music hint in `AudioPlayer`, 404 page).
-- `/` and the 404 page are **static** (built with the Firestore values). After
-  a save, `SiteTextEditor` and `GlobalSettingsEditor` call the
-  `revalidateGuestSite()` server action (`revalidatePath('/', 'layout')`), so
-  the next visit regenerates them. A save from another place (a script, the
-  Firestore console) shows only after the next deploy or such a save.
+- Server-read so the text is right on first paint, also on the loading screen
+  and the music hint. The root layout reads nothing from Firestore (the admin
+  pages don't need event text).
+- Refresh after a save: same as the content above (`refreshGuestSite`).
 - Merge rule: `mergeSiteText()` (`src/lib/siteText.ts`): known keys only, empty
   value = default. Placeholders like `{count}` are filled with `fillText()`
   (string) or `fillNodes()` (when a value is an element, e.g. the red `*` or
@@ -76,7 +93,9 @@ src/app/not-found.tsx -> NotFoundScreen (site = merged global) + its <title>
 - Not covered: image `alt` text and `aria-*` labels stay in the components;
   the loader's "H&C" monogram is hard-coded (see `docs/current-state.md`).
 
-`src/app/layout.tsx` gets the OG/Twitter image (`global.ogImage`) the same way.
+`src/app/[event]/page.tsx` gets the OG/Twitter image (`global.ogImage`) the same way;
+link-preview URLs are made absolute with `metadataBase` in `src/app/layout.tsx`
+(`getSiteUrl()` in `src/lib/siteUrl.ts`).
 
 ## How an editor works (`src/app/admin/content/*Editor.tsx`)
 
@@ -128,7 +147,9 @@ A new photo has none, so the 3D effect turns off until a developer adds a map.
 
 Editors write to Firestore **directly from the browser**; this works because
 the admin is signed in with the Firebase client SDK and `firestore.rules`
-allows writes to `events/{eventId}/content` for `isAdmin()`.
+allows writes to `events/{eventId}/content` for `isAdmin()`. After each write
+to a live doc an editor must call `refreshGuestSite(eventId)`, or the guest
+page keeps showing the cached version for up to an hour.
 
 ## Checklist: add a new editable field
 
@@ -136,11 +157,11 @@ Example: a new `welcomeScreen.footnote` text.
 
 1. **`src/data/wedding-content.json`** — add the key with a sensible default
    (this also makes it typed).
-2. **Merge in `WeddingContentContext.tsx`** — shallow-spread docs pick it up
-   automatically; field-by-field docs (`ourStory`, `entourage`, `dressCode`,
-   `globalSettings`) need an explicit line.
+2. **Merge in `mergeWeddingContent()`** (`src/lib/weddingContent.ts`) —
+   shallow-spread docs and `global` pick it up automatically; field-by-field
+   docs (`ourStory`, `entourage`, `dressCode`) need an explicit line.
 3. **Editor** — add it to the initial `formData` / `originalData` and add an
-   input.
+   input. A new write to a live doc is followed by `refreshGuestSite(eventId)`.
 4. **Screen** — read `content.<key>.<field>`, with a fallback if the value can
    be empty.
 5. **Site text** (a button, label, hint or error, not a screen's content):
@@ -148,8 +169,8 @@ Example: a new `welcomeScreen.footnote` text.
    add a field to `SITE_TEXT_GROUPS` in `src/app/admin/content/siteTextFields.ts`.
    No merge or provider change is needed. `src/lib/siteText.test.ts` fails if a
    key has no editor field (or the reverse).
-6. If it is a **new Firestore doc**, also add it to the `getDoc` list in the
-   provider, to `docs` / `docToKeyMap` in `scripts/sync-content.js`, to the tab
+6. If it is a **new Firestore doc**, also add it to `CONTENT_DOC_IDS` in
+   `src/lib/weddingContent.ts`, to `docs` / `docToKeyMap` in `scripts/sync-content.js`, to the tab
    list in `src/app/admin/content/page.tsx` (and its "not implemented" guard),
    and to the table in `docs/data-model.md`.
 

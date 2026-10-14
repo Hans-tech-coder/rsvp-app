@@ -1,12 +1,20 @@
-# Guest site (`/`)
+# Guest site (`/<eventId>`)
 
-The guest site is **one client page** (`src/app/page.tsx`) that swaps full-screen
-"screens" in place. There is no routing between screens and no URL per screen.
+Each event's guest site lives at **`/<eventId>`** (e.g. `/hans-and-czay`).
+`src/app/page.tsx` redirects `/` to the default event (`DEFAULT_EVENT_ID` in
+`src/lib/eventPaths.ts`, override with `NEXT_PUBLIC_DEFAULT_EVENT_ID`), so old
+links to the bare domain keep working. An unknown or invalid event ID is a 404.
+
+`src/app/[event]/page.tsx` (server) reads the event's content and site text,
+sets the title and link preview, and renders the cached page (see Caching in
+`docs/content-system.md`). Inside it, the guest site is **one client
+component** (`src/app/[event]/GuestSite.tsx`) that swaps full-screen "screens"
+in place. There is no routing between screens and no URL per screen.
 
 ## Step flow
 
 `currentStep` (0–9) picks the screen. Order and labels are defined twice and
-must stay in sync: the `currentStep === n` blocks in `page.tsx` and
+must stay in sync: the `currentStep === n` blocks in `GuestSite.tsx` and
 `menuItems` in `src/components/layout/CanvasMenu.tsx` (labels from
 `siteText.menu`, editable in the Site Text tab).
 
@@ -24,22 +32,25 @@ must stay in sync: the `currentStep === n` blocks in `page.tsx` and
 | 9 | `RsvpScreen` (locked) | RSVP |
 
 Every screen takes `onContinue` (→ `nextStep`). Some also take
-`onLightboxChange` (Our Story, Gallery, Dress Code) so `page.tsx` can hide the back/menu
+`onLightboxChange` (Our Story, Gallery, Dress Code) so `GuestSite.tsx` can hide the back/menu
 buttons and add `body.lightbox-open`.
 
-To **add, remove, or reorder a screen**: edit the step blocks in `page.tsx`,
+To **add, remove, or reorder a screen**: edit the step blocks in `GuestSite.tsx`,
 `menuItems` in `CanvasMenu.tsx`, the hard-coded `9` (RSVP step) in
 `goToStep` / `handleStartUnlock`, the `goToStep(7)` back target of `RsvpScreen`,
 and the table in `docs/FEATURE-MAP.md`.
 
-## State kept in `page.tsx`
+## State kept in `GuestSite.tsx`
+
+Saved keys are per event, `event:<eventId>:<name>`, so two events in one
+browser don't share progress or an unlocked RSVP.
 
 | State | Purpose | Persisted in `localStorage` |
 | --- | --- | --- |
-| `currentStep` | visible screen | `wedding_currentStep` |
-| `highestVisitedStep` | menu only allows steps already reached | `wedding_highestVisitedStep` |
-| `isUnlocked` | RSVP step is reachable | `wedding_isUnlocked` |
-| `validatedInviteCode` | code passed to `RsvpScreen` | `wedding_inviteCode` |
+| `currentStep` | visible screen | `event:<eventId>:currentStep` |
+| `highestVisitedStep` | menu only allows steps already reached | `event:<eventId>:highestVisitedStep` |
+| `isUnlocked` | RSVP step is reachable | `event:<eventId>:isUnlocked` |
+| `validatedInviteCode` | code passed to `RsvpScreen` | `event:<eventId>:inviteCode` |
 | `showEntranceScreen` | code-entry overlay is open | no |
 | `isMenuOpen`, `isLightboxOpen` | overlays | no |
 
@@ -104,7 +115,7 @@ transaction rejects when `currentCount >= maxCount`.
 
 ## Transitions and motion
 
-- **Screen swap:** `pageVariants` in `page.tsx` is a crossfade inside an
+- **Screen swap:** `pageVariants` in `GuestSite.tsx` is a crossfade inside an
   `AnimatePresence` with no `mode="wait"`. The new screen enters from the tap
   (opacity + `transform: scale(0.97→1)`, 0.7 s, `[0.22, 1, 0.36, 1]`) on top of
   the old one, which fades out in 0.45 s. The exiting screen flips to
@@ -112,7 +123,7 @@ transaction rejects when `currentCount >= maxCount`.
   taps. Under reduced motion it is an opacity-only 0.15 s fade
   (`useReducedMotion`). Screens are `absolute inset-0` and remount on each
   swap, so every screen opens scrolled to the top.
-- **Loader → first screen:** the outer `AnimatePresence` in `page.tsx` has no
+- **Loader → first screen:** the outer `AnimatePresence` in `GuestSite.tsx` has no
   `mode="wait"`, so `<main>` mounts under `LoadingScreen` while it fades out.
   The loader's exit is a CSS opacity transition on `--duration-very-slow` /
   `--ease-in-out` driven by `usePresence` (instant under reduced motion).
@@ -212,7 +223,7 @@ transaction rejects when `currentCount >= maxCount`.
 
 ## Custom cursor
 
-`WeddingCursor` (mounted in `Home` in `page.tsx`, so never on `/admin`)
+`WeddingCursor` (mounted in `GuestSite` in `src/app/[event]/GuestSite.tsx`, so never on `/admin`)
 replaces the cursor with a gold solitaire ring whose diamond tip is the
 hotspot. Moving leaves a trail of twinkling gold stardust. Hovering anything
 clickable tilts and grows the ring with a bounce and a few sparkles, and a
@@ -233,7 +244,7 @@ click throws a gold sparkle burst. The particles are drawn on one fixed canvas
 
 ## Music
 
-`AudioPlayer` (mounted in `layout.tsx`) renders `<audio id="wedding-bg-music"
+`AudioPlayer` (mounted in `src/app/[event]/page.tsx` and `not-found.tsx`) renders `<audio id="wedding-bg-music"
 src="/bg-music.mp3" preload="none">` and a toggle. It downloads only when
 `.play()` is first called, so the 5.4 MB file does not compete with the first load. Browsers block autoplay, so `nextStep` on
 step 0 (the first user tap) calls `.play()`. `OurStoryScreen` also reaches the
@@ -278,12 +289,16 @@ The controls sit bottom-right (`#audio-controls`, hidden while
 
 ## 404 page
 
-Any unknown URL renders `src/app/not-found.tsx` (the root `not-found`, HTTP
-404, title "Page not found | Hans & Czay"), which shows `NotFoundScreen`. It is
-not a step and sits outside `WeddingContentProvider`, so it reads names, logo,
-venue, wedding date and the Welcome photo straight from
-`src/data/wedding-content.json`; an admin change to those shows here only after
-`npm run sync-content`. The days-to-wedding line is read on the client
+Any unknown URL, including an event ID that doesn't exist, renders
+`src/app/not-found.tsx` (the root `not-found`, HTTP 404, title from site text
+`notFound.pageTitle`), which shows `NotFoundScreen` for the **default event**.
+It is not a step and sits outside `WeddingContentProvider`: names, logo, venue
+and wedding date come from the default event's global settings, read on the
+server (`getSiteContent(DEFAULT_EVENT_ID)`); the Welcome photo still comes
+straight from `src/data/wedding-content.json` (shows an admin change only after
+`npm run sync-content`). `src/app/[event]/page.tsx` also calls `notFound()` in
+`generateMetadata`; without it the root title replaced the 404 title after
+hydration. The days-to-wedding line is read on the client
 (`useSyncExternalStore`), because the page is prerendered. It uses the inner
 screens' burgundy backdrop and their burgundy button (text in `goldlight` for
 contrast). The logo is the original monogram, static, with an embossed
@@ -291,5 +306,6 @@ look (`.t-emboss` in `globals.css`), and `FallingPetals`
 drifts behind the text (24 petals, 12 on phones; seeded values so server and
 client match; transform-only CSS). Under reduced motion the petals are hidden.
 Its one action links
-to `/`, which resumes the guest's saved step from `localStorage`. `AudioPlayer`
-(from the root layout) shows here too.
+to `/` (the default event), which resumes the guest's saved step from
+`localStorage`. `not-found.tsx` mounts `AudioPlayer` and its own
+`SiteTextProvider`.

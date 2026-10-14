@@ -5,12 +5,12 @@ import { Loader2, Upload } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
 import { CharCount, TEXT_LIMITS } from './CharCount';
-import { revalidateGuestSite } from '@/app/actions/admin';
 
 export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
@@ -124,11 +124,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
 
       const docRef = doc(db, paths.content(eventId, 'globalSettings'));
       await setDoc(docRef, formData, { merge: true });
-
-      // Link previews, the browser tab and the 404 page are built on the server
-      // from these settings; regenerate them.
-      const refresh = await revalidateGuestSite();
-      if (!refresh.success) console.error('Guest site refresh failed:', refresh.error);
+      await refreshGuestSite(eventId);
 
       setOriginalData(formData);
       setHasBackup(true);

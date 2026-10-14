@@ -9,7 +9,7 @@ import { FallingPetals } from '@/components/effects/FallingPetals';
 import weddingContent from '@/data/wedding-content.json';
 import { useSiteText } from '@/contexts/SiteTextContext';
 import { fillNodes, fillText } from '@/lib/siteText';
-import type { SiteGlobal } from '@/lib/siteContentServer';
+import type { SiteGlobal } from '@/lib/weddingContent';
 
 // Rendered by src/app/not-found.tsx for every unknown URL. It sits outside
 // WeddingContentProvider: global settings come from the server (`site`), the

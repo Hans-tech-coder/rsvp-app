@@ -1,0 +1,470 @@
+"use client";
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, Variants, useReducedMotion } from 'motion/react';
+import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
+import { OurStoryScreen } from '@/components/screens/OurStoryScreen';
+import { EntourageScreen } from '@/components/screens/EntourageScreen';
+import { DetailsScreen } from '@/components/screens/DetailsScreen';
+import { DressCodeScreen } from '@/components/screens/DressCodeScreen';
+import { GalleryScreen } from '@/components/screens/GalleryScreen';
+import { FaqScreen } from '@/components/screens/FaqScreen';
+import { RegistryScreen } from '@/components/screens/RegistryScreen';
+import { RsvpCtaScreen } from '@/components/screens/RsvpCtaScreen';
+import { RsvpScreen } from '@/components/screens/RsvpScreen';
+import { EntranceScreen } from '@/components/screens/EntranceScreen';
+import { CanvasMenu } from '@/components/layout/CanvasMenu';
+import { LoadingScreen } from '@/components/screens/LoadingScreen';
+import { WeddingCursor } from '@/components/effects/WeddingCursor';
+import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { getImageProps } from 'next/image';
+
+// Longest the loader waits for fonts and the hero image (ms after navigation),
+// so a slow network never traps guests on it. Content comes with the page.
+const LOADER_MAX_WAIT_MS = 2500;
+
+// Warm the cache with the same srcset/sizes the Welcome <Image fill> requests.
+function preloadImage(src: string): Promise<unknown> {
+  try {
+    const { props } = getImageProps({ src, alt: '', fill: true });
+    const img = new window.Image();
+    if (props.sizes) img.sizes = props.sizes;
+    if (props.srcSet) img.srcset = props.srcSet;
+    img.src = props.src;
+    return img.decode().catch(() => {});
+  } catch {
+    return Promise.resolve();
+  }
+}
+
+// Saved progress is per event, so two events in one browser don't mix.
+const storageKey = (eventId: string, name: string) => `event:${eventId}:${name}`;
+
+function MainApp() {
+  const { eventId, content } = useWeddingContent();
+  const [assetsReady, setAssetsReady] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [showEntranceScreen, setShowEntranceScreen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [highestVisitedStep, setHighestVisitedStep] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const [validatedInviteCode, setValidatedInviteCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    
+    // Load saved state on initial client-side render
+    try {
+      const savedStep = localStorage.getItem(storageKey(eventId, 'currentStep'));
+      const savedHighestStep = localStorage.getItem(storageKey(eventId, 'highestVisitedStep'));
+      const savedUnlocked = localStorage.getItem(storageKey(eventId, 'isUnlocked'));
+      const savedInviteCode = localStorage.getItem(storageKey(eventId, 'inviteCode'));
+      
+      if (savedStep !== null) {
+        setCurrentStep(parseInt(savedStep, 10));
+      }
+      if (savedHighestStep !== null) {
+        setHighestVisitedStep(parseInt(savedHighestStep, 10));
+      }
+      if (savedUnlocked === 'true') {
+        setIsUnlocked(true);
+      }
+      if (savedInviteCode !== null) {
+        setValidatedInviteCode(savedInviteCode);
+      }
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+    }
+  }, [eventId]);
+
+  // Keep the loader up until fonts and the first screen's hero image are ready.
+  useEffect(() => {
+    if (!mounted || assetsReady) return;
+    let cancelled = false;
+    const waits: Promise<unknown>[] = [document.fonts.ready];
+    if (currentStep === 0) waits.push(preloadImage(content.welcomeScreen.backgroundImage));
+    const cap = new Promise((resolve) =>
+      setTimeout(resolve, Math.max(0, LOADER_MAX_WAIT_MS - performance.now()))
+    );
+    Promise.race([Promise.all(waits), cap]).then(() => {
+      if (!cancelled) setAssetsReady(true);
+    });
+    return () => { cancelled = true; };
+  }, [mounted, assetsReady, currentStep, content]);
+
+  // Save state changes to localStorage
+  useEffect(() => {
+    if (mounted) {
+      try {
+        localStorage.setItem(storageKey(eventId, 'currentStep'), currentStep.toString());
+        localStorage.setItem(storageKey(eventId, 'highestVisitedStep'), highestVisitedStep.toString());
+        localStorage.setItem(storageKey(eventId, 'isUnlocked'), isUnlocked.toString());
+        if (validatedInviteCode) {
+          localStorage.setItem(storageKey(eventId, 'inviteCode'), validatedInviteCode);
+        } else {
+          localStorage.removeItem(storageKey(eventId, 'inviteCode'));
+        }
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
+    }
+  }, [eventId, currentStep, highestVisitedStep, isUnlocked, validatedInviteCode, mounted]);
+
+  useEffect(() => {
+    if (isLightboxOpen) {
+      document.body.classList.add('lightbox-open');
+    } else {
+      document.body.classList.remove('lightbox-open');
+    }
+  }, [isLightboxOpen]);
+
+  const goToStep = (step: number) => {
+    if (step === currentStep) return;
+    
+    if (step === 9 && !isUnlocked) {
+      setShowEntranceScreen(true);
+      return;
+    }
+    
+    setCurrentStep(step);
+    if (step > highestVisitedStep) {
+      setHighestVisitedStep(step);
+    }
+  };
+
+  const handleStartUnlock = () => {
+    setIsUnlocked(true);
+    setCurrentStep(9);
+    if (9 > highestVisitedStep) {
+      setHighestVisitedStep(9);
+    }
+  };
+
+  const handleUnlock = (code: string) => {
+    // The screen transition has already finished behind the overlay
+    setValidatedInviteCode(code);
+    setShowEntranceScreen(false);
+  };
+
+  const nextStep = () => {
+    // Play audio synchronously during the first user interaction (WelcomeScreen continue button)
+    if (currentStep === 0) {
+      const audioEl = document.getElementById('wedding-bg-music') as HTMLAudioElement;
+      if (audioEl && audioEl.paused) {
+        audioEl.play().catch(e => console.log('Audio autoplay prevented:', e));
+      }
+    }
+
+    goToStep(currentStep + 1);
+  };
+
+  const handleRsvpSubmitSuccess = () => {
+    // Relock the RSVP section so it can't be accessed again without an invite code
+    setIsUnlocked(false);
+    setValidatedInviteCode(null);
+  };
+
+  // Screen swap is a crossfade: screens are absolute inset-0, so the new one
+  // starts entering on the tap and fades in on top of the old one (no blank gap).
+  // Only opacity + a transform string animate, so both run on WAAPI.
+  // zIndex/pointerEvents flip instantly so the exiting screen never covers or
+  // catches taps meant for the new one.
+  const instant = { duration: 0 };
+  const pageVariants: Variants = reduceMotion
+    ? {
+        initial: { opacity: 0, zIndex: 1 },
+        animate: {
+          opacity: 1,
+          zIndex: 1,
+          pointerEvents: 'auto',
+          transition: { duration: 0.15, ease: 'linear', zIndex: instant, pointerEvents: instant }
+        },
+        exit: {
+          opacity: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
+          transition: { duration: 0.15, ease: 'linear', zIndex: instant, pointerEvents: instant }
+        }
+      }
+    : {
+        initial: {
+          opacity: 0,
+          transform: 'scale(0.97)',
+          zIndex: 1
+        },
+        animate: {
+          opacity: 1,
+          transform: 'scale(1)',
+          zIndex: 1,
+          pointerEvents: 'auto',
+          transition: {
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1], // --ease-smooth-out
+            zIndex: instant,
+            pointerEvents: instant
+          }
+        },
+        exit: {
+          opacity: 0,
+          transform: 'scale(1.02)',
+          zIndex: 0,
+          pointerEvents: 'none',
+          transition: {
+            duration: 0.45,
+            ease: [0.4, 0, 1, 1], // slow in, gone by the time the new text reveals
+            zIndex: instant,
+            pointerEvents: instant
+          }
+        }
+      };
+
+  return (
+    // No mode="wait": the loader fades out over <main> (crossfade, no blank gap).
+    <AnimatePresence>
+      {!assetsReady ? (
+        <LoadingScreen key="loading" />
+      ) : (
+        <main key="main" className="relative w-full h-[100dvh] overflow-hidden bg-wedding-dark">
+      
+      {/* Global Effect removed to specific screens */}
+
+      {mounted && (
+        <>
+          {/* Global Navigation Controls */}
+          <AnimatePresence>
+            {currentStep > 0 && !isLightboxOpen && (
+              <motion.button 
+                key="back-button"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                onClick={() => goToStep(currentStep - 1)} 
+                aria-label="Back"
+                className="absolute top-6 left-6 w-11 h-11 z-[40] rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:bg-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300 active:scale-95 pointer-events-auto"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+              </motion.button>
+            )}
+          </AnimatePresence>
+
+          {/* Hamburger Menu Button */}
+          <AnimatePresence>
+            {currentStep > 0 && !isLightboxOpen && (
+              <motion.button 
+                key="menu-button"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                onClick={() => setIsMenuOpen(true)} 
+                aria-label="Menu"
+                className="absolute top-6 right-6 w-11 h-11 z-[40] rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:bg-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300 active:scale-95 pointer-events-auto"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+              </motion.button>
+            )}
+          </AnimatePresence>
+
+          {/* Screens with Framer Motion */}
+          <div className="absolute inset-0 z-10 pointer-events-none">
+            {/* No mode="wait": old and new screens overlap as a crossfade. */}
+            <AnimatePresence>
+              {currentStep === 0 && (
+                <motion.div
+                  key="welcome-screen"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="absolute inset-0 w-full h-full pointer-events-auto"
+                >
+                  <WelcomeScreen onContinue={nextStep} />
+                </motion.div>
+              )}
+              
+              {currentStep === 1 && (
+                <motion.div
+                  key="our-story-screen"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="absolute inset-0 w-full h-full pointer-events-auto"
+                >
+                  <OurStoryScreen 
+                    onContinue={nextStep} 
+                    onLightboxChange={setIsLightboxOpen}
+                  />
+                </motion.div>
+              )}
+
+              {currentStep === 2 && (
+                <motion.div
+                  key="entourage-screen"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="absolute inset-0 w-full h-full pointer-events-auto"
+                >
+                  <EntourageScreen onContinue={nextStep} />
+                </motion.div>
+              )}
+
+              {currentStep === 3 && (
+                <motion.div
+                  key="details-screen"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="absolute inset-0 w-full h-full pointer-events-auto"
+                >
+                  <DetailsScreen onContinue={nextStep} />
+                </motion.div>
+              )}
+
+              {currentStep === 4 && (
+                <motion.div
+                  key="dresscode-screen"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="absolute inset-0 w-full h-full pointer-events-auto"
+                >
+                  <DressCodeScreen onContinue={nextStep} onLightboxChange={setIsLightboxOpen} />
+                </motion.div>
+              )}
+
+              {currentStep === 5 && (
+                <motion.div
+                  key="gallery-screen"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="absolute inset-0 w-full h-full pointer-events-auto"
+                >
+                  <GalleryScreen 
+                    onContinue={nextStep} 
+                    onLightboxChange={setIsLightboxOpen} 
+                  />
+                </motion.div>
+              )}
+
+              {currentStep === 6 && (
+                <motion.div
+                  key="faq-screen"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="absolute inset-0 w-full h-full pointer-events-auto"
+                >
+                  <FaqScreen onContinue={nextStep} />
+                </motion.div>
+              )}
+
+              {currentStep === 7 && (
+                <motion.div
+                  key="registry-screen"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="absolute inset-0 w-full h-full pointer-events-auto"
+                >
+                  <RegistryScreen onContinue={nextStep} />
+                </motion.div>
+              )}
+
+              {currentStep === 8 && (
+                <motion.div
+                  key="rsvp-cta-screen"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="absolute inset-0 w-full h-full pointer-events-auto"
+                >
+                  <RsvpCtaScreen onContinue={nextStep} />
+                </motion.div>
+              )}
+
+              {currentStep === 9 && (
+                <motion.div
+                  key="rsvp-screen"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="absolute inset-0 w-full h-full pointer-events-auto"
+                >
+                  <RsvpScreen 
+                    inviteCode={validatedInviteCode || 'dev-mode'} 
+                    onContinue={() => goToStep(7)} 
+                    onSubmitSuccess={handleRsvpSubmitSuccess}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Navigation Menu */}
+          <CanvasMenu 
+            isOpen={isMenuOpen} 
+            onClose={() => setIsMenuOpen(false)} 
+            onNavigate={goToStep}
+            highestVisitedStep={highestVisitedStep}
+            currentStep={currentStep}
+          />
+
+          {/* Password Lock for RSVP */}
+          <AnimatePresence>
+            {showEntranceScreen && (
+              <motion.div
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 exit={{ opacity: 0, transition: { duration: 1.5, ease: "easeInOut" } }}
+                 className="fixed inset-0 z-[100] bg-wedding-dark"
+              >
+                 <EntranceScreen onUnlock={handleUnlock} onStartUnlock={handleStartUnlock} />
+                 
+                 {/* Back button to close Entrance Screen without unlocking */}
+                 <button 
+                   onClick={() => setShowEntranceScreen(false)}
+                   className="absolute top-6 left-6 z-[110] w-10 h-10 rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:text-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300"
+                 >
+                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                   </svg>
+                 </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
+      )}
+        </main>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/** The guest site; src/app/[event]/page.tsx wraps it in the event's content. */
+export function GuestSite() {
+  return (
+    <>
+      <MainApp />
+      <WeddingCursor />
+    </>
+  );
+}

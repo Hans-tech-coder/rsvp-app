@@ -4,14 +4,16 @@ Which files implement which feature. Find the feature, open only the files
 listed. Paths are relative to the repo root. Update this file whenever a file is
 added, moved, or deleted.
 
-## Guest site (`/`)
+## Guest site (`/<eventId>`)
 
-The whole guest site is one client page. Step numbers are the `currentStep`
-values in `src/app/page.tsx`.
+`/` redirects to the default event (`src/app/page.tsx`). Each event's guest
+site is one cached server page, `src/app/[event]/page.tsx`, around one client
+component. Step numbers are the `currentStep` values in
+`src/app/[event]/GuestSite.tsx`.
 
 | Step | Feature | Screen file | Content key(s) | Admin editor |
 | --- | --- | --- | --- | --- |
-| – | Loading splash (while content loads) | `src/components/screens/LoadingScreen.tsx` | – | – |
+| – | Loading splash (while fonts and the first photo load; monogram = name initials) | `src/components/screens/LoadingScreen.tsx` | `global` | `GlobalSettingsEditor.tsx` |
 | 0 | Welcome + countdown | `src/components/screens/WelcomeScreen.tsx` | `welcomeScreen`, `global` | `WelcomeScreenEditor.tsx`, `GlobalSettingsEditor.tsx` |
 | 1 | Our Story timeline | `src/components/screens/OurStoryScreen.tsx` | `ourStory` | `OurStoryEditor.tsx` |
 | 2 | Entourage | `src/components/screens/EntourageScreen.tsx` | `entourage` | `EntourageEditor.tsx` |
@@ -30,14 +32,17 @@ All editors are in `src/app/admin/content/`.
 
 | Feature | Files |
 | --- | --- |
-| Step state, back/menu buttons, screen transitions, RSVP lock, localStorage | `src/app/page.tsx` |
-| Content loading (JSON defaults + Firestore overrides; also hands out the current `eventId`) | `src/contexts/WeddingContentContext.tsx`, `src/data/wedding-content.json` |
-| Site text: every small guest-visible wording (buttons, labels, hints, errors, menu, loader, 404, link preview). Read on the server, given to all components by the root layout; `useSiteText()` in a component | `src/lib/siteContentServer.ts` (`getSiteContent`, server only), `src/contexts/SiteTextContext.tsx` (`SiteTextProvider`, `useSiteText`), `src/lib/siteText.ts` (`SiteText` type, `mergeSiteText`, `fillText`, `fillNodes`; tested by `src/lib/siteText.test.ts`), JSON key `siteText`; editor `src/app/admin/content/SiteTextEditor.tsx` + field labels `siteTextFields.ts` |
+| Per-event route: 404 for an unknown event, title/description/link preview (`generateMetadata`), ISR cache (`revalidate`, empty `generateStaticParams`), mounts `SiteTextProvider`, `WeddingContentProvider`, `AudioPlayer` | `src/app/[event]/page.tsx` |
+| `/` → default event redirect | `src/app/page.tsx` |
+| Step state, back/menu buttons, screen transitions, RSVP lock, localStorage (keys `event:<eventId>:…`) | `src/app/[event]/GuestSite.tsx` |
+| Content loading: read on the server (`getEventContent`, admin SDK), merged over the JSON defaults (`mergeWeddingContent`, `mergeGlobal`, `CONTENT_DOC_IDS`), handed to the browser with the event ID | `src/lib/siteContentServer.ts` (server only), `src/lib/weddingContent.ts`, `src/contexts/WeddingContentContext.tsx` (`useWeddingContent`), `src/data/wedding-content.json` |
+| Site text: every small guest-visible wording (buttons, labels, hints, errors, menu, loader, 404, link preview). Read on the server, given to all guest components by `src/app/[event]/page.tsx` (404: `not-found.tsx`); `useSiteText()` in a component | `src/lib/siteContentServer.ts` (`getEventContent` / `getSiteContent`, server only), `src/contexts/SiteTextContext.tsx` (`SiteTextProvider`, `useSiteText`), `src/lib/siteText.ts` (`SiteText` type, `mergeSiteText`, `fillText`, `fillNodes`; tested by `src/lib/siteText.test.ts`), JSON key `siteText`; editor `src/app/admin/content/SiteTextEditor.tsx` + field labels `siteTextFields.ts` |
 | Step menu overlay | `src/components/layout/CanvasMenu.tsx` |
 | Footer at the bottom of scrolling screens (monogram from `global.groomName`/`brideName` initials, tagline `global.footerTagline`, date `global.targetDate` as DD.MM.YYYY; all edited in `GlobalSettingsEditor.tsx`) | `src/components/layout/EmbeddedFooter.tsx` |
 | Background music + floating toggle, volume slider, "music is playing" hint | `src/components/AudioPlayer.tsx`, `.t-vol-*` in `src/app/globals.css`, `public/bg-music.mp3` |
-| Fonts, metadata (title/description from site text, OG image and favicon from global settings), theme script, `SiteTextProvider` | `src/app/layout.tsx` |
-| 404 page for any unknown URL (couple's photo inside the "404", days-to-wedding line, "Back to the celebration" → `/`; global settings read on the server and passed as `site`; wording from site text `notFound`; same burgundy backdrop and button style as the inner screens; embossed logo `.t-emboss` in `globals.css`; also mounts `FallingPetals` and `WeddingCursor`) | `src/app/not-found.tsx` (metadata) → `src/components/screens/NotFoundScreen.tsx` |
+| Fonts, theme script, `metadataBase` (site URL) and the admin pages' title | `src/app/layout.tsx` |
+| Site URL for links that leave the site (link preview base, invite message, RSVP email): `getSiteUrl`, `getEventUrl` | `src/lib/siteUrl.ts` (server only) |
+| 404 page for any unknown URL or event (default event's look: couple's photo inside the "404", days-to-wedding line, "Back to the celebration" → `/`; global settings read on the server and passed as `site`; own `SiteTextProvider` + `AudioPlayer`; wording from site text `notFound`; same burgundy backdrop and button style as the inner screens; embossed logo `.t-emboss` in `globals.css`; also mounts `FallingPetals` and `WeddingCursor`) | `src/app/not-found.tsx` (metadata) → `src/components/screens/NotFoundScreen.tsx` |
 | Colors, fonts, motion tokens, reveal CSS | `src/app/globals.css` |
 | Staggered text reveal on scroll | `src/components/ui/TextsReveal.tsx` |
 | Scroll motion: scroll-container context, `ScrollReveal`/`ScrollRevealItem` (reveal once), `Parallax` (image drift), `SCROLL_MOTION` constants | `src/components/ui/ScrollMotion.tsx` |
@@ -51,7 +56,7 @@ All editors are in `src/app/admin/content/`.
 | Welcome motion onboarding hint ("Move your mouse" / "Tilt your phone", iOS tap-to-enable), every page load, repeats up to 3 times until tried | `src/components/ui/MotionHint.tsx` (icon keyframes `t-hint-*` in `globals.css`) |
 | Firefly glow particles (welcome fallback, drawn above the dark gradient) | `src/components/effects/TwinkleSparks.tsx` |
 | Slow falling rose petals, burgundy/red/white, CSS only (404 page) | `src/components/effects/FallingPetals.tsx` + `.t-petal*` in `globals.css` |
-| Wedding-ring cursor: gold stardust trail, tilt over clickables, sparkle burst on click (mouse/trackpad only, mounted in `Home` in `page.tsx`) | `src/components/effects/WeddingCursor.tsx` + `.t-cursor*` in `globals.css` |
+| Wedding-ring cursor: gold stardust trail, tilt over clickables, sparkle burst on click (mouse/trackpad only, mounted in `GuestSite` in `src/app/[event]/GuestSite.tsx`) | `src/components/effects/WeddingCursor.tsx` + `.t-cursor*` in `globals.css` |
 | Mouse detection (`t-mouse` on `<html>`) that gates every hover style, the ring cursor and the mouse hint | `pointer-init` script in `src/app/layout.tsx`, `hasMouse()` in `src/lib/pointer.ts`, `@custom-variant hover` in `globals.css` |
 | Principal sponsors pair shape, title lists, legacy `string[]` reader | `src/lib/principalSponsors.ts`, tested by `src/lib/principalSponsors.test.ts`; used by `EntourageScreen.tsx`, `EntourageEditor.tsx`, `WeddingContentContext.tsx` |
 | Image download proxy | `src/app/api/download/route.ts` (called from `DetailsScreen.tsx`); host allowlist + filename sanitizer in `src/lib/downloadProxy.ts`, tested by `src/lib/downloadProxy.test.ts` |
@@ -68,7 +73,7 @@ All editors are in `src/app/admin/content/`.
 | `generateInviteCodes`, `deleteInviteCode`, `regenerateInviteCode`, `toggleInviteCopiedStatus`, `getInviteMessageTemplate`, `updateInviteMessageTemplate` | `admin.ts` | `admin/invites/*`, `admin/guests/GuestListClient.tsx` (delete) |
 | `addRegistryGift`, `updateRegistryGift`, `deleteRegistryGift`, `resetRegistryGift` | `admin.ts` | `admin/gifts/GiftsClient.tsx` |
 | `deleteGiftSelection` | `admin.ts` | `admin/registry/RegistrySelectionsClient.tsx` |
-| `revalidateGuestSite` (regenerates the static `/` and 404 after a save) | `admin.ts` | `admin/content/SiteTextEditor.tsx`, `GlobalSettingsEditor.tsx` |
+| `revalidateGuestSite(eventId)` (rebuilds the event's cached page on its next visit; the default event also the 404) | `admin.ts` | every content editor, through `admin/content/refreshGuestSite.ts` |
 | `getMyAdminRole` | `admins.ts` | `admin/layout.tsx` (shows Manage Admins for super admins) |
 | `listAdmins`, `addAdmin`, `cancelPendingAdmin`, `removeAdmin` (super only) | `admins.ts` | `admin/components/ManageAdminsModal.tsx` |
 
@@ -87,7 +92,7 @@ server actions and then `router.refresh()`.
 | `/admin/gifts` | `src/app/admin/gifts/page.tsx` | `GiftsClient.tsx` | event `registryGifts` |
 | `/admin/registry` | `src/app/admin/registry/page.tsx` | `RegistrySelectionsClient.tsx` | event `giftSelections` |
 | `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder ("Site Text" tab = `SiteTextEditor.tsx`); each takes an `eventId` prop from the page | event `content/*` + Vercel Blob |
-| Content editors' shared pieces: sticky Undo / Restore / Save row with live status (`EditorSaveBar.tsx`), "Leave without saving?" guard for tab switch, admin links and page close (`unsavedChanges.tsx`), character limits + counter (`CharCount.tsx`, `TEXT_LIMITS`) | `src/app/admin/content/page.tsx` | `EditorSaveBar.tsx`, `unsavedChanges.tsx`, `CharCount.tsx` | – |
+| Content editors' shared pieces: sticky Undo / Restore / Save row with live status (`EditorSaveBar.tsx`), "Leave without saving?" guard for tab switch, admin links and page close (`unsavedChanges.tsx`), character limits + counter (`CharCount.tsx`, `TEXT_LIMITS`) | `src/app/admin/content/page.tsx` | `EditorSaveBar.tsx`, `unsavedChanges.tsx`, `CharCount.tsx`; after each live write `refreshGuestSite.ts` | – |
 | sidebar/nav | `src/app/admin/layout.tsx` | – | – |
 | Manage Admins (sidebar button, super admins only; no route) | `src/app/admin/layout.tsx` | `src/app/admin/components/ManageAdminsModal.tsx` | `admins`, `adminAllowlist` |
 | shared UI | `src/app/admin/components/AdminModal.tsx`, `TablePagination.tsx` | | |
@@ -100,7 +105,7 @@ server actions and then `router.refresh()`.
 | Admin check (session cookie + `admins/{uid}`) for actions and pages | `src/lib/requireAdmin.ts` (`getAdmin`, `getAdminUid`, `requireAdmin`, `requireSuperAdmin`, `requireAdminPage`) |
 | Clear a bad session and go to login | `src/app/api/logout/route.ts` |
 | RSVP confirmation email to the guest (Gmail SMTP) | `src/lib/email/sendRsvpConfirmation.ts`, called via `after()` in `submitRsvp` |
-| Firestore paths: every collection and doc path, event-scoped (`paths`, `DEFAULT_EVENT_ID`, `isValidEventId`) | `src/lib/eventPaths.ts`, tested by `src/lib/eventPaths.test.ts` |
+| Firestore paths: every collection and doc path, event-scoped (`paths`, `DEFAULT_EVENT_ID` (env `NEXT_PUBLIC_DEFAULT_EVENT_ID`), `isValidEventId`) | `src/lib/eventPaths.ts`, tested by `src/lib/eventPaths.test.ts` |
 | Copy root collections into an event (dry run / `--write` / `--overwrite` / `--verify`) | `scripts/migrate-to-events.js` |
 | Firebase client init | `src/lib/firebase/client.ts` |
 | Firebase admin init (env parsing) | `src/lib/firebase/admin.ts` |
@@ -126,6 +131,6 @@ Read these by range (`grep -n` then read around the line), never whole.
 | 499 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
 | 477 | `src/app/admin/content/EventDetailsEditor.tsx` |
 | 471 | `src/components/ui/circular-image-gallery.tsx` |
-| 466 | `src/app/page.tsx` |
+| 470 | `src/app/[event]/GuestSite.tsx` |
 | 458 | `src/app/admin/content/FaqsEditor.tsx` |
 | 408 | `src/app/admin/content/RsvpFormEditor.tsx` |
