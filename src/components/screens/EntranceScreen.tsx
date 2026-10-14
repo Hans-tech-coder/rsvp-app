@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { InkRevealCanvas } from '@/components/ui/InkRevealCanvas';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { useSiteText } from '@/contexts/SiteTextContext';
+import { hostNames, joinNames } from '@/lib/genericContent';
 
 import { verifyInviteCode } from '@/app/actions/rsvp';
 import { Loader2 } from 'lucide-react';
@@ -145,7 +146,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
           <div className="w-36 h-36 flex items-center justify-center animate-float relative z-10">
             <img 
               src={logoUrl} 
-              alt={`${content.global.groomName} & ${content.global.brideName} Logo`} 
+              alt={`${joinNames(hostNames(content.global.hosts))} Logo`} 
               width={144} 
               height={144} 
               className="w-full h-full object-contain transition-all duration-700 hover:scale-105"
@@ -158,7 +159,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
 
         <div className="text-center">
           <span className="inline-block text-[10px] uppercase tracking-[0.4em] text-wedding-gold font-medium mb-3 border-b border-wedding-gold/30 pb-1">{text.entrance.eyebrow}</span>
-          <h1 className="text-4xl md:text-5xl font-cinzel text-wedding-goldlight font-light tracking-widest mb-4 drop-shadow-md">{content.global.groomName} & {content.global.brideName}</h1>
+          <h1 className="text-4xl md:text-5xl font-cinzel text-wedding-goldlight font-light tracking-widest mb-4 drop-shadow-md">{joinNames(hostNames(content.global.hosts))}</h1>
           <p className="text-sm font-cormorant text-wedding-cream/90 italic tracking-widest mb-10 flex items-center justify-center gap-2">
             <span className="w-8 h-[1px] bg-gradient-to-r from-transparent to-wedding-gold/50"></span>
             {new Date(content.global.targetDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} • {content.global.venueShort}

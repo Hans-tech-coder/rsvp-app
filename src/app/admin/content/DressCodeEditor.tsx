@@ -11,6 +11,7 @@ import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
 import { CharCount, TEXT_LIMITS } from './CharCount';
+import { guidelinesFromLegacy, readGuidelines, type Guideline } from '@/lib/genericContent';
 import { nanoid } from 'nanoid';
 import {
   DndContext,
@@ -48,8 +49,7 @@ interface DressCodeData {
   };
   title: string;
   description: string;
-  ladiesGuideline: string;
-  gentlemenGuideline: string;
+  guidelines: Guideline[];
   colors: ColorData[];
   inspirationImages: ImageData[];
 }
@@ -63,8 +63,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
     },
     title: weddingContent.dressCode.title,
     description: weddingContent.dressCode.description,
-    ladiesGuideline: weddingContent.dressCode.ladiesGuideline,
-    gentlemenGuideline: weddingContent.dressCode.gentlemenGuideline,
+    guidelines: weddingContent.dressCode.guidelines,
     colors: weddingContent.dressCode.colors || [],
     inspirationImages: (weddingContent.dressCode.inspirationImages || []).map(img => ({ ...img, id: nanoid() }))
   });
@@ -109,8 +108,8 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
             },
             title: fetchedData.title ?? weddingContent.dressCode.title,
             description: fetchedData.description ?? weddingContent.dressCode.description,
-            ladiesGuideline: fetchedData.ladiesGuideline ?? weddingContent.dressCode.ladiesGuideline,
-            gentlemenGuideline: fetchedData.gentlemenGuideline ?? weddingContent.dressCode.gentlemenGuideline,
+            // Content saved before Oct 2026: ladiesGuideline / gentlemenGuideline
+            guidelines: readGuidelines(fetchedData.guidelines) ?? guidelinesFromLegacy(fetchedData) ?? weddingContent.dressCode.guidelines,
             colors: fetchedData.colors ?? weddingContent.dressCode.colors,
             inspirationImages: (fetchedData.inspirationImages ?? weddingContent.dressCode.inspirationImages).map((img: any) => ({ ...img, id: nanoid() })),
           };
@@ -154,6 +153,21 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
       ...prev,
       [name]: value
     }));
+    setSaved(false);
+  };
+
+  const updateGuideline = (index: number, field: 'title' | 'text', value: string) => {
+    setData(prev => ({ ...prev, guidelines: prev.guidelines.map((g, i) => (i === index ? { ...g, [field]: value } : g)) }));
+    setSaved(false);
+  };
+
+  const addGuideline = () => {
+    setData(prev => ({ ...prev, guidelines: [...prev.guidelines, { id: nanoid(), title: '', text: '' }] }));
+    setSaved(false);
+  };
+
+  const removeGuideline = (index: number) => {
+    setData(prev => ({ ...prev, guidelines: prev.guidelines.filter((_, i) => i !== index) }));
     setSaved(false);
   };
 
@@ -302,8 +316,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
         },
         title: lastBackup.title ?? weddingContent.dressCode.title,
         description: lastBackup.description ?? weddingContent.dressCode.description,
-        ladiesGuideline: lastBackup.ladiesGuideline ?? weddingContent.dressCode.ladiesGuideline,
-        gentlemenGuideline: lastBackup.gentlemenGuideline ?? weddingContent.dressCode.gentlemenGuideline,
+        guidelines: readGuidelines(lastBackup.guidelines) ?? guidelinesFromLegacy(lastBackup) ?? weddingContent.dressCode.guidelines,
         colors: lastBackup.colors ?? weddingContent.dressCode.colors,
         inspirationImages: Array.isArray(lastBackup.inspirationImages) ? lastBackup.inspirationImages.map((img: any) => ({ ...img, id: nanoid() })) : data.inspirationImages
       };
@@ -397,28 +410,55 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
       <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Guidelines</h3>
+        <div className="flex justify-between items-start gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Guidelines</h3>
+            <p className="text-sm text-gray-500 dark:text-zinc-400">Attire notes with their own title (e.g. For Ladies, For Gentlemen, For Sponsors). Two sit side by side on desktop.</p>
+          </div>
+          <button
+            onClick={addGuideline}
+            className="flex items-center gap-2 shrink-0 px-3 py-1.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            Add guideline
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Ladies Guideline</label>
-            <textarea 
-              name="ladiesGuideline"
-              value={data.ladiesGuideline}
-              onChange={handleChange}
-              rows={4}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all resize-none"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Gentlemen Guideline</label>
-            <textarea 
-              name="gentlemenGuideline"
-              value={data.gentlemenGuideline}
-              onChange={handleChange}
-              rows={4}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all resize-none"
-            />
-          </div>
+          {data.guidelines.map((guideline, index) => (
+            <div key={guideline.id} className="space-y-2 p-4 rounded-xl border border-gray-200 dark:border-zinc-800">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  maxLength={TEXT_LIMITS.cardTitle}
+                  value={guideline.title}
+                  onChange={(e) => updateGuideline(index, 'title', e.target.value)}
+                  placeholder="Title, e.g. For Ladies"
+                  aria-label="Guideline title"
+                  className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+                />
+                <button
+                  onClick={() => removeGuideline(index)}
+                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  title="Remove guideline"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
+              <CharCount value={guideline.title} max={TEXT_LIMITS.cardTitle} />
+              <textarea
+                value={guideline.text}
+                onChange={(e) => updateGuideline(index, 'text', e.target.value)}
+                rows={4}
+                aria-label="Guideline text"
+                className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all resize-none"
+              />
+            </div>
+          ))}
+          {data.guidelines.length === 0 && (
+            <div className="md:col-span-2 text-center py-8 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-sm text-gray-500">
+              No guidelines. The section is hidden on the site.
+            </div>
+          )}
         </div>
       </div>
 

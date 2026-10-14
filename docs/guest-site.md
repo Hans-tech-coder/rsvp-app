@@ -21,8 +21,8 @@ must stay in sync: the `currentStep === n` blocks in `GuestSite.tsx` and
 | Step | Screen | Menu label |
 | --- | --- | --- |
 | 0 | `WelcomeScreen` | Welcome |
-| 1 | `OurStoryScreen` | Our Story |
-| 2 | `EntourageScreen` | Entourage |
+| 1 | `OurStoryScreen` (timeline; a photo per entry is optional) | Our Story |
+| 2 | `EntourageScreen` (People groups) | Entourage |
 | 3 | `DetailsScreen` | Details |
 | 4 | `DressCodeScreen` | Dress Code |
 | 5 | `GalleryScreen` | Gallery |
@@ -30,6 +30,15 @@ must stay in sync: the `currentStep === n` blocks in `GuestSite.tsx` and
 | 7 | `RegistryScreen` | Registry |
 | 8 | `RsvpCtaScreen` | Join Our Day |
 | 9 | `RsvpScreen` (locked) | RSVP |
+
+**Any event type.** The wedding-specific parts are content lists (shapes in
+`docs/data-model.md` → Generic content shapes): Welcome / Entrance show the
+hosts' names (`global.hosts`, "A & B", "A, B & C", or one name), the loader and
+footer their initials; Entourage renders `entourage.groups` (pairs groups full
+width, list / featured groups two side by side, empty groups hidden); Details
+renders one card per `details.venues` entry (one or an odd last card centered,
+empty fields and buttons hidden); Dress Code renders `dressCode.guidelines`
+two per row (hidden when empty).
 
 Every screen takes `onContinue` (→ `nextStep`). Some also take
 `onLightboxChange` (Our Story, Gallery, Dress Code) so `GuestSite.tsx` can hide the back/menu
@@ -91,7 +100,7 @@ browser don't share progress or an unlocked RSVP.
    Firestore transaction that fails if the code is already `used`. After it
    succeeds, `after()` sends the guest a confirmation email
    (`src/lib/email/sendRsvpConfirmation.ts`, Gmail SMTP via nodemailer): their
-   answers, plus date, ceremony/reception venues and dress code (with palette
+   answers, plus date, every venue and dress code (with palette
    swatches) when attending, or when declining with a proxy (the intro then
    names the proxy); a decline without a proxy gets only the thank-you and
    answers. The email matches the site's look: the OG image as
@@ -161,8 +170,8 @@ transaction rejects when `currentCount >= maxCount`.
 - **Scroll effects:** scrolling screens use the `ScrollMotion.tsx` primitives
   (rules in `docs/conventions.md` → Motion). Our Story: one `ScrollReveal` per
   timeline card, `Parallax` on every other photo. Entourage: one reveal per
-  name column, second column delayed; principal sponsors reveal one pair row at
-  a time. Details: one reveal per venue card plus
+  group column, second column delayed; a pairs group (principal sponsors)
+  reveals one pair row at a time. Details: one reveal per venue card plus
   the order-of-events block. Dress Code: palette card with staggered swatches.
   Gallery: the slider block. FAQ: one reveal per question (capped delay).
   Registry: one reveal per card. Each screen's Continue button reveals too, and

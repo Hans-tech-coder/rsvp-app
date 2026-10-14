@@ -4,6 +4,7 @@ import React from 'react';
 import { motion, Variants } from 'motion/react';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { useSiteText } from '@/contexts/SiteTextContext';
+import { hostInitials } from '@/lib/genericContent';
 
 // "December 20, 2026 15:00:00" -> "20.12.2026"; null when the date can't be parsed
 function formatFooterDate(targetDate: string) {
@@ -16,8 +17,8 @@ function formatFooterDate(targetDate: string) {
 export function EmbeddedFooter() {
   const { content } = useWeddingContent();
   const text = useSiteText();
-  const { groomName, brideName, targetDate, footerTagline } = content.global;
-  const monogram = `${groomName.trim().charAt(0)} & ${brideName.trim().charAt(0)}`.toUpperCase();
+  const { hosts, targetDate, footerTagline } = content.global;
+  const monogram = hostInitials(hosts).join(' & ');
   const footerDate = formatFooterDate(targetDate);
 
   const itemVariants: Variants = {

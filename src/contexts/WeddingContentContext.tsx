@@ -1,9 +1,8 @@
 'use client';
 
 import React, { createContext, useContext } from 'react';
-import weddingContentDefault from '@/data/wedding-content.json';
 import { DEFAULT_EVENT_ID } from '@/lib/eventPaths';
-import type { WeddingContent } from '@/lib/weddingContent';
+import { DEFAULT_CONTENT, type WeddingContent } from '@/lib/weddingContent';
 
 // The event's content is read and merged on the server (getEventContent in
 // src/lib/siteContentServer.ts) and handed in by src/app/[event]/page.tsx, so
@@ -17,7 +16,7 @@ interface WeddingContentContextType {
 
 const WeddingContentContext = createContext<WeddingContentContextType>({
   eventId: DEFAULT_EVENT_ID,
-  content: weddingContentDefault,
+  content: DEFAULT_CONTENT,
 });
 
 export const useWeddingContent = () => useContext(WeddingContentContext);

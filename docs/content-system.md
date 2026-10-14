@@ -24,17 +24,19 @@ src/app/[event]/page.tsx  ->  <WeddingContentProvider content>  ->  useWeddingCo
 2. `mergeWeddingContent()` merges each doc over the JSON default. The merge is
    **written by hand per doc** — there is no generic merge. Patterns used:
    - shallow spread: `welcomeScreen`, `entranceScreen`, `registry`, `rsvpCta`, `rsvpForm`
-   - one level deeper for nested objects: `details.header/ceremony/reception`, `dressCode.header`
+   - one level deeper for nested objects: `details.header`, `dressCode.header`
    - field-by-field with `??`: `ourStory`, `entourage`, `dressCode` fields
-     (`entourage.principalSponsors` goes through `normalizePrincipalSponsors()`
-     first, see `docs/data-model.md`)
-   - `globalSettings` → `content.global` with `mergeGlobal()`: every key of the
-     JSON `global`; an empty or non-text value keeps the default (the same rule
-     as the 404 page)
+   - the generic lists (`entourage.groups`, `details.venues`,
+     `dressCode.guidelines`, `global.hosts`) through their reader in
+     `src/lib/genericContent.ts`, else built from the doc's old wedding-only
+     fields (`*FromLegacy`; `siteText` is passed in for the old group and
+     guideline titles), else the JSON default. See "Generic content shapes" in
+     `docs/data-model.md`
+   - `globalSettings` → `content.global` with `mergeGlobal()`: every text key
+     of the JSON `global`; an empty or non-text value keeps the default (the
+     same rule as the 404 page); `hosts` as above
    - special: `gallery` doc → `content.gallery` = `images[]`, `content.galleryHeader` = `header`;
      `faq` doc → `content.faq` = `items[]`, `content.faqHeader` = `header`
-   - `globalSettings` also writes into `details.ceremony` / `details.reception`
-     (time, location, address) — it overrides the `details` doc for those fields.
 3. The page hands the merged content (plain JSON) and the event ID to
    `WeddingContentProvider`; the browser never reads content from Firestore.
 4. `GuestSite.tsx` keeps `LoadingScreen` up until `document.fonts.ready` and,
@@ -59,8 +61,11 @@ src/app/[event]/page.tsx  ->  <WeddingContentProvider content>  ->  useWeddingCo
   a missed refresh or a change made outside the admin (Firestore console,
   script).
 
-The type of `content` is `typeof wedding-content.json`, so **a key must exist in
-the JSON to be typed**.
+The type of `content` is `WeddingContent` (`src/lib/weddingContent.ts`): the
+type of `wedding-content.json` with the generic lists typed by
+`genericContent.ts`. So **a key must exist in the JSON to be typed**. Code
+that needs the typed defaults imports `DEFAULT_CONTENT` from
+`src/lib/weddingContent.ts` rather than the JSON itself.
 
 ## Site text (buttons, labels, hints, errors)
 
@@ -135,11 +140,22 @@ a new one):
    fields take a `max` in `siteTextFields.ts`; buttons and menu names have one.
    An older saved value over the limit is kept and the counter turns red.
 
-**Venue and time have one source.** Ceremony / reception time, location and
-address are edited only in Global Settings (the provider overrides the
-`details` doc with them). The Event Details editor reads `globalSettings` and
-shows them read-only with an "Edit in Global Settings" button (switches tab
-through the unsaved-changes guard).
+**Venue and time have one source.** Each venue's time, location and address
+are edited only on its card in the Venues (Event Details) tab
+(`details.venues[]`). Global Settings keeps only `venueShort` (the short place
+under the date). Before F5 these were Global Settings fields; an old-shape
+`details` doc still takes them from there (`venuesFromLegacy`), so the editor
+reads `globalSettings` too until the doc is migrated or saved.
+
+**Generic lists in the editors.** People (`EntourageEditor`), Venues
+(`EventDetailsEditor`), hosts (`GlobalSettingsEditor`) and guidelines
+(`DressCodeEditor`) load through the same readers / legacy adapters as the
+site (`src/lib/genericContent.ts`), also on Restore, and save the new field
+with `merge: true`, which leaves the old wedding-only fields in the doc for
+older code (see "Generic content shapes" in `docs/data-model.md`). People
+groups and venues are sortable (`@dnd-kit`, ids from `nanoid`); removing one
+asks first. Switching a People group between a column layout and `pairs`
+keeps the names (two per row, or flattened back).
 
 **Welcome background:** `WelcomeScreenEditor` tells the admin whether the
 current photo has a depth map (`hasDepthMap()` in `src/lib/welcomeDepthMaps.ts`).
@@ -159,7 +175,9 @@ Example: a new `welcomeScreen.footnote` text.
    (this also makes it typed).
 2. **Merge in `mergeWeddingContent()`** (`src/lib/weddingContent.ts`) —
    shallow-spread docs and `global` pick it up automatically; field-by-field
-   docs (`ourStory`, `entourage`, `dressCode`) need an explicit line.
+   docs (`ourStory`, `entourage`, `dressCode`) need an explicit line. A new
+   field on a host, person, venue or guideline goes into its type **and**
+   reader in `src/lib/genericContent.ts`: the readers copy known fields only.
 3. **Editor** — add it to the initial `formData` / `originalData` and add an
    input. A new write to a live doc is followed by `refreshGuestSite(eventId)`.
 4. **Screen** — read `content.<key>.<field>`, with a fallback if the value can
@@ -181,4 +199,7 @@ thirteen `content` docs of an event (`hans-and-czay`, or `--event <id>`; `siteTe
 `mergeSiteText()`, so new default keys survive) with the admin SDK and merges them into
 `src/data/wedding-content.json`. Run it to make the bundled defaults match
 production (so the first paint, before overrides load, already shows the real
-content). It never writes to Firestore.
+content). It never writes to Firestore. The old wedding-only fields that the
+live docs still carry (see "Generic content shapes" in `docs/data-model.md`)
+are deleted from the JSON as it pulls; a doc without the new list field
+(not migrated yet) gets a warning to run `scripts/migrate-content-f5.js`.

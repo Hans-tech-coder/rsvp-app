@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatSponsor, normalizePrincipalSponsors } from './principalSponsors';
+import { normalizePrincipalSponsors } from './principalSponsors';
 
 const s = (title: string, name: string) => ({ title, name });
 const none = s('', '');
@@ -63,10 +63,3 @@ describe('normalizePrincipalSponsors', () => {
   });
 });
 
-describe('formatSponsor', () => {
-  it('joins title and name, skipping blanks', () => {
-    expect(formatSponsor(s('Mr.', 'Larry Adams'))).toBe('Mr. Larry Adams');
-    expect(formatSponsor(s('', 'Larry Adams'))).toBe('Larry Adams');
-    expect(formatSponsor(none)).toBe('');
-  });
-});

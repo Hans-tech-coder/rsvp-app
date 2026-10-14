@@ -5,6 +5,18 @@ const path = require('path');
 // Load environment variables from .env.local
 require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
 
+// Old-shape fields (before the F5 generic content schema, Oct 2026). The live
+// docs keep them for older code; the JSON holds only the new shape.
+const LEGACY_KEYS = {
+  global: ['brideName', 'groomName', 'ceremonyTime', 'ceremonyLocation', 'ceremonyAddress',
+    'receptionTime', 'receptionLocation', 'receptionAddress', 'dateShort', 'dateFull'],
+  entourage: ['parents', 'principalSponsors', 'honorAttendants', 'bridesmaids', 'groomsmen', 'flowerGirls', 'ringBearers'],
+  details: ['ceremony', 'reception'],
+  dressCode: ['ladiesGuideline', 'gentlemenGuideline'],
+};
+// The new field each of those docs must have; a doc without it was never migrated.
+const NEW_FIELD = { global: 'hosts', entourage: 'groups', details: 'venues', dressCode: 'guidelines' };
+
 // Same rule as mergeSiteText() in src/lib/siteText.ts
 function mergeText(defaults, data) {
   if (!data || typeof data !== 'object') return defaults;
@@ -94,6 +106,11 @@ async function syncContent() {
             ...currentContent[jsonKey],
             ...docSnap.data()
           };
+        const data = docSnap.data();
+        if (NEW_FIELD[jsonKey] && !Array.isArray(data[NEW_FIELD[jsonKey]])) {
+          console.warn(`  ${docId} has no ${NEW_FIELD[jsonKey]} yet (old shape): run node scripts/migrate-content-f5.js --write`);
+        }
+        for (const key of LEGACY_KEYS[jsonKey] || []) delete currentContent[jsonKey][key];
         console.log(`Synced: ${docId}`);
       }
     }

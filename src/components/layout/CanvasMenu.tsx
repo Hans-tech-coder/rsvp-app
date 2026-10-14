@@ -6,6 +6,7 @@ import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { useSiteText } from '@/contexts/SiteTextContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { RevealImage } from '@/components/ui/RevealImage';
+import { hostNames, joinNames } from '@/lib/genericContent';
 
 interface CanvasMenuProps {
   isOpen: boolean;
@@ -67,7 +68,7 @@ export function CanvasMenu({ isOpen, onClose, onNavigate, highestVisitedStep, cu
           <div className="w-32 h-32 flex items-center justify-center animate-float relative z-10">
             <RevealImage 
               src={logoUrl} 
-              alt={`${content.global.groomName} & ${content.global.brideName} Logo`} 
+              alt={`${joinNames(hostNames(content.global.hosts))} Logo`} 
               className="w-full h-full object-contain transition-transform duration-700 hover:scale-110"
               wrapperClassName="w-full h-full flex items-center justify-center"
               style={{ 

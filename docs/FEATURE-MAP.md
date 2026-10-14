@@ -15,10 +15,10 @@ component. Step numbers are the `currentStep` values in
 | --- | --- | --- | --- | --- |
 | – | Loading splash (while fonts and the first photo load; monogram = name initials) | `src/components/screens/LoadingScreen.tsx` | `global` | `GlobalSettingsEditor.tsx` |
 | 0 | Welcome + countdown | `src/components/screens/WelcomeScreen.tsx` | `welcomeScreen`, `global` | `WelcomeScreenEditor.tsx`, `GlobalSettingsEditor.tsx` |
-| 1 | Our Story timeline | `src/components/screens/OurStoryScreen.tsx` | `ourStory` | `OurStoryEditor.tsx` |
-| 2 | Entourage | `src/components/screens/EntourageScreen.tsx` | `entourage` | `EntourageEditor.tsx` |
-| 3 | Event details (ceremony, reception, order of events download) | `src/components/screens/DetailsScreen.tsx` | `details` (+ `global` venue/time fields) | `EventDetailsEditor.tsx`, `GlobalSettingsEditor.tsx` |
-| 4 | Dress code (palette, guidelines, inspiration slider + circular lightbox) | `src/components/screens/DressCodeScreen.tsx`, `src/components/ui/circular-image-gallery.tsx` | `dressCode` | `DressCodeEditor.tsx` |
+| 1 | Our Story timeline (any timeline / program; photo optional) | `src/components/screens/OurStoryScreen.tsx` | `ourStory` | `OurStoryEditor.tsx` |
+| 2 | Entourage = People groups (pairs / list / featured, optional photo + role) | `src/components/screens/EntourageScreen.tsx` | `entourage` (`groups[]`) | `EntourageEditor.tsx` (tab "People (Entourage)") |
+| 3 | Event details: venue cards (any number), order of events download | `src/components/screens/DetailsScreen.tsx` | `details` (`venues[]`) | `EventDetailsEditor.tsx` (tab "Venues (Event Details)") |
+| 4 | Dress code (palette, `guidelines[]`, inspiration slider + circular lightbox) | `src/components/screens/DressCodeScreen.tsx`, `src/components/ui/circular-image-gallery.tsx` | `dressCode` | `DressCodeEditor.tsx` |
 | 5 | Gallery (slider + circular 3D lightbox) | `src/components/screens/GalleryScreen.tsx`, `src/components/ui/circular-image-gallery.tsx` | `gallery`, `galleryHeader` | `GalleryEditor.tsx` |
 | 6 | FAQs | `src/components/screens/FaqScreen.tsx` | `faq`, `faqHeader` | `FaqsEditor.tsx` |
 | 7 | Registry (bank transfer + curated gifts) | `src/components/screens/RegistryScreen.tsx`, `CuratedRegistryScreen.tsx`, `GiftSelectionModal.tsx` | `registry` (+ `rsvpForm` labels in modal) | `RegistryEditor.tsx`; gifts in `/admin/gifts` |
@@ -38,7 +38,7 @@ All editors are in `src/app/admin/content/`.
 | Content loading: read on the server (`getEventContent`, admin SDK), merged over the JSON defaults (`mergeWeddingContent`, `mergeGlobal`, `CONTENT_DOC_IDS`), handed to the browser with the event ID | `src/lib/siteContentServer.ts` (server only), `src/lib/weddingContent.ts`, `src/contexts/WeddingContentContext.tsx` (`useWeddingContent`), `src/data/wedding-content.json` |
 | Site text: every small guest-visible wording (buttons, labels, hints, errors, menu, loader, 404, link preview). Read on the server, given to all guest components by `src/app/[event]/page.tsx` (404: `not-found.tsx`); `useSiteText()` in a component | `src/lib/siteContentServer.ts` (`getEventContent` / `getSiteContent`, server only), `src/contexts/SiteTextContext.tsx` (`SiteTextProvider`, `useSiteText`), `src/lib/siteText.ts` (`SiteText` type, `mergeSiteText`, `fillText`, `fillNodes`; tested by `src/lib/siteText.test.ts`), JSON key `siteText`; editor `src/app/admin/content/SiteTextEditor.tsx` + field labels `siteTextFields.ts` |
 | Step menu overlay | `src/components/layout/CanvasMenu.tsx` |
-| Footer at the bottom of scrolling screens (monogram from `global.groomName`/`brideName` initials, tagline `global.footerTagline`, date `global.targetDate` as DD.MM.YYYY; all edited in `GlobalSettingsEditor.tsx`) | `src/components/layout/EmbeddedFooter.tsx` |
+| Footer at the bottom of scrolling screens (monogram from `global.hosts` initials, tagline `global.footerTagline`, date `global.targetDate` as DD.MM.YYYY; all edited in `GlobalSettingsEditor.tsx`) | `src/components/layout/EmbeddedFooter.tsx` |
 | Background music + floating toggle, volume slider, "music is playing" hint | `src/components/AudioPlayer.tsx`, `.t-vol-*` in `src/app/globals.css`, `public/bg-music.mp3` |
 | Fonts, theme script, `metadataBase` (site URL) and the admin pages' title | `src/app/layout.tsx` |
 | Site URL for links that leave the site (link preview base, invite message, RSVP email): `getSiteUrl`, `getEventUrl` | `src/lib/siteUrl.ts` (server only) |
@@ -58,7 +58,8 @@ All editors are in `src/app/admin/content/`.
 | Slow falling rose petals, burgundy/red/white, CSS only (404 page) | `src/components/effects/FallingPetals.tsx` + `.t-petal*` in `globals.css` |
 | Wedding-ring cursor: gold stardust trail, tilt over clickables, sparkle burst on click (mouse/trackpad only, mounted in `GuestSite` in `src/app/[event]/GuestSite.tsx`) | `src/components/effects/WeddingCursor.tsx` + `.t-cursor*` in `globals.css` |
 | Mouse detection (`t-mouse` on `<html>`) that gates every hover style, the ring cursor and the mouse hint | `pointer-init` script in `src/app/layout.tsx`, `hasMouse()` in `src/lib/pointer.ts`, `@custom-variant hover` in `globals.css` |
-| Principal sponsors pair shape, title lists, legacy `string[]` reader | `src/lib/principalSponsors.ts`, tested by `src/lib/principalSponsors.test.ts`; used by `EntourageScreen.tsx`, `EntourageEditor.tsx`, `WeddingContentContext.tsx` |
+| Generic content shapes: hosts, People groups, venues, guidelines (types, readers, display helpers, legacy adapters for the old wedding-only fields) | `src/lib/genericContent.ts`, tested by `src/lib/genericContent.test.ts`; used by `weddingContent.ts` (merge), the four editors, the screens and `scripts/migrate-content-f5.js` |
+| Legacy principal sponsors reader (`{ninang, ninong, couple}` pairs and the older `string[]`), only for converting old content | `src/lib/principalSponsors.ts`, tested by `src/lib/principalSponsors.test.ts`; used by `genericContent.ts` |
 | Image download proxy | `src/app/api/download/route.ts` (called from `DetailsScreen.tsx`); host allowlist + filename sanitizer in `src/lib/downloadProxy.ts`, tested by `src/lib/downloadProxy.test.ts` |
 | Image upload (admin editors) | `src/lib/blob/uploadImage.ts` (compress + client upload), `src/app/api/upload/route.ts` (admin-only Blob token) |
 
@@ -107,6 +108,7 @@ server actions and then `router.refresh()`.
 | RSVP confirmation email to the guest (Gmail SMTP) | `src/lib/email/sendRsvpConfirmation.ts`, called via `after()` in `submitRsvp` |
 | Firestore paths: every collection and doc path, event-scoped (`paths`, `DEFAULT_EVENT_ID` (env `NEXT_PUBLIC_DEFAULT_EVENT_ID`), `isValidEventId`) | `src/lib/eventPaths.ts`, tested by `src/lib/eventPaths.test.ts` |
 | Copy root collections into an event (dry run / `--write` / `--overwrite` / `--verify`) | `scripts/migrate-to-events.js` |
+| Add the generic content fields to old-shape content docs (dry run / `--write` / `--verify` / `--dump`) | `scripts/migrate-content-f5.js` |
 | Firebase client init | `src/lib/firebase/client.ts` |
 | Firebase admin init (env parsing) | `src/lib/firebase/admin.ts` |
 | Firestore / Storage rules | `firestore.rules`, `storage.rules`, `firebase.json`, `.firebaserc` |
@@ -121,16 +123,16 @@ Read these by range (`grep -n` then read around the line), never whole.
 
 | Lines | File |
 | --- | --- |
-| 765 | `src/data/wedding-content.json` |
-| 667 | `src/app/admin/content/DressCodeEditor.tsx` |
+| 977 | `src/data/wedding-content.json` |
+| 711 | `src/app/admin/content/DressCodeEditor.tsx` |
+| 635 | `src/app/admin/content/EntourageEditor.tsx` |
 | 628 | `src/app/admin/content/RegistryEditor.tsx` |
 | 562 | `src/app/admin/content/OurStoryEditor.tsx` |
 | 541 | `src/components/screens/RsvpScreen.tsx` |
 | 512 | `src/app/admin/content/GalleryEditor.tsx` |
-| 506 | `src/app/admin/content/EntourageEditor.tsx` |
-| 499 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
-| 477 | `src/app/admin/content/EventDetailsEditor.tsx` |
+| 504 | `src/app/admin/content/EventDetailsEditor.tsx` |
 | 471 | `src/components/ui/circular-image-gallery.tsx` |
 | 470 | `src/app/[event]/GuestSite.tsx` |
 | 458 | `src/app/admin/content/FaqsEditor.tsx` |
+| 451 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
 | 408 | `src/app/admin/content/RsvpFormEditor.tsx` |

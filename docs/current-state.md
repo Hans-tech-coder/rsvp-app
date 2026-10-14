@@ -13,7 +13,9 @@ when you find or fix one of these.
 - Invite-code RSVP with one-time codes (transaction-safe).
 - Curated registry with claim limits (transaction-safe) and bank-transfer info.
 - Admin: dashboard counts, invite generation + message template, RSVP list with
-  CSV export, gift CRUD, claim list, content editors for all 12 screens and
+  CSV export, gift CRUD, claim list, content editors for all 12 screens (People
+  groups, venues, hosts and dress-code guidelines are lists, for any event type,
+  since Oct 2026) and
   a Site Text tab for every button, label, hint and error (Oct 2026), with
   one-step backup/restore. Google sign-in with an email allowlist; super admins
   add and remove regular admins from the Manage Admins modal in the sidebar.
@@ -38,7 +40,9 @@ when you find or fix one of these.
 | A content change made outside the admin shows within the hour | `src/app/[event]/page.tsx` (`revalidate = 3600`), `revalidateGuestSite` in `admin.ts` | Event pages are cached; an admin save rebuilds them at once. A Firestore console or script edit waits for the hourly rebuild (the 404 page: the next default-event save or deploy). Facebook and Messenger cache link previews on their side |
 | Root collections still hold a copy of the event data | Firestore root `websiteContent`, `guests`, `registryGifts`, `giftSelections`, `settings` + their block in `firestore.rules` | Kept on purpose after the F3 move to `events/hans-and-czay` (rollback path). Re-sync with `scripts/migrate-to-events.js --write --overwrite` right before the F3 deploy; remove later as its own step. See `docs/data-model.md` |
 | F3 admin side checked by query, not by a signed-in session | `src/app/admin/**` | The admin pages' exact queries and the deployed rules were run against `events/hans-and-czay`; no real admin Save, invite generation or gift edit was done after the move |
-| Event Details `calendarStart` repeats the time set in Global Settings |`EventDetailsEditor.tsx` ("Calendar Start"), `globalSettings.ceremonyTime` / `receptionTime` | Changing the time in Global Settings does not move the Add to Calendar time; edit both |
+| A venue's `calendarStart` repeats its time |`EventDetailsEditor.tsx` (venue card: "Time" and "Calendar Start") | Changing the Time does not move the Add to Calendar time; edit both |
+| Content docs still hold the old wedding-only fields (F5) | `globalSettings` (`groomName`, `brideName`, venue fields), `entourage` (fixed lists), `details` (`ceremony`, `reception`), `dressCode` (`ladiesGuideline`, `gentlemenGuideline`) | Kept on purpose for a rollback to pre-F5 code; frozen at the 2026-10-14 migration. Remove in a later step (`docs/data-model.md` → Generic content shapes) |
+| Timeline entry photo cannot be removed, only replaced | `OurStoryEditor.tsx` | An entry without a photo shows no image block on the site, but the editor has no "remove photo" button |
 | Sign Out does not warn about unsaved content edits | `src/app/admin/layout.tsx` (`handleLogout`) | Tab switch, admin links and page close do (`unsavedChanges.tsx`) |
 | Circular gallery keeps the last-closed photo mounted | `circular-image-gallery.tsx` (`closing` state never resets) | Two extra SVG `<image>`s at most; harmless |
 

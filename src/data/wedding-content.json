@@ -2,18 +2,20 @@
   "global": {
     "logo": "/hansandczay.svg",
     "ogImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/global-og-1mbYmcdV6dwoZTYfthMHbALUD7Ix6N.jpg",
-    "brideName": "Czay",
-    "groomName": "Hans",
+    "hosts": [
+      {
+        "name": "Hans",
+        "role": "Groom"
+      },
+      {
+        "name": "Czay",
+        "role": "Bride"
+      }
+    ],
     "venueShort": "Camiling, Tarlac",
     "targetDate": "December 20, 2026 15:00:00",
     "coupleNameFormat": "Hans & Czay",
-    "footerTagline": "Together is a beautiful place to be",
-    "receptionLocation": "DokNWellness Natural Health Care Center",
-    "ceremonyTime": "3:00 PM",
-    "receptionAddress": "Purok 1, San Isidro, Camiling, 2306 Tarlac",
-    "ceremonyAddress": "Nagserialan Camiling, Paniqui - Camiling Rd, Paniqui, Tarlac",
-    "ceremonyLocation": "Iglesia Ni Cristo [Paniqui, Tarlac] - Nagserialan",
-    "receptionTime": "6:30 PM"
+    "footerTagline": "Together is a beautiful place to be"
   },
   "welcomeScreen": {
     "backgroundImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/welcome-bg-axudzflkDlVGWsNhY7twkhYJRWfWLI.webp",
@@ -79,209 +81,422 @@
   "entourage": {
     "subtitle": "With love and gratitude",
     "title": "Wedding Entourage",
-    "parents": {
-      "groom": [
-        "Mr. Regie D. Bacarro",
-        "Mrs. Diwata A. Obena"
-      ],
-      "bride": [
-        "Mr. Reynaldo S. Presto Sr.",
-        "Mrs. Adalia U. Presto"
-      ]
-    },
-    "principalSponsors": [
+    "groups": [
       {
-        "ninang": {
-          "title": "Mrs.",
-          "name": "Luningning N. Obena"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "Melchor Vardeleon"
-        },
-        "couple": false
+        "id": "parents-bride",
+        "title": "Parents of the Bride",
+        "layout": "featured",
+        "people": [
+          {
+            "title": "",
+            "name": "Mr. Reynaldo S. Presto Sr.",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Mrs. Adalia U. Presto",
+            "role": "",
+            "photo": ""
+          }
+        ],
+        "pairs": []
       },
       {
-        "ninang": {
-          "title": "Mrs.",
-          "name": "Analyn Gonzales"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "Eduardo D. Nicolas"
-        },
-        "couple": false
+        "id": "parents-groom",
+        "title": "Parents of the Groom",
+        "layout": "featured",
+        "people": [
+          {
+            "title": "",
+            "name": "Mr. Regie D. Bacarro",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Mrs. Diwata A. Obena",
+            "role": "",
+            "photo": ""
+          }
+        ],
+        "pairs": []
       },
       {
-        "ninang": {
-          "title": "Ms.",
-          "name": "Ira Veronica Santillan"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "Glenn P. Perpinian"
-        },
-        "couple": false
+        "id": "principal-sponsors",
+        "title": "Principal Sponsors",
+        "layout": "pairs",
+        "people": [],
+        "pairs": [
+          {
+            "left": {
+              "title": "Mrs.",
+              "name": "Luningning N. Obena",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "Melchor Vardeleon",
+              "role": "",
+              "photo": ""
+            },
+            "together": false
+          },
+          {
+            "left": {
+              "title": "Mrs.",
+              "name": "Analyn Gonzales",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "Eduardo D. Nicolas",
+              "role": "",
+              "photo": ""
+            },
+            "together": false
+          },
+          {
+            "left": {
+              "title": "Ms.",
+              "name": "Ira Veronica Santillan",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "Glenn P. Perpinian",
+              "role": "",
+              "photo": ""
+            },
+            "together": false
+          },
+          {
+            "left": {
+              "title": "Mrs.",
+              "name": "Angelina C. Soriano",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "John Edward U. Bautista",
+              "role": "",
+              "photo": ""
+            },
+            "together": false
+          },
+          {
+            "left": {
+              "title": "Mrs.",
+              "name": "Lina Adams",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "Larry Adams",
+              "role": "",
+              "photo": ""
+            },
+            "together": true
+          },
+          {
+            "left": {
+              "title": "Mrs.",
+              "name": "Esmelia R. Gaña",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "Mario B. Gaña",
+              "role": "",
+              "photo": ""
+            },
+            "together": true
+          },
+          {
+            "left": {
+              "title": "Mrs.",
+              "name": "Vangie Presto",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "Ahmed N. Obena",
+              "role": "",
+              "photo": ""
+            },
+            "together": false
+          },
+          {
+            "left": {
+              "title": "Mrs.",
+              "name": "Margarette Oliver",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "Edwin Oliver",
+              "role": "",
+              "photo": ""
+            },
+            "together": true
+          },
+          {
+            "left": {
+              "title": "Mrs.",
+              "name": "Raziel C. Catacutan",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "Allan N. Obena",
+              "role": "",
+              "photo": ""
+            },
+            "together": false
+          },
+          {
+            "left": {
+              "title": "Mrs.",
+              "name": "Kristine Joy A. Navarro",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "Dimtter D. Navarro",
+              "role": "",
+              "photo": ""
+            },
+            "together": true
+          },
+          {
+            "left": {
+              "title": "Mrs.",
+              "name": "Lani M. Villarico",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "Cristobal R. De Mayo",
+              "role": "",
+              "photo": ""
+            },
+            "together": false
+          },
+          {
+            "left": {
+              "title": "Mrs.",
+              "name": "Lolita A. Salayog",
+              "role": "",
+              "photo": ""
+            },
+            "right": {
+              "title": "Mr.",
+              "name": "Maglangit S. Decampong",
+              "role": "",
+              "photo": ""
+            },
+            "together": false
+          }
+        ]
       },
       {
-        "ninang": {
-          "title": "Mrs.",
-          "name": "Angelina C. Soriano"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "John Edward U. Bautista"
-        },
-        "couple": false
+        "id": "maid-of-honor",
+        "title": "Maid of Honor",
+        "layout": "featured",
+        "people": [
+          {
+            "title": "",
+            "name": "Irish Gail Torio",
+            "role": "",
+            "photo": ""
+          }
+        ],
+        "pairs": []
       },
       {
-        "ninang": {
-          "title": "Mrs.",
-          "name": "Lina Adams"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "Larry Adams"
-        },
-        "couple": true
+        "id": "best-man",
+        "title": "Best Man",
+        "layout": "featured",
+        "people": [
+          {
+            "title": "",
+            "name": "Chris John A. Obena",
+            "role": "",
+            "photo": ""
+          }
+        ],
+        "pairs": []
       },
       {
-        "ninang": {
-          "title": "Mrs.",
-          "name": "Esmelia R. Gaña"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "Mario B. Gaña"
-        },
-        "couple": true
+        "id": "bridesmaids",
+        "title": "Bridesmaids",
+        "layout": "list",
+        "people": [
+          {
+            "title": "",
+            "name": "Christina Rose A. Obena",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Sakura Jane A. Obena",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Waynne C. Presto",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Princess Nadine C. Presto",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Althea Bautista",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Irene Dimmangna",
+            "role": "",
+            "photo": ""
+          }
+        ],
+        "pairs": []
       },
       {
-        "ninang": {
-          "title": "Mrs.",
-          "name": "Vangie Presto"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "Ahmed N. Obena"
-        },
-        "couple": false
+        "id": "groomsmen",
+        "title": "Groomsmen",
+        "layout": "list",
+        "people": [
+          {
+            "title": "",
+            "name": "Ernie Joshua O. Villegas",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Rusty S. Linsao",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Jake Borenz Obena",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Karl Christian C. Presto",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Elohim Q. Bautista",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Jake Nicolas Zarraga",
+            "role": "",
+            "photo": ""
+          }
+        ],
+        "pairs": []
       },
       {
-        "ninang": {
-          "title": "Mrs.",
-          "name": "Margarette Oliver"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "Edwin Oliver"
-        },
-        "couple": true
+        "id": "flower-girls",
+        "title": "Flower Girls",
+        "layout": "list",
+        "people": [
+          {
+            "title": "",
+            "name": "Wraynne C. Presto",
+            "role": "",
+            "photo": ""
+          },
+          {
+            "title": "",
+            "name": "Athena Amara S. Obena",
+            "role": "",
+            "photo": ""
+          }
+        ],
+        "pairs": []
       },
       {
-        "ninang": {
-          "title": "Mrs.",
-          "name": "Raziel C. Catacutan"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "Allan N. Obena"
-        },
-        "couple": false
-      },
-      {
-        "ninang": {
-          "title": "Mrs.",
-          "name": "Kristine Joy A. Navarro"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "Dimtter D. Navarro"
-        },
-        "couple": true
-      },
-      {
-        "ninang": {
-          "title": "Mrs.",
-          "name": "Lani M. Villarico"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "Cristobal R. De Mayo"
-        },
-        "couple": false
-      },
-      {
-        "ninang": {
-          "title": "Mrs.",
-          "name": "Lolita A. Salayog"
-        },
-        "ninong": {
-          "title": "Mr.",
-          "name": "Maglangit S. Decampong"
-        },
-        "couple": false
+        "id": "ring-bearers",
+        "title": "Ring Bearer",
+        "layout": "list",
+        "people": [
+          {
+            "title": "",
+            "name": "Matthew Hero O. Tan",
+            "role": "",
+            "photo": ""
+          }
+        ],
+        "pairs": []
       }
-    ],
-    "honorAttendants": {
-      "bestMan": "Chris John A. Obena",
-      "maidOfHonor": "Irish Gail Torio"
-    },
-    "bridesmaids": [
-      "Christina Rose A. Obena",
-      "Sakura Jane A. Obena",
-      "Waynne C. Presto",
-      "Princess Nadine C. Presto",
-      "Althea Bautista",
-      "Irene Dimmangna"
-    ],
-    "groomsmen": [
-      "Ernie Joshua O. Villegas",
-      "Rusty S. Linsao",
-      "Jake Borenz Obena",
-      "Karl Christian C. Presto",
-      "Elohim Q. Bautista",
-      "Jake Nicolas Zarraga"
-    ],
-    "flowerGirls": [
-      "Wraynne C. Presto",
-      "Athena Amara S. Obena"
-    ],
-    "ringBearers": [
-      "Matthew Hero O. Tan"
     ]
   },
   "details": {
-    "orderOfEventsImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/website/order-of-events-xad3Hl2ZAcNek0zNQWnH3E3kdpJEHm.jpg",
     "header": {
       "subtitle": "The Celebration",
       "description": "A breathtaking romance in Camiling, Tarlac.",
       "title": "Where & When"
     },
-    "ceremony": {
-      "address": "Nagserialan Camiling, Paniqui - Camiling Rd, Paniqui, Tarlac",
-      "calendarLoc": "https://maps.app.goo.gl/yBdxdLkEZMgYQyo8A",
-      "location": "Iglesia Ni Cristo [Paniqui, Tarlac] - Nagserialan",
-      "time": "3:00 PM",
-      "mapLink": "https://maps.google.com/maps?q=Iglesia%20Ni%20Cristo%20%5BPaniqui,%20Tarlac%5D%20-%20Nagserialan&t=&z=15&ie=UTF8&output=embed",
-      "calendarStart": "2026-12-20T15:00:00",
-      "description": "Witness the beginning of our forever as we exchange vows in the sacred and solemn ambiance of the Church Of Christ. Surrounded by faith, love, and the blessings of our families and friends, we invite you to share in this meaningful celebration of our union.",
-      "title": "The Ceremony",
-      "subtitle": "The Vows",
-      "calendarDesc": "Hans and Czay Union - Camiling, Tarlac"
-    },
-    "reception": {
-      "address": "Purok 1, San Isidro, Camiling, 2306 Tarlac",
-      "calendarLoc": "https://maps.app.goo.gl/XZg1ByDqMjzxiP5UA",
-      "location": "DokNWellness Natural Health Care Center",
-      "time": "6:30 PM",
-      "calendarDesc": "Dinner, Cocktails, & Dance - DokNWellness Natural Health Care Center",
-      "mapLink": "https://maps.google.com/maps?q=DokNWellness%20Natural%20Health%20Care%20Center,%20Camiling,%20Tarlac&t=&z=15&ie=UTF8&output=embed",
-      "calendarStart": "2026-12-20T18:30:00",
-      "description": "As the sun sets, join us for an intimate celebration in a charming open farm beneath the canopy of mango trees. Surrounded by nature and the warm glow of twinkling bubble lights, enjoy an evening filled with laughter, heartfelt moments, delicious food, and joyful dancing as we celebrate the start of our new journey together.",
-      "title": "The Reception",
-      "subtitle": "The Dinner & Ball"
-    }
+    "venues": [
+      {
+        "id": "ceremony",
+        "title": "The Ceremony",
+        "subtitle": "The Vows",
+        "time": "3:00 PM",
+        "location": "Iglesia Ni Cristo [Paniqui, Tarlac] - Nagserialan",
+        "address": "Nagserialan Camiling, Paniqui - Camiling Rd, Paniqui, Tarlac",
+        "description": "Witness the beginning of our forever as we exchange vows in the sacred and solemn ambiance of the Church Of Christ. Surrounded by faith, love, and the blessings of our families and friends, we invite you to share in this meaningful celebration of our union.",
+        "mapLink": "https://maps.google.com/maps?q=Iglesia%20Ni%20Cristo%20%5BPaniqui,%20Tarlac%5D%20-%20Nagserialan&t=&z=15&ie=UTF8&output=embed",
+        "calendarStart": "2026-12-20T15:00:00",
+        "calendarLoc": "https://maps.app.goo.gl/yBdxdLkEZMgYQyo8A",
+        "calendarDesc": "Hans and Czay Union - Camiling, Tarlac"
+      },
+      {
+        "id": "reception",
+        "title": "The Reception",
+        "subtitle": "The Dinner & Ball",
+        "time": "6:30 PM",
+        "location": "DokNWellness Natural Health Care Center",
+        "address": "Purok 1, San Isidro, Camiling, 2306 Tarlac",
+        "description": "As the sun sets, join us for an intimate celebration in a charming open farm beneath the canopy of mango trees. Surrounded by nature and the warm glow of twinkling bubble lights, enjoy an evening filled with laughter, heartfelt moments, delicious food, and joyful dancing as we celebrate the start of our new journey together.",
+        "mapLink": "https://maps.google.com/maps?q=DokNWellness%20Natural%20Health%20Care%20Center,%20Camiling,%20Tarlac&t=&z=15&ie=UTF8&output=embed",
+        "calendarStart": "2026-12-20T18:30:00",
+        "calendarLoc": "https://maps.app.goo.gl/XZg1ByDqMjzxiP5UA",
+        "calendarDesc": "Dinner, Cocktails, & Dance - DokNWellness Natural Health Care Center"
+      }
+    ],
+    "orderOfEventsImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/website/order-of-events-xad3Hl2ZAcNek0zNQWnH3E3kdpJEHm.jpg"
   },
   "dressCode": {
     "header": {
@@ -312,8 +527,18 @@
         "hex": "#F4F5EB"
       }
     ],
-    "ladiesGuideline": "Floor-length gowns or refined midi-cocktail dresses in shades of burgundy, blush, antique gold, or warm neutrals. Flowing silhouettes and romantic laces are highly welcomed.",
-    "gentlemenGuideline": "Classic dinner suit (Tuxedo) or tailored suit with crisp white dress shirts. Burgundy, antique gold, or black tailored coordinates. Bowties or silk ties matching the theme are preferred.",
+    "guidelines": [
+      {
+        "id": "ladies",
+        "title": "For Ladies",
+        "text": "Floor-length gowns or refined midi-cocktail dresses in shades of burgundy, blush, antique gold, or warm neutrals. Flowing silhouettes and romantic laces are highly welcomed."
+      },
+      {
+        "id": "gentlemen",
+        "title": "For Gentlemen",
+        "text": "Classic dinner suit (Tuxedo) or tailored suit with crisp white dress shirts. Burgundy, antique gold, or black tailored coordinates. Bowties or silk ties matching the theme are preferred."
+      }
+    ],
     "inspirationImages": [
       {
         "type": "Principal Sponsor - Ladies",
@@ -648,17 +873,6 @@
     "ourStory": {
       "watchVideo": "Watch Video"
     },
-    "entourage": {
-      "parentsOfBride": "Parents of the Bride",
-      "parentsOfGroom": "Parents of the Groom",
-      "principalSponsors": "Principal Sponsors",
-      "maidOfHonor": "Maid of Honor",
-      "bestMan": "Best Man",
-      "bridesmaids": "Bridesmaids",
-      "groomsmen": "Groomsmen",
-      "flowerGirls": "Flower Girls",
-      "ringBearer": "Ring Bearer"
-    },
     "details": {
       "location": "Location:",
       "address": "Address:",
@@ -669,8 +883,6 @@
       "mapTitle": "Location Map"
     },
     "dressCode": {
-      "ladies": "For Ladies",
-      "gentlemen": "For Gentlemen",
       "inspiration": "Outfit Inspiration"
     },
     "registry": {

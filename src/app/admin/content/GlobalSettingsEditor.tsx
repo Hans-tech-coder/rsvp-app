@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2, Plus, Trash2, Upload } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
-import weddingContent from '@/data/wedding-content.json';
+import { DEFAULT_CONTENT as weddingContent } from '@/lib/weddingContent';
+import { hostsFromLegacy, readHosts, type Host } from '@/lib/genericContent';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
 import { CharCount, TEXT_LIMITS } from './CharCount';
@@ -28,19 +29,21 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
   const defaultData = {
     logo: weddingContent.global.logo,
     ogImage: weddingContent.global.ogImage || '',
-    brideName: weddingContent.global.brideName,
-    groomName: weddingContent.global.groomName,
+    hosts: weddingContent.global.hosts as Host[],
     coupleNameFormat: weddingContent.global.coupleNameFormat,
     venueShort: weddingContent.global.venueShort,
     targetDate: weddingContent.global.targetDate,
     footerTagline: weddingContent.global.footerTagline,
-    ceremonyTime: weddingContent.details.ceremony.time,
-    ceremonyLocation: weddingContent.details.ceremony.location,
-    ceremonyAddress: weddingContent.details.ceremony.address,
-    receptionTime: weddingContent.details.reception.time,
-    receptionLocation: weddingContent.details.reception.location,
-    receptionAddress: weddingContent.details.reception.address,
   };
+
+  // Every field of the saved doc is kept and written back, including ones
+  // this editor no longer shows (groomName / brideName and the venue fields
+  // from before Oct 2026), so older code reading them still works.
+  const fromDoc = (saved: Record<string, unknown>) => ({
+    ...defaultData,
+    ...saved,
+    hosts: readHosts(saved.hosts) ?? hostsFromLegacy(saved) ?? defaultData.hosts,
+  });
 
   const [formData, setFormData] = useState(defaultData);
   const [originalData, setOriginalData] = useState(defaultData);
@@ -54,7 +57,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
-          const fetchedData = { ...defaultData, ...docSnap.data() };
+          const fetchedData = fromDoc(docSnap.data());
           setFormData(fetchedData);
           setOriginalData(fetchedData);
         }
@@ -77,6 +80,21 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setSaved(false);
+  };
+
+  const updateHost = (index: number, field: keyof Host, value: string) => {
+    setFormData(prev => ({ ...prev, hosts: prev.hosts.map((h, i) => (i === index ? { ...h, [field]: value } : h)) }));
+    setSaved(false);
+  };
+
+  const addHost = () => {
+    setFormData(prev => ({ ...prev, hosts: [...prev.hosts, { name: '', role: '' }] }));
+    setSaved(false);
+  };
+
+  const removeHost = (index: number) => {
+    setFormData(prev => ({ ...prev, hosts: prev.hosts.filter((_, i) => i !== index) }));
     setSaved(false);
   };
 
@@ -155,7 +173,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
       const backupRef = doc(db, paths.content(eventId, 'globalSettings_backup'));
       const backupSnap = await getDoc(backupRef);
       if (backupSnap.exists()) {
-        const fetchedBackup = { ...defaultData, ...backupSnap.data() };
+        const fetchedBackup = fromDoc(backupSnap.data());
         setFormData(fetchedBackup);
         setIsSuccessModalOpen(true);
       }
@@ -269,45 +287,66 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
 
       <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
 
-      {/* Couple Details Section */}
+      {/* Hosts Section */}
       <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">The Couple</h3>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">These names are used across the website, including the Entrance, Our Story, and Registry screens.</p>
+        <div className="flex justify-between items-start gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Hosts</h3>
+            <p className="text-sm text-gray-500 dark:text-zinc-400">Who the event is for: the couple, the debutante, the celebrant or the company. The names appear large on the Welcome and Entrance screens, and their initials form the monogram on the loading screen and in the footer.</p>
+          </div>
+          <button
+            onClick={addHost}
+            className="flex items-center gap-2 shrink-0 px-3 py-1.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            Add host
+          </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Bride Name</label>
-            <input 
-              type="text" 
-              name="brideName"
-              value={formData.brideName}
-              onChange={handleChange}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Groom Name</label>
-            <input 
-              type="text" 
-              name="groomName"
-              value={formData.groomName}
-              onChange={handleChange}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Couple Name (as written in sentences)</label>
-            <input
-              type="text"
-              name="coupleNameFormat"
-              value={formData.coupleNameFormat}
-              onChange={handleChange}
-              placeholder="e.g. Hans & Czay"
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-            <p className="text-xs text-gray-500 dark:text-zinc-500">Used where the site writes both names together: the link preview and browser tab, the 404 page and the RSVP confirmation email. In Site Text it is <code>{'{couple}'}</code>.</p>
-          </div>
+        <div className="space-y-3">
+          {formData.hosts.map((host, index) => (
+            <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Name</label>
+                <input
+                  type="text"
+                  value={host.name}
+                  onChange={(e) => updateHost(index, 'name', e.target.value)}
+                  placeholder="e.g. Hans"
+                  className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Role <span className="font-normal text-gray-400 dark:text-zinc-500">(optional, not shown to guests)</span></label>
+                <input
+                  type="text"
+                  value={host.role}
+                  onChange={(e) => updateHost(index, 'role', e.target.value)}
+                  placeholder="e.g. Groom, Debutante, Organizer"
+                  className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+                />
+              </div>
+              <button
+                onClick={() => removeHost(index)}
+                disabled={formData.hosts.length <= 1}
+                className="p-2 mb-0.5 text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:hover:text-gray-400 transition-colors justify-self-start"
+                title={formData.hosts.length <= 1 ? 'The event needs at least one host' : 'Remove host'}
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Display Name (as written in sentences)</label>
+          <input
+            type="text"
+            name="coupleNameFormat"
+            value={formData.coupleNameFormat}
+            onChange={handleChange}
+            placeholder="e.g. Hans & Czay, Ana's 18th, ACME Summit 2027"
+            className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+          />
+          <p className="text-xs text-gray-500 dark:text-zinc-500">Used where the site names the event in a sentence: the link preview and browser tab, the 404 page and the RSVP confirmation email. In Site Text it is <code>{'{couple}'}</code>.</p>
         </div>
       </div>
 
@@ -371,91 +410,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
         </div>
       </div>
 
-      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
-
-      {/* Ceremony Details */}
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Ceremony Specifics</h3>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">Used specifically on the Event Details screen to tell guests when and where the ceremony will happen.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Ceremony Time</label>
-            <input 
-              type="text" 
-              name="ceremonyTime"
-              value={formData.ceremonyTime}
-              onChange={handleChange}
-              placeholder="e.g. 3:00 PM"
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Ceremony Location Name</label>
-            <input 
-              type="text" 
-              name="ceremonyLocation"
-              value={formData.ceremonyLocation}
-              onChange={handleChange}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Ceremony Full Address</label>
-            <input 
-              type="text" 
-              name="ceremonyAddress"
-              value={formData.ceremonyAddress}
-              onChange={handleChange}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
-
-      {/* Reception Details */}
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Reception Specifics</h3>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">Used specifically on the Event Details screen to tell guests when and where the reception will happen.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Reception Time</label>
-            <input 
-              type="text" 
-              name="receptionTime"
-              value={formData.receptionTime}
-              onChange={handleChange}
-              placeholder="e.g. 6:30 PM"
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Reception Location Name</label>
-            <input 
-              type="text" 
-              name="receptionLocation"
-              value={formData.receptionLocation}
-              onChange={handleChange}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Reception Full Address</label>
-            <input 
-              type="text" 
-              name="receptionAddress"
-              value={formData.receptionAddress}
-              onChange={handleChange}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
-        </div>
-      </div>
+      <p className="text-sm text-gray-500 dark:text-zinc-400">Venue times, places and addresses are edited in the Venues (Event Details) tab.</p>
 
       <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
 

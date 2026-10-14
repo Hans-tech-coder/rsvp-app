@@ -1,35 +1,54 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Loader2, Upload, X, Settings } from 'lucide-react';
+import { Loader2, Upload, X, Plus, Trash2, GripVertical } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
-import weddingContent from '@/data/wedding-content.json';
+import { DEFAULT_CONTENT as weddingContent } from '@/lib/weddingContent';
+import { emptyVenue, readVenues, venuesFromLegacy, type Venue } from '@/lib/genericContent';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
 import { CharCount, TEXT_LIMITS } from './CharCount';
+import { nanoid } from 'nanoid';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-// Time, location and address come from Global Settings (the guest site reads
-// them from there), so they are shown here read-only.
-type VenueFacts = Record<'ceremony' | 'reception', { time: string; location: string; address: string }>;
+// Venues / program: any number of cards, each with its own time, place and
+// address (edited only here). Content saved before Oct 2026 had a fixed
+// ceremony + reception whose time, location and address lived in Global
+// Settings; venuesFromLegacy() reads that shape until the first save.
 
-const venueFactsFrom = (global: Record<string, string | undefined>): VenueFacts => ({
-  ceremony: {
-    time: global.ceremonyTime || weddingContent.details.ceremony.time,
-    location: global.ceremonyLocation || weddingContent.details.ceremony.location,
-    address: global.ceremonyAddress || weddingContent.details.ceremony.address,
-  },
-  reception: {
-    time: global.receptionTime || weddingContent.details.reception.time,
-    location: global.receptionLocation || weddingContent.details.reception.location,
-    address: global.receptionAddress || weddingContent.details.reception.address,
-  },
-});
+type DetailsForm = { header: typeof weddingContent.details.header; venues: Venue[]; orderOfEventsImage: string };
 
-export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId: string; onEditGlobalSettings: () => void }) {
+const inputClass = "w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all";
+
+function formFromDoc(saved: DocumentData, globalDoc: DocumentData | undefined): DetailsForm {
+  return {
+    header: { ...weddingContent.details.header, ...(saved.header || {}) },
+    venues: readVenues(saved.venues) ?? venuesFromLegacy(saved, globalDoc) ?? weddingContent.details.venues,
+    orderOfEventsImage: saved.orderOfEventsImage || weddingContent.details.orderOfEventsImage || '',
+  };
+}
+
+export function EventDetailsEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -39,52 +58,45 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  
+  const [venueToDelete, setVenueToDelete] = useState<number | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [venueFacts, setVenueFacts] = useState<VenueFacts>(() => venueFactsFrom({}));
-  
-  // State for the form fields
-  const [data, setData] = useState({ ...weddingContent.details, orderOfEventsImage: '' });
-  const [originalData, setOriginalData] = useState({ ...weddingContent.details, orderOfEventsImage: '' });
+  // Old-shape venues take their time / location / address from Global Settings
+  const globalDocRef = useRef<DocumentData | undefined>(undefined);
+
+  const initial: DetailsForm = {
+    header: weddingContent.details.header,
+    venues: weddingContent.details.venues,
+    orderOfEventsImage: '',
+  };
+  const [data, setData] = useState<DetailsForm>(initial);
+  const [originalData, setOriginalData] = useState<DetailsForm>(initial);
 
   const hasChanges = JSON.stringify(data) !== JSON.stringify(originalData);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, paths.content(eventId, 'details'));
-        const docSnap = await getDoc(docRef);
-        
+        const [docSnap, globalSnap, backupSnap] = await Promise.all([
+          getDoc(doc(db, paths.content(eventId, 'details'))),
+          getDoc(doc(db, paths.content(eventId, 'globalSettings'))),
+          getDoc(doc(db, paths.content(eventId, 'details_backup'))),
+        ]);
+        globalDocRef.current = globalSnap.data();
+
         if (docSnap.exists()) {
-          const fetchedData = docSnap.data();
-          const mergedData = {
-            header: {
-              ...(weddingContent.details.header || { subtitle: "The Celebration", title: "Where & When", description: "A breathtaking romance in Paniqui, Tarlac." }),
-              ...(fetchedData.header || {})
-            },
-            ceremony: {
-              ...weddingContent.details.ceremony,
-              ...(fetchedData.ceremony || {})
-            },
-            reception: {
-              ...weddingContent.details.reception,
-              ...(fetchedData.reception || {})
-            },
-            orderOfEventsImage: fetchedData.orderOfEventsImage || weddingContent.details.orderOfEventsImage || ''
-          };
+          const mergedData = formFromDoc(docSnap.data(), globalDocRef.current);
           setData(mergedData);
           setOriginalData(mergedData);
         }
 
-        const backupRef = doc(db, paths.content(eventId, 'details_backup'));
-        const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
-        }
-
-        const globalSnap = await getDoc(doc(db, paths.content(eventId, 'globalSettings')));
-        if (globalSnap.exists()) {
-          setVenueFacts(venueFactsFrom(globalSnap.data()));
         }
       } catch (error) {
         console.error("Error fetching content:", error);
@@ -96,16 +108,33 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
     fetchData();
   }, [eventId]);
 
-  const handleSectionChange = (section: 'ceremony' | 'reception', e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [name]: value
-      }
-    }));
+  const updateVenue = (index: number, field: keyof Venue, value: string) => {
+    setData(prev => ({ ...prev, venues: prev.venues.map((v, i) => (i === index ? { ...v, [field]: value } : v)) }));
     setSaved(false);
+  };
+
+  const addVenue = () => {
+    setData(prev => ({ ...prev, venues: [...prev.venues, emptyVenue(nanoid())] }));
+    setSaved(false);
+  };
+
+  const executeRemoveVenue = () => {
+    if (venueToDelete === null) return;
+    setData(prev => ({ ...prev, venues: prev.venues.filter((_, i) => i !== venueToDelete) }));
+    setVenueToDelete(null);
+    setSaved(false);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setData(prev => {
+        const oldIndex = prev.venues.findIndex(v => v.id === active.id);
+        const newIndex = prev.venues.findIndex(v => v.id === over.id);
+        return { ...prev, venues: arrayMove(prev.venues, oldIndex, newIndex) };
+      });
+      setSaved(false);
+    }
   };
 
   const handleSave = async () => {
@@ -114,10 +143,11 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
       const backupRef = doc(db, paths.content(eventId, 'details_backup'));
       await setDoc(backupRef, originalData, { merge: true });
 
+      // merge: true keeps the old ceremony / reception fields for older code
       const docRef = doc(db, paths.content(eventId, 'details'));
       await setDoc(docRef, data, { merge: true });
       await refreshGuestSite(eventId);
-      
+
       setOriginalData(data);
       setHasBackup(true);
       setSaved(true);
@@ -136,10 +166,6 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
     setSaved(false);
   };
 
-  const handleRestoreBackup = async () => {
-    setIsRestoreModalOpen(true);
-  };
-
   const executeRestore = async () => {
     setRestoring(true);
     setIsRestoreModalOpen(false);
@@ -147,23 +173,7 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
       const backupRef = doc(db, paths.content(eventId, 'details_backup'));
       const backupSnap = await getDoc(backupRef);
       if (backupSnap.exists()) {
-        const fetchedBackup = backupSnap.data();
-        const mergedData = {
-          header: {
-            ...(weddingContent.details.header || { subtitle: "The Celebration", title: "Where & When", description: "A breathtaking romance in Paniqui, Tarlac." }),
-            ...(fetchedBackup.header || {})
-          },
-          ceremony: {
-            ...weddingContent.details.ceremony,
-            ...(fetchedBackup.ceremony || {})
-          },
-          reception: {
-            ...weddingContent.details.reception,
-            ...(fetchedBackup.reception || {})
-          },
-          orderOfEventsImage: fetchedBackup.orderOfEventsImage || weddingContent.details.orderOfEventsImage || ''
-        };
-        setData(mergedData);
+        setData(formFromDoc(backupSnap.data(), globalDocRef.current));
         setIsSuccessModalOpen(true);
       }
     } catch (error: any) {
@@ -181,7 +191,7 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
     setIsUploadingImage(true);
     try {
       const url = await uploadImage(file, 'website/order-of-events');
-      
+
       setData(prev => ({ ...prev, orderOfEventsImage: url }));
       setSaved(false);
     } catch (err) {
@@ -200,125 +210,6 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
     setSaved(false);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    );
-  }
-
-  const renderSection = (title: string, section: 'ceremony' | 'reception') => (
-    <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">{title}</h3>
-      <div className="grid grid-cols-1 gap-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Card Subtitle (e.g., The Vows)</label>
-            <input 
-              maxLength={TEXT_LIMITS.cardTitle}
-              type="text" 
-              name="subtitle"
-              value={(data[section] as any).subtitle || ""}
-              onChange={(e) => handleSectionChange(section, e)}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-            <CharCount value={data[section].subtitle} max={TEXT_LIMITS.cardTitle} />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Title</label>
-            <input 
-              maxLength={TEXT_LIMITS.cardTitle}
-              type="text" 
-              name="title"
-              value={data[section].title}
-              onChange={(e) => handleSectionChange(section, e)}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-            <CharCount value={data[section].title} max={TEXT_LIMITS.cardTitle} />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Description</label>
-          <textarea 
-            name="description"
-            value={data[section].description}
-            onChange={(e) => handleSectionChange(section, e)}
-            rows={4}
-            className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all resize-none"
-          />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Map Link URL</label>
-            <input 
-              type="text" 
-              name="mapLink"
-              value={data[section].mapLink}
-              onChange={(e) => handleSectionChange(section, e)}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Calendar Link: Location</label>
-            <input 
-              type="text" 
-              name="calendarLoc"
-              value={data[section].calendarLoc}
-              onChange={(e) => handleSectionChange(section, e)}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Calendar Link: Description</label>
-            <input 
-              type="text" 
-              name="calendarDesc"
-              value={data[section].calendarDesc}
-              onChange={(e) => handleSectionChange(section, e)}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Calendar Start (YYYY-MM-DDTHH:mm:ss)</label>
-            <input 
-              type="text" 
-              name="calendarStart"
-              value={data[section].calendarStart}
-              onChange={(e) => handleSectionChange(section, e)}
-              placeholder="e.g. 2026-12-20T15:00:00"
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all font-mono text-sm"
-            />
-          </div>
-        </div>
-        
-        <div className="p-4 bg-gray-50 dark:bg-zinc-950/50 border border-gray-200 dark:border-zinc-800 rounded-lg">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-              <dt className="text-gray-500 dark:text-zinc-400">Time</dt>
-              <dd className="text-gray-900 dark:text-zinc-100">{venueFacts[section].time}</dd>
-              <dt className="text-gray-500 dark:text-zinc-400">Location</dt>
-              <dd className="text-gray-900 dark:text-zinc-100">{venueFacts[section].location}</dd>
-              <dt className="text-gray-500 dark:text-zinc-400">Address</dt>
-              <dd className="text-gray-900 dark:text-zinc-100">{venueFacts[section].address}</dd>
-            </dl>
-            <button
-              type="button"
-              onClick={onEditGlobalSettings}
-              className="inline-flex items-center justify-center gap-2 shrink-0 px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors"
-            >
-              <Settings className="w-4 h-4" aria-hidden="true" />
-              Edit in Global Settings
-            </button>
-          </div>
-          <p className="mt-3 text-xs text-gray-500 dark:text-zinc-400">
-            Time, location and address are set once in Global Settings so they match everywhere on the site.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-
   const handleHeaderChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setData(prev => ({
@@ -331,6 +222,14 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
     setSaved(false);
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div className="space-y-4">
@@ -339,37 +238,37 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
           <div className="grid grid-cols-1 gap-6">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Subtitle</label>
-              <input 
+              <input
                 maxLength={TEXT_LIMITS.heading}
-                type="text" 
+                type="text"
                 name="subtitle"
                 value={data.header?.subtitle || ""}
                 onChange={handleHeaderChange}
-                className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+                className={inputClass}
               />
               <CharCount value={data.header?.subtitle || ""} max={TEXT_LIMITS.heading} />
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Title</label>
-              <input 
+              <input
                 maxLength={TEXT_LIMITS.heading}
-                type="text" 
+                type="text"
                 name="title"
                 value={data.header?.title || ""}
                 onChange={handleHeaderChange}
-                className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+                className={inputClass}
               />
               <CharCount value={data.header?.title || ""} max={TEXT_LIMITS.heading} />
             </div>
           </div>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Description</label>
-            <textarea 
+            <textarea
               name="description"
               value={data.header?.description || ""}
               onChange={handleHeaderChange}
               rows={2}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all resize-none"
+              className={`${inputClass} resize-none`}
             />
           </div>
         </div>
@@ -377,11 +276,42 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
 
       <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
 
-      {renderSection('Ceremony Details', 'ceremony')}
-      
-      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
-      
-      {renderSection('Reception Details', 'reception')}
+      <div className="space-y-4">
+        <div className="flex justify-between items-start gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Venues</h3>
+            <p className="text-sm text-gray-500 dark:text-zinc-400">One card per venue or program stop (ceremony, reception, registration, sessions…), in the order guests see them. Drag to reorder. Empty fields and buttons are hidden on the site.</p>
+          </div>
+          <button
+            onClick={addVenue}
+            className="flex items-center gap-2 shrink-0 px-4 py-2 bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg hover:bg-gray-800 dark:hover:bg-zinc-200 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            Add Venue
+          </button>
+        </div>
+
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <div className="space-y-6">
+            <SortableContext items={data.venues.map(v => v.id)} strategy={verticalListSortingStrategy}>
+              {data.venues.map((venue, index) => (
+                <SortableVenue
+                  key={venue.id}
+                  venue={venue}
+                  index={index}
+                  onChange={updateVenue}
+                  onRemove={setVenueToDelete}
+                />
+              ))}
+            </SortableContext>
+            {data.venues.length === 0 && (
+              <div className="text-center py-12 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700">
+                <p className="text-gray-500 dark:text-zinc-400">No venues yet. Add one to get started.</p>
+              </div>
+            )}
+          </div>
+        </DndContext>
+      </div>
 
       <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
 
@@ -389,16 +319,16 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Order of Events</h3>
         </div>
-        
+
         <div className="bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg p-6">
           <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-4">Order of Events Image</label>
-          
+
           {data.orderOfEventsImage ? (
             <div className="relative inline-block">
               <div className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 flex items-center justify-center min-h-[200px] min-w-[200px]">
-                <img 
-                  src={data.orderOfEventsImage} 
-                  alt="Order of Events" 
+                <img
+                  src={data.orderOfEventsImage}
+                  alt="Order of Events"
                   className="max-h-[400px] w-auto object-contain"
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -413,7 +343,7 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
               </div>
             </div>
           ) : (
-            <div 
+            <div
               onClick={() => fileInputRef.current?.click()}
               className="w-full max-w-md h-48 border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 dark:hover:border-zinc-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors"
             >
@@ -466,15 +396,109 @@ export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId:
       />
 
       <AdminModal
+        isOpen={venueToDelete !== null}
+        onClose={() => setVenueToDelete(null)}
+        onConfirm={executeRemoveVenue}
+        title="Remove Venue"
+        message={`Remove "${(venueToDelete !== null && data.venues[venueToDelete]?.title) || 'this venue'}"? It leaves the site when you save.`}
+        type="confirm"
+        variant="danger"
+        confirmText="Yes, remove it"
+      />
+
+      <AdminModal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleSave}
         title="Publish Changes?"
-        message="This will update the Event Details section on the live website immediately. A backup of the current version will be saved."
+        message="This will update the Venues (Event Details) section on the live website immediately. A backup of the current version will be saved."
         type="confirm"
         variant="info"
         confirmText="Yes, Publish Now"
       />
+    </div>
+  );
+}
+
+function SortableVenue({
+  venue,
+  index,
+  onChange,
+  onRemove,
+}: {
+  venue: Venue;
+  index: number;
+  onChange: (index: number, field: keyof Venue, value: string) => void;
+  onRemove: (index: number) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: venue.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const field = (name: keyof Venue, label: string, opts: { placeholder?: string; max?: number; mono?: boolean; wide?: boolean } = {}) => (
+    <div className={`space-y-2 ${opts.wide ? 'md:col-span-2' : ''}`}>
+      <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">{label}</label>
+      <input
+        type="text"
+        maxLength={opts.max}
+        value={venue[name]}
+        onChange={(e) => onChange(index, name, e.target.value)}
+        placeholder={opts.placeholder}
+        className={`${inputClass} ${opts.mono ? 'font-mono text-sm' : ''}`}
+      />
+      {opts.max && <CharCount value={venue[name]} max={opts.max} />}
+    </div>
+  );
+
+  return (
+    <div ref={setNodeRef} style={style} className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm space-y-6">
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-semibold text-gray-400 dark:text-zinc-500">#{index + 1}</span>
+        <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 truncate">{venue.title || 'Untitled venue'}</span>
+        <div className="ml-auto flex items-center gap-1">
+          <div
+            className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing transition-colors"
+            title="Drag to reorder"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="w-4 h-4" />
+          </div>
+          <button
+            onClick={() => onRemove(index)}
+            className="p-1.5 text-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            title="Remove venue"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {field('subtitle', 'Card Subtitle (e.g., The Vows)', { max: TEXT_LIMITS.cardTitle })}
+        {field('title', 'Title', { max: TEXT_LIMITS.cardTitle })}
+        {field('time', 'Time', { placeholder: 'e.g. 3:00 PM' })}
+        {field('location', 'Location Name')}
+        {field('address', 'Full Address', { wide: true })}
+        <div className="space-y-2 md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Description</label>
+          <textarea
+            value={venue.description}
+            onChange={(e) => onChange(index, 'description', e.target.value)}
+            rows={4}
+            className={`${inputClass} resize-none`}
+          />
+        </div>
+        {field('mapLink', 'Map Link URL (embed link for the map window)')}
+        {field('calendarLoc', 'Calendar Link: Location')}
+        {field('calendarDesc', 'Calendar Link: Description')}
+        {field('calendarStart', 'Calendar Start (YYYY-MM-DDTHH:mm:ss)', { placeholder: 'e.g. 2026-12-20T15:00:00', mono: true })}
+      </div>
     </div>
   );
 }

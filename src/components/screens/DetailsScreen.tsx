@@ -19,6 +19,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
   const text = useSiteText();
 
   const scrollRef = useRef<HTMLElement>(null);
+  const venues = content.details.venues;
 
   const openMap = (url: string) => {
     setMapUrl(url);
@@ -71,76 +72,57 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
           <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-lg mx-auto">{content.details.header?.description}</p>
         </TextsReveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Ceremony Details */}
-          <ScrollReveal>
+        {/* Two cards per row on desktop; one venue, or the last of an odd number, is centered */}
+        <div className={`grid grid-cols-1 ${venues.length > 1 ? 'md:grid-cols-2' : 'max-w-2xl mx-auto'} gap-8`}>
+          {venues.map((venue, index) => {
+            const centered = venues.length > 1 && venues.length % 2 === 1 && index === venues.length - 1;
+            const buttons = [venue.mapLink, venue.calendarStart].filter(Boolean).length;
+            return (
+          <ScrollReveal key={venue.id} delay={index % 2 ? SCROLL_MOTION.revealStagger : 0} className={centered ? 'md:col-span-2 md:w-[calc(50%-1rem)] md:mx-auto' : undefined}>
           <motion.div whileHover={{ y: -5 }} className="h-full bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-gold/20 hover:shadow-xl hover:border-wedding-gold/40 transition-all duration-500 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-6">
-                <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{content.details.ceremony.subtitle}</span>
-                <span className="text-sm font-cinzel text-wedding-goldlight/70">{content.details.ceremony.time}</span>
+                {venue.subtitle ? <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{venue.subtitle}</span> : <span />}
+                <span className="text-sm font-cinzel text-wedding-goldlight/70">{venue.time}</span>
               </div>
-              <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">{content.details.ceremony.title}</h3>
+              <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">{venue.title}</h3>
               <div className="w-16 h-[1px] bg-gradient-to-r from-wedding-gold/50 to-transparent mb-6"></div>
               <p className="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
-                {content.details.ceremony.description}
+                {venue.description}
               </p>
               <div className="space-y-3 text-sm text-wedding-cream mb-8 font-cormorant tracking-wide">
+                {venue.location && (
                 <div className="flex items-start">
-                  <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>{text.details.location}</strong>&nbsp;{content.details.ceremony.location}</p>
+                  <span className="text-wedding-gold mr-3 mt-[2px]">✦</span>
+                  <p className="flex-1"><strong>{text.details.location}</strong>&nbsp;{venue.location}</p>
                 </div>
+                )}
+                {venue.address && (
                 <div className="flex items-start">
-                  <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>{text.details.address}</strong>&nbsp;{content.details.ceremony.address}</p>
+                  <span className="text-wedding-gold mr-3 mt-[2px]">✦</span>
+                  <p className="flex-1"><strong>{text.details.address}</strong>&nbsp;{venue.address}</p>
                 </div>
+                )}
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-wedding-gold/20">
-              <button onClick={() => openMap(content.details.ceremony.mapLink)} className="text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
+            {buttons > 0 && (
+            <div className={`grid grid-cols-1 ${buttons === 2 ? 'sm:grid-cols-2' : ''} gap-4 mt-6 pt-6 border-t border-wedding-gold/20`}>
+              {venue.mapLink && (
+              <button onClick={() => openMap(venue.mapLink)} className="text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
                 {text.details.viewLocation}
               </button>
-              <button onClick={() => addToCalendar(content.details.ceremony.calendarDesc, content.details.ceremony.calendarDesc, content.details.ceremony.calendarLoc, content.details.ceremony.calendarStart)} className="text-center py-3 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
+              )}
+              {venue.calendarStart && (
+              <button onClick={() => addToCalendar(venue.calendarDesc || venue.title, venue.calendarDesc, venue.calendarLoc, venue.calendarStart)} className="text-center py-3 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
                 {text.details.addToCalendar}
               </button>
+              )}
             </div>
+            )}
           </motion.div>
           </ScrollReveal>
-
-          {/* Reception Details */}
-          <ScrollReveal delay={SCROLL_MOTION.revealStagger}>
-          <motion.div whileHover={{ y: -5 }} className="h-full bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-gold/20 hover:shadow-xl hover:border-wedding-gold/40 transition-all duration-500 flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-start mb-6">
-                <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{content.details.reception.subtitle}</span>
-                <span className="text-sm font-cinzel text-wedding-goldlight/70">{content.details.reception.time}</span>
-              </div>
-              <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">{content.details.reception.title}</h3>
-              <div className="w-16 h-[1px] bg-gradient-to-r from-wedding-gold/50 to-transparent mb-6"></div>
-              <p className="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
-                {content.details.reception.description}
-              </p>
-              <div className="space-y-3 text-sm text-wedding-cream mb-8 font-cormorant tracking-wide">
-                <div className="flex items-start">
-                  <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>{text.details.location}</strong>&nbsp;{content.details.reception.location}</p>
-                </div>
-                <div className="flex items-start">
-                  <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>{text.details.address}</strong>&nbsp;{content.details.reception.address}</p>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-wedding-gold/20">
-              <button onClick={() => openMap(content.details.reception.mapLink)} className="text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
-                {text.details.viewLocation}
-              </button>
-              <button onClick={() => addToCalendar(content.details.reception.calendarDesc, content.details.reception.calendarDesc, content.details.reception.calendarLoc, content.details.reception.calendarStart)} className="text-center py-3 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
-                {text.details.addToCalendar}
-              </button>
-            </div>
-          </motion.div>
-          </ScrollReveal>
+            );
+          })}
         </div>
 
         {/* Order of Events Section */}

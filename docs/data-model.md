@@ -124,25 +124,27 @@ if present, overrides it (merge rules in `docs/content-system.md`).
 
 | Firestore doc | JSON key(s) the site reads | Editor |
 | --- | --- | --- |
-| `globalSettings` | `global` (logo, names, `coupleNameFormat`, `targetDate`, `venueShort`, `ogImage`, `footerTagline`) **and** `details.ceremony` / `details.reception` time, location, address | `GlobalSettingsEditor.tsx` |
+| `globalSettings` | `global` (logo, `hosts[]`, `coupleNameFormat`, `targetDate`, `venueShort`, `ogImage`, `footerTagline`) | `GlobalSettingsEditor.tsx` |
 | `welcomeScreen` | `welcomeScreen` | `WelcomeScreenEditor.tsx` |
 | `entranceScreen` | `entranceScreen` | `EntranceScreenEditor.tsx` |
-| `ourStory` | `ourStory` (`subtitle`, `title`, `description`, `items[]`) | `OurStoryEditor.tsx` |
-| `entourage` | `entourage` (`parents`, `principalSponsors`, `honorAttendants`, `bridesmaids`, `groomsmen`, `flowerGirls`, `ringBearers`) | `EntourageEditor.tsx` |
-| `details` | `details` (`header`, `ceremony`, `reception`, `orderOfEventsImage`) | `EventDetailsEditor.tsx` |
-| `dressCode` | `dressCode` | `DressCodeEditor.tsx` |
+| `ourStory` | `ourStory` (`subtitle`, `title`, `description`, `items[]`; admin tab "Timeline (Our Story)", an item's `image` and `videoLink` are optional) | `OurStoryEditor.tsx` |
+| `entourage` | `entourage` (`subtitle`, `title`, `groups[]`; admin tab "People (Entourage)") | `EntourageEditor.tsx` |
+| `details` | `details` (`header`, `venues[]`, `orderOfEventsImage`; admin tab "Venues (Event Details)") | `EventDetailsEditor.tsx` |
+| `dressCode` | `dressCode` (`header`, `title`, `description`, `colors[]`, `guidelines[]`, `inspirationImages[]`) | `DressCodeEditor.tsx` |
 | `gallery` | `gallery` ← doc field `images[]`; `galleryHeader` ← doc field `header` | `GalleryEditor.tsx` |
 | `faq` | `faq` ← doc field `items[]`; `faqHeader` ← doc field `header` | `FaqsEditor.tsx` |
 | `registry` | `registry` (`header`, `bankTransfer`, `curatedRegistry`) | `RegistryEditor.tsx` |
 | `rsvpCta` | `rsvpCta` | `RsvpCtaEditor.tsx` |
 | `rsvpForm` | `rsvpForm` (`header`, `labels`, `attendanceOptions`, `actions`, `successModal`) | `RsvpFormEditor.tsx` |
-| `siteText` | `siteText`: small UI wording grouped by screen (`common`, `menu`, `loading`, `welcome`, `motionHint`, `music`, `entrance`, `ourStory`, `entourage`, `details`, `dressCode`, `registry`, `curatedRegistry`, `giftModal`, `rsvp`, `phone`, `footer`, `notFound`, `seo`), every leaf a string. Read **on the server only**, into `SiteTextProvider` (not `WeddingContentContext`). | `SiteTextEditor.tsx` ("Site Text" tab) |
+| `siteText` | `siteText`: small UI wording grouped by screen (`common`, `menu`, `loading`, `welcome`, `motionHint`, `music`, `entrance`, `ourStory`, `details`, `dressCode`, `registry`, `curatedRegistry`, `giftModal`, `rsvp`, `phone`, `footer`, `notFound`, `seo`), every leaf a string. Read **on the server only**, into `SiteTextProvider` (not `WeddingContentContext`). | `SiteTextEditor.tsx` ("Site Text" tab) |
 
-`global.coupleNameFormat` ("Hans & Czay") is the couple's names as written in a
-sentence: metadata, the 404 page, the RSVP email, `{couple}` in site text.
+`global.coupleNameFormat` ("Hans & Czay", "Ana's 18th", "ACME Summit 2027";
+"Display Name" in the editor) is the event's name as written in a sentence:
+metadata, the 404 page, the RSVP email, `{couple}` in site text. The key kept
+its old name so saved site text and docs need no change.
 `global.dateShort` and `global.dateFull` were removed from the JSON in Oct 2026
-(nothing showed them); the live `globalSettings` doc may still hold them and
-`sync-content` may copy them back; they are harmless.
+(nothing showed them); the live `globalSettings` doc may still hold them;
+`sync-content` drops them from the JSON.
 
 **`siteText` shape.** Defined by the JSON (the type is
 `typeof wedding-content.json.siteText`, exported as `SiteText` from
@@ -161,29 +163,65 @@ the `gallery` key holds both array-index keys (`"0"`…`"7"`) and `images` /
 `header`; there is an extra `faqs` key (the site reads `faq` + `faqHeader`, not
 `faqs`). Do not "fix" these by hand without checking what the screens read.
 
-**`entourage.principalSponsors`** is an array of pairs, one row per pair in
-display order:
+### Generic content shapes (F5, Oct 2026)
 
-```ts
-{ ninang: { title, name }, ninong: { title, name }, couple: boolean }
-```
+So one site can serve any event type, four parts of the content are lists.
+Types, readers and display helpers live in **`src/lib/genericContent.ts`**
+(tested by `genericContent.test.ts`); `WeddingContent` in
+`src/lib/weddingContent.ts` is the JSON's type with these lists typed.
 
-`title` comes from the editor's dropdown (`NINANG_TITLES` / `NINONG_TITLES` in
-`src/lib/principalSponsors.ts`) or is `""`; either side may be blank for a solo
-sponsor with no partner. Desktop shows ninang left, ninong right on one row;
-phones show a couple on one line (`ninong & ninang`) and two solo
-sponsors on a line each. Content saved before Oct 2026 is a flat `string[]`
-(`"Mrs. A"`, `"Mr. B"`, couples as `"Mr. B & Mrs. A"`).
-`normalizePrincipalSponsors()` reads both shapes (in the provider and in the
-editor, including the backup restore), so a legacy doc keeps rendering; the
-first save from `EntourageEditor` writes the pair shape. The flag was first
-named `married`; one save on 2026-10-14 stored it under that name, and the
-normalizer still reads it as `couple`. **Rollback:** code from before the change
-crashes on the pair objects (`startsWith is not a function`), so rolling the
-code back also needs `content/entourage` rewritten as a `string[]`.
-Both `entourage` and `entourage_backup` already hold the pair shape, so the
-backup cannot do this; write the strings by hand (couples as
-`"Mr. B & Mrs. A"`, which the normalizer pairs again).
+| Field | Shape | Shown on |
+| --- | --- | --- |
+| `global.hosts[]` | `{ name, role }`. `role` (Groom, Debutante, Organizer…) is not shown to guests | Welcome and Entrance names (`"A & B"`, three or more `"A, B & C"`), loader and footer monogram (initials), logo `alt` |
+| `entourage.groups[]` | `{ id, title, layout: 'pairs' \| 'list' \| 'featured', people: Person[], pairs: PersonPair[] }`; `Person` = `{ title, name, role, photo }` (`title` is the honorific, used by pairs), `PersonPair` = `{ left, right, together }` | People screen. `list` / `featured` groups use `people` and fill two columns side by side (featured = large names); `pairs` groups use `pairs`, full width, left and right facing each other; a pair that is `together` shares one phone line as "right & left" ("Mr. B & Mrs. A"). A group with no names is hidden |
+| `details.venues[]` | `{ id, title, subtitle, time, location, address, description, mapLink, calendarStart, calendarLoc, calendarDesc }` (all strings) | Venue cards, two per row (one or an odd last one centered); empty fields and buttons hidden. RSVP email lists every venue |
+| `dressCode.guidelines[]` | `{ id, title, text }` | Dress Code screen, two per row |
+
+Venue time / location / address are edited only in the Venues editor now
+(before F5 they were Global Settings fields that overrode `details`).
+
+**Old shape, still readable.** Until Oct 2026 the same docs held:
+`globalSettings.groomName` / `brideName` and `ceremonyTime|Location|Address`,
+`receptionTime|Location|Address`; `entourage.parents{bride,groom}`,
+`principalSponsors`, `honorAttendants{maidOfHonor,bestMan}`, `bridesmaids`,
+`groomsmen`, `flowerGirls`, `ringBearers` (group titles were site text
+`siteText.entourage.*`); `details.ceremony` / `details.reception`;
+`dressCode.ladiesGuideline` / `gentlemenGuideline` (titles were
+`siteText.dressCode.ladies` / `gentlemen`). When a doc has no new field, the
+merge (and each editor, including Restore) builds it from these with
+`hostsFromLegacy`, `peopleGroupsFromLegacy` (titles from the event's site text,
+else English), `venuesFromLegacy` (Global Settings venue fields win, as before)
+and `guidelinesFromLegacy`. `principalSponsors` itself may be the pair shape
+`{ ninang, ninong, couple }` (ninang → left, ninong → right, `couple` →
+`together`; an early save named the flag `married`) or the older flat
+`string[]` (`"Mrs. A"`, couples as `"Mr. B & Mrs. A"`); both are read by
+`normalizePrincipalSponsors()` in `src/lib/principalSponsors.ts`, which only
+serves this conversion now.
+
+**Migration.** `scripts/migrate-content-f5.js` adds the new fields to
+`globalSettings`, `entourage`, `details`, `dressCode` and their `_backup`
+docs, computed by `genericContent.ts` itself (loaded with `jiti`). Dry run by
+default; `--write` adds missing fields only (`update` with the doc's update
+time as precondition, so a concurrent editor save makes it fail instead of
+being overwritten); `--verify` exits 1 if a doc with old fields lacks the new
+one; `--dump <file>` saves the docs first; `--event <id>`. It never removes or
+changes an old field. Run on `hans-and-czay` on 2026-10-14 (8 docs, verified;
+dump in the git-ignored plan backups).
+
+**Old fields are kept** in the docs on purpose: editors save with
+`merge: true` (Global Settings writes back every field it loaded), so the old
+fields stay as they were at migration time. The JSON has only the new shape;
+`sync-content` deletes the old keys when it pulls and warns about a doc
+without the new field. Removing the old fields from Firestore is a separate,
+later step (after the F5 code has run in production for a while).
+
+**Rollback.** Redeploy the code from before F5: it reads the old fields, which
+are untouched, so the site shows the content as it was at migration time.
+Edits made in the new editors after that (new groups, venues, guidelines,
+host names) are not in the old fields and are lost on rollback unless copied
+back by hand. Site text saved after F5 no longer has `entourage.*` and
+`dressCode.ladies` / `gentlemen`, so old code shows its English defaults for
+those titles.
 
 ## Image storage (Vercel Blob)
 
@@ -205,6 +243,7 @@ Firestore.
 | `images/entrance-bg` | default | EntranceScreenEditor |
 | `images/our-story` | default | OurStoryEditor |
 | `images/dress-code` | default | DressCodeEditor |
+| `images/people` | max 600px (round photo next to a name) | EntourageEditor (People) |
 | `images/registry-qr` | PNG (keeps QR codes lossless) | RegistryEditor |
 | `images/rsvpCta-bg` | default | RsvpCtaEditor |
 | `website/order-of-events` | default | EventDetailsEditor |

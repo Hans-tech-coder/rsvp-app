@@ -1,16 +1,82 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Loader2, Plus, Trash2, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Loader2, Plus, Trash2, ChevronDown, GripVertical, Upload, X } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 import { refreshGuestSite } from './refreshGuestSite';
-import weddingContent from '@/data/wedding-content.json';
+import { uploadImage } from '@/lib/blob/uploadImage';
+import { DEFAULT_CONTENT as weddingContent } from '@/lib/weddingContent';
+import {
+  PERSON_TITLES, emptyPerson, formatPerson, peopleGroupsFromLegacy, readPeopleGroups,
+  type PeopleGroup, type PeopleLayout, type Person, type PersonPair,
+} from '@/lib/genericContent';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
 import { CharCount, TEXT_LIMITS } from './CharCount';
-import { NINANG_TITLES, NINONG_TITLES, emptySponsor, formatSponsor, normalizePrincipalSponsors, type Sponsor } from '@/lib/principalSponsors';
+import { nanoid } from 'nanoid';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// "People" (doc `entourage`): any number of titled groups. Content saved
+// before Oct 2026 had fixed wedding lists whose titles were site text;
+// peopleGroupsFromLegacy() turns them into groups until the first save.
+
+type PeopleForm = { subtitle: string; title: string; groups: PeopleGroup[] };
+
+const inputClass = "px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all";
+const smallButtonClass = "flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors text-sm font-medium";
+
+const LAYOUTS: { value: PeopleLayout; label: string; help: string }[] = [
+  { value: 'list', label: 'List', help: 'A column of names. Two list or featured groups in a row sit side by side on desktop.' },
+  { value: 'featured', label: 'Featured', help: 'A column of large names, e.g. parents or the maid of honor. Sits side by side with the next list or featured group on desktop.' },
+  { value: 'pairs', label: 'Pairs', help: 'Two names facing each other on each row, full width, e.g. principal sponsors or speaker and moderator.' },
+];
+
+const emptyPair = (): PersonPair => ({ left: { ...emptyPerson(), title: 'Mrs.' }, right: { ...emptyPerson(), title: 'Mr.' }, together: true });
+
+/** Keeps the names when the layout changes between pairs and a column. */
+function withLayout(group: PeopleGroup, layout: PeopleLayout): PeopleGroup {
+  if (layout === group.layout) return group;
+  if (layout === 'pairs' && group.layout !== 'pairs') {
+    const pairs: PersonPair[] = [];
+    for (let i = 0; i < group.people.length; i += 2) {
+      pairs.push({ left: group.people[i], right: group.people[i + 1] ?? emptyPerson(), together: false });
+    }
+    return { ...group, layout, people: [], pairs };
+  }
+  if (group.layout === 'pairs') {
+    const people = group.pairs.flatMap((p) => [p.left, p.right]).filter((p) => formatPerson(p));
+    return { ...group, layout, people, pairs: [] };
+  }
+  return { ...group, layout };
+}
+
+function formFromDoc(saved: DocumentData, siteText: DocumentData | undefined): PeopleForm {
+  return {
+    subtitle: saved.subtitle ?? weddingContent.entourage.subtitle,
+    title: saved.title ?? weddingContent.entourage.title,
+    groups: readPeopleGroups(saved.groups)
+      ?? peopleGroupsFromLegacy(saved, siteText?.entourage)
+      ?? weddingContent.entourage.groups,
+  };
+}
 
 export function EntourageEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
@@ -21,38 +87,42 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  
-  // State for the form fields
-  const [data, setData] = useState({ ...weddingContent.entourage });
-  const [originalData, setOriginalData] = useState({ ...weddingContent.entourage });
+  const [groupToDelete, setGroupToDelete] = useState<number | null>(null);
+  const [uploading, setUploading] = useState<string | null>(null);
+  // Old-shape content took its group titles from site text
+  const siteTextRef = useRef<DocumentData | undefined>(undefined);
+
+  const initial: PeopleForm = {
+    subtitle: weddingContent.entourage.subtitle,
+    title: weddingContent.entourage.title,
+    groups: weddingContent.entourage.groups,
+  };
+  const [data, setData] = useState<PeopleForm>(initial);
+  const [originalData, setOriginalData] = useState<PeopleForm>(initial);
 
   const hasChanges = JSON.stringify(data) !== JSON.stringify(originalData);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, paths.content(eventId, 'entourage'));
-        const docSnap = await getDoc(docRef);
-        
+        const [docSnap, siteTextSnap, backupSnap] = await Promise.all([
+          getDoc(doc(db, paths.content(eventId, 'entourage'))),
+          getDoc(doc(db, paths.content(eventId, 'siteText'))),
+          getDoc(doc(db, paths.content(eventId, 'entourage_backup'))),
+        ]);
+        siteTextRef.current = siteTextSnap.data();
+
         if (docSnap.exists()) {
-          const fetchedData = docSnap.data();
-          const mergedData = {
-            subtitle: fetchedData.subtitle ?? weddingContent.entourage.subtitle,
-            title: fetchedData.title ?? weddingContent.entourage.title,
-            principalSponsors: normalizePrincipalSponsors(fetchedData.principalSponsors) ?? weddingContent.entourage.principalSponsors,
-            honorAttendants: fetchedData.honorAttendants ?? weddingContent.entourage.honorAttendants,
-            parents: fetchedData.parents ?? weddingContent.entourage.parents,
-            bridesmaids: fetchedData.bridesmaids ?? weddingContent.entourage.bridesmaids,
-            groomsmen: fetchedData.groomsmen ?? weddingContent.entourage.groomsmen,
-            flowerGirls: fetchedData.flowerGirls ?? weddingContent.entourage.flowerGirls,
-            ringBearers: fetchedData.ringBearers ?? weddingContent.entourage.ringBearers
-          };
+          const mergedData = formFromDoc(docSnap.data(), siteTextRef.current);
           setData(mergedData);
           setOriginalData(mergedData);
         }
 
-        const backupRef = doc(db, paths.content(eventId, 'entourage_backup'));
-        const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
         }
@@ -66,110 +136,56 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
     fetchData();
   }, [eventId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setData(prev => ({ ...prev, [name]: value }));
     setSaved(false);
   };
 
-  const handleHonorAttendantChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const updateGroup = (index: number, change: (group: PeopleGroup) => PeopleGroup) => {
+    setData(prev => ({ ...prev, groups: prev.groups.map((g, i) => (i === index ? change(g) : g)) }));
+    setSaved(false);
+  };
+
+  const addGroup = () => {
     setData(prev => ({
       ...prev,
-      honorAttendants: {
-        ...prev.honorAttendants,
-        [name]: value
-      }
+      groups: [...prev.groups, { id: nanoid(), title: '', layout: 'list', people: [emptyPerson()], pairs: [] }],
     }));
     setSaved(false);
   };
 
-  const handleArrayChange = (arrayName: 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers' | 'groomParents' | 'brideParents', index: number, value: string) => {
-    setData(prev => {
-      if (arrayName === 'groomParents') {
-        const newArray = [...prev.parents.groom];
-        newArray[index] = value;
-        return { ...prev, parents: { ...prev.parents, groom: newArray } };
-      }
-      if (arrayName === 'brideParents') {
-        const newArray = [...prev.parents.bride];
-        newArray[index] = value;
-        return { ...prev, parents: { ...prev.parents, bride: newArray } };
-      }
-      const newArray = [...prev[arrayName as 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers']];
-      newArray[index] = value;
-      return { ...prev, [arrayName]: newArray };
-    });
+  const executeRemoveGroup = () => {
+    if (groupToDelete === null) return;
+    setData(prev => ({ ...prev, groups: prev.groups.filter((_, i) => i !== groupToDelete) }));
+    setGroupToDelete(null);
     setSaved(false);
   };
 
-  const addArrayItem = (arrayName: 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers' | 'groomParents' | 'brideParents') => {
-    setData(prev => {
-      if (arrayName === 'groomParents') {
-        return { ...prev, parents: { ...prev.parents, groom: [...prev.parents.groom, ""] } };
-      }
-      if (arrayName === 'brideParents') {
-        return { ...prev, parents: { ...prev.parents, bride: [...prev.parents.bride, ""] } };
-      }
-      return {
-        ...prev,
-        [arrayName]: [...prev[arrayName as 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers'], ""]
-      };
-    });
-    setSaved(false);
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setData(prev => {
+        const oldIndex = prev.groups.findIndex(g => g.id === active.id);
+        const newIndex = prev.groups.findIndex(g => g.id === over.id);
+        return { ...prev, groups: arrayMove(prev.groups, oldIndex, newIndex) };
+      });
+      setSaved(false);
+    }
   };
 
-  const removeArrayItem = (arrayName: 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers' | 'groomParents' | 'brideParents', index: number) => {
-    setData(prev => {
-      if (arrayName === 'groomParents') {
-        const newArray = [...prev.parents.groom];
-        newArray.splice(index, 1);
-        return { ...prev, parents: { ...prev.parents, groom: newArray } };
-      }
-      if (arrayName === 'brideParents') {
-        const newArray = [...prev.parents.bride];
-        newArray.splice(index, 1);
-        return { ...prev, parents: { ...prev.parents, bride: newArray } };
-      }
-      const newArray = [...prev[arrayName as 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers']];
-      newArray.splice(index, 1);
-      return { ...prev, [arrayName]: newArray };
-    });
-    setSaved(false);
-  };
-
-  const updateSponsor = (index: number, side: 'ninang' | 'ninong', field: keyof Sponsor, value: string) => {
-    setData(prev => {
-      const pairs = [...prev.principalSponsors];
-      pairs[index] = { ...pairs[index], [side]: { ...pairs[index][side], [field]: value } };
-      return { ...prev, principalSponsors: pairs };
-    });
-    setSaved(false);
-  };
-
-  const toggleCouple = (index: number) => {
-    setData(prev => {
-      const pairs = [...prev.principalSponsors];
-      pairs[index] = { ...pairs[index], couple: !pairs[index].couple };
-      return { ...prev, principalSponsors: pairs };
-    });
-    setSaved(false);
-  };
-
-  const addSponsorPair = () => {
-    setData(prev => ({
-      ...prev,
-      principalSponsors: [
-        ...prev.principalSponsors,
-        { ninang: { ...emptySponsor(), title: 'Mrs.' }, ninong: { ...emptySponsor(), title: 'Mr.' }, couple: true },
-      ],
-    }));
-    setSaved(false);
-  };
-
-  const removeSponsorPair = (index: number) => {
-    setData(prev => ({ ...prev, principalSponsors: prev.principalSponsors.filter((_, i) => i !== index) }));
-    setSaved(false);
+  const uploadPhoto = async (groupIndex: number, personIndex: number, file: File) => {
+    const key = `${data.groups[groupIndex].id}:${personIndex}`;
+    setUploading(key);
+    try {
+      const url = await uploadImage(file, 'images/people', { maxDimension: 600 });
+      updateGroup(groupIndex, g => ({ ...g, people: g.people.map((p, i) => (i === personIndex ? { ...p, photo: url } : p)) }));
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      alert("Failed to upload photo. Please try again.");
+    } finally {
+      setUploading(null);
+    }
   };
 
   const handleSave = async () => {
@@ -178,10 +194,11 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
       const backupRef = doc(db, paths.content(eventId, 'entourage_backup'));
       await setDoc(backupRef, originalData, { merge: true });
 
+      // merge: true keeps the old fixed lists for older code
       const docRef = doc(db, paths.content(eventId, 'entourage'));
       await setDoc(docRef, data, { merge: true });
       await refreshGuestSite(eventId);
-      
+
       setOriginalData(data);
       setHasBackup(true);
       setSaved(true);
@@ -200,10 +217,6 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
     setSaved(false);
   };
 
-  const handleRestoreBackup = async () => {
-    setIsRestoreModalOpen(true);
-  };
-
   const executeRestore = async () => {
     setRestoring(true);
     setIsRestoreModalOpen(false);
@@ -211,19 +224,7 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
       const backupRef = doc(db, paths.content(eventId, 'entourage_backup'));
       const backupSnap = await getDoc(backupRef);
       if (backupSnap.exists()) {
-        const fetchedBackup = backupSnap.data();
-        const mergedData = {
-          subtitle: fetchedBackup.subtitle ?? weddingContent.entourage.subtitle,
-          title: fetchedBackup.title ?? weddingContent.entourage.title,
-          principalSponsors: normalizePrincipalSponsors(fetchedBackup.principalSponsors) ?? weddingContent.entourage.principalSponsors,
-          honorAttendants: fetchedBackup.honorAttendants ?? weddingContent.entourage.honorAttendants,
-          parents: fetchedBackup.parents ?? weddingContent.entourage.parents,
-          bridesmaids: fetchedBackup.bridesmaids ?? weddingContent.entourage.bridesmaids,
-          groomsmen: fetchedBackup.groomsmen ?? weddingContent.entourage.groomsmen,
-          flowerGirls: fetchedBackup.flowerGirls ?? weddingContent.entourage.flowerGirls,
-          ringBearers: fetchedBackup.ringBearers ?? weddingContent.entourage.ringBearers
-        };
-        setData(mergedData);
+        setData(formFromDoc(backupSnap.data(), siteTextRef.current));
         setIsSuccessModalOpen(true);
       }
     } catch (error: any) {
@@ -242,156 +243,6 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
     );
   }
 
-  const renderArraySection = (title: string, arrayName: 'bridesmaids' | 'groomsmen' | 'flowerGirls' | 'ringBearers' | 'groomParents' | 'brideParents') => {
-    const arrayData = arrayName === 'groomParents' ? data.parents.groom : 
-                      arrayName === 'brideParents' ? data.parents.bride : 
-                      data[arrayName];
-                      
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">{title}</h3>
-          <button
-            onClick={() => addArrayItem(arrayName)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors text-sm font-medium"
-          >
-            <Plus className="w-4 h-4" />
-            Add
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {arrayData.map((item, index) => (
-            <div key={index} className="flex gap-2">
-              <input 
-                type="text" 
-                value={item}
-                onChange={(e) => handleArrayChange(arrayName, index, e.target.value)}
-                className="flex-1 px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-              />
-              <button
-                onClick={() => removeArrayItem(arrayName, index)}
-                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                title="Remove"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
-            </div>
-          ))}
-          {arrayData.length === 0 && (
-            <div className="col-span-full text-center py-8 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-sm text-gray-500">
-              No {title.toLowerCase()} added yet.
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  const inputClass = "px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all";
-
-  const renderSponsorInput = (index: number, side: 'ninang' | 'ninong') => {
-    const sponsor = data.principalSponsors[index][side];
-    const titles = side === 'ninang' ? NINANG_TITLES : NINONG_TITLES;
-    // Keep a title the list no longer has, so opening the editor never drops it
-    const options = sponsor.title && !titles.includes(sponsor.title) ? [sponsor.title, ...titles] : titles;
-    return (
-      <div className="space-y-1.5">
-        <label className="block text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-zinc-400">{side === 'ninang' ? 'Ninang' : 'Ninong'}</label>
-        <div className="flex gap-2">
-          <div className="relative w-28 shrink-0">
-            <select
-              value={sponsor.title}
-              onChange={(e) => updateSponsor(index, side, 'title', e.target.value)}
-              aria-label={`${side === 'ninang' ? 'Ninang' : 'Ninong'} title`}
-              className="w-full appearance-none pl-4 pr-9 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all cursor-pointer"
-            >
-              <option value="">—</option>
-              {options.map(title => <option key={title} value={title}>{title}</option>)}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-zinc-400" />
-          </div>
-          <input
-            type="text"
-            value={sponsor.name}
-            placeholder="Full name"
-            onChange={(e) => updateSponsor(index, side, 'name', e.target.value)}
-            aria-label={`${side === 'ninang' ? 'Ninang' : 'Ninong'} name`}
-            className={`flex-1 min-w-0 ${inputClass}`}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const renderSponsorsSection = () => {
-    const pairs = data.principalSponsors;
-    const ninangOnly = pairs.flatMap((p, i) => (formatSponsor(p.ninang) && !formatSponsor(p.ninong) ? [i + 1] : []));
-    const ninongOnly = pairs.flatMap((p, i) => (!formatSponsor(p.ninang) && formatSponsor(p.ninong) ? [i + 1] : []));
-
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Principal Sponsors</h3>
-          <button
-            onClick={addSponsorPair}
-            className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors text-sm font-medium"
-          >
-            <Plus className="w-4 h-4" />
-            Add pair
-          </button>
-        </div>
-        <p className="text-sm text-gray-500 dark:text-zinc-400">
-          One row per pair, in the order they appear on the site. On desktop the ninang sits on the left and the ninong faces her on the right.
-          Tick <span className="font-medium">Couple</span> when the two are a pair: phones show them on one line. Two solo sponsors in one row stay facing each other on desktop and get a line each on phones.
-        </p>
-        {ninangOnly.length > 0 && ninongOnly.length > 0 && (
-          <p className="text-sm px-4 py-3 rounded-lg bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-            Row {ninangOnly.join(', ')} has only a ninang and row {ninongOnly.join(', ')} only a ninong. Put a solo ninong into a ninang-only row (and remove his old row) to keep both sides balanced.
-          </p>
-        )}
-        <div className="space-y-3">
-          {pairs.map((pair, index) => {
-            const ninang = formatSponsor(pair.ninang);
-            const ninong = formatSponsor(pair.ninong);
-            const preview = !ninang || !ninong
-              ? `Only a ${ninang ? 'ninang' : ninong ? 'ninong' : 'blank row'}${ninang || ninong ? ': the other side stays empty on desktop' : ': hidden on the site'}`
-              : pair.couple
-                ? `Phone: one line: ${ninong} & ${ninang}`
-                : 'Phone: two lines, ninang first';
-            return (
-              <div key={index} className="p-4 rounded-xl border border-gray-200 dark:border-zinc-800 space-y-3">
-                <div className="flex items-center gap-4">
-                  <span className="text-xs font-semibold text-gray-400 dark:text-zinc-500">#{index + 1}</span>
-                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300 cursor-pointer select-none">
-                    <input type="checkbox" checked={pair.couple} onChange={() => toggleCouple(index)} className="w-4 h-4 accent-gray-900 dark:accent-zinc-100" />
-                    Couple
-                  </label>
-                  <button
-                    onClick={() => removeSponsorPair(index)}
-                    className="ml-auto p-2 text-gray-400 hover:text-red-500 transition-colors"
-                    title="Remove pair"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {renderSponsorInput(index, 'ninang')}
-                  {renderSponsorInput(index, 'ninong')}
-                </div>
-                <p className={`text-xs ${ninang && ninong ? 'text-gray-500 dark:text-zinc-400' : 'text-amber-700 dark:text-amber-400'}`}>{preview}</p>
-              </div>
-            );
-          })}
-          {pairs.length === 0 && (
-            <div className="text-center py-8 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-sm text-gray-500">
-              No principal sponsors added yet.
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-8">
       <div className="space-y-4">
@@ -399,25 +250,25 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
         <div className="grid grid-cols-1 gap-6">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Subtitle</label>
-            <input 
+            <input
               maxLength={TEXT_LIMITS.heading}
-              type="text" 
+              type="text"
               name="subtitle"
               value={data.subtitle}
               onChange={handleChange}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+              className={`w-full ${inputClass}`}
             />
             <CharCount value={data.subtitle} max={TEXT_LIMITS.heading} />
           </div>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Title</label>
-            <input 
+            <input
               maxLength={TEXT_LIMITS.heading}
-              type="text" 
+              type="text"
               name="title"
               value={data.title}
               onChange={handleChange}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+              className={`w-full ${inputClass}`}
             />
             <CharCount value={data.title} max={TEXT_LIMITS.heading} />
           </div>
@@ -427,48 +278,43 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
       <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Honor Attendants</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Maid of Honor</label>
-            <input 
-              type="text" 
-              name="maidOfHonor"
-              value={data.honorAttendants.maidOfHonor}
-              onChange={handleHonorAttendantChange}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
+        <div className="flex justify-between items-start gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Groups</h3>
+            <p className="text-sm text-gray-500 dark:text-zinc-400">Each group has its own title and layout (entourage roles, 18 Roses, speakers, committee…). Drag to reorder. A group with no names is hidden on the site.</p>
           </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Best Man</label>
-            <input 
-              type="text" 
-              name="bestMan"
-              value={data.honorAttendants.bestMan}
-              onChange={handleHonorAttendantChange}
-              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
-            />
-          </div>
+          <button
+            onClick={addGroup}
+            className="flex items-center gap-2 shrink-0 px-4 py-2 bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg hover:bg-gray-800 dark:hover:bg-zinc-200 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            Add Group
+          </button>
         </div>
+
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <div className="space-y-6">
+            <SortableContext items={data.groups.map(g => g.id)} strategy={verticalListSortingStrategy}>
+              {data.groups.map((group, index) => (
+                <SortableGroup
+                  key={group.id}
+                  group={group}
+                  index={index}
+                  uploading={uploading}
+                  onChange={(change) => updateGroup(index, change)}
+                  onRemove={() => setGroupToDelete(index)}
+                  onUploadPhoto={(personIndex, file) => uploadPhoto(index, personIndex, file)}
+                />
+              ))}
+            </SortableContext>
+            {data.groups.length === 0 && (
+              <div className="text-center py-12 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700">
+                <p className="text-gray-500 dark:text-zinc-400">No groups yet. Add one to get started.</p>
+              </div>
+            )}
+          </div>
+        </DndContext>
       </div>
-
-      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
-
-      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
-      {renderArraySection("Parents of the Groom", "groomParents")}
-      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
-      {renderArraySection("Parents of the Bride", "brideParents")}
-      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
-
-      {renderSponsorsSection()}
-      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
-      {renderArraySection("Bridesmaids", "bridesmaids")}
-      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
-      {renderArraySection("Groomsmen", "groomsmen")}
-      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
-      {renderArraySection("Flower Girls", "flowerGirls")}
-      <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
-      {renderArraySection("Ring Bearers", "ringBearers")}
 
       <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
 
@@ -495,15 +341,295 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
       />
 
       <AdminModal
+        isOpen={groupToDelete !== null}
+        onClose={() => setGroupToDelete(null)}
+        onConfirm={executeRemoveGroup}
+        title="Remove Group"
+        message={`Remove "${(groupToDelete !== null && data.groups[groupToDelete]?.title) || 'this group'}" and all its names? It leaves the site when you save.`}
+        type="confirm"
+        variant="danger"
+        confirmText="Yes, remove it"
+      />
+
+      <AdminModal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleSave}
         title="Publish Changes?"
-        message="This will update the Entourage section on the live website immediately. A backup of the current version will be saved."
+        message="This will update the People (Entourage) section on the live website immediately. A backup of the current version will be saved."
         type="confirm"
         variant="info"
         confirmText="Yes, Publish Now"
       />
+    </div>
+  );
+}
+
+function SortableGroup({
+  group,
+  index,
+  uploading,
+  onChange,
+  onRemove,
+  onUploadPhoto,
+}: {
+  group: PeopleGroup;
+  index: number;
+  uploading: string | null;
+  onChange: (change: (group: PeopleGroup) => PeopleGroup) => void;
+  onRemove: () => void;
+  onUploadPhoto: (personIndex: number, file: File) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: group.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const layout = LAYOUTS.find(l => l.value === group.layout) ?? LAYOUTS[0];
+
+  return (
+    <div ref={setNodeRef} style={style} className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm space-y-4">
+      <div className="flex flex-col md:flex-row md:items-start gap-3">
+        <div className="flex-1 space-y-1">
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-zinc-400">Group #{index + 1} title</label>
+          <input
+            type="text"
+            maxLength={TEXT_LIMITS.heading}
+            value={group.title}
+            onChange={(e) => onChange(g => ({ ...g, title: e.target.value }))}
+            placeholder="e.g. Principal Sponsors"
+            className={`w-full ${inputClass}`}
+          />
+          <CharCount value={group.title} max={TEXT_LIMITS.heading} />
+        </div>
+        <div className="space-y-1">
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-zinc-400">Layout</label>
+          <div className="relative w-full md:w-40">
+            <select
+              value={group.layout}
+              onChange={(e) => onChange(g => withLayout(g, e.target.value as PeopleLayout))}
+              className={`w-full appearance-none pr-9 cursor-pointer ${inputClass}`}
+            >
+              {LAYOUTS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-zinc-400" />
+          </div>
+        </div>
+        <div className="flex items-center gap-1 md:pt-6">
+          <div
+            className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing transition-colors"
+            title="Drag to reorder"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="w-4 h-4" />
+          </div>
+          <button
+            onClick={onRemove}
+            className="p-1.5 text-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            title="Remove group"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+      <p className="text-sm text-gray-500 dark:text-zinc-400">{layout.help}</p>
+
+      {group.layout === 'pairs'
+        ? <PairRows group={group} onChange={onChange} />
+        : <PeopleRows group={group} uploading={uploading} onChange={onChange} onUploadPhoto={onUploadPhoto} />}
+    </div>
+  );
+}
+
+function PeopleRows({
+  group,
+  uploading,
+  onChange,
+  onUploadPhoto,
+}: {
+  group: PeopleGroup;
+  uploading: string | null;
+  onChange: (change: (group: PeopleGroup) => PeopleGroup) => void;
+  onUploadPhoto: (personIndex: number, file: File) => void;
+}) {
+  const fileInputs = useRef<(HTMLInputElement | null)[]>([]);
+  const update = (index: number, field: keyof Person, value: string) =>
+    onChange(g => ({ ...g, people: g.people.map((p, i) => (i === index ? { ...p, [field]: value } : p)) }));
+
+  return (
+    <div className="space-y-3">
+      {group.people.map((person, index) => {
+        const isUploading = uploading === `${group.id}:${index}`;
+        return (
+          <div key={index} className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <div className="flex gap-2 items-center">
+              <button
+                type="button"
+                onClick={() => fileInputs.current[index]?.click()}
+                disabled={isUploading}
+                className="relative w-10 h-10 shrink-0 rounded-full overflow-hidden border border-gray-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
+                title={person.photo ? 'Change photo' : 'Add photo (optional)'}
+              >
+                {isUploading
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : person.photo
+                    ? <img src={person.photo} alt="" className="w-full h-full object-cover" />
+                    : <Upload className="w-4 h-4" />}
+              </button>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                ref={(el) => { fileInputs.current[index] = el; }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onUploadPhoto(index, file);
+                  e.target.value = '';
+                }}
+              />
+              {person.photo && (
+                <button type="button" onClick={() => update(index, 'photo', '')} className="p-1 text-gray-400 hover:text-red-500 transition-colors" title="Remove photo">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <input
+              type="text"
+              value={person.name}
+              onChange={(e) => update(index, 'name', e.target.value)}
+              placeholder="Full name"
+              aria-label="Name"
+              className={`flex-1 min-w-0 ${inputClass}`}
+            />
+            <input
+              type="text"
+              value={person.role}
+              onChange={(e) => update(index, 'role', e.target.value)}
+              placeholder="Role (optional)"
+              aria-label="Role"
+              className={`sm:w-48 min-w-0 ${inputClass}`}
+            />
+            <button
+              onClick={() => onChange(g => ({ ...g, people: g.people.filter((_, i) => i !== index) }))}
+              className="p-2 text-gray-400 hover:text-red-500 transition-colors self-end sm:self-auto"
+              title="Remove name"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
+        );
+      })}
+      {group.people.length === 0 && (
+        <div className="text-center py-6 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-sm text-gray-500">
+          No names yet.
+        </div>
+      )}
+      <button onClick={() => onChange(g => ({ ...g, people: [...g.people, emptyPerson()] }))} className={smallButtonClass}>
+        <Plus className="w-4 h-4" />
+        Add name
+      </button>
+    </div>
+  );
+}
+
+function PairRows({ group, onChange }: { group: PeopleGroup; onChange: (change: (group: PeopleGroup) => PeopleGroup) => void }) {
+  const updatePair = (index: number, change: (pair: PersonPair) => PersonPair) =>
+    onChange(g => ({ ...g, pairs: g.pairs.map((p, i) => (i === index ? change(p) : p)) }));
+
+  const pairs = group.pairs;
+  const leftOnly = pairs.flatMap((p, i) => (formatPerson(p.left) && !formatPerson(p.right) ? [i + 1] : []));
+  const rightOnly = pairs.flatMap((p, i) => (!formatPerson(p.left) && formatPerson(p.right) ? [i + 1] : []));
+
+  const renderSide = (index: number, side: 'left' | 'right') => {
+    const person = pairs[index][side];
+    // Keep a title the list does not have, so opening the editor never drops it
+    const options = person.title && !PERSON_TITLES.includes(person.title) ? [person.title, ...PERSON_TITLES] : PERSON_TITLES;
+    const label = side === 'left' ? 'Left' : 'Right';
+    return (
+      <div className="space-y-1.5">
+        <label className="block text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-zinc-400">{label}</label>
+        <div className="flex gap-2">
+          <div className="relative w-28 shrink-0">
+            <select
+              value={person.title}
+              onChange={(e) => updatePair(index, p => ({ ...p, [side]: { ...p[side], title: e.target.value } }))}
+              aria-label={`${label} title`}
+              className={`w-full appearance-none pl-4 pr-9 cursor-pointer ${inputClass}`}
+            >
+              <option value="">—</option>
+              {options.map(title => <option key={title} value={title}>{title}</option>)}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-zinc-400" />
+          </div>
+          <input
+            type="text"
+            value={person.name}
+            placeholder="Full name"
+            onChange={(e) => updatePair(index, p => ({ ...p, [side]: { ...p[side], name: e.target.value } }))}
+            aria-label={`${label} name`}
+            className={`flex-1 min-w-0 ${inputClass}`}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-gray-500 dark:text-zinc-400">
+        On desktop the left and right names face each other on one row. Tick <span className="font-medium">Together</span>{' '}when the two are a couple: phones show them on one line, right name first (&ldquo;Mr. B &amp; Mrs. A&rdquo;). Two solo names in one row get a line each on phones.
+      </p>
+      {leftOnly.length > 0 && rightOnly.length > 0 && (
+        <p className="text-sm px-4 py-3 rounded-lg bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+          Row {leftOnly.join(', ')} has only a left name and row {rightOnly.join(', ')} only a right name. Move a solo right name into a left-only row (and remove its old row) to keep both sides balanced.
+        </p>
+      )}
+      {pairs.map((pair, index) => {
+        const left = formatPerson(pair.left);
+        const right = formatPerson(pair.right);
+        const preview = !left || !right
+          ? `Only a ${left ? 'left name' : right ? 'right name' : 'blank row'}${left || right ? ': the other side stays empty on desktop' : ': hidden on the site'}`
+          : pair.together
+            ? `Phone: one line: ${right} & ${left}`
+            : 'Phone: two lines, left name first';
+        return (
+          <div key={index} className="p-4 rounded-xl border border-gray-200 dark:border-zinc-800 space-y-3">
+            <div className="flex items-center gap-4">
+              <span className="text-xs font-semibold text-gray-400 dark:text-zinc-500">#{index + 1}</span>
+              <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300 cursor-pointer select-none">
+                <input type="checkbox" checked={pair.together} onChange={() => updatePair(index, p => ({ ...p, together: !p.together }))} className="w-4 h-4 accent-gray-900 dark:accent-zinc-100" />
+                Together
+              </label>
+              <button
+                onClick={() => onChange(g => ({ ...g, pairs: g.pairs.filter((_, i) => i !== index) }))}
+                className="ml-auto p-2 text-gray-400 hover:text-red-500 transition-colors"
+                title="Remove pair"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {renderSide(index, 'left')}
+              {renderSide(index, 'right')}
+            </div>
+            <p className={`text-xs ${left && right ? 'text-gray-500 dark:text-zinc-400' : 'text-amber-700 dark:text-amber-400'}`}>{preview}</p>
+          </div>
+        );
+      })}
+      {pairs.length === 0 && (
+        <div className="text-center py-6 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-sm text-gray-500">
+          No pairs yet.
+        </div>
+      )}
+      <button onClick={() => onChange(g => ({ ...g, pairs: [...g.pairs, emptyPair()] }))} className={smallButtonClass}>
+        <Plus className="w-4 h-4" />
+        Add pair
+      </button>
     </div>
   );
 }

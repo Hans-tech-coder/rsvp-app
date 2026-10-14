@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import { getAdminDb } from '@/lib/firebase/admin';
-import weddingContent from '@/data/wedding-content.json';
+import { mergeWeddingContent } from '@/lib/weddingContent';
+import type { Venue } from '@/lib/genericContent';
 import { paths } from '@/lib/eventPaths';
 import { getEventUrl } from '@/lib/siteUrl';
 
@@ -25,50 +26,21 @@ const escapeHtml = (value: string) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-// Same precedence as WeddingContentContext: JSON defaults, then the `details`
-// and `dressCode` docs, then the ceremony/reception fields in `globalSettings`.
+// Same merge as the guest site (mergeWeddingContent), from the three docs the
+// email shows: names and date, the venues, the dress code.
 async function loadEmailContent(eventId: string) {
-  const global = { ...weddingContent.global };
-  const ceremony = { ...weddingContent.details.ceremony };
-  const reception = { ...weddingContent.details.reception };
-  const dressCode = { ...weddingContent.dressCode };
-
+  let content = mergeWeddingContent({});
   try {
-    const [globalDoc, detailsDoc, dressCodeDoc] = await Promise.all(
-      ['globalSettings', 'details', 'dressCode'].map((id) =>
-        getAdminDb().doc(paths.content(eventId, id)).get()
+    const [globalSettings, details, dressCode] = await Promise.all(
+      ['globalSettings', 'details', 'dressCode'].map(async (id) =>
+        (await getAdminDb().doc(paths.content(eventId, id)).get()).data()
       )
     );
-
-    const details = detailsDoc.data();
-    if (details) {
-      Object.assign(ceremony, details.ceremony || {});
-      Object.assign(reception, details.reception || {});
-    }
-
-    const dress = dressCodeDoc.data();
-    if (dress) {
-      dressCode.title = dress.title ?? dressCode.title;
-      dressCode.description = dress.description ?? dressCode.description;
-      dressCode.colors = dress.colors ?? dressCode.colors;
-    }
-
-    const g = globalDoc.data();
-    if (g) {
-      global.coupleNameFormat = g.coupleNameFormat || global.coupleNameFormat;
-      global.targetDate = g.targetDate || global.targetDate;
-      global.ogImage = g.ogImage || global.ogImage;
-      global.venueShort = g.venueShort || global.venueShort;
-      ceremony.time = g.ceremonyTime || ceremony.time;
-      ceremony.location = g.ceremonyLocation || ceremony.location;
-      ceremony.address = g.ceremonyAddress || ceremony.address;
-      reception.time = g.receptionTime || reception.time;
-      reception.location = g.receptionLocation || reception.location;
-      reception.address = g.receptionAddress || reception.address;
-    }
+    content = mergeWeddingContent({ globalSettings, details, dressCode });
   } catch (error) {
     console.error('RSVP email: using default content, Firestore read failed:', error);
   }
+  const { global, details: { venues }, dressCode } = content;
 
   const parsed = new Date(global.targetDate);
   const date = Number.isNaN(parsed.getTime())
@@ -80,8 +52,7 @@ async function loadEmailContent(eventId: string) {
     date,
     venueShort: global.venueShort,
     heroImage: global.ogImage,
-    ceremony,
-    reception,
+    venues,
     dressCode,
   };
 }
@@ -124,15 +95,13 @@ const sectionTitle = (subtitle: string, title: string) => `
     ${divider()}
   </div>`;
 
-type Venue = { title: string; subtitle?: string; location: string; address: string; time: string; calendarLoc: string };
-
 const venueBlock = (venue: Venue) => `
   <tr><td style="padding:0 0 12px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${c.dark};border:1px solid ${c.line};border-radius:6px;">
       <tr><td style="padding:22px 22px 24px;text-align:center;">
         ${venue.subtitle ? `<div style="font-family:${font.cormorant};font-style:italic;font-size:15px;color:${c.goldlight};">${escapeHtml(venue.subtitle)}</div>` : ''}
         <div style="font-family:${font.cinzel};font-size:17px;letter-spacing:3px;color:${c.cream};margin-top:2px;">${escapeHtml(venue.title)}</div>
-        <div style="margin-top:10px;">${eyebrow(escapeHtml(venue.time))}</div>
+        ${venue.time ? `<div style="margin-top:10px;">${eyebrow(escapeHtml(venue.time))}</div>` : ''}
         <div style="font-family:${font.cormorant};font-size:19px;line-height:1.35;color:${c.cream};margin-top:12px;">${escapeHtml(venue.location)}</div>
         <div style="font-family:${font.inter};font-size:12px;line-height:1.6;color:${c.muted};margin-top:4px;">${escapeHtml(venue.address)}</div>
         ${venue.calendarLoc ? `<a href="${escapeHtml(venue.calendarLoc)}" style="display:inline-block;margin-top:16px;padding:9px 20px;border:1px solid ${c.gold};border-radius:2px;font-family:${font.inter};font-size:10px;letter-spacing:3px;text-transform:uppercase;color:${c.gold};text-decoration:none;">View Map</a>` : ''}
@@ -190,8 +159,7 @@ function buildEmail(data: RsvpEmailData, content: Awaited<ReturnType<typeof load
       ${sectionTitle('Mark your calendar', 'Where &amp; When')}
       <div style="text-align:center;font-family:${font.cormorant};font-style:italic;font-size:18px;color:${c.goldlight};margin:-4px 0 20px;">${date}</div>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-        ${venueBlock(content.ceremony)}
-        ${venueBlock(content.reception)}
+        ${content.venues.map(venueBlock).join('')}
       </table>
       ${sectionTitle('The style guideline', 'Dress Code')}
       <div style="text-align:center;">
@@ -273,8 +241,7 @@ function buildEmail(data: RsvpEmailData, content: Awaited<ReturnType<typeof load
       ? [
           '',
           `Where & When — ${content.date}`,
-          `${content.ceremony.title} (${content.ceremony.time}): ${content.ceremony.location}, ${content.ceremony.address}`,
-          `${content.reception.title} (${content.reception.time}): ${content.reception.location}, ${content.reception.address}`,
+          ...content.venues.map((v) => `${v.title}${v.time ? ` (${v.time})` : ''}: ${[v.location, v.address].filter(Boolean).join(', ')}`),
           '',
           `Dress code: ${content.dressCode.title}`,
         ]

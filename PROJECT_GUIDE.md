@@ -67,6 +67,7 @@ npm run lint           # eslint
 npm test               # vitest, src/ only (download-proxy allowlist tests)
 npm run sync-content   # PULL Firestore events/hans-and-czay/content -> src/data/wedding-content.json
 node scripts/migrate-to-events.js [--write [--overwrite] | --verify]   # copy root collections into the event (F3)
+node scripts/migrate-content-f5.js [--write | --verify] [--dump <file>]   # add generic content fields (hosts, groups, venues, guidelines) to old docs (F5)
 node scripts/add-admin.js <email> [--super]   # allowlist an admin; reads FIREBASE_ADMIN_* from .env.local
 ```
 
@@ -116,13 +117,14 @@ src/
   lib/requireAdmin.ts        admin check for server actions and admin pages (server only)
   lib/siteText.ts            SiteText type, merge, {placeholder} fill (+ .test.ts)
   lib/siteContentServer.ts   getEventContent() (event page), getSiteContent() (404) via admin SDK (server only)
-  lib/weddingContent.ts      JSON defaults + content docs merge (mergeWeddingContent, mergeGlobal)
+  lib/weddingContent.ts      JSON defaults + content docs merge (mergeWeddingContent, mergeGlobal, DEFAULT_CONTENT)
+  lib/genericContent.ts      hosts / People groups / venues / guidelines: types, readers, old-shape adapters (+ .test.ts)
   lib/siteUrl.ts             getSiteUrl(), getEventUrl() for links that leave the site (server only)
   lib/downloadProxy.ts       URL allowlist + filename sanitizer for /api/download (+ .test.ts)
   lib/email/sendRsvpConfirmation.ts   guest RSVP confirmation email via Gmail SMTP (server only)
   types/index.ts             Guest, RegistryGift, GiftSelection, AdminUser
   proxy.ts                   /admin/** redirect when no session cookie
-scripts/                     sync-content.js, add-admin.js, migrate-to-events.js
+scripts/                     sync-content.js, add-admin.js, migrate-to-events.js, migrate-content-f5.js
 firestore.rules, storage.rules, firebase.json   deployed with the Firebase CLI
 legacy/                      old static site — reference only, not built
 ```

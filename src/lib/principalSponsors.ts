@@ -1,30 +1,21 @@
-// Principal sponsors are stored as pairs: the ninang sits on the left, the
-// ninong on the right, and the same row on desktop. `couple` decides the
-// phone layout: a couple shares one line, two solo sponsors get a line each.
-//
-// Older content stored a flat string[] ("Mrs. A", "Mr. B", or a couple as
-// "Mr. B & Mrs. A"). `normalizePrincipalSponsors` reads both shapes, so the
-// site keeps working until an admin re-saves in the new shape.
+// Legacy reader. Until Oct 2026 principal sponsors were `entourage.principalSponsors`:
+// pairs { ninang, ninong, couple } (ninang left, ninong right on desktop; a
+// couple shares one line on phones), and before that a flat string[] ("Mrs. A",
+// "Mr. B", or a couple as "Mr. B & Mrs. A"). `normalizePrincipalSponsors`
+// reads both; peopleGroupsFromLegacy() in genericContent.ts turns the result
+// into a "pairs" People group. New content never uses this file.
 
 export type Sponsor = { title: string; name: string };
 export type SponsorPair = { ninang: Sponsor; ninong: Sponsor; couple: boolean };
 
-export const NINANG_TITLES = ['Mrs.', 'Ms.', 'Dra.', 'Dr.', 'Atty.', 'Engr.', 'Arch.', 'Hon.'];
-export const NINONG_TITLES = ['Mr.', 'Dr.', 'Atty.', 'Engr.', 'Arch.', 'Hon.'];
+const NINANG_TITLES = ['Mrs.', 'Ms.', 'Dra.', 'Dr.', 'Atty.', 'Engr.', 'Arch.', 'Hon.'];
+const NINONG_TITLES = ['Mr.', 'Dr.', 'Atty.', 'Engr.', 'Arch.', 'Hon.'];
 
 const KNOWN_TITLES = Array.from(new Set([...NINANG_TITLES, ...NINONG_TITLES, 'Miss']));
 const FEMALE_TITLES = ['mrs.', 'ms.', 'miss', 'dra.'];
 const MALE_TITLES = ['mr.'];
 
-export const emptySponsor = (): Sponsor => ({ title: '', name: '' });
-
-export function formatSponsor(sponsor: Sponsor): string {
-  return [sponsor.title, sponsor.name].map(s => s.trim()).filter(Boolean).join(' ');
-}
-
-export function isPairEmpty(pair: SponsorPair): boolean {
-  return !formatSponsor(pair.ninang) && !formatSponsor(pair.ninong);
-}
+const emptySponsor = (): Sponsor => ({ title: '', name: '' });
 
 /** "Mrs. Lina Adams" -> { title: "Mrs.", name: "Lina Adams" }; unknown titles stay in the name. */
 function parseSponsor(raw: string): Sponsor {

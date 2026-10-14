@@ -20,6 +20,7 @@ interface DressCodeScreenProps {
 export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScreenProps) {
   const { content } = useWeddingContent();
   const text = useSiteText();
+  const guidelines = content.dressCode.guidelines.filter((g) => g.title.trim() || g.text.trim());
   const scrollRef = useRef<HTMLElement>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -84,20 +85,18 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
           </ScrollReveal>
 
           {/* Attire Guidelines */}
+          {guidelines.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left border-t border-wedding-gold/20 pt-8 mb-10">
-            <div>
-              <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">{text.dressCode.ladies}</h4>
+            {guidelines.map((guideline) => (
+            <div key={guideline.id}>
+              <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">{guideline.title}</h4>
               <p className="text-sm font-cormorant text-wedding-cream leading-relaxed">
-                {content.dressCode.ladiesGuideline}
+                {guideline.text}
               </p>
             </div>
-            <div>
-              <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">{text.dressCode.gentlemen}</h4>
-              <p className="text-sm font-cormorant text-wedding-cream leading-relaxed">
-                {content.dressCode.gentlemenGuideline}
-              </p>
-            </div>
+            ))}
           </div>
+          )}
 
           {/* Outfit Inspiration Slider */}
           <div className="border-t border-wedding-gold/20 pt-8 mt-4">

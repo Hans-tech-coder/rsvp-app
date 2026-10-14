@@ -11,6 +11,7 @@ import { PopInNumber } from '@/components/ui/PopInNumber';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { MotionHint } from '@/components/ui/MotionHint';
 import { DEPTH_MAPS } from '@/lib/welcomeDepthMaps';
+import { hostNames } from '@/lib/genericContent';
 
 interface WelcomeScreenProps {
   onContinue: () => void;
@@ -19,6 +20,7 @@ interface WelcomeScreenProps {
 export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
   const { content } = useWeddingContent();
   const text = useSiteText();
+  const names = hostNames(content.global.hosts);
   const [timeLeft, setTimeLeft] = useState({ days: '00', hours: '00', minutes: '00', seconds: '00' });
   const [mounted, setMounted] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -135,7 +137,13 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         <TextsReveal isHero className="px-4 w-full max-w-4xl mt-6 lg:mt-8">
           <span className="text-sm font-cormorant italic text-wedding-cream/90 tracking-widest block mb-4">{content.welcomeScreen.topText}</span>
           <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-cinzel text-wedding-cream font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
-            {content.global.groomName} <span className="text-wedding-gold italic font-serif text-3xl sm:text-4xl md:text-6xl font-light">&</span> {content.global.brideName}
+            {/* "Hans & Czay"; three or more hosts: "A, B & C" */}
+            {names.map((name, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && (i < names.length - 1 ? ', ' : <> <span className="text-wedding-gold italic font-serif text-3xl sm:text-4xl md:text-6xl font-light">&</span> </>)}
+                {name}
+              </React.Fragment>
+            ))}
           </h2>
           <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto my-8"></div>
           <p className="text-xs uppercase tracking-[0.3em] text-wedding-cream/90 mb-3">{content.welcomeScreen.bottomText1}</p>

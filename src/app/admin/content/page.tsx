@@ -33,9 +33,9 @@ export default function ContentManagerPage() {
     { id: 'site-text', label: 'Site Text' },
     { id: 'welcome', label: 'Welcome Screen' },
     { id: 'entrance', label: 'Entrance Screen' },
-    { id: 'our-story', label: 'Our Story' },
-    { id: 'entourage', label: 'Entourage' },
-    { id: 'event-details', label: 'Event Details' },
+    { id: 'our-story', label: 'Timeline (Our Story)' },
+    { id: 'entourage', label: 'People (Entourage)' },
+    { id: 'event-details', label: 'Venues (Event Details)' },
     { id: 'dress-code', label: 'Dress Code' },
     { id: 'gallery', label: 'Gallery' },
     { id: 'faqs', label: 'FAQs' },
@@ -102,7 +102,7 @@ export default function ContentManagerPage() {
           {activeTab === 'entrance' && <EntranceScreenEditor eventId={eventId} />}
           {activeTab === 'our-story' && <OurStoryEditor eventId={eventId} />}
           {activeTab === 'entourage' && <EntourageEditor eventId={eventId} />}
-          {activeTab === 'event-details' && <EventDetailsEditor eventId={eventId} onEditGlobalSettings={() => selectTab('global-settings')} />}
+          {activeTab === 'event-details' && <EventDetailsEditor eventId={eventId} />}
           {activeTab === 'dress-code' && <DressCodeEditor eventId={eventId} />}
           {activeTab === 'gallery' && <GalleryEditor eventId={eventId} />}
           {activeTab === 'faqs' && <FaqsEditor eventId={eventId} />}
