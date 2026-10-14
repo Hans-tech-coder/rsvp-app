@@ -54,8 +54,14 @@ and the table in `docs/FEATURE-MAP.md`.
    Firestore transaction that fails if the code is already `used`. After it
    succeeds, `after()` sends the guest a confirmation email
    (`src/lib/email/sendRsvpConfirmation.ts`, Gmail SMTP via nodemailer): their
-   answers, plus date, ceremony/reception venues and dress code when attending.
-   Content follows the same precedence as `WeddingContentContext` (JSON defaults,
+   answers, plus date, ceremony/reception venues and dress code (with palette
+   swatches) when attending, or when declining with a proxy (the intro then
+   names the proxy); a decline without a proxy gets only the thank-you and
+   answers. The email matches the site's look: the OG image as
+   hero, dark/burgundy/gold colors copied from the `@theme` tokens (email
+   clients cannot read CSS variables), and Cinzel / Cormorant Garamond / Inter
+   from Google Fonts. Gmail and Outlook block web fonts and fall back to
+   Georgia/Arial. Content follows the same precedence as `WeddingContentContext` (JSON defaults,
    then `websiteContent/details`, `dressCode`, `globalSettings`). Missing Gmail
    env vars or a failed send are logged and never fail the RSVP.
 4. On success, `onSubmitSuccess` relocks (`isUnlocked = false`, code cleared).
