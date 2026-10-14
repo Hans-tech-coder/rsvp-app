@@ -27,7 +27,7 @@ field, update this file.
 | `isCopied` | boolean | admin marks the invite message as copied/sent |
 | `createdAt` | Timestamp | code generated |
 | `updatedAt` | Timestamp | `toggleInviteCopiedStatus` (not in the TS type) |
-| `fullName`, `email`, `phoneNumber` | string | RSVP submitted |
+| `fullName`, `email`, `phoneNumber` | string | RSVP submitted (`phoneNumber` is international, e.g. `+63 917 123 4567`, since 2026-10; older RSVPs hold what the guest typed) |
 | `willAttend` | `'Yes' \| 'No'` | RSVP submitted |
 | `proxyName`, `message` | string (may be `''`) | RSVP submitted |
 | `submittedAt` | Timestamp | RSVP submitted |

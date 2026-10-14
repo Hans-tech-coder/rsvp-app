@@ -5,6 +5,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { Guest } from '@/types';
 import weddingContent from '@/data/wedding-content.json';
 import { after } from 'next/server';
+import { headers } from 'next/headers';
 import { sendRsvpConfirmation } from '@/lib/email/sendRsvpConfirmation';
 
 export async function verifyInviteCode(inviteCode: string) {
@@ -24,6 +25,35 @@ export async function verifyInviteCode(inviteCode: string) {
     return { valid: true };
   } catch (error: any) {
     return { valid: false, error: 'Failed to verify code. Please try again.' };
+  }
+}
+
+const ISO_COUNTRY = /^[A-Z]{2}$/;
+const PRIVATE_IP = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|::1$|::ffff:127\.|f[cd]|fe80)/i;
+
+/** Visitor's country (ISO code) from their IP, used to preselect the phone
+ *  country code. Vercel's geo header first; without it (local dev or another
+ *  host) the IP is looked up at api.country.is. Null when unknown. */
+export async function getVisitorCountry(): Promise<string | null> {
+  const h = await headers();
+  const fromVercel = h.get('x-vercel-ip-country');
+  if (fromVercel && ISO_COUNTRY.test(fromVercel)) return fromVercel;
+
+  const ip = h.get('x-forwarded-for')?.split(',')[0].trim() ?? '';
+  const isPublic = ip !== '' && !PRIVATE_IP.test(ip);
+  // A loopback/private IP in dev means the guest is this machine: look up its own public IP.
+  if (!isPublic && process.env.NODE_ENV === 'production') return null;
+
+  try {
+    const res = await fetch(`https://api.country.is/${isPublic ? encodeURIComponent(ip) : ''}`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!res.ok) return null;
+    const { country } = (await res.json()) as { country?: string };
+    return country && ISO_COUNTRY.test(country) ? country : null;
+  } catch {
+    return null;
   }
 }
 

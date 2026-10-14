@@ -50,7 +50,32 @@ and the table in `docs/FEATURE-MAP.md`.
 2. `EntranceScreen` calls `verifyInviteCode(code)` (server action). On success it
    calls `onStartUnlock` (unlocks, moves to step 9 behind the overlay), then
    `onUnlock(code)` (stores the code, closes the overlay).
-3. `RsvpScreen` calls `submitRsvp(inviteCode, formData)`. The action runs a
+3. `RsvpScreen` validates in the browser first (`validateRsvp`, form is
+   `noValidate`): full name (two words), email, phone (country minimum digits),
+   attendance (no default; the guest must pick) and the privacy box are
+   required; proxy (shown on "decline") and message (max 500, counter) are
+   optional. Each field has a hint line that its error replaces; errors show
+   after the field is left or after a submit attempt and clear as soon as the
+   value is fixed. A failed submit focuses and scrolls to the first bad field
+   and shows a count above the button. "Fields marked * are required" is a
+   floating card (same style as the music hint) beside the Full Name asterisk:
+   shown once, 0.7 s after that field is fully in view, and kept until the
+   first input anywhere in the form (`onInput`: typing, a choice, the checkbox,
+   the country code) or a submit attempt. When it appears every asterisk
+   pulses three times (`data-hint="on"` on the form,
+   `group-data-[hint=on]/form:` classes). The hint, placeholder and error texts
+   are hard-coded in `RsvpScreen.tsx` / `PhoneField.tsx`, not editable.
+   The phone country is first guessed from the device time zone, then
+   language (on Windows any UTC+8 zone counts as PH, because Windows has no
+   Manila zone and PH PCs report e.g. `Asia/Shanghai`), then replaced by the
+   IP country from `getVisitorCountry()` unless the guest already touched the
+   field; Philippines is the fallback. `getVisitorCountry` reads Vercel's
+   `x-vercel-ip-country`; without it, it looks the IP up at `api.country.is`
+   (in dev, the machine's own public IP).
+   A leading `0` and a pasted `+<code>` are stripped (a pasted foreign code
+   switches the country), digits are capped at the country maximum, and the
+   number is saved as `+63 917 123 4567`.
+   Then `RsvpScreen` calls `submitRsvp(inviteCode, formData)`. The action runs a
    Firestore transaction that fails if the code is already `used`. After it
    succeeds, `after()` sends the guest a confirmation email
    (`src/lib/email/sendRsvpConfirmation.ts`, Gmail SMTP via nodemailer): their

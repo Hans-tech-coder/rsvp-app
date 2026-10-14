@@ -22,7 +22,7 @@ values in `src/app/page.tsx`.
 | 7 | Registry (bank transfer + curated gifts) | `src/components/screens/RegistryScreen.tsx`, `CuratedRegistryScreen.tsx`, `GiftSelectionModal.tsx` | `registry` (+ `rsvpForm` labels in modal) | `RegistryEditor.tsx`; gifts in `/admin/gifts` |
 | 8 | RSVP call-to-action ("Join Our Day") | `src/components/screens/RsvpCtaScreen.tsx` | `rsvpCta` | `RsvpCtaEditor.tsx` |
 | – | Invite-code lock overlay (before step 9) | `src/components/screens/EntranceScreen.tsx` | `entranceScreen`, `global` | `EntranceScreenEditor.tsx` |
-| 9 | RSVP form | `src/components/screens/RsvpScreen.tsx` | `rsvpForm` | `RsvpFormEditor.tsx` |
+| 9 | RSVP form (inline validation, phone field) | `src/components/screens/RsvpScreen.tsx`, `src/components/ui/PhoneField.tsx`, `src/lib/phoneCountries.ts` (+ `.test.ts`) | `rsvpForm` | `RsvpFormEditor.tsx` |
 
 All editors are in `src/app/admin/content/`.
 
@@ -42,6 +42,7 @@ All editors are in `src/app/admin/content/`.
 | Scroll motion: scroll-container context, `ScrollReveal`/`ScrollRevealItem` (reveal once), `Parallax` (image drift), `SCROLL_MOTION` constants | `src/components/ui/ScrollMotion.tsx` |
 | Image fade/blur reveal | `src/components/ui/RevealImage.tsx` |
 | Hover/focus "View" chip and keyboard-button props (`viewCardProps`) for slider photo cards (Gallery, Dress Code) | `src/components/ui/ViewOverlay.tsx` + `.t-view-*` in `globals.css` |
+| Phone input with country-code picker (auto-detected), live formatting, per-country digit cap and "N more digits" guide; country list, detection and parsing helpers | `src/components/ui/PhoneField.tsx`, `src/lib/phoneCountries.ts` (tested by `src/lib/phoneCountries.test.ts`); used by `RsvpScreen.tsx` |
 | Countdown digits pop-in | `src/components/ui/PopInNumber.tsx` |
 | Auto-scrolling draggable strip (pauses on hover and keyboard focus; hidden loop copy) | `src/components/ui/DraggableSlider.tsx` |
 | Ink reveal canvas background | `src/components/ui/InkRevealCanvas.tsx` |
@@ -60,7 +61,7 @@ All editors are in `src/app/admin/content/`.
 | Action | File | Called from |
 | --- | --- | --- |
 | `verifyInviteCode` | `rsvp.ts` | `EntranceScreen.tsx` |
-| `submitRsvp` | `rsvp.ts` | `RsvpScreen.tsx` |
+| `submitRsvp`, `getVisitorCountry` (`x-vercel-ip-country`, else `api.country.is`) | `rsvp.ts` | `RsvpScreen.tsx` |
 | `getRegistryGifts`, `claimGift` | `registry.ts` | `CuratedRegistryScreen.tsx` |
 | `createSessionCookie`, `clearSessionCookie` | `auth.ts` | `admin/login/page.tsx`, `admin/layout.tsx` |
 | `generateInviteCodes`, `deleteInviteCode`, `regenerateInviteCode`, `toggleInviteCopiedStatus`, `getInviteMessageTemplate`, `updateInviteMessageTemplate` | `admin.ts` | `admin/invites/*`, `admin/guests/GuestListClient.tsx` (delete) |
@@ -120,5 +121,6 @@ Read these by range (`grep -n` then read around the line), never whole.
 | 493 | `src/app/admin/content/FaqsEditor.tsx` |
 | 471 | `src/components/ui/circular-image-gallery.tsx` |
 | 469 | `src/app/admin/content/EventDetailsEditor.tsx` |
+| 466 | `src/components/screens/RsvpScreen.tsx` |
 | 464 | `src/app/page.tsx` |
 | 435 | `src/app/admin/content/RsvpFormEditor.tsx` |
