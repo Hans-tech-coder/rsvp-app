@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Trash2, ChevronDown } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
@@ -10,7 +11,7 @@ import { EditorSaveBar } from './EditorSaveBar';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 import { NINANG_TITLES, NINONG_TITLES, emptySponsor, formatSponsor, normalizePrincipalSponsors, type Sponsor } from '@/lib/principalSponsors';
 
-export function EntourageEditor() {
+export function EntourageEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -29,7 +30,7 @@ export function EntourageEditor() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, 'websiteContent', 'entourage');
+        const docRef = doc(db, paths.content(eventId, 'entourage'));
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -49,7 +50,7 @@ export function EntourageEditor() {
           setOriginalData(mergedData);
         }
 
-        const backupRef = doc(db, 'websiteContent', 'entourage_backup');
+        const backupRef = doc(db, paths.content(eventId, 'entourage_backup'));
         const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
@@ -62,7 +63,7 @@ export function EntourageEditor() {
     };
 
     fetchData();
-  }, []);
+  }, [eventId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -173,10 +174,10 @@ export function EntourageEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const backupRef = doc(db, 'websiteContent', 'entourage_backup');
+      const backupRef = doc(db, paths.content(eventId, 'entourage_backup'));
       await setDoc(backupRef, originalData, { merge: true });
 
-      const docRef = doc(db, 'websiteContent', 'entourage');
+      const docRef = doc(db, paths.content(eventId, 'entourage'));
       await setDoc(docRef, data, { merge: true });
       
       setOriginalData(data);
@@ -205,7 +206,7 @@ export function EntourageEditor() {
     setRestoring(true);
     setIsRestoreModalOpen(false);
     try {
-      const backupRef = doc(db, 'websiteContent', 'entourage_backup');
+      const backupRef = doc(db, paths.content(eventId, 'entourage_backup'));
       const backupSnap = await getDoc(backupRef);
       if (backupSnap.exists()) {
         const fetchedBackup = backupSnap.data();

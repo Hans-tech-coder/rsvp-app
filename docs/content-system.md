@@ -9,7 +9,7 @@ the screen, and the checklist for adding a new editable field.
 ```
 src/data/wedding-content.json      (defaults, bundled at build time)
           +
-Firestore websiteContent/<doc>     (overrides, fetched in the browser)
+Firestore events/{eventId}/content/<doc>   (overrides, fetched in the browser)
           │  merged in src/contexts/WeddingContentContext.tsx
           ▼
 useWeddingContent().content        (read by every screen)
@@ -17,7 +17,7 @@ useWeddingContent().content        (read by every screen)
 
 1. `WeddingContentProvider` (wraps the guest page in `src/app/page.tsx`) starts
    with the JSON as `content` and `loading = true`.
-2. On mount it `getDoc`s all twelve screen docs of `websiteContent` (not `siteText`) **in parallel**
+2. On mount it `getDoc`s all twelve screen docs of the event's `content` (not `siteText`) **in parallel**
    (`Promise.all`) with the **browser SDK** (public read is allowed by
    `firestore.rules`). One failing read falls back to the JSON for everything.
 3. It merges each doc over the JSON default. The merge is **written by hand per
@@ -51,7 +51,7 @@ preview title) lives in `siteText`, **not** in `WeddingContentContext`:
 ```
 src/data/wedding-content.json  siteText   (defaults)
           +
-Firestore websiteContent/siteText         (read with the admin SDK on the server)
+Firestore events/{eventId}/content/siteText   (read with the admin SDK on the server)
           │  getSiteContent() in src/lib/siteContentServer.ts (also reads globalSettings)
           ▼
 src/app/layout.tsx  ->  <SiteTextProvider>  ->  useSiteText()   (every client component)
@@ -85,7 +85,7 @@ a new one):
 
 1. **State:** `formData` (being edited) and `originalData` (last saved), both
    seeded from `wedding-content.json`. `hasChanges` = JSON compare of the two.
-2. **Load:** `getDoc(websiteContent/<doc>)`, spread over the JSON default, set
+2. **Load:** `getDoc(doc(db, paths.content(eventId, '<doc>')))` (`eventId` is the editor's prop), spread over the JSON default, set
    both states. Check whether `<doc>_backup` exists to enable "Restore".
 3. **Upload image:** `await uploadImage(file, '<folder>/<name>')` from
    `src/lib/blob/uploadImage.ts` (compresses, uploads to Vercel Blob, returns the
@@ -128,7 +128,7 @@ A new photo has none, so the 3D effect turns off until a developer adds a map.
 
 Editors write to Firestore **directly from the browser**; this works because
 the admin is signed in with the Firebase client SDK and `firestore.rules`
-allows `websiteContent` writes for `isAdmin()`.
+allows writes to `events/{eventId}/content` for `isAdmin()`.
 
 ## Checklist: add a new editable field
 
@@ -156,7 +156,7 @@ Example: a new `welcomeScreen.footnote` text.
 ## `npm run sync-content`
 
 This **pulls** Firestore → JSON: it reads the
-thirteen `websiteContent` docs (`siteText` is merged key by key, like
+thirteen `content` docs of an event (`hans-and-czay`, or `--event <id>`; `siteText` is merged key by key, like
 `mergeSiteText()`, so new default keys survive) with the admin SDK and merges them into
 `src/data/wedding-content.json`. Run it to make the bundled defaults match
 production (so the first paint, before overrides load, already shows the real

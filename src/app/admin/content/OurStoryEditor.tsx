@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon, Plus, Trash2, GripVertical } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
@@ -28,7 +29,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-export function OurStoryEditor() {
+export function OurStoryEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -69,7 +70,7 @@ export function OurStoryEditor() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, 'websiteContent', 'ourStory');
+        const docRef = doc(db, paths.content(eventId, 'ourStory'));
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -93,7 +94,7 @@ export function OurStoryEditor() {
           }));
         }
 
-        const backupRef = doc(db, 'websiteContent', 'ourStory_backup');
+        const backupRef = doc(db, paths.content(eventId, 'ourStory_backup'));
         const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
@@ -106,7 +107,7 @@ export function OurStoryEditor() {
     };
 
     fetchData();
-  }, []);
+  }, [eventId]);
 
   const handleChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -206,10 +207,10 @@ export function OurStoryEditor() {
         items: originalItems.map(({ id, ...rest }) => rest)
       };
 
-      const backupRef = doc(db, 'websiteContent', 'ourStory_backup');
+      const backupRef = doc(db, paths.content(eventId, 'ourStory_backup'));
       await setDoc(backupRef, backupPayload, { merge: true });
 
-      const docRef = doc(db, 'websiteContent', 'ourStory');
+      const docRef = doc(db, paths.content(eventId, 'ourStory'));
       await setDoc(docRef, payload, { merge: true });
       
       setOriginalItems(items);
@@ -240,7 +241,7 @@ export function OurStoryEditor() {
     setRestoring(true);
     setIsRestoreModalOpen(false);
     try {
-      const backupRef = doc(db, 'websiteContent', 'ourStory_backup');
+      const backupRef = doc(db, paths.content(eventId, 'ourStory_backup'));
       const backupSnap = await getDoc(backupRef);
       if (backupSnap.exists()) {
         const data = backupSnap.data();

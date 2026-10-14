@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
+import { paths } from '@/lib/eventPaths';
 
 // Issues short-lived Vercel Blob client-upload tokens to signed-in admins only.
 // The browser then uploads straight to Blob (see src/lib/blob/uploadImage.ts).
@@ -11,7 +12,7 @@ async function assertAdmin(idToken: string | null) {
   if (!idToken) throw new Error('Missing ID token');
 
   const { uid } = await getAdminAuth().verifyIdToken(idToken, true);
-  const admin = await getAdminDb().collection('admins').doc(uid).get();
+  const admin = await getAdminDb().doc(paths.admin(uid)).get();
   if (!admin.exists) throw new Error('Not an admin');
 }
 

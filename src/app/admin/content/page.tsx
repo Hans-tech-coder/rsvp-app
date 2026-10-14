@@ -15,8 +15,11 @@ import { RsvpCtaEditor } from './RsvpCtaEditor';
 import { RsvpFormEditor } from './RsvpFormEditor';
 import { SiteTextEditor } from './SiteTextEditor';
 import { UnsavedChangesProvider, useUnsavedChangesGuard } from './unsavedChanges';
+import { DEFAULT_EVENT_ID } from '@/lib/eventPaths';
 
 export default function ContentManagerPage() {
+  // The only event until the event switcher (F11)
+  const eventId = DEFAULT_EVENT_ID;
   const [activeTab, setActiveTab] = useState('global-settings');
   const { setDirty, guard, dialog } = useUnsavedChangesGuard();
 
@@ -94,19 +97,19 @@ export default function ContentManagerPage() {
         {/* Main Content Area */}
         <div className="flex-1 p-6 lg:p-8 overflow-y-auto bg-white dark:bg-zinc-900">
           <UnsavedChangesProvider value={setDirty}>
-          {activeTab === 'global-settings' && <GlobalSettingsEditor />}
-          {activeTab === 'welcome' && <WelcomeScreenEditor />}
-          {activeTab === 'entrance' && <EntranceScreenEditor />}
-          {activeTab === 'our-story' && <OurStoryEditor />}
-          {activeTab === 'entourage' && <EntourageEditor />}
-          {activeTab === 'event-details' && <EventDetailsEditor onEditGlobalSettings={() => selectTab('global-settings')} />}
-          {activeTab === 'dress-code' && <DressCodeEditor />}
-          {activeTab === 'gallery' && <GalleryEditor />}
-          {activeTab === 'faqs' && <FaqsEditor />}
-          {activeTab === 'registry' && <RegistryEditor />}
-          {activeTab === 'rsvp-cta' && <RsvpCtaEditor />}
-          {activeTab === 'rsvp-form' && <RsvpFormEditor />}
-          {activeTab === 'site-text' && <SiteTextEditor />}
+          {activeTab === 'global-settings' && <GlobalSettingsEditor eventId={eventId} />}
+          {activeTab === 'welcome' && <WelcomeScreenEditor eventId={eventId} />}
+          {activeTab === 'entrance' && <EntranceScreenEditor eventId={eventId} />}
+          {activeTab === 'our-story' && <OurStoryEditor eventId={eventId} />}
+          {activeTab === 'entourage' && <EntourageEditor eventId={eventId} />}
+          {activeTab === 'event-details' && <EventDetailsEditor eventId={eventId} onEditGlobalSettings={() => selectTab('global-settings')} />}
+          {activeTab === 'dress-code' && <DressCodeEditor eventId={eventId} />}
+          {activeTab === 'gallery' && <GalleryEditor eventId={eventId} />}
+          {activeTab === 'faqs' && <FaqsEditor eventId={eventId} />}
+          {activeTab === 'registry' && <RegistryEditor eventId={eventId} />}
+          {activeTab === 'rsvp-cta' && <RsvpCtaEditor eventId={eventId} />}
+          {activeTab === 'rsvp-form' && <RsvpFormEditor eventId={eventId} />}
+          {activeTab === 'site-text' && <SiteTextEditor eventId={eventId} />}
           
           {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && activeTab !== 'event-details' && activeTab !== 'dress-code' && activeTab !== 'gallery' && activeTab !== 'faqs' && activeTab !== 'registry' && activeTab !== 'rsvp-cta' && activeTab !== 'rsvp-form' && activeTab !== 'site-text' && (
             <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center text-gray-500 dark:text-zinc-400 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-xl">

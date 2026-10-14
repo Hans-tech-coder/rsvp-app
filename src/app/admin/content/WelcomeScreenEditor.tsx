@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon, Info, AlertTriangle } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
@@ -12,7 +13,7 @@ import { EditorSaveBar } from './EditorSaveBar';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 import { hasDepthMap } from '@/lib/welcomeDepthMaps';
 
-export function WelcomeScreenEditor() {
+export function WelcomeScreenEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -45,7 +46,7 @@ export function WelcomeScreenEditor() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, 'websiteContent', 'welcomeScreen');
+        const docRef = doc(db, paths.content(eventId, 'welcomeScreen'));
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -57,7 +58,7 @@ export function WelcomeScreenEditor() {
           setOriginalData(fetchedData);
         }
 
-        const backupRef = doc(db, 'websiteContent', 'welcomeScreen_backup');
+        const backupRef = doc(db, paths.content(eventId, 'welcomeScreen_backup'));
         const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
@@ -70,7 +71,7 @@ export function WelcomeScreenEditor() {
     };
 
     fetchData();
-  }, []);
+  }, [eventId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -100,10 +101,10 @@ export function WelcomeScreenEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const backupRef = doc(db, 'websiteContent', 'welcomeScreen_backup');
+      const backupRef = doc(db, paths.content(eventId, 'welcomeScreen_backup'));
       await setDoc(backupRef, originalData, { merge: true });
 
-      const docRef = doc(db, 'websiteContent', 'welcomeScreen');
+      const docRef = doc(db, paths.content(eventId, 'welcomeScreen'));
       await setDoc(docRef, formData, { merge: true });
       
       setOriginalData(formData);
@@ -132,7 +133,7 @@ export function WelcomeScreenEditor() {
     setRestoring(true);
     setIsRestoreModalOpen(false);
     try {
-      const backupRef = doc(db, 'websiteContent', 'welcomeScreen_backup');
+      const backupRef = doc(db, paths.content(eventId, 'welcomeScreen_backup'));
       const backupSnap = await getDoc(backupRef);
       if (backupSnap.exists()) {
         const fetchedBackup = {

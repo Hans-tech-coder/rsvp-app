@@ -1,5 +1,6 @@
 import { getAdminDb } from '@/lib/firebase/admin';
 import { requireAdminPage } from '@/lib/requireAdmin';
+import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
 import InviteListClient from './InviteListClient';
 import { Guest } from '@/types';
 import { getInviteMessageTemplate } from '@/app/actions/admin';
@@ -9,13 +10,15 @@ export const revalidate = 0;
 
 export default async function InvitesPage() {
   await requireAdminPage();
+  // The only event until the event switcher (F11)
+  const eventId = DEFAULT_EVENT_ID;
 
   const [snapshot, template] = await Promise.all([
     getAdminDb()
-      .collection('guests')
+      .collection(paths.guests(eventId))
       // Fallback if missing createdAt
       .get(),
-    getInviteMessageTemplate()
+    getInviteMessageTemplate(eventId)
   ]);
 
   const invites = snapshot.docs.map(doc => {
@@ -42,7 +45,7 @@ export default async function InvitesPage() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-zinc-100">Invite Codes</h1>
         <p className="text-gray-500 dark:text-zinc-400 mt-1">Manage and generate invite codes for your guests.</p>
       </div>
-      <InviteListClient initialInvites={invites} initialTemplate={template} />
+      <InviteListClient eventId={eventId} initialInvites={invites} initialTemplate={template} />
     </div>
   );
 }

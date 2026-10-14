@@ -17,6 +17,7 @@ import { CanvasMenu } from '@/components/layout/CanvasMenu';
 import { LoadingScreen } from '@/components/screens/LoadingScreen';
 import { WeddingCursor } from '@/components/effects/WeddingCursor';
 import { WeddingContentProvider, useWeddingContent } from '@/contexts/WeddingContentContext';
+import { DEFAULT_EVENT_ID } from '@/lib/eventPaths';
 import { getImageProps } from 'next/image';
 
 // Longest the loader waits for fonts and the hero image (ms after navigation),
@@ -458,7 +459,7 @@ function MainApp() {
 
 export default function Home() {
   return (
-    <WeddingContentProvider>
+    <WeddingContentProvider eventId={DEFAULT_EVENT_ID}>
       <MainApp />
       <WeddingCursor />
     </WeddingContentProvider>

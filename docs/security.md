@@ -4,10 +4,10 @@
 
 | Actor | Can |
 | --- | --- |
-| Anyone | Read `websiteContent` and `registryGifts` from the browser (`firestore.rules`); read all uploaded images (public Vercel Blob URLs); call the guest server actions (`rsvp.ts`, `registry.ts`). **Cannot** read or write `guests` from the browser (`allow read, write: if false`); invite-code checks and RSVPs go through `verifyInviteCode` / `submitRsvp` |
+| Anyone | Read an event's `content` and `registryGifts` (`events/{eventId}/…`) from the browser (`firestore.rules`);read all uploaded images (public Vercel Blob URLs); call the guest server actions (`rsvp.ts`, `registry.ts`). **Cannot** read or write `guests` from the browser (`allow read, write: if false`); invite-code checks and RSVPs go through `verifyInviteCode` / `submitRsvp` |
 | Anyone, via `/api/download` | Download an image only from an allowed host (`isAllowedImageUrl` in `src/lib/downloadProxy.ts`): `https:`, default port, no credentials, and either a `*.public.blob.vercel-storage.com` host (`endsWith`, not `includes`) or `firebasestorage.googleapis.com` with a path under `/v0/b/${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/` (legacy URLs). Anything else gets 400 before any fetch. The fetch uses `redirect: 'error'`; a non-`image/*` reply gets 415, more than 15 MB gets 413 (by `content-length`, and by a byte count while reading when the header is missing or wrong). Upstream errors return a generic 502/500; details go to `console.error` only. `filename` is cut down to `[A-Za-z0-9._-]`, max 100 chars, fallback `download.jpg` (`sanitizeFilename`), so no header injection. Response sets `Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`. Tests: `npm test` (`src/lib/downloadProxy.test.ts`) |
 | Guest with a valid unused code | Submit one RSVP (`submitRsvp` transaction flips `codeStatus` to `used`) |
-| Signed-in admin (`admins/{uid}` exists; role `super` or `admin`) | Write `websiteContent` from the browser (rules check `isAdmin()`); upload images to Vercel Blob with a token from `/api/upload`, which verifies the Firebase ID token the browser sends as `clientPayload` (`verifyIdToken(…, true)`) and that `admins/{uid}` exists before issuing it. It deliberately does not use the 5-day `session` cookie, which can expire while the admin page stays open |
+| Signed-in admin (`admins/{uid}` exists; role `super` or `admin`) | Write any event's `content` from the browser (rules check `isAdmin()`; every admin can act on every event until per-event roles, F10);upload images to Vercel Blob with a token from `/api/upload`, which verifies the Firebase ID token the browser sends as `clientPayload` (`verifyIdToken(…, true)`) and that `admins/{uid}` exists before issuing it. It deliberately does not use the 5-day `session` cookie, which can expire while the admin page stays open |
 | Super admin (`role: 'super'`) | Everything a signed-in admin can, plus add a regular admin to `adminAllowlist`, cancel a pending regular admin, and remove a regular admin (`src/app/actions/admins.ts`). Cannot create, remove, or cancel a super admin from the UI; only `scripts/add-admin.js --super` (or the Firebase console) can |
 | Server (firebase-admin) | Everything — admin SDK bypasses rules |
 
@@ -16,6 +16,32 @@ the rules; those go through server actions. `guests` (guest PII) is also
 unreadable from the browser: every read is `getAdminDb()` in `rsvp.ts`,
 `admin.ts`, or an admin server page. A new browser read of `guests` would be
 denied by the rules; add a server action instead.
+
+**Event-scoped rules** (`match /events/{eventId}` in `firestore.rules`):
+
+| Path | Browser read | Browser write |
+| --- | --- | --- |
+| `events/{eventId}` (event record) | no | no |
+| `…/content/{doc}` | anyone | `isAdmin()` |
+| `…/guests/{code}` | no | no |
+| `…/registryGifts/{id}` | anyone | no |
+| `…/giftSelections/{id}` | `isAdmin()` | no |
+| `…/settings/{doc}` | no | no |
+
+Checked on 2026-10-14 against the deployed rules with anonymous REST calls
+(content and gifts 200; guests, selections, settings, event record and a
+content write 403). The old root rules (`websiteContent`, `guests`, …) are
+still in the file, unchanged, so the previous code keeps working during the
+switch and as a rollback; they go when the root collections are removed (see
+`docs/data-model.md`).
+
+**Guest actions take an `eventId` from the browser.** It is not trusted for
+access: it only picks which event's data the action touches, and the path
+helpers in `src/lib/eventPaths.ts` reject anything that is not a plain slug
+(and any document ID containing `/`). A guest can still only verify a code,
+submit one RSVP per unused code, and claim an existing gift, now within the
+event they name. Admin actions take `eventId` too and still check only
+`requireAdmin()`.
 
 ## Admin check on the server (`src/lib/requireAdmin.ts`)
 
@@ -77,18 +103,20 @@ redirect). The real check is in `src/lib/requireAdmin.ts`:
 
 1. **No rate limit on `verifyInviteCode`.** 32^6 ≈ 1.07 billion codes makes
    guessing slow, but there is no throttle.
-2. `firestore.rules` has overlapping `allow` lines for `registryGifts` and
+2. The **old root** rules have overlapping `allow` lines for `registryGifts` and
    `giftSelections` (e.g. `allow read, write: if isAdmin()` and
    `allow write: if false`); rules are OR-ed, so the `false` lines do nothing.
-   Read them as "admin OR public read". (`guests` no longer has this: it is a
-   single `allow read, write: if false`.)
+   Read them as "admin OR public read". The new `events/` rules do not have
+   this (one line per operation), and the root block goes away with the root
+   collections.
 
 ## Rules deployment
 
 `firestore.rules` and `storage.rules` are deployed with the Firebase CLI
 (`npx firebase deploy --only firestore:rules,storage`, project from
 `.firebaserc`). Editing the file does nothing until deployed — confirm with the
-owner before deploying.
+owner before deploying. The event-scoped `firestore.rules` were deployed on
+2026-10-14 (with the owner's OK), ahead of the code that uses them.
 
 ## Security review
 

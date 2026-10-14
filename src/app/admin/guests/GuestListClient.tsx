@@ -9,7 +9,7 @@ import { deleteInviteCode } from '@/app/actions/admin';
 import { AdminModal } from '../components/AdminModal';
 import { TablePagination } from '../components/TablePagination';
 
-export default function GuestListClient({ initialGuests }: { initialGuests: Guest[] }) {
+export default function GuestListClient({ eventId, initialGuests }: { eventId: string, initialGuests: Guest[] }) {
   const guests = initialGuests;
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
@@ -59,7 +59,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
   const confirmDelete = async () => {
     if (!guestToDelete) return;
     setIsDeleting(true);
-    const res = await deleteInviteCode(guestToDelete);
+    const res = await deleteInviteCode(eventId, guestToDelete);
     setIsDeleting(false);
     if (res.success) {
       setGuestToDelete(null);

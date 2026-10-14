@@ -3,8 +3,10 @@
 import { getAdminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { RegistryGift } from '@/types';
+import { paths } from '@/lib/eventPaths';
 
 export async function claimGift(
+  eventId: string,
   giftId: string,
   formData: {
     fullName: string;
@@ -13,9 +15,9 @@ export async function claimGift(
   }
 ) {
   try {
-    const giftRef = getAdminDb().collection('registryGifts').doc(giftId);
+    const giftRef = getAdminDb().doc(paths.registryGift(eventId, giftId));
     // Create a new reference for the selection
-    const selectionRef = getAdminDb().collection('giftSelections').doc();
+    const selectionRef = getAdminDb().collection(paths.giftSelections(eventId)).doc();
 
     await getAdminDb().runTransaction(async (transaction) => {
       const giftDoc = await transaction.get(giftRef);
@@ -60,9 +62,9 @@ export async function claimGift(
   }
 }
 
-export async function getRegistryGifts() {
+export async function getRegistryGifts(eventId: string) {
   try {
-    const snapshot = await getAdminDb().collection('registryGifts').get();
+    const snapshot = await getAdminDb().collection(paths.registryGifts(eventId)).get();
     return snapshot.docs.map(doc => {
       const data = doc.data();
       return {

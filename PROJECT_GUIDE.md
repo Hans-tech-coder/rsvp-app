@@ -63,7 +63,8 @@ npm run dev            # local dev server on :3000
 npm run build          # production build (the main correctness gate)
 npm run lint           # eslint
 npm test               # vitest, src/ only (download-proxy allowlist tests)
-npm run sync-content   # PULL Firestore websiteContent -> src/data/wedding-content.json
+npm run sync-content   # PULL Firestore events/hans-and-czay/content -> src/data/wedding-content.json
+node scripts/migrate-to-events.js [--write [--overwrite] | --verify]   # copy root collections into the event (F3)
 node scripts/add-admin.js <email> [--super]   # allowlist an admin; reads FIREBASE_ADMIN_* from .env.local
 ```
 
@@ -102,6 +103,7 @@ src/
   contexts/WeddingContentContext.tsx   JSON defaults + Firestore overrides -> useWeddingContent()
   contexts/SiteTextContext.tsx         site text (buttons, labels, errors) from the root layout -> useSiteText()
   data/wedding-content.json  default/fallback content for every screen
+  lib/eventPaths.ts          every Firestore path (events/{eventId}/content|guests|registryGifts|giftSelections|settings, admins) (+ .test.ts)
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
   lib/blob/uploadImage.ts    compress + upload an image to Vercel Blob (all editors)
   lib/requireAdmin.ts        admin check for server actions and admin pages (server only)
@@ -111,7 +113,7 @@ src/
   lib/email/sendRsvpConfirmation.ts   guest RSVP confirmation email via Gmail SMTP (server only)
   types/index.ts             Guest, RegistryGift, GiftSelection, AdminUser
   proxy.ts                   /admin/** redirect when no session cookie
-scripts/                     sync-content.js, add-admin.js
+scripts/                     sync-content.js, add-admin.js, migrate-to-events.js
 firestore.rules, storage.rules, firebase.json   deployed with the Firebase CLI
 legacy/                      old static site — reference only, not built
 ```
@@ -130,7 +132,7 @@ legacy/                      old static site — reference only, not built
    see the checklist in `docs/content-system.md`. Missing one means the admin
    saves a value the site never shows (or the reverse).
 5. **Mutations of guests, gifts, and selections go through server actions**
-   in `src/app/actions/` with `firebase-admin`. Only `websiteContent` is written
+   in `src/app/actions/` with `firebase-admin`. Only the event's `content` is written
    from the browser (by admin editors).
 6. **Keep the guest site mobile-first.** Every screen fills `100dvh`; check
    phone width first.
@@ -151,7 +153,7 @@ same change**:
 | --- | --- |
 | new file, moved file, new screen/editor/action/route | `docs/FEATURE-MAP.md` |
 | new or changed screen, step order, guest flow | `docs/guest-site.md` |
-| new editable field, new `websiteContent` doc, editor behavior | `docs/content-system.md` + `docs/data-model.md` |
+| new editable field, new `content` doc, editor behavior |`docs/content-system.md` + `docs/data-model.md` |
 | Firestore collection/field, Storage path | `docs/data-model.md` |
 | admin page or admin action | `docs/admin.md` |
 | auth, rules, session, anything access-related | `docs/security.md` |

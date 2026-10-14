@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Trash2, GripVertical } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
@@ -27,7 +28,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-export function FaqsEditor() {
+export function FaqsEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -64,7 +65,7 @@ export function FaqsEditor() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, 'websiteContent', 'faq');
+        const docRef = doc(db, paths.content(eventId, 'faq'));
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -86,7 +87,7 @@ export function FaqsEditor() {
           }
         }
 
-        const backupRef = doc(db, 'websiteContent', 'faq_backup');
+        const backupRef = doc(db, paths.content(eventId, 'faq_backup'));
         const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
@@ -99,7 +100,7 @@ export function FaqsEditor() {
     };
 
     fetchData();
-  }, []);
+  }, [eventId]);
 
   const handleChange = (id: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -163,8 +164,8 @@ export function FaqsEditor() {
     try {
       setSaving(true);
       
-      const docRef = doc(db, 'websiteContent', 'faq');
-      const backupRef = doc(db, 'websiteContent', 'faq_backup');
+      const docRef = doc(db, paths.content(eventId, 'faq'));
+      const backupRef = doc(db, paths.content(eventId, 'faq_backup'));
       
       const currentDoc = await getDoc(docRef);
       if (currentDoc.exists()) {
@@ -199,7 +200,7 @@ export function FaqsEditor() {
   const restoreBackup = async () => {
     try {
       setRestoring(true);
-      const backupRef = doc(db, 'websiteContent', 'faq_backup');
+      const backupRef = doc(db, paths.content(eventId, 'faq_backup'));
       const backupSnap = await getDoc(backupRef);
       
       if (backupSnap.exists()) {
@@ -221,7 +222,7 @@ export function FaqsEditor() {
           }));
         }
 
-        const docRef = doc(db, 'websiteContent', 'faq');
+        const docRef = doc(db, paths.content(eventId, 'faq'));
         await setDoc(docRef, {
           header: backupData.header || header,
           items: backupData.items || [],

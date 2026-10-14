@@ -7,10 +7,11 @@ import weddingContent from '@/data/wedding-content.json';
 import { after } from 'next/server';
 import { headers } from 'next/headers';
 import { sendRsvpConfirmation } from '@/lib/email/sendRsvpConfirmation';
+import { paths } from '@/lib/eventPaths';
 
-export async function verifyInviteCode(inviteCode: string) {
+export async function verifyInviteCode(eventId: string, inviteCode: string) {
   try {
-    const guestRef = getAdminDb().collection('guests').doc(inviteCode);
+    const guestRef = getAdminDb().doc(paths.guest(eventId, inviteCode));
     const guestDoc = await guestRef.get();
 
     if (!guestDoc.exists) {
@@ -58,6 +59,7 @@ export async function getVisitorCountry(): Promise<string | null> {
 }
 
 export async function submitRsvp(
+  eventId: string,
   inviteCode: string,
   formData: {
     fullName: string;
@@ -69,8 +71,8 @@ export async function submitRsvp(
   }
 ) {
   try {
-    // Normal flow: We use the inviteCode as the document ID for the 'guests' collection
-    const guestRef = getAdminDb().collection('guests').doc(inviteCode);
+    // The invite code is the guest's document ID within the event
+    const guestRef = getAdminDb().doc(paths.guest(eventId, inviteCode));
 
     await getAdminDb().runTransaction(async (transaction) => {
       const guestDoc = await transaction.get(guestRef);
@@ -101,7 +103,7 @@ export async function submitRsvp(
     // Confirmation email runs after the response; a failed send never fails the RSVP.
     after(async () => {
       try {
-        await sendRsvpConfirmation(formData);
+        await sendRsvpConfirmation(eventId, formData);
       } catch (error) {
         console.error('RSVP confirmation email failed:', error);
       }

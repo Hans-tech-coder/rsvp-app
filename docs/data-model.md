@@ -8,15 +8,59 @@ field, update this file.
 
 ## Firestore collections
 
-| Collection | Doc ID | Written by | Read by |
+Event data is **scoped to an event**: everything a guest or an editor touches
+lives under `events/{eventId}`. Admin accounts are still global. Every path is
+built by `paths` in **`src/lib/eventPaths.ts`**; no other file in `src/` names a
+collection (the Node scripts keep their own copy of the names). The rest of the
+docs write event subcollections short: `guests` means
+`events/{eventId}/guests`, `content/<doc>` means `events/{eventId}/content/<doc>`.
+
+There is one event, `hans-and-czay` (`DEFAULT_EVENT_ID`). Until per-event
+routing (F4) and the admin event switcher (F11) exist, the guest page
+(`page.tsx` → `WeddingContentProvider eventId`) and every admin page
+(`const eventId = DEFAULT_EVENT_ID`) use it. Guest components get the ID from
+`useWeddingContent().eventId`; admin client components and content editors get
+it as an `eventId` prop. Every server action takes `eventId` as its first
+argument (except `revalidateGuestSite` and the global admin actions).
+
+| Path | Doc ID | Written by | Read by |
 | --- | --- | --- | --- |
-| `guests` | the invite code (e.g. `K7MPQ2`) | server actions (`admin.ts`, `rsvp.ts`) | admin pages; `verifyInviteCode` |
-| `registryGifts` | auto ID | server actions (`admin.ts`, `registry.ts`) | `getRegistryGifts`; admin gifts/dashboard |
-| `giftSelections` | auto ID | `claimGift`; deleted by `resetRegistryGift` / `deleteGiftSelection` | admin registry page |
-| `admins` | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); deleted by `removeAdmin` (`admins.ts`, super only) | `firestore.rules`, `storage.rules` (`isAdmin()`), `requireAdmin.ts` |
-| `adminAllowlist` | lowercased email | `scripts/add-admin.js`; `addAdmin` / `cancelPendingAdmin` (`admins.ts`, super only) | `createSessionCookie`, `listAdmins` (server only; rules deny all browser access) |
-| `settings` | `inviteTemplate` | `updateInviteMessageTemplate` | `getInviteMessageTemplate` |
-| `websiteContent` | one doc per screen (below) + `<doc>_backup` | admin editors, **from the browser** | `WeddingContentContext` (browser); `globalSettings` + `siteText` also on the server by `getSiteContent()` (`src/lib/siteContentServer.ts`, admin SDK) for the root layout, metadata and the 404 page |
+| `events/{eventId}` | event ID: lowercase letters, digits, inner hyphens, max 64 (`isValidEventId`) | `scripts/migrate-to-events.js` | nothing yet (F4/F11). Fields: `slug`, `type` (`'wedding'`), `status` (`'active'`), `createdAt` |
+| `…/guests` | the invite code (e.g. `K7MPQ2`), unique per event | server actions (`admin.ts`, `rsvp.ts`) | admin pages; `verifyInviteCode` |
+| `…/registryGifts` | auto ID | server actions (`admin.ts`, `registry.ts`) | `getRegistryGifts`; admin gifts/dashboard |
+| `…/giftSelections` | auto ID | `claimGift`; deleted by `resetRegistryGift` / `deleteGiftSelection` | admin registry page |
+| `…/settings` | `inviteTemplate` | `updateInviteMessageTemplate` | `getInviteMessageTemplate` |
+| `…/content` | one doc per screen (below) + `<doc>_backup` | admin editors, **from the browser** | `WeddingContentContext` (browser); `globalSettings` + `siteText` also on the server by `getSiteContent(eventId)` (`src/lib/siteContentServer.ts`, admin SDK) for the root layout, metadata and the 404 page; `globalSettings`, `details`, `dressCode` by the RSVP email |
+| `admins` (global) | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); deleted by `removeAdmin` (`admins.ts`, super only) | `firestore.rules`, `storage.rules` (`isAdmin()`), `requireAdmin.ts` |
+| `adminAllowlist` (global) | lowercased email | `scripts/add-admin.js`; `addAdmin` / `cancelPendingAdmin` (`admins.ts`, super only) | `createSessionCookie`, `listAdmins` (server only; rules deny all browser access) |
+
+A path helper throws on an invalid event ID or a document ID containing `/`,
+so a guest-typed code can never point at another document; the action's
+`try` turns that into its usual failure result.
+
+### Old root collections (kept until verified, then removed)
+
+Before Oct 2026 the same data lived at the root: `websiteContent` (now
+`content`), `guests`, `registryGifts`, `giftSelections`, `settings`. On
+2026-10-14 `scripts/migrate-to-events.js --write` copied all 48 docs into
+`events/hans-and-czay` with the same doc IDs (so `giftSelections.giftId` still
+matches) and `--verify` confirmed every doc equal. Nothing in `src/` reads or
+writes the root copies any more; `firestore.rules` still allows them so a
+rollback to the old code keeps working.
+
+- **Re-sync before going live.** The deployed site keeps writing to the root
+  until the F3 code is deployed. Right before deploying, run
+  `node scripts/migrate-to-events.js --write --overwrite`, then `--verify`.
+- **Rollback.** Redeploy the previous commit: it reads the root collections,
+  which are untouched. Anything written under `events/` after the switch
+  (RSVPs, claims, content saves) is not in the root and must be copied back by
+  hand.
+- **Removal** of the root collections and their rules is a separate, later
+  step, done only after the event copy has run in production for a while.
+
+`scripts/migrate-to-events.js` (dry run by default; `--write` copies missing
+docs, `--overwrite` also replaces differing ones, `--verify` exits 1 on any
+missing or different doc; `--event <id>`) never deletes anything.
 
 ### `guests/{inviteCode}` — type `Guest`
 
@@ -33,8 +77,10 @@ field, update this file.
 | `submittedAt` | Timestamp | RSVP submitted |
 
 Codes are 6 characters from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (no I, O, 0, 1),
-made with `crypto.randomBytes` in `generateCode()` (`admin.ts`). There is no
-collision check — a duplicate code would silently overwrite the existing doc.
+made with `crypto.randomBytes` in `generateCode()` (`admin.ts`). They are unique
+per event: `generateInviteCodes` and `regenerateInviteCode` write with
+`create()`, so a code the event already has fails the batch, which is retried
+with fresh codes (up to 3 tries). The same code may exist in two events.
 `regenerateInviteCode` **deletes** the old doc, including any RSVP on it.
 
 ### `registryGifts/{id}` — type `RegistryGift`
@@ -62,13 +108,13 @@ admin. On their next Google sign-in, `createSessionCookie` copies it onto
 `admins/{uid}` in a transaction (creating the doc, or setting `role` on an
 existing one) and deletes the entry.
 
-### `settings/inviteTemplate`
+### `settings/inviteTemplate` (per event)
 
 `{ template: string }`. `{{CODE}}` in the text is replaced with the guest's
 code by the invites page. Default text lives in `DEFAULT_INVITE_TEMPLATE`
 (`admin.ts`).
 
-## `websiteContent` docs ↔ `wedding-content.json` keys
+## `content` docs ↔ `wedding-content.json` keys
 
 `src/data/wedding-content.json` holds the **default** content. A Firestore doc,
 if present, overrides it (merge rules in `docs/content-system.md`).
@@ -131,7 +177,7 @@ first save from `EntourageEditor` writes the pair shape. The flag was first
 named `married`; one save on 2026-10-14 stored it under that name, and the
 normalizer still reads it as `couple`. **Rollback:** code from before the change
 crashes on the pair objects (`startsWith is not a function`), so rolling the
-code back also needs `websiteContent/entourage` rewritten as a `string[]`.
+code back also needs `content/entourage` rewritten as a `string[]`.
 Both `entourage` and `entourage_backup` already hold the pair shape, so the
 backup cannot do this; write the strings by hand (couples as
 `"Mr. B & Mrs. A"`, which the normalizer pairs again).

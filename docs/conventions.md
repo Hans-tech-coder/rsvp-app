@@ -33,6 +33,14 @@ Match the code around you. These are the patterns the codebase already uses.
   `{ success: false, error: string }`. Never throw to the client.
 - Use `getAdminDb()` from `@/lib/firebase/admin` — call it inside the function,
   not at module top level.
+- **Firestore paths come from `paths` in `@/lib/eventPaths`**, never a literal
+  collection name: `getAdminDb().doc(paths.guest(eventId, code))`,
+  `.collection(paths.registryGifts(eventId))`, and in the browser
+  `doc(db, paths.content(eventId, 'faq'))`. A new collection gets a builder
+  there (and a rule in `firestore.rules`).
+- An action on event data takes `eventId: string` as its **first** argument.
+  Guest components pass `useWeddingContent().eventId`; admin client components
+  and editors pass their `eventId` prop.
 - Any read-then-write on counts or status uses `runTransaction`; multi-doc
   writes without reads use `batch()`.
 - Timestamps: `FieldValue.serverTimestamp()` on write; convert with

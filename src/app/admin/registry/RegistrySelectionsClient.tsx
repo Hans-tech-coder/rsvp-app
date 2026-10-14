@@ -8,7 +8,7 @@ import { deleteGiftSelection } from '@/app/actions/admin';
 import { Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export function RegistrySelectionsClient({ initialSelections }: { initialSelections: GiftSelection[] }) {
+export function RegistrySelectionsClient({ eventId, initialSelections }: { eventId: string, initialSelections: GiftSelection[] }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const router = useRouter();
@@ -34,7 +34,7 @@ export function RegistrySelectionsClient({ initialSelections }: { initialSelecti
       confirmText: 'Delete',
       action: async () => {
         setIsProcessing(true);
-        const res = await deleteGiftSelection(selection.id!, selection.giftId);
+        const res = await deleteGiftSelection(eventId, selection.id!, selection.giftId);
         setIsProcessing(false);
         setConfirmConfig(prev => ({ ...prev, isOpen: false }));
         if (res.success) {

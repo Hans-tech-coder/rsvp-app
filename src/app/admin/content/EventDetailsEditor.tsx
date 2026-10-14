@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Loader2, Upload, X, Settings } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
@@ -27,7 +28,7 @@ const venueFactsFrom = (global: Record<string, string | undefined>): VenueFacts 
   },
 });
 
-export function EventDetailsEditor({ onEditGlobalSettings }: { onEditGlobalSettings: () => void }) {
+export function EventDetailsEditor({ eventId, onEditGlobalSettings }: { eventId: string; onEditGlobalSettings: () => void }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -50,7 +51,7 @@ export function EventDetailsEditor({ onEditGlobalSettings }: { onEditGlobalSetti
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, 'websiteContent', 'details');
+        const docRef = doc(db, paths.content(eventId, 'details'));
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -74,13 +75,13 @@ export function EventDetailsEditor({ onEditGlobalSettings }: { onEditGlobalSetti
           setOriginalData(mergedData);
         }
 
-        const backupRef = doc(db, 'websiteContent', 'details_backup');
+        const backupRef = doc(db, paths.content(eventId, 'details_backup'));
         const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
         }
 
-        const globalSnap = await getDoc(doc(db, 'websiteContent', 'globalSettings'));
+        const globalSnap = await getDoc(doc(db, paths.content(eventId, 'globalSettings')));
         if (globalSnap.exists()) {
           setVenueFacts(venueFactsFrom(globalSnap.data()));
         }
@@ -92,7 +93,7 @@ export function EventDetailsEditor({ onEditGlobalSettings }: { onEditGlobalSetti
     };
 
     fetchData();
-  }, []);
+  }, [eventId]);
 
   const handleSectionChange = (section: 'ceremony' | 'reception', e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -109,10 +110,10 @@ export function EventDetailsEditor({ onEditGlobalSettings }: { onEditGlobalSetti
   const handleSave = async () => {
     setSaving(true);
     try {
-      const backupRef = doc(db, 'websiteContent', 'details_backup');
+      const backupRef = doc(db, paths.content(eventId, 'details_backup'));
       await setDoc(backupRef, originalData, { merge: true });
 
-      const docRef = doc(db, 'websiteContent', 'details');
+      const docRef = doc(db, paths.content(eventId, 'details'));
       await setDoc(docRef, data, { merge: true });
       
       setOriginalData(data);
@@ -141,7 +142,7 @@ export function EventDetailsEditor({ onEditGlobalSettings }: { onEditGlobalSetti
     setRestoring(true);
     setIsRestoreModalOpen(false);
     try {
-      const backupRef = doc(db, 'websiteContent', 'details_backup');
+      const backupRef = doc(db, paths.content(eventId, 'details_backup'));
       const backupSnap = await getDoc(backupRef);
       if (backupSnap.exists()) {
         const fetchedBackup = backupSnap.data();

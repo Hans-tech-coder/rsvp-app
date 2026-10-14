@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { AdminModal } from '../components/AdminModal';
 import { TablePagination } from '../components/TablePagination';
 
-export default function GiftsClient({ initialGifts }: { initialGifts: RegistryGift[] }) {
+export default function GiftsClient({ eventId, initialGifts }: { eventId: string, initialGifts: RegistryGift[] }) {
   const gifts = initialGifts;
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,12 +59,12 @@ export default function GiftsClient({ initialGifts }: { initialGifts: RegistryGi
     const data = { name, link, maxCount };
     
     if (editingId) {
-      const res = await updateRegistryGift(editingId, data);
+      const res = await updateRegistryGift(eventId, editingId, data);
       if (!res.success) {
         setAlertConfig({ isOpen: true, title: 'Error', message: res.error, variant: 'danger' });
       }
     } else {
-      const res = await addRegistryGift(data);
+      const res = await addRegistryGift(eventId, data);
       if (!res.success) {
         setAlertConfig({ isOpen: true, title: 'Error', message: res.error, variant: 'danger' });
       }
@@ -84,7 +84,7 @@ export default function GiftsClient({ initialGifts }: { initialGifts: RegistryGi
       confirmText: 'Delete',
       action: async () => {
         setIsProcessing(true);
-        const res = await deleteRegistryGift(id);
+        const res = await deleteRegistryGift(eventId, id);
         setIsProcessing(false);
         setConfirmConfig(prev => ({ ...prev, isOpen: false }));
         if (res.success) {
@@ -105,7 +105,7 @@ export default function GiftsClient({ initialGifts }: { initialGifts: RegistryGi
       confirmText: 'Reset',
       action: async () => {
         setIsProcessing(true);
-        const res = await resetRegistryGift(id);
+        const res = await resetRegistryGift(eventId, id);
         setIsProcessing(false);
         setConfirmConfig(prev => ({ ...prev, isOpen: false }));
         if (res.success) {

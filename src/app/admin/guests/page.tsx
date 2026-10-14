@@ -1,5 +1,6 @@
 import { getAdminDb } from '@/lib/firebase/admin';
 import { requireAdminPage } from '@/lib/requireAdmin';
+import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
 import { Guest } from '@/types';
 import GuestListClient from './GuestListClient';
 
@@ -7,12 +8,14 @@ export const dynamic = 'force-dynamic';
 
 export default async function GuestsPage() {
   await requireAdminPage();
+  // The only event until the event switcher (F11)
+  const eventId = DEFAULT_EVENT_ID;
 
   let guests: Guest[] = [];
   let errorMsg = null;
 
   try {
-    const snapshot = await getAdminDb().collection('guests').orderBy('createdAt', 'desc').get();
+    const snapshot = await getAdminDb().collection(paths.guests(eventId)).orderBy('createdAt', 'desc').get();
     
     guests = snapshot.docs.map(doc => {
       const data = doc.data();
@@ -43,7 +46,7 @@ export default async function GuestsPage() {
         </div>
       )}
 
-      {!errorMsg && <GuestListClient initialGuests={guests} />}
+      {!errorMsg && <GuestListClient eventId={eventId} initialGuests={guests} />}
     </div>
   );
 }

@@ -43,6 +43,13 @@ async function syncContent() {
     }
     
     const db = admin.firestore();
+    // Content lives under the event (src/lib/eventPaths.ts); --event <id> picks another one.
+    const eventIdx = process.argv.indexOf('--event');
+    const eventId = eventIdx >= 0 ? process.argv[eventIdx + 1] : 'hans-and-czay';
+    if (!/^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/.test(eventId || '')) {
+      console.error(`Invalid --event "${eventId}"`);
+      process.exit(1);
+    }
     const contentPath = path.join(__dirname, '../src/data/wedding-content.json');
     
     // Read the current JSON structure to use as a base
@@ -51,7 +58,7 @@ async function syncContent() {
       currentContent = JSON.parse(fs.readFileSync(contentPath, 'utf8'));
     }
     
-    console.log('Pulling latest content from Firestore...');
+    console.log(`Pulling latest content from events/${eventId}/content...`);
     
     const docs = [
       'welcomeScreen', 'globalSettings', 'entranceScreen', 'ourStory',
@@ -77,7 +84,7 @@ async function syncContent() {
     };
     
     for (const docId of docs) {
-      const docSnap = await db.collection('websiteContent').doc(docId).get();
+      const docSnap = await db.doc(`events/${eventId}/content/${docId}`).get();
       if (docSnap.exists) {
         const jsonKey = docToKeyMap[docId];
         currentContent[jsonKey] = docId === 'siteText'

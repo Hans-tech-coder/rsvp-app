@@ -2,6 +2,7 @@
 
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
+import { paths } from '@/lib/eventPaths';
 import { getAdmin, requireSuperAdmin } from '@/lib/requireAdmin';
 import type { AdminRole } from '@/types';
 
@@ -36,8 +37,8 @@ export async function listAdmins() {
     const me = await requireSuperAdmin();
     const db = getAdminDb();
     const [adminsSnap, allowSnap] = await Promise.all([
-      db.collection('admins').get(),
-      db.collection('adminAllowlist').get(),
+      db.collection(paths.admins()).get(),
+      db.collection(paths.adminAllowlist()).get(),
     ]);
 
     const admins: ActiveAdmin[] = adminsSnap.docs
@@ -72,7 +73,7 @@ export async function addAdmin(rawEmail: string) {
     }
 
     const db = getAdminDb();
-    const existing = await db.collection('admins').where('email', '==', email).limit(1).get();
+    const existing = await db.collection(paths.admins()).where('email', '==', email).limit(1).get();
     if (!existing.empty) {
       return { success: false, error: 'That email is already an admin.' };
     }
@@ -80,7 +81,7 @@ export async function addAdmin(rawEmail: string) {
     // create() fails if an entry exists, so a pending super is never
     // overwritten (downgraded) from the UI.
     try {
-      await db.collection('adminAllowlist').doc(email).create({
+      await db.doc(paths.adminAllowlistEntry(email)).create({
         role: 'admin',
         addedAt: FieldValue.serverTimestamp(),
         addedBy: me.uid,
@@ -99,7 +100,7 @@ export async function cancelPendingAdmin(rawEmail: string) {
   try {
     await requireSuperAdmin();
     const email = String(rawEmail ?? '').trim().toLowerCase();
-    const ref = getAdminDb().collection('adminAllowlist').doc(email);
+    const ref = getAdminDb().doc(paths.adminAllowlistEntry(email));
     const entry = await ref.get();
     if (!entry.exists) return { success: false, error: 'That pending admin no longer exists.' };
     if (entry.get('role') === 'super') {
@@ -117,7 +118,7 @@ export async function removeAdmin(uid: string) {
     const me = await requireSuperAdmin();
     if (!uid || uid === me.uid) return { success: false, error: 'You cannot remove yourself.' };
 
-    const ref = getAdminDb().collection('admins').doc(uid);
+    const ref = getAdminDb().doc(paths.admin(uid));
     const target = await ref.get();
     if (!target.exists) return { success: false, error: 'That admin no longer exists.' };
     if (target.get('role') === 'super') {

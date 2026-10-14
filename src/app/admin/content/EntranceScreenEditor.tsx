@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
 
-export function EntranceScreenEditor() {
+export function EntranceScreenEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -34,7 +35,7 @@ export function EntranceScreenEditor() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, 'websiteContent', 'entranceScreen');
+        const docRef = doc(db, paths.content(eventId, 'entranceScreen'));
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -46,7 +47,7 @@ export function EntranceScreenEditor() {
           setOriginalData(fetchedData);
         }
 
-        const backupRef = doc(db, 'websiteContent', 'entranceScreen_backup');
+        const backupRef = doc(db, paths.content(eventId, 'entranceScreen_backup'));
         const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
@@ -59,7 +60,7 @@ export function EntranceScreenEditor() {
     };
 
     fetchData();
-  }, []);
+  }, [eventId]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -83,10 +84,10 @@ export function EntranceScreenEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const backupRef = doc(db, 'websiteContent', 'entranceScreen_backup');
+      const backupRef = doc(db, paths.content(eventId, 'entranceScreen_backup'));
       await setDoc(backupRef, originalData, { merge: true });
 
-      const docRef = doc(db, 'websiteContent', 'entranceScreen');
+      const docRef = doc(db, paths.content(eventId, 'entranceScreen'));
       await setDoc(docRef, formData, { merge: true });
       
       setOriginalData(formData);
@@ -115,7 +116,7 @@ export function EntranceScreenEditor() {
     setRestoring(true);
     setIsRestoreModalOpen(false);
     try {
-      const backupRef = doc(db, 'websiteContent', 'entranceScreen_backup');
+      const backupRef = doc(db, paths.content(eventId, 'entranceScreen_backup'));
       const backupSnap = await getDoc(backupRef);
       if (backupSnap.exists()) {
         const fetchedBackup = {

@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import { getAdminDb } from '@/lib/firebase/admin';
 import weddingContent from '@/data/wedding-content.json';
+import { paths } from '@/lib/eventPaths';
 
 // Server only. Sends the guest a confirmation of their RSVP through the
 // couple's Gmail account (SMTP + App Password). Needs GMAIL_USER and
@@ -25,7 +26,7 @@ const escapeHtml = (value: string) =>
 
 // Same precedence as WeddingContentContext: JSON defaults, then the `details`
 // and `dressCode` docs, then the ceremony/reception fields in `globalSettings`.
-async function loadEmailContent() {
+async function loadEmailContent(eventId: string) {
   const global = { ...weddingContent.global };
   const ceremony = { ...weddingContent.details.ceremony };
   const reception = { ...weddingContent.details.reception };
@@ -34,7 +35,7 @@ async function loadEmailContent() {
   try {
     const [globalDoc, detailsDoc, dressCodeDoc] = await Promise.all(
       ['globalSettings', 'details', 'dressCode'].map((id) =>
-        getAdminDb().collection('websiteContent').doc(id).get()
+        getAdminDb().doc(paths.content(eventId, id)).get()
       )
     );
 
@@ -292,7 +293,7 @@ function buildEmail(data: RsvpEmailData, content: Awaited<ReturnType<typeof load
   return { subject, html, text };
 }
 
-export async function sendRsvpConfirmation(data: RsvpEmailData) {
+export async function sendRsvpConfirmation(eventId: string, data: RsvpEmailData) {
   const user = process.env.GMAIL_USER?.trim();
   // Google shows the App Password in groups of four; the spaces are not part of it.
   const pass = process.env.GMAIL_APP_PASSWORD?.replace(/\s/g, '');
@@ -301,7 +302,7 @@ export async function sendRsvpConfirmation(data: RsvpEmailData) {
     return;
   }
 
-  const content = await loadEmailContent();
+  const content = await loadEmailContent(eventId);
   const { subject, html, text } = buildEmail(data, content);
 
   const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user, pass } });

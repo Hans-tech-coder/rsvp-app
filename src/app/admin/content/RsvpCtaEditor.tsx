@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
@@ -11,7 +12,7 @@ import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 
-export function RsvpCtaEditor() {
+export function RsvpCtaEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -44,7 +45,7 @@ export function RsvpCtaEditor() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, 'websiteContent', 'rsvpCta');
+        const docRef = doc(db, paths.content(eventId, 'rsvpCta'));
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -56,7 +57,7 @@ export function RsvpCtaEditor() {
           setOriginalData(fetchedData);
         }
 
-        const backupRef = doc(db, 'websiteContent', 'rsvpCta_backup');
+        const backupRef = doc(db, paths.content(eventId, 'rsvpCta_backup'));
         const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
@@ -69,7 +70,7 @@ export function RsvpCtaEditor() {
     };
 
     fetchData();
-  }, []);
+  }, [eventId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -98,10 +99,10 @@ export function RsvpCtaEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const backupRef = doc(db, 'websiteContent', 'rsvpCta_backup');
+      const backupRef = doc(db, paths.content(eventId, 'rsvpCta_backup'));
       await setDoc(backupRef, originalData, { merge: true });
 
-      const docRef = doc(db, 'websiteContent', 'rsvpCta');
+      const docRef = doc(db, paths.content(eventId, 'rsvpCta'));
       await setDoc(docRef, formData, { merge: true });
       
       setOriginalData(formData);
@@ -126,7 +127,7 @@ export function RsvpCtaEditor() {
     setRestoring(true);
     setIsRestoreModalOpen(false);
     try {
-      const backupRef = doc(db, 'websiteContent', 'rsvpCta_backup');
+      const backupRef = doc(db, paths.content(eventId, 'rsvpCta_backup'));
       const backupSnap = await getDoc(backupRef);
       if (backupSnap.exists()) {
         const fetchedBackup = {

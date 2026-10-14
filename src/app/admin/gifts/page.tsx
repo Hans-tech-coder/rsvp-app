@@ -1,5 +1,6 @@
 import { getAdminDb } from '@/lib/firebase/admin';
 import { requireAdminPage } from '@/lib/requireAdmin';
+import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
 import { RegistryGift } from '@/types';
 import GiftsClient from './GiftsClient';
 
@@ -7,12 +8,14 @@ export const dynamic = 'force-dynamic';
 
 export default async function GiftsPage() {
   await requireAdminPage();
+  // The only event until the event switcher (F11)
+  const eventId = DEFAULT_EVENT_ID;
 
   let gifts: RegistryGift[] = [];
   let errorMsg = null;
 
   try {
-    const giftsSnapshot = await getAdminDb().collection('registryGifts').orderBy('createdAt', 'desc').get();
+    const giftsSnapshot = await getAdminDb().collection(paths.registryGifts(eventId)).orderBy('createdAt', 'desc').get();
     gifts = giftsSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -34,7 +37,7 @@ export default async function GiftsPage() {
           <p className="text-red-600 dark:text-red-300 font-mono text-sm break-all">{errorMsg}</p>
         </div>
       ) : (
-        <GiftsClient initialGifts={gifts} />
+        <GiftsClient eventId={eventId} initialGifts={gifts} />
       )}
     </div>
   );

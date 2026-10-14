@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Upload } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
@@ -11,7 +12,7 @@ import { EditorSaveBar } from './EditorSaveBar';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 import { revalidateGuestSite } from '@/app/actions/admin';
 
-export function GlobalSettingsEditor() {
+export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -49,7 +50,7 @@ export function GlobalSettingsEditor() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, 'websiteContent', 'globalSettings');
+        const docRef = doc(db, paths.content(eventId, 'globalSettings'));
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -58,7 +59,7 @@ export function GlobalSettingsEditor() {
           setOriginalData(fetchedData);
         }
 
-        const backupRef = doc(db, 'websiteContent', 'globalSettings_backup');
+        const backupRef = doc(db, paths.content(eventId, 'globalSettings_backup'));
         const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
@@ -71,7 +72,7 @@ export function GlobalSettingsEditor() {
     };
 
     fetchData();
-  }, []);
+  }, [eventId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -118,10 +119,10 @@ export function GlobalSettingsEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const backupRef = doc(db, 'websiteContent', 'globalSettings_backup');
+      const backupRef = doc(db, paths.content(eventId, 'globalSettings_backup'));
       await setDoc(backupRef, originalData, { merge: true });
 
-      const docRef = doc(db, 'websiteContent', 'globalSettings');
+      const docRef = doc(db, paths.content(eventId, 'globalSettings'));
       await setDoc(docRef, formData, { merge: true });
 
       // Link previews, the browser tab and the 404 page are built on the server
@@ -155,7 +156,7 @@ export function GlobalSettingsEditor() {
     setRestoring(true);
     setIsRestoreModalOpen(false);
     try {
-      const backupRef = doc(db, 'websiteContent', 'globalSettings_backup');
+      const backupRef = doc(db, paths.content(eventId, 'globalSettings_backup'));
       const backupSnap = await getDoc(backupRef);
       if (backupSnap.exists()) {
         const fetchedBackup = { ...defaultData, ...backupSnap.data() };

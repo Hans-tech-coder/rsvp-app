@@ -5,22 +5,26 @@ import weddingContentDefault from '@/data/wedding-content.json';
 import { db } from '@/lib/firebase/client';
 import { doc, getDoc } from 'firebase/firestore';
 import { normalizePrincipalSponsors } from '@/lib/principalSponsors';
+import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
 
 type WeddingContent = typeof weddingContentDefault;
 
 interface WeddingContentContextType {
+  /** The event whose content this is; guest server actions take it too. */
+  eventId: string;
   content: WeddingContent;
   loading: boolean;
 }
 
 const WeddingContentContext = createContext<WeddingContentContextType>({
+  eventId: DEFAULT_EVENT_ID,
   content: weddingContentDefault,
   loading: true,
 });
 
 export const useWeddingContent = () => useContext(WeddingContentContext);
 
-export function WeddingContentProvider({ children }: { children: React.ReactNode }) {
+export function WeddingContentProvider({ eventId, children }: { eventId: string; children: React.ReactNode }) {
   const [content, setContent] = useState<WeddingContent>(weddingContentDefault);
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +38,7 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
         ] = await Promise.all([
           'welcomeScreen', 'globalSettings', 'entranceScreen', 'ourStory', 'entourage', 'details',
           'dressCode', 'gallery', 'faq', 'registry', 'rsvpCta', 'rsvpForm',
-        ].map((id) => getDoc(doc(db, 'websiteContent', id))));
+        ].map((id) => getDoc(doc(db, paths.content(eventId, id)))));
         
         let newContent = { ...weddingContentDefault };
         
@@ -207,10 +211,10 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
     };
 
     fetchContent();
-  }, []);
+  }, [eventId]);
 
   return (
-    <WeddingContentContext.Provider value={{ content, loading }}>
+    <WeddingContentContext.Provider value={{ eventId, content, loading }}>
       {children}
     </WeddingContentContext.Provider>
   );

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Search, ChevronDown } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { DEFAULT_SITE_TEXT, mergeSiteText, type SiteText } from '@/lib/siteText';
 import { revalidateGuestSite } from '@/app/actions/admin';
@@ -12,7 +13,7 @@ import { CharCount } from './CharCount';
 import { SITE_TEXT_GROUPS, type SiteTextField } from './siteTextFields';
 
 // Small wording on the guest site (buttons, labels, hints, error messages),
-// stored in websiteContent/siteText. The guest pages read it on the server, so
+// stored in the event's content/siteText. The guest pages read it on the server, so
 // a save also asks Next.js to regenerate them (revalidateGuestSite).
 
 function getText(text: SiteText, path: string): string {
@@ -31,7 +32,7 @@ function setText(text: SiteText, path: string, value: string): SiteText {
 const inputClass =
   'w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-zinc-100 focus:border-transparent transition-all text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-600';
 
-export function SiteTextEditor() {
+export function SiteTextEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -50,14 +51,14 @@ export function SiteTextEditor() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docSnap = await getDoc(doc(db, 'websiteContent', 'siteText'));
+        const docSnap = await getDoc(doc(db, paths.content(eventId, 'siteText')));
         if (docSnap.exists()) {
           const fetchedData = mergeSiteText(DEFAULT_SITE_TEXT, docSnap.data());
           setFormData(fetchedData);
           setOriginalData(fetchedData);
         }
 
-        const backupSnap = await getDoc(doc(db, 'websiteContent', 'siteText_backup'));
+        const backupSnap = await getDoc(doc(db, paths.content(eventId, 'siteText_backup')));
         if (backupSnap.exists()) {
           setHasBackup(true);
         }
@@ -69,7 +70,7 @@ export function SiteTextEditor() {
     };
 
     fetchData();
-  }, []);
+  }, [eventId]);
 
   const handleChange = (path: string, value: string) => {
     setFormData(prev => setText(prev, path, value));
@@ -79,8 +80,8 @@ export function SiteTextEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await setDoc(doc(db, 'websiteContent', 'siteText_backup'), originalData);
-      await setDoc(doc(db, 'websiteContent', 'siteText'), formData);
+      await setDoc(doc(db, paths.content(eventId, 'siteText_backup')), originalData);
+      await setDoc(doc(db, paths.content(eventId, 'siteText')), formData);
 
       // The text is live in Firestore now; this makes the cached pages show it.
       const refresh = await revalidateGuestSite();
@@ -108,7 +109,7 @@ export function SiteTextEditor() {
     setRestoring(true);
     setIsRestoreModalOpen(false);
     try {
-      const backupSnap = await getDoc(doc(db, 'websiteContent', 'siteText_backup'));
+      const backupSnap = await getDoc(doc(db, paths.content(eventId, 'siteText_backup')));
       if (backupSnap.exists()) {
         setFormData(mergeSiteText(DEFAULT_SITE_TEXT, backupSnap.data()));
         setIsSuccessModalOpen(true);

@@ -115,7 +115,7 @@ function FieldMessage({ id, error, hint, aside }: { id: string; error?: string |
 }
 
 export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScreenProps) {
-  const { content } = useWeddingContent();
+  const { content, eventId } = useWeddingContent();
   const formContent = content.rsvpForm;
   const text = useSiteText();
 
@@ -214,7 +214,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
       message: message.trim(),
     };
 
-    const result = await submitRsvp(inviteCode, formData);
+    const result = await submitRsvp(eventId, inviteCode, formData);
 
     setIsSubmitting(false);
 

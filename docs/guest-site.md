@@ -88,7 +88,7 @@ and the table in `docs/FEATURE-MAP.md`.
    clients cannot read CSS variables), and Cinzel / Cormorant Garamond / Inter
    from Google Fonts. Gmail and Outlook block web fonts and fall back to
    Georgia/Arial. Content follows the same precedence as `WeddingContentContext` (JSON defaults,
-   then `websiteContent/details`, `dressCode`, `globalSettings`). Missing Gmail
+   then the event's `content/details`, `dressCode`, `globalSettings`).Missing Gmail
    env vars or a failed send are logged and never fail the RSVP.
 4. On success, `onSubmitSuccess` relocks (`isUnlocked = false`, code cleared).
 
@@ -116,7 +116,7 @@ transaction rejects when `currentCount >= maxCount`.
   `mode="wait"`, so `<main>` mounts under `LoadingScreen` while it fades out.
   The loader's exit is a CSS opacity transition on `--duration-very-slow` /
   `--ease-in-out` driven by `usePresence` (instant under reduced motion).
-  The loader stays up until content has loaded (the 12 `websiteContent` docs
+  The loader stays up until content has loaded (the 12 `content` docs of the event
   are fetched in parallel) and fonts plus, on step 0, the Welcome hero image
   are ready (`assetsReady`). The asset wait is capped at `LOADER_MAX_WAIT_MS`
   (2.5 s after navigation).

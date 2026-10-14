@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { AdminModal } from '../components/AdminModal';
 import { TablePagination } from '../components/TablePagination';
 
-export default function InviteListClient({ initialInvites, initialTemplate }: { initialInvites: Guest[], initialTemplate: string }) {
+export default function InviteListClient({ eventId, initialInvites, initialTemplate }: { eventId: string, initialInvites: Guest[], initialTemplate: string }) {
   const invites = initialInvites;
   const [template, setTemplate] = useState(initialTemplate);
   const [editingTemplate, setEditingTemplate] = useState(initialTemplate);
@@ -38,7 +38,7 @@ export default function InviteListClient({ initialInvites, initialTemplate }: { 
       return;
     }
     setGenerating(true);
-    const res = await generateInviteCodes(codeCount);
+    const res = await generateInviteCodes(eventId, codeCount);
     setGenerating(false);
     if (res.success) {
       setAlertConfig({ isOpen: true, title: 'Success', message: `Generated ${res.count} codes successfully!`, variant: 'success' });
@@ -57,7 +57,7 @@ export default function InviteListClient({ initialInvites, initialTemplate }: { 
       confirmText: 'Delete',
       action: async () => {
         setIsProcessing(true);
-        const res = await deleteInviteCode(code);
+        const res = await deleteInviteCode(eventId, code);
         setIsProcessing(false);
         setConfirmConfig(prev => ({ ...prev, isOpen: false }));
         if (res.success) {
@@ -78,7 +78,7 @@ export default function InviteListClient({ initialInvites, initialTemplate }: { 
       confirmText: 'Regenerate',
       action: async () => {
         setIsProcessing(true);
-        const res = await regenerateInviteCode(oldCode);
+        const res = await regenerateInviteCode(eventId, oldCode);
         setIsProcessing(false);
         setConfirmConfig(prev => ({ ...prev, isOpen: false }));
         if (res.success) {
@@ -106,7 +106,7 @@ export default function InviteListClient({ initialInvites, initialTemplate }: { 
 
   const handleToggleCopied = async (code: string, isCopied: boolean) => {
     setIsProcessing(true);
-    const res = await toggleInviteCopiedStatus(code, isCopied);
+    const res = await toggleInviteCopiedStatus(eventId, code, isCopied);
     setIsProcessing(false);
     if (res.success) {
       router.refresh();
@@ -117,7 +117,7 @@ export default function InviteListClient({ initialInvites, initialTemplate }: { 
 
   const handleSaveTemplate = async () => {
     setIsProcessing(true);
-    const res = await updateInviteMessageTemplate(editingTemplate);
+    const res = await updateInviteMessageTemplate(eventId, editingTemplate);
     setIsProcessing(false);
     
     if (res.success) {

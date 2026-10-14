@@ -23,9 +23,8 @@ when you find or fix one of these.
 | Issue | Where | Notes |
 | --- | --- | --- |
 | Welcome 3D scene fetches the photo twice | `DepthParallaxScene.tsx` loads the raw Blob URL; the loader preloads the `next/image` srcset URL | ~220 KB extra on first visit. Feed the scene the same optimized URL to share the cache |
-| No collision check when generating invite codes | `generateCode()` in `admin.ts` | A duplicate overwrites an existing guest doc |
 | Replaced images are never deleted from Blob | all editors | Counts against the shared 1 GB Hobby Blob quota |
-| Legacy Firebase Storage URLs return 402 | Firestore `websiteContent/*`, `wedding-content.json` | Google billing account closed; replace by re-uploading in the admin, then `npm run sync-content`. See `docs/data-model.md` |
+| Legacy Firebase Storage URLs return 402 | Firestore `events/hans-and-czay/content/*` (and the old root `websiteContent/*` copy), `wedding-content.json` |Google billing account closed; replace by re-uploading in the admin, then `npm run sync-content`. See `docs/data-model.md` |
 | `wedding-content.json` has a mixed `gallery` key and an unused `faqs` key | `src/data/wedding-content.json` | Side effect of `sync-content.js`; see `docs/data-model.md` |
 | Content merge is hand-written per doc | `WeddingContentContext.tsx` | New fields in field-by-field docs need an explicit line |
 | `RsvpScreen` falls back to `'dev-mode'` as the code | `src/app/page.tsx` | Submission fails server-side, which is the intended outcome |
@@ -37,7 +36,9 @@ when you find or fix one of these.
 | Music volume on iOS goes through Web Audio after the first slider touch | `AudioPlayer.tsx` (`ensureGain`) | Only checked in a desktop browser. On iOS < 17 the ringer switch may silence the music once that happens; the AudioContext is resumed on each `play` |
 | A few guest-visible words are still in code | loader monogram "H&C" (`LoadingScreen.tsx`); country names in `phoneCountries.ts`; dates formatted with `en-US` (`EntranceScreen`, metadata `{date}`); image `alt` and `aria-*` labels | The loader shows before content loads, so its monogram needs server-side global settings (planned with per-event server content) |
 | Site text, metadata and the 404 page update only through an admin save | `revalidateGuestSite` in `admin.ts` | `/` and the 404 page are static. A change made outside the admin (Firestore console, script) shows after the next deploy or the next Site Text / Global Settings save. Facebook and Messenger cache link previews on their side |
-| Event Details `calendarStart` repeats the time set in Global Settings | `EventDetailsEditor.tsx` ("Calendar Start"), `globalSettings.ceremonyTime` / `receptionTime` | Changing the time in Global Settings does not move the Add to Calendar time; edit both |
+| Root collections still hold a copy of the event data | Firestore root `websiteContent`, `guests`, `registryGifts`, `giftSelections`, `settings` + their block in `firestore.rules` | Kept on purpose after the F3 move to `events/hans-and-czay` (rollback path). Re-sync with `scripts/migrate-to-events.js --write --overwrite` right before the F3 deploy; remove later as its own step. See `docs/data-model.md` |
+| F3 admin side checked by query, not by a signed-in session | `src/app/admin/**` | The admin pages' exact queries and the deployed rules were run against `events/hans-and-czay`; no real admin Save, invite generation or gift edit was done after the move |
+| Event Details `calendarStart` repeats the time set in Global Settings |`EventDetailsEditor.tsx` ("Calendar Start"), `globalSettings.ceremonyTime` / `receptionTime` | Changing the time in Global Settings does not move the Add to Calendar time; edit both |
 | Sign Out does not warn about unsaved content edits | `src/app/admin/layout.tsx` (`handleLogout`) | Tab switch, admin links and page close do (`unsavedChanges.tsx`) |
 | Circular gallery keeps the last-closed photo mounted | `circular-image-gallery.tsx` (`closing` state never resets) | Two extra SVG `<image>`s at most; harmless |
 

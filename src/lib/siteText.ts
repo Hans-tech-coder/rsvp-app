@@ -3,7 +3,7 @@ import { createElement, Fragment, type ReactNode } from 'react';
 import weddingContent from '../data/wedding-content.json';
 
 // Guest-visible UI wording (buttons, labels, errors, hints), edited in the
-// "Site Text" admin tab and stored in websiteContent/siteText. Grouped by screen.
+// "Site Text" admin tab and stored in the event's content/siteText. Grouped by screen.
 export type SiteText = typeof weddingContent.siteText;
 
 export const DEFAULT_SITE_TEXT: SiteText = weddingContent.siteText;

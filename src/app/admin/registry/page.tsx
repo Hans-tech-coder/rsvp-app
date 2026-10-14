@@ -1,5 +1,6 @@
 import { getAdminDb } from '@/lib/firebase/admin';
 import { requireAdminPage } from '@/lib/requireAdmin';
+import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
 import { GiftSelection } from '@/types';
 import { RegistrySelectionsClient } from './RegistrySelectionsClient';
 
@@ -7,13 +8,15 @@ export const dynamic = 'force-dynamic';
 
 export default async function RegistryPage() {
   await requireAdminPage();
+  // The only event until the event switcher (F11)
+  const eventId = DEFAULT_EVENT_ID;
 
   let selections: GiftSelection[] = [];
   let errorMsg = null;
 
   try {
     // Fetch Selections
-    const selectionsSnapshot = await getAdminDb().collection('giftSelections').orderBy('selectedAt', 'desc').get();
+    const selectionsSnapshot = await getAdminDb().collection(paths.giftSelections(eventId)).orderBy('selectedAt', 'desc').get();
     selections = selectionsSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -36,7 +39,7 @@ export default async function RegistryPage() {
         </div>
       )}
 
-      <RegistrySelectionsClient initialSelections={selections} />
+      <RegistrySelectionsClient eventId={eventId} initialSelections={selections} />
     </div>
   );
 }

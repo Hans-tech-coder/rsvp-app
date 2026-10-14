@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { FieldValue } from 'firebase-admin/firestore';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
+import { paths } from '@/lib/eventPaths';
 
 const NOT_ADMIN = 'This Google account is not an admin.';
 const MAX_SIGN_IN_AGE_SECONDS = 5 * 60;
@@ -27,8 +28,8 @@ export async function createSessionCookie(idToken: string) {
     const uid = decoded.uid;
     const email = decoded.email.toLowerCase();
     const db = getAdminDb();
-    const adminRef = db.collection('admins').doc(uid);
-    const allowRef = db.collection('adminAllowlist').doc(email);
+    const adminRef = db.doc(paths.admin(uid));
+    const allowRef = db.doc(paths.adminAllowlistEntry(email));
 
     const isAdmin = await db.runTransaction(async (tx) => {
       const [admin, allow] = await Promise.all([tx.get(adminRef), tx.get(allowRef)]);

@@ -31,7 +31,7 @@ All editors are in `src/app/admin/content/`.
 | Feature | Files |
 | --- | --- |
 | Step state, back/menu buttons, screen transitions, RSVP lock, localStorage | `src/app/page.tsx` |
-| Content loading (JSON defaults + Firestore overrides) | `src/contexts/WeddingContentContext.tsx`, `src/data/wedding-content.json` |
+| Content loading (JSON defaults + Firestore overrides; also hands out the current `eventId`) | `src/contexts/WeddingContentContext.tsx`, `src/data/wedding-content.json` |
 | Site text: every small guest-visible wording (buttons, labels, hints, errors, menu, loader, 404, link preview). Read on the server, given to all components by the root layout; `useSiteText()` in a component | `src/lib/siteContentServer.ts` (`getSiteContent`, server only), `src/contexts/SiteTextContext.tsx` (`SiteTextProvider`, `useSiteText`), `src/lib/siteText.ts` (`SiteText` type, `mergeSiteText`, `fillText`, `fillNodes`; tested by `src/lib/siteText.test.ts`), JSON key `siteText`; editor `src/app/admin/content/SiteTextEditor.tsx` + field labels `siteTextFields.ts` |
 | Step menu overlay | `src/components/layout/CanvasMenu.tsx` |
 | Footer at the bottom of scrolling screens (monogram from `global.groomName`/`brideName` initials, tagline `global.footerTagline`, date `global.targetDate` as DD.MM.YYYY; all edited in `GlobalSettingsEditor.tsx`) | `src/components/layout/EmbeddedFooter.tsx` |
@@ -81,12 +81,12 @@ server actions and then `router.refresh()`.
 | Route | Server page | Client component | Data |
 | --- | --- | --- | --- |
 | `/admin/login` | `src/app/admin/login/page.tsx` (client) | – | Google popup sign-in → session cookie (allowlist claim in `auth.ts`) |
-| `/admin/dashboard` | `src/app/admin/dashboard/page.tsx` | – (stat cards inline) | `guests`, `registryGifts` |
-| `/admin/invites` | `src/app/admin/invites/page.tsx` | `InviteListClient.tsx` | `guests` (all codes), `settings/inviteTemplate` |
-| `/admin/guests` | `src/app/admin/guests/page.tsx` | `GuestListClient.tsx` (CSV export via papaparse) | `guests` |
-| `/admin/gifts` | `src/app/admin/gifts/page.tsx` | `GiftsClient.tsx` | `registryGifts` |
-| `/admin/registry` | `src/app/admin/registry/page.tsx` | `RegistrySelectionsClient.tsx` | `giftSelections` |
-| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder ("Site Text" tab = `SiteTextEditor.tsx`) | `websiteContent/*` + Vercel Blob |
+| `/admin/dashboard` | `src/app/admin/dashboard/page.tsx` | – (stat cards inline) | event `guests`, `registryGifts` |
+| `/admin/invites` | `src/app/admin/invites/page.tsx` | `InviteListClient.tsx` | event `guests` (all codes), `settings/inviteTemplate` |
+| `/admin/guests` | `src/app/admin/guests/page.tsx` | `GuestListClient.tsx` (CSV export via papaparse) | event `guests` |
+| `/admin/gifts` | `src/app/admin/gifts/page.tsx` | `GiftsClient.tsx` | event `registryGifts` |
+| `/admin/registry` | `src/app/admin/registry/page.tsx` | `RegistrySelectionsClient.tsx` | event `giftSelections` |
+| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder ("Site Text" tab = `SiteTextEditor.tsx`); each takes an `eventId` prop from the page | event `content/*` + Vercel Blob |
 | Content editors' shared pieces: sticky Undo / Restore / Save row with live status (`EditorSaveBar.tsx`), "Leave without saving?" guard for tab switch, admin links and page close (`unsavedChanges.tsx`), character limits + counter (`CharCount.tsx`, `TEXT_LIMITS`) | `src/app/admin/content/page.tsx` | `EditorSaveBar.tsx`, `unsavedChanges.tsx`, `CharCount.tsx` | – |
 | sidebar/nav | `src/app/admin/layout.tsx` | – | – |
 | Manage Admins (sidebar button, super admins only; no route) | `src/app/admin/layout.tsx` | `src/app/admin/components/ManageAdminsModal.tsx` | `admins`, `adminAllowlist` |
@@ -100,6 +100,8 @@ server actions and then `router.refresh()`.
 | Admin check (session cookie + `admins/{uid}`) for actions and pages | `src/lib/requireAdmin.ts` (`getAdmin`, `getAdminUid`, `requireAdmin`, `requireSuperAdmin`, `requireAdminPage`) |
 | Clear a bad session and go to login | `src/app/api/logout/route.ts` |
 | RSVP confirmation email to the guest (Gmail SMTP) | `src/lib/email/sendRsvpConfirmation.ts`, called via `after()` in `submitRsvp` |
+| Firestore paths: every collection and doc path, event-scoped (`paths`, `DEFAULT_EVENT_ID`, `isValidEventId`) | `src/lib/eventPaths.ts`, tested by `src/lib/eventPaths.test.ts` |
+| Copy root collections into an event (dry run / `--write` / `--overwrite` / `--verify`) | `scripts/migrate-to-events.js` |
 | Firebase client init | `src/lib/firebase/client.ts` |
 | Firebase admin init (env parsing) | `src/lib/firebase/admin.ts` |
 | Firestore / Storage rules | `firestore.rules`, `storage.rules`, `firebase.json`, `.firebaserc` |

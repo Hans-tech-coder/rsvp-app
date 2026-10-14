@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
@@ -52,7 +53,7 @@ interface DressCodeData {
   inspirationImages: ImageData[];
 }
 
-export function DressCodeEditor() {
+export function DressCodeEditor({ eventId }: { eventId: string }) {
   const { content: weddingContent } = useWeddingContent();
   const [data, setData] = useState<DressCodeData>({
     header: {
@@ -95,7 +96,7 @@ export function DressCodeEditor() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const docRef = doc(db, 'websiteContent', 'dressCode');
+        const docRef = doc(db, paths.content(eventId, 'dressCode'));
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -125,7 +126,7 @@ export function DressCodeEditor() {
     
     async function fetchBackup() {
       try {
-        const backupRef = doc(db, 'websiteContent', 'dressCode_backup');
+        const backupRef = doc(db, paths.content(eventId, 'dressCode_backup'));
         const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setLastBackup(backupSnap.data());
@@ -137,7 +138,7 @@ export function DressCodeEditor() {
 
     fetchData();
     fetchBackup();
-  }, [weddingContent.dressCode]);
+  }, [eventId, weddingContent.dressCode]);
 
   const handleUndo = () => {
     if (originalData) {
@@ -258,10 +259,10 @@ export function DressCodeEditor() {
         inspirationImages: data.inspirationImages.map(({ id, ...rest }) => rest)
       };
 
-      const docRef = doc(db, 'websiteContent', 'dressCode');
+      const docRef = doc(db, paths.content(eventId, 'dressCode'));
       const currentSnap = await getDoc(docRef);
       if (currentSnap.exists()) {
-        const backupRef = doc(db, 'websiteContent', 'dressCode_backup');
+        const backupRef = doc(db, paths.content(eventId, 'dressCode_backup'));
         await setDoc(backupRef, {
           ...currentSnap.data(),
           backedUpAt: new Date().toISOString()
@@ -288,7 +289,7 @@ export function DressCodeEditor() {
     
     setIsSaving(true);
     try {
-      const docRef = doc(db, 'websiteContent', 'dressCode');
+      const docRef = doc(db, paths.content(eventId, 'dressCode'));
       await setDoc(docRef, lastBackup);
       
       const mergedData = {

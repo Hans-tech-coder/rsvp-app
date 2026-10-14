@@ -2,6 +2,7 @@ import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
+import { paths } from '@/lib/eventPaths';
 import type { AdminRole } from '@/types';
 
 export type AdminSession = { uid: string; role: AdminRole };
@@ -16,7 +17,7 @@ export const getAdmin = cache(async (): Promise<AdminSession | null> => {
 
   try {
     const { uid } = await getAdminAuth().verifySessionCookie(session, true);
-    const admin = await getAdminDb().collection('admins').doc(uid).get();
+    const admin = await getAdminDb().doc(paths.admin(uid)).get();
     if (!admin.exists) return null;
     return { uid, role: admin.get('role') === 'super' ? 'super' : 'admin' };
   } catch {

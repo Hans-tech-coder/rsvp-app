@@ -2,6 +2,7 @@ import { cache } from 'react';
 import { getAdminDb } from '@/lib/firebase/admin';
 import weddingContent from '@/data/wedding-content.json';
 import { DEFAULT_SITE_TEXT, mergeSiteText, type SiteText } from '@/lib/siteText';
+import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
 
 // Server-only. The content the root layout and the 404 page need before the
 // browser loads anything: the site text and the global settings used in
@@ -11,13 +12,16 @@ import { DEFAULT_SITE_TEXT, mergeSiteText, type SiteText } from '@/lib/siteText'
 
 export type SiteGlobal = typeof weddingContent.global;
 
-export const getSiteContent = cache(async (): Promise<{ global: SiteGlobal; siteText: SiteText }> => {
+export const getSiteContent = cache(async (eventId: string = DEFAULT_EVENT_ID): Promise<{ global: SiteGlobal; siteText: SiteText }> => {
   const global = { ...weddingContent.global };
   let siteText = DEFAULT_SITE_TEXT;
 
   try {
-    const col = getAdminDb().collection('websiteContent');
-    const [globalDoc, siteTextDoc] = await Promise.all([col.doc('globalSettings').get(), col.doc('siteText').get()]);
+    const db = getAdminDb();
+    const [globalDoc, siteTextDoc] = await Promise.all([
+      db.doc(paths.content(eventId, 'globalSettings')).get(),
+      db.doc(paths.content(eventId, 'siteText')).get(),
+    ]);
 
     const g = globalDoc.data();
     if (g) {

@@ -21,7 +21,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   
-  const { content } = useWeddingContent();
+  const { content, eventId } = useWeddingContent();
   const text = useSiteText();
   const logoUrl = content.global.logo;
   const [particles, setParticles] = useState<{ id: number; left: string; delay: string; duration: string; size: string }[]>([]);
@@ -49,7 +49,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
 
 
     // Verify against database
-    const res = await verifyInviteCode(inputCode);
+    const res = await verifyInviteCode(eventId, inputCode);
     
     setIsValidating(false);
 

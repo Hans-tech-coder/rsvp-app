@@ -6,6 +6,7 @@ import { GiftSelectionModal } from './GiftSelectionModal';
 import { RegistryGift } from '@/types';
 import { getRegistryGifts, claimGift } from '@/app/actions/registry';
 import { useSiteText } from '@/contexts/SiteTextContext';
+import { useWeddingContent } from '@/contexts/WeddingContentContext';
 
 interface Gift extends RegistryGift {
   iconFn?: () => React.ReactNode;
@@ -22,7 +23,8 @@ interface CuratedRegistryScreenProps {
 
 export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreenProps) {
   const text = useSiteText();
-  const [gifts, setGifts] = useState<Gift[]>([]);
+  const { eventId } = useWeddingContent();
+  const [gifts, setGifts]= useState<Gift[]>([]);
   const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -32,7 +34,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
     // Fetch registry gifts from Server Action
     let mounted = true;
     const fetchGifts = async () => {
-      const giftData = await getRegistryGifts();
+      const giftData = await getRegistryGifts(eventId);
       if (mounted) {
         setGifts(giftData.map(data => ({
           ...data,
@@ -46,7 +48,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [eventId]);
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -64,7 +66,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
   const handleGiftSubmit = async (details: { name: string; email: string; message: string }) => {
     if (!selectedGift || !selectedGift.id) return;
 
-    const res = await claimGift(selectedGift.id, {
+    const res = await claimGift(eventId, selectedGift.id, {
       fullName: details.name,
       email: details.email,
       message: details.message

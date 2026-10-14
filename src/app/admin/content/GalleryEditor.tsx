@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
@@ -35,7 +36,7 @@ type GalleryItem = {
   file?: File;
 };
 
-export function GalleryEditor() {
+export function GalleryEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -84,10 +85,10 @@ export function GalleryEditor() {
 
   const fetchContent = async () => {
     try {
-      const docRef = doc(db, 'websiteContent', 'gallery');
+      const docRef = doc(db, paths.content(eventId, 'gallery'));
       const docSnap = await getDoc(docRef);
       
-      const backupRef = doc(db, 'websiteContent', 'gallery_backup');
+      const backupRef = doc(db, paths.content(eventId, 'gallery_backup'));
       const backupSnap = await getDoc(backupRef);
       
       if (backupSnap.exists()) {
@@ -223,11 +224,11 @@ export function GalleryEditor() {
       setError(null);
 
       // Create backup
-      const currentDocRef = doc(db, 'websiteContent', 'gallery');
+      const currentDocRef = doc(db, paths.content(eventId, 'gallery'));
       const currentDocSnap = await getDoc(currentDocRef);
       
       if (currentDocSnap.exists()) {
-        const backupRef = doc(db, 'websiteContent', 'gallery_backup');
+        const backupRef = doc(db, paths.content(eventId, 'gallery_backup'));
         await setDoc(backupRef, {
             ...currentDocSnap.data(),
             backedUpAt: new Date().toISOString()
@@ -259,7 +260,7 @@ export function GalleryEditor() {
       setSaving(true);
       setError(null);
         
-      const docRef = doc(db, 'websiteContent', 'gallery');
+      const docRef = doc(db, paths.content(eventId, 'gallery'));
       await setDoc(docRef, lastBackup);
         
       const mergedData = lastBackup.images ?? weddingContent.gallery;

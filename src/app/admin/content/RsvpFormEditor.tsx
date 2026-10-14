@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
+import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 
-export function RsvpFormEditor() {
+export function RsvpFormEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -28,7 +29,7 @@ export function RsvpFormEditor() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, 'websiteContent', 'rsvpForm');
+        const docRef = doc(db, paths.content(eventId, 'rsvpForm'));
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -40,7 +41,7 @@ export function RsvpFormEditor() {
           setOriginalData(fetchedData as typeof weddingContent.rsvpForm);
         }
 
-        const backupRef = doc(db, 'websiteContent', 'rsvpForm_backup');
+        const backupRef = doc(db, paths.content(eventId, 'rsvpForm_backup'));
         const backupSnap = await getDoc(backupRef);
         if (backupSnap.exists()) {
           setHasBackup(true);
@@ -53,7 +54,7 @@ export function RsvpFormEditor() {
     };
 
     fetchData();
-  }, []);
+  }, [eventId]);
 
   const handleChange = (section: string, field: string, value: string) => {
     setFormData(prev => ({
@@ -70,8 +71,8 @@ export function RsvpFormEditor() {
     setSaving(true);
     try {
       // Create backup of current live data before saving new data
-      const docRef = doc(db, 'websiteContent', 'rsvpForm');
-      const backupRef = doc(db, 'websiteContent', 'rsvpForm_backup');
+      const docRef = doc(db, paths.content(eventId, 'rsvpForm'));
+      const backupRef = doc(db, paths.content(eventId, 'rsvpForm_backup'));
       
       const currentDoc = await getDoc(docRef);
       if (currentDoc.exists()) {
@@ -99,8 +100,8 @@ export function RsvpFormEditor() {
   const handleRestore = async () => {
     setRestoring(true);
     try {
-      const backupRef = doc(db, 'websiteContent', 'rsvpForm_backup');
-      const docRef = doc(db, 'websiteContent', 'rsvpForm');
+      const backupRef = doc(db, paths.content(eventId, 'rsvpForm_backup'));
+      const docRef = doc(db, paths.content(eventId, 'rsvpForm'));
       
       const backupSnap = await getDoc(backupRef);
       

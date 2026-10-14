@@ -1,5 +1,6 @@
 import { getAdminDb } from '@/lib/firebase/admin';
 import { requireAdminPage } from '@/lib/requireAdmin';
+import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
 import { Guest, RegistryGift } from '@/types';
 import { Users, UserCheck, UserX, Gift, CheckCircle2 } from 'lucide-react';
 
@@ -8,6 +9,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
   await requireAdminPage();
+  // The only event until the event switcher (F11)
+  const eventId = DEFAULT_EVENT_ID;
 
   let totalCodes = 0, unusedCodes = 0, attendingCount = 0, notAttendingCount = 0;
   let totalGifts = 0, fullyClaimedGifts = 0, availableGifts = 0;
@@ -15,7 +18,7 @@ export default async function DashboardPage() {
 
   try {
     // Fetch Guests Data
-    const guestsSnapshot = await getAdminDb().collection('guests').get();
+    const guestsSnapshot = await getAdminDb().collection(paths.guests(eventId)).get();
     const guests = guestsSnapshot.docs.map(doc => doc.data() as Guest);
     
     totalCodes = guests.length;
@@ -25,7 +28,7 @@ export default async function DashboardPage() {
     notAttendingCount = usedCodes.filter(g => g.willAttend === 'No').length;
 
     // Fetch Registry Data
-    const giftsSnapshot = await getAdminDb().collection('registryGifts').get();
+    const giftsSnapshot = await getAdminDb().collection(paths.registryGifts(eventId)).get();
     const gifts = giftsSnapshot.docs.map(doc => doc.data() as RegistryGift);
     
     totalGifts = gifts.length;
