@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import weddingContentDefault from '@/data/wedding-content.json';
 import { db } from '@/lib/firebase/client';
 import { doc, getDoc } from 'firebase/firestore';
+import { normalizePrincipalSponsors } from '@/lib/principalSponsors';
 
 type WeddingContent = typeof weddingContentDefault;
 
@@ -120,7 +121,7 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
             ...newContent.entourage,
             subtitle: entourageData.subtitle ?? newContent.entourage.subtitle,
             title: entourageData.title ?? newContent.entourage.title,
-            principalSponsors: entourageData.principalSponsors ?? newContent.entourage.principalSponsors,
+            principalSponsors: normalizePrincipalSponsors(entourageData.principalSponsors) ?? newContent.entourage.principalSponsors,
             honorAttendants: entourageData.honorAttendants ?? newContent.entourage.honorAttendants,
             bridesmaids: entourageData.bridesmaids ?? newContent.entourage.bridesmaids,
             groomsmen: entourageData.groomsmen ?? newContent.entourage.groomsmen,

@@ -124,7 +124,8 @@ transaction rejects when `currentCount >= maxCount`.
 - **Scroll effects:** scrolling screens use the `ScrollMotion.tsx` primitives
   (rules in `docs/conventions.md` → Motion). Our Story: one `ScrollReveal` per
   timeline card, `Parallax` on every other photo. Entourage: one reveal per
-  name column, second column delayed. Details: one reveal per venue card plus
+  name column, second column delayed; principal sponsors reveal one pair row at
+  a time. Details: one reveal per venue card plus
   the order-of-events block. Dress Code: palette card with staggered swatches.
   Gallery: the slider block. FAQ: one reveal per question (capped delay).
   Registry: one reveal per card. Each screen's Continue button reveals too, and

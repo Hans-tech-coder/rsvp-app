@@ -5,6 +5,7 @@ import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal, SCROLL_MOTION } from '@/components/ui/ScrollMotion';
+import { formatSponsor, isPairEmpty } from '@/lib/principalSponsors';
 
 interface EntourageScreenProps {
   onContinue: () => void;
@@ -14,6 +15,8 @@ interface EntourageScreenProps {
 // step, so side-by-side columns stagger softly and stacked ones (phone)
 // reveal as they scroll in.
 const SECOND_COLUMN_DELAY = SCROLL_MOTION.revealStagger;
+
+const SPONSOR_NAME_CLASS = "font-cormorant text-xl md:text-2xl lg:text-3xl text-wedding-cream/85 hover:text-wedding-goldlight hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default";
 
 export function EntourageScreen({ onContinue }: EntourageScreenProps) {
   const { content } = useWeddingContent();
@@ -69,24 +72,36 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             Principal Sponsors 
             <span className="w-16 md:w-32 h-[1px] bg-gradient-to-l from-transparent to-wedding-gold/30"></span>
           </h3>
-          <div className="grid grid-cols-2 gap-4 md:gap-16 max-w-5xl mx-auto px-2 md:px-0 relative">
+          {/* One row per pair, ninang left and ninong right, so a pair always
+              faces each other on desktop. Phones get one column: a couple
+              shares a line, two solo sponsors get a line each. */}
+          <div className="max-w-5xl mx-auto px-4 md:px-0 relative">
             <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-wedding-gold/20 to-transparent -translate-x-1/2 hidden md:block"></div>
-            
-            <ScrollReveal className="flex flex-col items-center">
-              <ul className="text-center space-y-6 md:space-y-8 w-full px-2">
-                {content.entourage.principalSponsors.filter(s => !s.startsWith('Mr.')).map((name, index) => (
-                  <li key={index} className="font-cormorant text-xl md:text-2xl lg:text-3xl text-wedding-cream/85 hover:text-wedding-goldlight hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default">{name}</li>
-                ))}
-              </ul>
-            </ScrollReveal>
 
-            <ScrollReveal delay={SECOND_COLUMN_DELAY} className="flex flex-col items-center">
-              <ul className="text-center space-y-6 md:space-y-8 w-full px-2">
-                {content.entourage.principalSponsors.filter(s => s.startsWith('Mr.')).map((name, index) => (
-                  <li key={index} className="font-cormorant text-xl md:text-2xl lg:text-3xl text-wedding-cream/85 hover:text-wedding-goldlight hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default">{name}</li>
-                ))}
-              </ul>
-            </ScrollReveal>
+            <ul className="text-center space-y-6 md:space-y-8">
+              {content.entourage.principalSponsors.filter(pair => !isPairEmpty(pair)).map((pair, index) => {
+                const ninang = formatSponsor(pair.ninang);
+                const ninong = formatSponsor(pair.ninong);
+                const isCouple = pair.couple && !!ninang && !!ninong;
+                return (
+                  <li key={index}>
+                    <ScrollReveal>
+                      {isCouple && (
+                        <p className={`md:hidden leading-snug ${SPONSOR_NAME_CLASS}`}>
+                          <span className="whitespace-nowrap">{ninong}</span>{' '}
+                          {/* Wraps before the "&" so a long couple reads as one unit */}
+                          <span className="whitespace-nowrap"><span className="italic text-wedding-gold/70">&amp;</span> {ninang}</span>
+                        </p>
+                      )}
+                      <div className={`${isCouple ? 'hidden md:grid' : 'grid'} grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-x-16`}>
+                        <p className={`${ninang ? '' : 'hidden md:block'} ${SPONSOR_NAME_CLASS}`}>{ninang}</p>
+                        <p className={`${ninong ? '' : 'hidden md:block'} ${SPONSOR_NAME_CLASS}`}>{ninong}</p>
+                      </div>
+                    </ScrollReveal>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         </div>
 

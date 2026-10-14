@@ -25,6 +25,8 @@ useWeddingContent().content        (read by every screen)
    - shallow spread: `welcomeScreen`, `entranceScreen`, `registry`, `rsvpCta`, `rsvpForm`
    - one level deeper for nested objects: `details.header/ceremony/reception`, `dressCode.header`
    - field-by-field with `??`: `ourStory`, `entourage`, `dressCode` fields
+     (`entourage.principalSponsors` goes through `normalizePrincipalSponsors()`
+     first, see `docs/data-model.md`)
    - field-by-field with `||` (empty string falls back to default): `globalSettings`
    - special: `gallery` doc → `content.gallery` = `images[]`, `content.galleryHeader` = `header`;
      `faq` doc → `content.faq` = `items[]`, `content.faqHeader` = `header`

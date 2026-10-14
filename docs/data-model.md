@@ -96,6 +96,30 @@ the `gallery` key holds both array-index keys (`"0"`…`"7"`) and `images` /
 `header`; there is an extra `faqs` key (the site reads `faq` + `faqHeader`, not
 `faqs`). Do not "fix" these by hand without checking what the screens read.
 
+**`entourage.principalSponsors`** is an array of pairs, one row per pair in
+display order:
+
+```ts
+{ ninang: { title, name }, ninong: { title, name }, couple: boolean }
+```
+
+`title` comes from the editor's dropdown (`NINANG_TITLES` / `NINONG_TITLES` in
+`src/lib/principalSponsors.ts`) or is `""`; either side may be blank for a solo
+sponsor with no partner. Desktop shows ninang left, ninong right on one row;
+phones show a couple on one line (`ninong & ninang`) and two solo
+sponsors on a line each. Content saved before Oct 2026 is a flat `string[]`
+(`"Mrs. A"`, `"Mr. B"`, couples as `"Mr. B & Mrs. A"`).
+`normalizePrincipalSponsors()` reads both shapes (in the provider and in the
+editor, including the backup restore), so a legacy doc keeps rendering; the
+first save from `EntourageEditor` writes the pair shape. The flag was first
+named `married`; one save on 2026-10-14 stored it under that name, and the
+normalizer still reads it as `couple`. **Rollback:** code from before the change
+crashes on the pair objects (`startsWith is not a function`), so rolling the
+code back also needs `websiteContent/entourage` rewritten as a `string[]`.
+Both `entourage` and `entourage_backup` already hold the pair shape, so the
+backup cannot do this; write the strings by hand (couples as
+`"Mr. B & Mrs. A"`, which the normalizer pairs again).
+
 ## Image storage (Vercel Blob)
 
 Admin editors call `uploadImage(file, name, opts)` from

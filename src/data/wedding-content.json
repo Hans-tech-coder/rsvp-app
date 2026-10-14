@@ -91,30 +91,138 @@
       ]
     },
     "principalSponsors": [
-      "Mrs. Luningning N. Obena",
-      "Mr. Melchor Vardeleon",
-      "Mrs. Analyn Gonzales",
-      "Mr. Eduardo D. Nicolas",
-      "Ms. Ira Veronica Santillan",
-      "Mr. Glenn P. Perpinian",
-      "Mrs. Angelina C. Soriano",
-      "Mr. John Edward U. Bautista",
-      "Mrs. Lina Adams",
-      "Mr. Larry Adams",
-      "Mrs. Esmelia R. Gaña",
-      "Mr. Mario B. Gaña",
-      "Mrs. Vangie Presto",
-      "Mr. Ahmed N. Obena",
-      "Mrs. Margarette Oliver",
-      "Mr. Edwin Oliver",
-      "Mrs. Raziel C. Catacutan",
-      "Mr. Allan N. Obena",
-      "Mrs. Kristine Joy A. Navarro",
-      "Mr. Dimtter D. Navarro",
-      "Mrs. Lani M. Villarico",
-      "Mr. Cristobal R. De Mayo",
-      "Mrs. Lolita A. Salayog",
-      "Mr. Maglangit S. Decampong"
+      {
+        "ninang": {
+          "title": "Mrs.",
+          "name": "Luningning N. Obena"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "Melchor Vardeleon"
+        },
+        "couple": false
+      },
+      {
+        "ninang": {
+          "title": "Mrs.",
+          "name": "Analyn Gonzales"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "Eduardo D. Nicolas"
+        },
+        "couple": false
+      },
+      {
+        "ninang": {
+          "title": "Ms.",
+          "name": "Ira Veronica Santillan"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "Glenn P. Perpinian"
+        },
+        "couple": false
+      },
+      {
+        "ninang": {
+          "title": "Mrs.",
+          "name": "Angelina C. Soriano"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "John Edward U. Bautista"
+        },
+        "couple": false
+      },
+      {
+        "ninang": {
+          "title": "Mrs.",
+          "name": "Lina Adams"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "Larry Adams"
+        },
+        "couple": true
+      },
+      {
+        "ninang": {
+          "title": "Mrs.",
+          "name": "Esmelia R. Gaña"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "Mario B. Gaña"
+        },
+        "couple": true
+      },
+      {
+        "ninang": {
+          "title": "Mrs.",
+          "name": "Vangie Presto"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "Ahmed N. Obena"
+        },
+        "couple": false
+      },
+      {
+        "ninang": {
+          "title": "Mrs.",
+          "name": "Margarette Oliver"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "Edwin Oliver"
+        },
+        "couple": true
+      },
+      {
+        "ninang": {
+          "title": "Mrs.",
+          "name": "Raziel C. Catacutan"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "Allan N. Obena"
+        },
+        "couple": false
+      },
+      {
+        "ninang": {
+          "title": "Mrs.",
+          "name": "Kristine Joy A. Navarro"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "Dimtter D. Navarro"
+        },
+        "couple": true
+      },
+      {
+        "ninang": {
+          "title": "Mrs.",
+          "name": "Lani M. Villarico"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "Cristobal R. De Mayo"
+        },
+        "couple": false
+      },
+      {
+        "ninang": {
+          "title": "Mrs.",
+          "name": "Lolita A. Salayog"
+        },
+        "ninong": {
+          "title": "Mr.",
+          "name": "Maglangit S. Decampong"
+        },
+        "couple": false
+      }
     ],
     "honorAttendants": {
       "bestMan": "Chris John A. Obena",

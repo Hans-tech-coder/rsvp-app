@@ -51,6 +51,7 @@ All editors are in `src/app/admin/content/`.
 | Slow falling rose petals, burgundy/red/white, CSS only (404 page) | `src/components/effects/FallingPetals.tsx` + `.t-petal*` in `globals.css` |
 | Wedding-ring cursor: gold stardust trail, tilt over clickables, sparkle burst on click (mouse/trackpad only, mounted in `Home` in `page.tsx`) | `src/components/effects/WeddingCursor.tsx` + `.t-cursor*` in `globals.css` |
 | Mouse detection (`t-mouse` on `<html>`) that gates every hover style, the ring cursor and the mouse hint | `pointer-init` script in `src/app/layout.tsx`, `hasMouse()` in `src/lib/pointer.ts`, `@custom-variant hover` in `globals.css` |
+| Principal sponsors pair shape, title lists, legacy `string[]` reader | `src/lib/principalSponsors.ts`, tested by `src/lib/principalSponsors.test.ts`; used by `EntourageScreen.tsx`, `EntourageEditor.tsx`, `WeddingContentContext.tsx` |
 | Image download proxy | `src/app/api/download/route.ts` (called from `DetailsScreen.tsx`); host allowlist + filename sanitizer in `src/lib/downloadProxy.ts`, tested by `src/lib/downloadProxy.test.ts` |
 | Image upload (admin editors) | `src/lib/blob/uploadImage.ts` (compress + client upload), `src/app/api/upload/route.ts` (admin-only Blob token) |
 
@@ -112,12 +113,12 @@ Read these by range (`grep -n` then read around the line), never whole.
 | 700 | `src/app/admin/content/DressCodeEditor.tsx` |
 | 661 | `src/app/admin/content/RegistryEditor.tsx` |
 | 597 | `src/app/admin/content/OurStoryEditor.tsx` |
+| 594 | `src/data/wedding-content.json` |
 | 557 | `src/app/admin/content/GalleryEditor.tsx` |
+| 538 | `src/app/admin/content/EntourageEditor.tsx` |
 | 498 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
 | 493 | `src/app/admin/content/FaqsEditor.tsx` |
-| 486 | `src/data/wedding-content.json` |
 | 471 | `src/components/ui/circular-image-gallery.tsx` |
 | 469 | `src/app/admin/content/EventDetailsEditor.tsx` |
 | 464 | `src/app/page.tsx` |
 | 435 | `src/app/admin/content/RsvpFormEditor.tsx` |
-| 400 | `src/app/admin/content/EntourageEditor.tsx` |
