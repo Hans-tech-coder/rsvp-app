@@ -9,6 +9,8 @@ import {
   formatPhoneDigits,
   normalizePhoneInput,
 } from '@/lib/phoneCountries';
+import { useSiteText } from '@/contexts/SiteTextContext';
+import { fillText } from '@/lib/siteText';
 
 interface PhoneFieldProps {
   id: string;
@@ -23,6 +25,7 @@ interface PhoneFieldProps {
 /** Phone input with a country-code picker, live formatting, a digit cap per
  *  country and a "N more digits" guide. Errors replace the guide line. */
 export function PhoneField({ id, label, country, digits, error, onChange, onBlur }: PhoneFieldProps) {
+  const text = useSiteText().phone;
   const inputRef = useRef<HTMLInputElement>(null);
   const caretDigits = useRef<number | null>(null);
   const formatted = formatPhoneDigits(digits, country);
@@ -73,15 +76,15 @@ export function PhoneField({ id, label, country, digits, error, onChange, onBlur
   let guide: React.ReactNode;
   if (count === 0) {
     guide = isOther
-      ? 'Start with your country code, then your number.'
-      : `Enter the ${digitRangeLabel(country)}-digit number that follows +${country.dial}.`;
+      ? text.guideOther
+      : fillText(text.guide, { digits: digitRangeLabel(country), dial: country.dial });
   } else if (!complete) {
-    guide = `${remaining} more digit${remaining === 1 ? '' : 's'} to go`;
+    guide = remaining === 1 ? text.remainingOne : fillText(text.remainingMany, { count: remaining });
   } else {
     guide = (
       <span className="inline-flex items-center gap-1 text-wedding-goldlight">
         <Check className="w-3.5 h-3.5" aria-hidden="true" />
-        {count === country.max ? 'Complete' : 'Looks good'}
+        {count === country.max ? text.complete : text.looksGood}
       </span>
     );
   }
@@ -100,7 +103,7 @@ export function PhoneField({ id, label, country, digits, error, onChange, onBlur
         {/* Native select on top of the visible chip: real picker on phones, keyboard accessible. */}
         <div className="relative shrink-0 flex items-center pr-3 mr-3 border-r border-wedding-gold/20 has-[select:focus-visible]:ring-2 has-[select:focus-visible]:ring-wedding-gold">
           <span aria-hidden="true" className="flex items-center gap-1.5 py-2 text-sm text-wedding-cream">
-            <span className="text-[11px] tracking-wider text-wedding-cream/60">{isOther ? 'INTL' : country.iso}</span>
+            <span className="text-[11px] tracking-wider text-wedding-cream/60">{isOther ? text.otherChip : country.iso}</span>
             <span className="text-wedding-goldlight">+{country.dial}</span>
             <ChevronDown className="w-3.5 h-3.5 text-wedding-gold/70" />
           </span>
@@ -112,7 +115,7 @@ export function PhoneField({ id, label, country, digits, error, onChange, onBlur
           >
             {PHONE_COUNTRIES.map((x) => (
               <option key={x.iso} value={x.iso} className="bg-wedding-dark text-wedding-cream">
-                {x.dial ? `${x.name} (+${x.dial})` : `${x.name} (type the code)`}
+                {x.dial ? `${x.name} (+${x.dial})` : text.otherOption}
               </option>
             ))}
           </select>
@@ -127,7 +130,7 @@ export function PhoneField({ id, label, country, digits, error, onChange, onBlur
           value={formatted}
           onChange={handleInput}
           onBlur={onBlur}
-          placeholder={country.example}
+          placeholder={isOther ? text.otherPlaceholder : country.example}
           aria-required="true"
           aria-invalid={error ? true : undefined}
           aria-describedby={messageId}

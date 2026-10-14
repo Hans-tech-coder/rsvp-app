@@ -7,6 +7,7 @@ import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { ViewOverlay, viewCardProps } from '@/components/ui/ViewOverlay';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useSiteText } from '@/contexts/SiteTextContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal, ScrollRevealItem } from '@/components/ui/ScrollMotion';
 import { CircularImageGallery, loadGsap } from '@/components/ui/circular-image-gallery';
@@ -18,6 +19,7 @@ interface DressCodeScreenProps {
 
 export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScreenProps) {
   const { content } = useWeddingContent();
+  const text = useSiteText();
   const scrollRef = useRef<HTMLElement>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -53,8 +55,8 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
 
       <div className="max-w-4xl mx-auto text-center w-full relative z-10">
         <TextsReveal className="mb-16 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.dressCode.header?.subtitle || "The Style Guideline"}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.dressCode.header?.title || "La Palette de l'Amour"}</h2>
+          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.dressCode.header?.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.dressCode.header?.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
         </TextsReveal>
 
@@ -84,13 +86,13 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
           {/* Attire Guidelines */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left border-t border-wedding-gold/20 pt-8 mb-10">
             <div>
-              <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">For Ladies</h4>
+              <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">{text.dressCode.ladies}</h4>
               <p className="text-sm font-cormorant text-wedding-cream leading-relaxed">
                 {content.dressCode.ladiesGuideline}
               </p>
             </div>
             <div>
-              <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">For Gentlemen</h4>
+              <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">{text.dressCode.gentlemen}</h4>
               <p className="text-sm font-cormorant text-wedding-cream leading-relaxed">
                 {content.dressCode.gentlemenGuideline}
               </p>
@@ -99,7 +101,7 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
 
           {/* Outfit Inspiration Slider */}
           <div className="border-t border-wedding-gold/20 pt-8 mt-4">
-            <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold/80 font-bold mb-6 text-center">Outfit Inspiration</h4>
+            <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold/80 font-bold mb-6 text-center">{text.dressCode.inspiration}</h4>
             
             <div className="relative w-full max-w-full" style={{
               mask: 'linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)',
@@ -124,8 +126,8 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
       </div>
 
       <ScrollReveal delay={0.2} className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
-        <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
+        <button onClick={onContinue} aria-label={text.common.continue} className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
+          <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">{text.common.continue}</span>
           <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
             <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>

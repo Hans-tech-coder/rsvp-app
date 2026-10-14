@@ -7,7 +7,8 @@ The guest site is **one client page** (`src/app/page.tsx`) that swaps full-scree
 
 `currentStep` (0–9) picks the screen. Order and labels are defined twice and
 must stay in sync: the `currentStep === n` blocks in `page.tsx` and
-`menuItems` in `src/components/layout/CanvasMenu.tsx`.
+`menuItems` in `src/components/layout/CanvasMenu.tsx` (labels from
+`siteText.menu`, editable in the Site Text tab).
 
 | Step | Screen | Menu label |
 | --- | --- | --- |
@@ -64,7 +65,7 @@ and the table in `docs/FEATURE-MAP.md`.
    the country code) or a submit attempt. When it appears every asterisk
    pulses three times (`data-hint="on"` on the form,
    `group-data-[hint=on]/form:` classes). The hint, placeholder and error texts
-   are hard-coded in `RsvpScreen.tsx` / `PhoneField.tsx`, not editable.
+   come from site text (`siteText.rsvp`, `siteText.phone`; Site Text tab).
    The phone country is first guessed from the device time zone, then
    language (on Windows any UTC+8 zone counts as PH, because Windows has no
    Manila zone and PH PCs report e.g. `Asia/Shanghai`), then replaced by the

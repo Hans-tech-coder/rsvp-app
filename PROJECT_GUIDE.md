@@ -84,7 +84,7 @@ commit, or paste their values.
 src/
   app/
     page.tsx                 guest site: the whole 10-step flow (client component)
-    layout.tsx               fonts, theme script, OG metadata (reads Firestore), <AudioPlayer/>
+    layout.tsx               fonts, theme script, metadata + SiteTextProvider (reads Firestore), <AudioPlayer/>
     globals.css              Tailwind @theme colors/fonts + motion tokens + reveal CSS
     actions/                 server actions: rsvp.ts, registry.ts, admin.ts, admins.ts, auth.ts
     api/download/route.ts    image download proxy (used by DetailsScreen)
@@ -100,10 +100,13 @@ src/
     effects/                 TwinkleSparks, FallingPetals (404 page), WeddingCursor, DepthParallaxScene
     layout/                  CanvasMenu (step menu), EmbeddedFooter
   contexts/WeddingContentContext.tsx   JSON defaults + Firestore overrides -> useWeddingContent()
+  contexts/SiteTextContext.tsx         site text (buttons, labels, errors) from the root layout -> useSiteText()
   data/wedding-content.json  default/fallback content for every screen
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
   lib/blob/uploadImage.ts    compress + upload an image to Vercel Blob (all editors)
   lib/requireAdmin.ts        admin check for server actions and admin pages (server only)
+  lib/siteText.ts            SiteText type, merge, {placeholder} fill (+ .test.ts)
+  lib/siteContentServer.ts   getSiteContent(): globalSettings + siteText via admin SDK (server only)
   lib/downloadProxy.ts       URL allowlist + filename sanitizer for /api/download (+ .test.ts)
   lib/email/sendRsvpConfirmation.ts   guest RSVP confirmation email via Gmail SMTP (server only)
   types/index.ts             Guest, RegistryGift, GiftSelection, AdminUser

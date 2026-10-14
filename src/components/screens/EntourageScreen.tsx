@@ -3,6 +3,7 @@
 import React, { useRef } from 'react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useSiteText } from '@/contexts/SiteTextContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal, SCROLL_MOTION } from '@/components/ui/ScrollMotion';
 import { formatSponsor, isPairEmpty } from '@/lib/principalSponsors';
@@ -20,6 +21,7 @@ const SPONSOR_NAME_CLASS = "font-cormorant text-xl md:text-2xl lg:text-3xl text-
 
 export function EntourageScreen({ onContinue }: EntourageScreenProps) {
   const { content } = useWeddingContent();
+  const text = useSiteText();
   const scrollRef = useRef<HTMLElement>(null);
 
   return (
@@ -42,7 +44,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             {/* Parents of the Bride */}
             <ScrollReveal className="flex flex-col items-center justify-start group cursor-default">
               <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-8 flex items-center justify-center gap-4 w-full">
-                <span className="px-2">Parents of the Bride</span>
+                <span className="px-2">{text.entourage.parentsOfBride}</span>
               </h3>
               <div className="text-center px-4 w-full space-y-6 md:space-y-8">
                 {content.entourage.parents.bride.map((name, index) => (
@@ -54,7 +56,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             {/* Parents of the Groom */}
             <ScrollReveal delay={SECOND_COLUMN_DELAY} className="flex flex-col items-center justify-start group cursor-default">
               <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-8 flex items-center justify-center gap-4 w-full">
-                <span className="px-2">Parents of the Groom</span>
+                <span className="px-2">{text.entourage.parentsOfGroom}</span>
               </h3>
               <div className="text-center px-4 w-full space-y-6 md:space-y-8">
                 {content.entourage.parents.groom.map((name, index) => (
@@ -69,7 +71,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
         <div className="mb-24 md:mb-32">
           <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-12 flex items-center justify-center gap-4">
             <span className="w-16 md:w-32 h-[1px] bg-gradient-to-r from-transparent to-wedding-gold/30"></span> 
-            Principal Sponsors 
+            {text.entourage.principalSponsors}
             <span className="w-16 md:w-32 h-[1px] bg-gradient-to-l from-transparent to-wedding-gold/30"></span>
           </h3>
           {/* One row per pair, ninang left and ninong right, so a pair always
@@ -113,7 +115,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             {/* Maid of Honor Column */}
             <ScrollReveal className="flex flex-col items-center justify-start group cursor-default">
               <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-8 flex items-center justify-center gap-4 w-full">
-                <span className="px-2">Maid of Honor</span>
+                <span className="px-2">{text.entourage.maidOfHonor}</span>
               </h3>
               <div className="text-center px-4 w-full">
                 <h4 className="font-cormorant text-2xl md:text-3xl lg:text-4xl text-wedding-cream font-medium tracking-widest group-hover:text-wedding-goldlight group-hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] transition-all duration-500 whitespace-nowrap">{content.entourage.honorAttendants.maidOfHonor}</h4>
@@ -123,7 +125,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
             {/* Best Man Column */}
             <ScrollReveal delay={SECOND_COLUMN_DELAY} className="flex flex-col items-center justify-start group cursor-default">
               <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-8 flex items-center justify-center gap-4 w-full">
-                <span className="px-2">Best Man</span>
+                <span className="px-2">{text.entourage.bestMan}</span>
               </h3>
               <div className="text-center px-4 w-full">
                 <h4 className="font-cormorant text-2xl md:text-3xl lg:text-4xl text-wedding-cream font-medium tracking-widest group-hover:text-wedding-goldlight group-hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] transition-all duration-500 whitespace-nowrap">{content.entourage.honorAttendants.bestMan}</h4>
@@ -138,7 +140,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
           
           <ScrollReveal className="flex flex-col items-center">
             <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-10 flex items-center justify-center gap-4 w-full">
-              <span className="px-2">Bridesmaids</span>
+              <span className="px-2">{text.entourage.bridesmaids}</span>
             </h3>
             <ul className="text-center space-y-6 md:space-y-8 w-full px-4">
               {content.entourage.bridesmaids.map((name, index) => (
@@ -149,7 +151,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
 
           <ScrollReveal delay={SECOND_COLUMN_DELAY} className="flex flex-col items-center">
             <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-10 flex items-center justify-center gap-4 w-full">
-              <span className="px-2">Groomsmen</span>
+              <span className="px-2">{text.entourage.groomsmen}</span>
             </h3>
             <ul className="text-center space-y-6 md:space-y-8 w-full px-4">
               {content.entourage.groomsmen.map((name, index) => (
@@ -165,7 +167,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
           
           <ScrollReveal className="flex flex-col items-center">
             <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-10 flex items-center justify-center gap-4 w-full">
-              <span className="px-2">Flower Girls</span>
+              <span className="px-2">{text.entourage.flowerGirls}</span>
             </h3>
             <ul className="text-center space-y-6 md:space-y-8 w-full px-4">
               {content.entourage.flowerGirls.map((name, index) => (
@@ -176,7 +178,7 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
 
           <ScrollReveal delay={SECOND_COLUMN_DELAY} className="flex flex-col items-center">
             <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-wedding-gold/80 text-center mb-10 flex items-center justify-center gap-4 w-full">
-              <span className="px-2">Ring Bearer</span>
+              <span className="px-2">{text.entourage.ringBearer}</span>
             </h3>
             <ul className="text-center space-y-6 md:space-y-8 w-full px-4">
               {content.entourage.ringBearers.map((name, index) => (
@@ -188,8 +190,8 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
       </div>
 
       <ScrollReveal delay={0.2} className="w-full flex justify-center pb-12 pt-8 relative z-20">
-        <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
+        <button onClick={onContinue} aria-label={text.common.continue} className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
+          <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">{text.common.continue}</span>
           <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
             <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>

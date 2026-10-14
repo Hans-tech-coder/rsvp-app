@@ -13,12 +13,14 @@ import { FaqsEditor } from './FaqsEditor';
 import { RegistryEditor } from './RegistryEditor';
 import { RsvpCtaEditor } from './RsvpCtaEditor';
 import { RsvpFormEditor } from './RsvpFormEditor';
+import { SiteTextEditor } from './SiteTextEditor';
 
 export default function ContentManagerPage() {
   const [activeTab, setActiveTab] = useState('global-settings');
 
   const tabs = [
     { id: 'global-settings', label: 'Global Settings' },
+    { id: 'site-text', label: 'Site Text' },
     { id: 'welcome', label: 'Welcome Screen' },
     { id: 'entrance', label: 'Entrance Screen' },
     { id: 'our-story', label: 'Our Story' },
@@ -96,8 +98,9 @@ export default function ContentManagerPage() {
           {activeTab === 'registry' && <RegistryEditor />}
           {activeTab === 'rsvp-cta' && <RsvpCtaEditor />}
           {activeTab === 'rsvp-form' && <RsvpFormEditor />}
+          {activeTab === 'site-text' && <SiteTextEditor />}
           
-          {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && activeTab !== 'event-details' && activeTab !== 'dress-code' && activeTab !== 'gallery' && activeTab !== 'faqs' && activeTab !== 'registry' && activeTab !== 'rsvp-cta' && activeTab !== 'rsvp-form' && (
+          {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && activeTab !== 'event-details' && activeTab !== 'dress-code' && activeTab !== 'gallery' && activeTab !== 'faqs' && activeTab !== 'registry' && activeTab !== 'rsvp-cta' && activeTab !== 'rsvp-form' && activeTab !== 'site-text' && (
             <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center text-gray-500 dark:text-zinc-400 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-xl">
               <p className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-2">
                 {tabs.find(t => t.id === activeTab)?.label}

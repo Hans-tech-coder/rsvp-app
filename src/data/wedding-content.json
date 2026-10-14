@@ -4,12 +4,10 @@
     "ogImage": "https://zclb8o6hebl8hcyr.public.blob.vercel-storage.com/images/global-og-1mbYmcdV6dwoZTYfthMHbALUD7Ix6N.jpg",
     "brideName": "Czay",
     "groomName": "Hans",
-    "dateFull": "Sunday, the twentieth of December, two thousand twenty-sixs",
     "venueShort": "Camiling, Tarlac",
     "targetDate": "December 20, 2026 15:00:00",
     "coupleNameFormat": "Hans & Czay",
     "footerTagline": "Together is a beautiful place to be",
-    "dateShort": "December 21, 2026",
     "receptionLocation": "DokNWellness Natural Health Care Center",
     "ceremonyTime": "3:00 PM",
     "receptionAddress": "Purok 1, San Isidro, Camiling, 2306 Tarlac",
@@ -592,5 +590,177 @@
       }
     ],
     "updatedAt": "2026-08-02T03:50:06.782Z"
+  },
+  "siteText": {
+    "common": {
+      "continue": "Continue",
+      "view": "View"
+    },
+    "menu": {
+      "welcome": "Welcome",
+      "ourStory": "Our Story",
+      "entourage": "Entourage",
+      "details": "Details",
+      "dressCode": "Dress Code",
+      "gallery": "Gallery",
+      "faqs": "FAQs",
+      "registry": "Registry",
+      "rsvpCta": "Join Our Day",
+      "rsvp": "RSVP"
+    },
+    "loading": {
+      "title": "Curating Elegance",
+      "subtitle": "Please wait"
+    },
+    "welcome": {
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Min",
+      "seconds": "Sec"
+    },
+    "motionHint": {
+      "mouseTitle": "Move your mouse",
+      "mouseText": "to bring the scene to life",
+      "tiltTitle": "Tilt your phone",
+      "tiltText": "to bring the scene to life",
+      "iosTitle": "Tap to enable motion",
+      "iosText": "then tilt your phone"
+    },
+    "music": {
+      "title": "Music is playing",
+      "mouseHint": "Click to mute · hover for volume",
+      "touchHint": "Tap to mute or change the volume"
+    },
+    "entrance": {
+      "eyebrow": "The Royal Invitation",
+      "instructions": "Please use the unique access code provided\nwith your invitation link",
+      "codePlaceholder": "ENTER CODE",
+      "button": "Confirm Attendance",
+      "validating": "Validating...",
+      "granted": "Access Granted",
+      "preparing": "Preparing your royal invitation...",
+      "errors": {
+        "invalid": "Invalid invite code.",
+        "used": "This invite code has already been used.",
+        "failed": "Failed to verify code. Please try again."
+      }
+    },
+    "ourStory": {
+      "watchVideo": "Watch Video"
+    },
+    "entourage": {
+      "parentsOfBride": "Parents of the Bride",
+      "parentsOfGroom": "Parents of the Groom",
+      "principalSponsors": "Principal Sponsors",
+      "maidOfHonor": "Maid of Honor",
+      "bestMan": "Best Man",
+      "bridesmaids": "Bridesmaids",
+      "groomsmen": "Groomsmen",
+      "flowerGirls": "Flower Girls",
+      "ringBearer": "Ring Bearer"
+    },
+    "details": {
+      "location": "Location:",
+      "address": "Address:",
+      "viewLocation": "View Location",
+      "addToCalendar": "Add To Calendar",
+      "saveCopy": "Save a Copy",
+      "downloading": "Downloading...",
+      "mapTitle": "Location Map"
+    },
+    "dressCode": {
+      "ladies": "For Ladies",
+      "gentlemen": "For Gentlemen",
+      "inspiration": "Outfit Inspiration"
+    },
+    "registry": {
+      "visitRegistry": "Visit Wedding Registry",
+      "scanQr": "Scan the QR code to transfer",
+      "thankYou": "Thank you for your generosity",
+      "qrMissing": "Place {bank} QR Code Here"
+    },
+    "curatedRegistry": {
+      "title": "Curated Registry Suggestions",
+      "intro": "Should you wish to send a specific home keepsake, please choose one below to select it.",
+      "viewItem": "View Item",
+      "selectGift": "Select This Gift",
+      "selected": "Selected",
+      "errors": {
+        "notFound": "This gift is no longer in the registry.",
+        "full": "This gift has already been fully claimed.",
+        "failed": "Failed to claim gift. Please try again."
+      }
+    },
+    "giftModal": {
+      "eyebrow": "Gift Selection",
+      "intro": "Please provide your details below to confirm you are gifting this item to the couple.",
+      "nameLabel": "Full Name",
+      "namePlaceholder": "John & Jane Doe",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "your@email.com",
+      "messageLabel": "Short Message (Optional)",
+      "messagePlaceholder": "Wishing you a lifetime of love and happiness...",
+      "submit": "Confirm Selection"
+    },
+    "rsvp": {
+      "optional": "(optional)",
+      "requiredHintTitle": "Before you begin",
+      "requiredHintText": "Fields marked {star} are required",
+      "placeholders": {
+        "fullName": "e.g. Juan Dela Cruz",
+        "email": "e.g. juan@gmail.com"
+      },
+      "hints": {
+        "fullName": "Your first and last name, so we can find you on the guest list.",
+        "email": "We'll send your RSVP confirmation here.",
+        "attendance": "Choose one. Your response can only be sent once.",
+        "proxy": "Someone attending in your place. Leave blank if no one.",
+        "message": "A wish, a memory, or a few kind words."
+      },
+      "errors": {
+        "fullNameMissing": "Please enter your full name.",
+        "fullNameIncomplete": "Please include both your first and last name.",
+        "emailMissing": "Please enter your email address.",
+        "emailInvalid": "That email doesn't look right. Try something like name@example.com.",
+        "phoneMissing": "Please enter your phone number so we can reach you.",
+        "phoneTooShort": "This number is too short. {country} numbers have {digits} digits after +{dial}.",
+        "phoneTooShortOther": "This number is too short. Include your country code (at least {min} digits).",
+        "attendanceMissing": "Please let us know if you can attend.",
+        "consentMissing": "Please tick the box to agree before sending your response.",
+        "checkOne": "Please check the highlighted field above.",
+        "checkMany": "Please check the {count} highlighted fields above.",
+        "codeInvalid": "Invalid invite code.",
+        "codeUsed": "This invite code has already been used.",
+        "submitFailed": "Something went wrong. Please try again."
+      }
+    },
+    "phone": {
+      "guide": "Enter the {digits}-digit number that follows +{dial}.",
+      "guideOther": "Start with your country code, then your number.",
+      "remainingOne": "1 more digit to go",
+      "remainingMany": "{count} more digits to go",
+      "looksGood": "Looks good",
+      "complete": "Complete",
+      "otherChip": "INTL",
+      "otherOption": "Other country (type the code)",
+      "otherPlaceholder": "Country code + number"
+    },
+    "footer": {
+      "credit": "Designed with modern elegance & love."
+    },
+    "notFound": {
+      "pageTitle": "Page not found | {couple}",
+      "heading": "Lost on the way to the aisle?",
+      "description": "This page doesn't exist or has moved. The celebration is just this way.",
+      "button": "Back to the celebration",
+      "resumeNote": "You'll pick up right where you left off.",
+      "daysLeftOne": "{days} day until {couple} say “I do” in {venue}",
+      "daysLeftMany": "{days} days until {couple} say “I do” in {venue}",
+      "after": "Thank you for celebrating {couple} with us"
+    },
+    "seo": {
+      "title": "{couple} | A Celebration of Love",
+      "description": "We joyfully request the honor of your presence as we celebrate the beginning of our forever. Join us on {date}."
+    }
   }
 }

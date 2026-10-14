@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useSiteText } from '@/contexts/SiteTextContext';
 
 interface GiftSelectionModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface GiftSelectionModalProps {
 
 export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: GiftSelectionModalProps) {
   const { content } = useWeddingContent();
+  const text = useSiteText();
   const formContent = content.rsvpForm;
 
   const [name, setName] = useState('');
@@ -63,7 +65,7 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
             </button>
 
             <div className="text-center mb-6">
-              <span className="text-xs uppercase tracking-[0.3em] text-wedding-gold block mb-2">Gift Selection</span>
+              <span className="text-xs uppercase tracking-[0.3em] text-wedding-gold block mb-2">{text.giftModal.eyebrow}</span>
               <h3 className="text-2xl font-cinzel font-light text-wedding-goldlight">
                 {giftName}
               </h3>
@@ -71,12 +73,12 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
             </div>
 
             <p className="text-sm font-cormorant text-wedding-cream/80 text-center mb-6">
-              Please provide your details below to confirm you are gifting this item to the couple.
+              {text.giftModal.intro}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-xs uppercase tracking-widest text-wedding-gold font-medium mb-1">Full Name</label>
+                <label htmlFor="name" className="block text-xs uppercase tracking-widest text-wedding-gold font-medium mb-1">{text.giftModal.nameLabel}</label>
                 <input 
                   type="text" 
                   id="name"
@@ -84,12 +86,12 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full bg-wedding-dark/50 border border-wedding-gold/30 rounded-sm px-4 py-3 text-wedding-cream font-inter text-sm focus:outline-none focus:border-wedding-gold transition-colors placeholder:text-wedding-cream/30"
-                  placeholder="John & Jane Doe"
+                  placeholder={text.giftModal.namePlaceholder}
                 />
               </div>
               
               <div>
-                <label htmlFor="email" className="block text-xs uppercase tracking-widest text-wedding-gold font-medium mb-1">Email Address</label>
+                <label htmlFor="email" className="block text-xs uppercase tracking-widest text-wedding-gold font-medium mb-1">{text.giftModal.emailLabel}</label>
                 <input 
                   type="email" 
                   id="email"
@@ -97,19 +99,19 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-wedding-dark/50 border border-wedding-gold/30 rounded-sm px-4 py-3 text-wedding-cream font-inter text-sm focus:outline-none focus:border-wedding-gold transition-colors placeholder:text-wedding-cream/30"
-                  placeholder="your@email.com"
+                  placeholder={text.giftModal.emailPlaceholder}
                 />
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-xs uppercase tracking-widest text-wedding-gold font-medium mb-1">Short Message (Optional)</label>
+                <label htmlFor="message" className="block text-xs uppercase tracking-widest text-wedding-gold font-medium mb-1">{text.giftModal.messageLabel}</label>
                 <textarea 
                   id="message"
                   rows={3}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="w-full bg-wedding-dark/50 border border-wedding-gold/30 rounded-sm px-4 py-3 text-wedding-cream font-inter text-sm focus:outline-none focus:border-wedding-gold transition-colors placeholder:text-wedding-cream/30 resize-none"
-                  placeholder="Wishing you a lifetime of love and happiness..."
+                  placeholder={text.giftModal.messagePlaceholder}
                 />
               </div>
 
@@ -142,7 +144,7 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                   ) : (
-                    "Confirm Selection"
+                    text.giftModal.submit
                   )}
                 </button>
               </div>

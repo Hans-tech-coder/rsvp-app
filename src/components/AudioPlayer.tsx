@@ -5,6 +5,7 @@ import { Volume1, Volume2, VolumeX } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { hasMouse } from '@/lib/pointer';
+import { useSiteText } from '@/contexts/SiteTextContext';
 
 const DEFAULT_VOLUME = 0.5;
 // Onboarding hint: shown once per page load, a moment after the music first
@@ -13,13 +14,9 @@ const HINT_DELAY_MS = 1800;
 const HINT_VISIBLE_MS = 7000;
 // Touch has no hover, so a tap opens the slider and it closes after this idle time
 const PANEL_IDLE_MS = 3500;
-const HINT_COPY = {
-  mouse: 'Click to mute · hover for volume',
-  touch: 'Tap to mute or change the volume',
-};
-
 export function AudioPlayer() {
   const pathname = usePathname();
+  const text = useSiteText().music;
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -262,8 +259,8 @@ export function AudioPlayer() {
             >
               <div className="relative flex flex-col gap-0.5 pl-4 pr-5 py-2.5 border border-wedding-gold/50 bg-wedding-dark/85 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
                 <span aria-hidden="true" className="absolute inset-[3px] border border-wedding-gold/20 pointer-events-none"></span>
-                <span className="font-cinzel text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-wedding-goldlight">Music is playing</span>
-                <span className="font-cormorant italic text-sm text-wedding-cream/85 tracking-wide">{HINT_COPY[hintMode]}</span>
+                <span className="font-cinzel text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-wedding-goldlight">{text.title}</span>
+                <span className="font-cormorant italic text-sm text-wedding-cream/85 tracking-wide">{hintMode === 'mouse' ? text.mouseHint : text.touchHint}</span>
                 {/* Caret pointing down at the button's centre */}
                 <span aria-hidden="true" className="absolute -bottom-[6px] right-[19px] h-2.5 w-2.5 rotate-45 border-r border-b border-wedding-gold/50 bg-wedding-dark"></span>
               </div>

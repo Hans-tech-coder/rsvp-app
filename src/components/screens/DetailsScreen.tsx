@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useSiteText } from '@/contexts/SiteTextContext';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal, SCROLL_MOTION } from '@/components/ui/ScrollMotion';
@@ -15,6 +16,7 @@ interface DetailsScreenProps {
 export function DetailsScreen({ onContinue }: DetailsScreenProps) {
   const [mapUrl, setMapUrl] = useState<string | null>(null);
   const { content } = useWeddingContent();
+  const text = useSiteText();
 
   const scrollRef = useRef<HTMLElement>(null);
 
@@ -61,12 +63,12 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
 
       <div className="max-w-6xl mx-auto relative z-10 w-full">
         <TextsReveal className="text-center mb-16 relative z-10 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.details.header?.subtitle || "Where & When"}</span>
+          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.details.header?.subtitle}</span>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">
-            {content.details.header?.title || "The Details"}
+            {content.details.header?.title}
           </h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
-          <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-lg mx-auto">{content.details.header?.description || "A breathtaking romance in Paniqui, Tarlac."}</p>
+          <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-lg mx-auto">{content.details.header?.description}</p>
         </TextsReveal>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -75,7 +77,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
           <motion.div whileHover={{ y: -5 }} className="h-full bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-gold/20 hover:shadow-xl hover:border-wedding-gold/40 transition-all duration-500 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-6">
-                <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{(content.details.ceremony as any).subtitle || "The Vows"}</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{content.details.ceremony.subtitle}</span>
                 <span className="text-sm font-cinzel text-wedding-goldlight/70">{content.details.ceremony.time}</span>
               </div>
               <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">{content.details.ceremony.title}</h3>
@@ -86,20 +88,20 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
               <div className="space-y-3 text-sm text-wedding-cream mb-8 font-cormorant tracking-wide">
                 <div className="flex items-start">
                   <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>Location:</strong>&nbsp;{content.details.ceremony.location}</p>
+                  <p className="flex-1"><strong>{text.details.location}</strong>&nbsp;{content.details.ceremony.location}</p>
                 </div>
                 <div className="flex items-start">
                   <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>Address:</strong>&nbsp;{content.details.ceremony.address}</p>
+                  <p className="flex-1"><strong>{text.details.address}</strong>&nbsp;{content.details.ceremony.address}</p>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-wedding-gold/20">
               <button onClick={() => openMap(content.details.ceremony.mapLink)} className="text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
-                View Location
+                {text.details.viewLocation}
               </button>
               <button onClick={() => addToCalendar(content.details.ceremony.calendarDesc, content.details.ceremony.calendarDesc, content.details.ceremony.calendarLoc, content.details.ceremony.calendarStart)} className="text-center py-3 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
-                Add To Calendar
+                {text.details.addToCalendar}
               </button>
             </div>
           </motion.div>
@@ -110,7 +112,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
           <motion.div whileHover={{ y: -5 }} className="h-full bg-wedding-dark/60 p-8 md:p-12 rounded-xl shadow-lg border border-wedding-gold/20 hover:shadow-xl hover:border-wedding-gold/40 transition-all duration-500 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-6">
-                <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{(content.details.reception as any).subtitle || "The Feast"}</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] bg-wedding-gold/10 border border-wedding-gold/30 text-wedding-goldlight px-3 py-1 font-semibold rounded-full">{content.details.reception.subtitle}</span>
                 <span className="text-sm font-cinzel text-wedding-goldlight/70">{content.details.reception.time}</span>
               </div>
               <h3 className="text-3xl font-cinzel text-wedding-cream font-light tracking-wide mb-4">{content.details.reception.title}</h3>
@@ -121,20 +123,20 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
               <div className="space-y-3 text-sm text-wedding-cream mb-8 font-cormorant tracking-wide">
                 <div className="flex items-start">
                   <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>Location:</strong>&nbsp;{content.details.reception.location}</p>
+                  <p className="flex-1"><strong>{text.details.location}</strong>&nbsp;{content.details.reception.location}</p>
                 </div>
                 <div className="flex items-start">
                   <span className="text-wedding-gold mr-3 mt-[2px]">✦</span> 
-                  <p className="flex-1"><strong>Address:</strong>&nbsp;{content.details.reception.address}</p>
+                  <p className="flex-1"><strong>{text.details.address}</strong>&nbsp;{content.details.reception.address}</p>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-wedding-gold/20">
               <button onClick={() => openMap(content.details.reception.mapLink)} className="text-center py-3 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
-                View Location
+                {text.details.viewLocation}
               </button>
               <button onClick={() => addToCalendar(content.details.reception.calendarDesc, content.details.reception.calendarDesc, content.details.reception.calendarLoc, content.details.reception.calendarStart)} className="text-center py-3 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.15em] font-medium uppercase transition-all duration-300 rounded-sm">
-                Add To Calendar
+                {text.details.addToCalendar}
               </button>
             </div>
           </motion.div>
@@ -167,15 +169,15 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
               ) : (
                 <svg className="w-4 h-4 relative z-10 group-hover:-translate-y-0.5 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
               )}
-              <span className="relative z-10">{isDownloading ? 'Downloading...' : 'Save a Copy'}</span>
+              <span className="relative z-10">{isDownloading ? text.details.downloading : text.details.saveCopy}</span>
             </button>
           </ScrollReveal>
         )}
       </div>
 
       <ScrollReveal delay={0.2} className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
-        <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
+        <button onClick={onContinue} aria-label={text.common.continue} className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
+          <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">{text.common.continue}</span>
           <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
             <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>
@@ -200,7 +202,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
               className="bg-wedding-dark border border-wedding-burgundylight/30 w-full max-w-4xl h-[80vh] rounded-xl overflow-hidden relative flex flex-col shadow-2xl"
             >
               <div className="flex justify-between items-center p-4 border-b border-wedding-gold/20 bg-wedding-dark">
-                <h3 className="font-cinzel tracking-widest text-wedding-goldlight">Location Map</h3>
+                <h3 className="font-cinzel tracking-widest text-wedding-goldlight">{text.details.mapTitle}</h3>
                 <button onClick={closeMap} className="text-wedding-cream/70 hover:text-wedding-gold transition-colors">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>

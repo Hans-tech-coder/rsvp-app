@@ -17,7 +17,7 @@ useWeddingContent().content        (read by every screen)
 
 1. `WeddingContentProvider` (wraps the guest page in `src/app/page.tsx`) starts
    with the JSON as `content` and `loading = true`.
-2. On mount it `getDoc`s all twelve `websiteContent` docs **in parallel**
+2. On mount it `getDoc`s all twelve screen docs of `websiteContent` (not `siteText`) **in parallel**
    (`Promise.all`) with the **browser SDK** (public read is allowed by
    `firestore.rules`). One failing read falls back to the JSON for everything.
 3. It merges each doc over the JSON default. The merge is **written by hand per
@@ -42,12 +42,45 @@ useWeddingContent().content        (read by every screen)
 The type of `content` is `typeof wedding-content.json`, so **a key must exist in
 the JSON to be typed**.
 
-`src/app/layout.tsx` separately reads `websiteContent/globalSettings.ogImage`
-with the admin SDK for the OG/Twitter image.
+## Site text (buttons, labels, hints, errors)
+
+Small UI wording that is not part of a screen's own content ("Continue",
+countdown labels, form hints and errors, menu names, loader, 404 page, link
+preview title) lives in `siteText`, **not** in `WeddingContentContext`:
+
+```
+src/data/wedding-content.json  siteText   (defaults)
+          +
+Firestore websiteContent/siteText         (read with the admin SDK on the server)
+          │  getSiteContent() in src/lib/siteContentServer.ts (also reads globalSettings)
+          ▼
+src/app/layout.tsx  ->  <SiteTextProvider>  ->  useSiteText()   (every client component)
+                    ->  generateMetadata (title, description, OG, favicon = global.logo)
+src/app/not-found.tsx -> NotFoundScreen (site = merged global) + its <title>
+```
+
+- Server-read so the text is right on first paint, also outside the guest
+  page's provider (loading screen, music hint in `AudioPlayer`, 404 page).
+- `/` and the 404 page are **static** (built with the Firestore values). After
+  a save, `SiteTextEditor` and `GlobalSettingsEditor` call the
+  `revalidateGuestSite()` server action (`revalidatePath('/', 'layout')`), so
+  the next visit regenerates them. A save from another place (a script, the
+  Firestore console) shows only after the next deploy or such a save.
+- Merge rule: `mergeSiteText()` (`src/lib/siteText.ts`): known keys only, empty
+  value = default. Placeholders like `{count}` are filled with `fillText()`
+  (string) or `fillNodes()` (when a value is an element, e.g. the red `*` or
+  the styled day count).
+- Server actions return error **codes** (`verifyInviteCode` and `submitRsvp`:
+  `invalid` / `used` / `failed`; `claimGift`: `notFound` / `full` /
+  `failed`); the screen shows the matching site-text message.
+- Not covered: image `alt` text and `aria-*` labels stay in the components;
+  the loader's "H&C" monogram is hard-coded (see `docs/current-state.md`).
+
+`src/app/layout.tsx` gets the OG/Twitter image (`global.ogImage`) the same way.
 
 ## How an editor works (`src/app/admin/content/*Editor.tsx`)
 
-All twelve editors follow the same pattern (copy an existing one, do not invent
+All the editors follow the same pattern (copy an existing one, do not invent
 a new one):
 
 1. **State:** `formData` (being edited) and `originalData` (last saved), both
@@ -59,7 +92,7 @@ a new one):
    URL; see `docs/data-model.md`), put the URL into `formData`. The image is live only after Save.
 4. **Save:** confirm modal (`AdminModal`) → write the previous values to
    `<doc>_backup` → write `<doc>`. Most editors use
-   `setDoc(..., { merge: true })`; `FaqsEditor`, `RegistryEditor` and
+   `setDoc(..., { merge: true })`; `FaqsEditor`, `RegistryEditor`, `SiteTextEditor` and
    `RsvpFormEditor` write **without** `merge`, replacing the whole doc.
 5. **Undo:** reset `formData` to `originalData` (no network).
 6. **Restore backup:** differs per editor. Simple editors (Welcome, Entrance,
@@ -87,7 +120,12 @@ Example: a new `welcomeScreen.footnote` text.
    input.
 4. **Screen** — read `content.<key>.<field>`, with a fallback if the value can
    be empty.
-5. If it is a **new Firestore doc**, also add it to the `getDoc` list in the
+5. **Site text** (a button, label, hint or error, not a screen's content):
+   add the key under `siteText` in the JSON, read it with `useSiteText()`, and
+   add a field to `SITE_TEXT_GROUPS` in `src/app/admin/content/siteTextFields.ts`.
+   No merge or provider change is needed. `src/lib/siteText.test.ts` fails if a
+   key has no editor field (or the reverse).
+6. If it is a **new Firestore doc**, also add it to the `getDoc` list in the
    provider, to `docs` / `docToKeyMap` in `scripts/sync-content.js`, to the tab
    list in `src/app/admin/content/page.tsx` (and its "not implemented" guard),
    and to the table in `docs/data-model.md`.
@@ -95,7 +133,8 @@ Example: a new `welcomeScreen.footnote` text.
 ## `npm run sync-content`
 
 This **pulls** Firestore → JSON: it reads the
-twelve `websiteContent` docs with the admin SDK and merges them into
+thirteen `websiteContent` docs (`siteText` is merged key by key, like
+`mergeSiteText()`, so new default keys survive) with the admin SDK and merges them into
 `src/data/wedding-content.json`. Run it to make the bundled defaults match
 production (so the first paint, before overrides load, already shows the real
 content). It never writes to Firestore.

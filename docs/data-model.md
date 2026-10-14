@@ -16,7 +16,7 @@ field, update this file.
 | `admins` | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); deleted by `removeAdmin` (`admins.ts`, super only) | `firestore.rules`, `storage.rules` (`isAdmin()`), `requireAdmin.ts` |
 | `adminAllowlist` | lowercased email | `scripts/add-admin.js`; `addAdmin` / `cancelPendingAdmin` (`admins.ts`, super only) | `createSessionCookie`, `listAdmins` (server only; rules deny all browser access) |
 | `settings` | `inviteTemplate` | `updateInviteMessageTemplate` | `getInviteMessageTemplate` |
-| `websiteContent` | one doc per screen (below) + `<doc>_backup` | admin editors, **from the browser** | `WeddingContentContext` (browser), `layout.tsx` (OG image, admin SDK) |
+| `websiteContent` | one doc per screen (below) + `<doc>_backup` | admin editors, **from the browser** | `WeddingContentContext` (browser); `globalSettings` + `siteText` also on the server by `getSiteContent()` (`src/lib/siteContentServer.ts`, admin SDK) for the root layout, metadata and the 404 page |
 
 ### `guests/{inviteCode}` — type `Guest`
 
@@ -75,7 +75,7 @@ if present, overrides it (merge rules in `docs/content-system.md`).
 
 | Firestore doc | JSON key(s) the site reads | Editor |
 | --- | --- | --- |
-| `globalSettings` | `global` (logo, names, dates, `targetDate`, `ogImage`, `footerTagline`) **and** `details.ceremony` / `details.reception` time, location, address | `GlobalSettingsEditor.tsx` |
+| `globalSettings` | `global` (logo, names, `coupleNameFormat`, `targetDate`, `venueShort`, `ogImage`, `footerTagline`) **and** `details.ceremony` / `details.reception` time, location, address | `GlobalSettingsEditor.tsx` |
 | `welcomeScreen` | `welcomeScreen` | `WelcomeScreenEditor.tsx` |
 | `entranceScreen` | `entranceScreen` | `EntranceScreenEditor.tsx` |
 | `ourStory` | `ourStory` (`subtitle`, `title`, `description`, `items[]`) | `OurStoryEditor.tsx` |
@@ -87,6 +87,22 @@ if present, overrides it (merge rules in `docs/content-system.md`).
 | `registry` | `registry` (`header`, `bankTransfer`, `curatedRegistry`) | `RegistryEditor.tsx` |
 | `rsvpCta` | `rsvpCta` | `RsvpCtaEditor.tsx` |
 | `rsvpForm` | `rsvpForm` (`header`, `labels`, `attendanceOptions`, `actions`, `successModal`) | `RsvpFormEditor.tsx` |
+| `siteText` | `siteText`: small UI wording grouped by screen (`common`, `menu`, `loading`, `welcome`, `motionHint`, `music`, `entrance`, `ourStory`, `entourage`, `details`, `dressCode`, `registry`, `curatedRegistry`, `giftModal`, `rsvp`, `phone`, `footer`, `notFound`, `seo`), every leaf a string. Read **on the server only** (not by `WeddingContentContext`). | `SiteTextEditor.tsx` ("Site Text" tab) |
+
+`global.coupleNameFormat` ("Hans & Czay") is the couple's names as written in a
+sentence: metadata, the 404 page, the RSVP email, `{couple}` in site text.
+`global.dateShort` and `global.dateFull` were removed from the JSON in Oct 2026
+(nothing showed them); the live `globalSettings` doc may still hold them and
+`sync-content` may copy them back; they are harmless.
+
+**`siteText` shape.** Defined by the JSON (the type is
+`typeof wedding-content.json.siteText`, exported as `SiteText` from
+`src/lib/siteText.ts`). `mergeSiteText()` overlays the doc on the JSON key by
+key: unknown keys are ignored, and an empty or non-string value keeps the
+default. Some strings hold `{name}` placeholders filled by `fillText()` /
+`fillNodes()` (e.g. `rsvp.errors.checkMany` uses `{count}`); the Site Text
+editor's field hints list them. The editor saves the whole merged object
+(no `merge`), so the doc always has every key known at save time.
 
 Every editor also writes `<doc>_backup` (e.g. `welcomeScreen_backup`) with the
 previous values before saving, so the admin can restore one step back.

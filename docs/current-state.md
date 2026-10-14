@@ -13,7 +13,8 @@ when you find or fix one of these.
 - Invite-code RSVP with one-time codes (transaction-safe).
 - Curated registry with claim limits (transaction-safe) and bank-transfer info.
 - Admin: dashboard counts, invite generation + message template, RSVP list with
-  CSV export, gift CRUD, claim list, content editors for all 12 screens with
+  CSV export, gift CRUD, claim list, content editors for all 12 screens and
+  a Site Text tab for every button, label, hint and error (Oct 2026), with
   one-step backup/restore. Google sign-in with an email allowlist; super admins
   add and remove regular admins from the Manage Admins modal in the sidebar.
 
@@ -34,6 +35,8 @@ when you find or fix one of these.
 | Guest page starts Firebase Auth (iframe + gapi scripts) though guests never sign in | `src/lib/firebase/client.ts:18` (`getAuth` at module scope) | Extra startup requests on every guest load |
 | FAQ question cards keep `transition-all` while Motion animates them | `FaqScreen.tsx` (`ScrollReveal` className) | CSS may also transition Motion's inline opacity/transform; no jank measured |
 | Music volume on iOS goes through Web Audio after the first slider touch | `AudioPlayer.tsx` (`ensureGain`) | Only checked in a desktop browser. On iOS < 17 the ringer switch may silence the music once that happens; the AudioContext is resumed on each `play` |
+| A few guest-visible words are still in code | loader monogram "H&C" (`LoadingScreen.tsx`); country names in `phoneCountries.ts`; dates formatted with `en-US` (`EntranceScreen`, metadata `{date}`); image `alt` and `aria-*` labels | The loader shows before content loads, so its monogram needs server-side global settings (planned with per-event server content) |
+| Site text, metadata and the 404 page update only through an admin save | `revalidateGuestSite` in `admin.ts` | `/` and the 404 page are static. A change made outside the admin (Firestore console, script) shows after the next deploy or the next Site Text / Global Settings save. Facebook and Messenger cache link previews on their side |
 | Circular gallery keeps the last-closed photo mounted | `circular-image-gallery.tsx` (`closing` state never resets) | Two extra SVG `<image>`s at most; harmless |
 
 ## Unused code and dependencies
@@ -53,5 +56,7 @@ Remove them only when asked.
 Vercel (Node 22). Image uploads need a **public** Vercel Blob store connected
 to the project (`BLOB_READ_WRITE_TOKEN`). Firestore/Storage rules are deployed separately with the
 Firebase CLI. The Vercel project must have all `FIREBASE_ADMIN_*` and
-`NEXT_PUBLIC_FIREBASE_*` variables set; `layout.tsx` and every admin page call
+`NEXT_PUBLIC_FIREBASE_*` variables set at **build** time too: `layout.tsx` and
+`not-found.tsx` read Firestore when the static pages are built or regenerated,
+and every admin page calls
 the admin SDK at request time.

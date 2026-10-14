@@ -14,17 +14,17 @@ export async function verifyInviteCode(inviteCode: string) {
     const guestDoc = await guestRef.get();
 
     if (!guestDoc.exists) {
-      return { valid: false, error: 'Invalid invite code.' };
+      return { valid: false, code: 'invalid' as const, error: 'Invalid invite code.' };
     }
 
     const guestData = guestDoc.data() as Guest;
     if (guestData.codeStatus === 'used') {
-      return { valid: false, error: 'This invite code has already been used.' };
+      return { valid: false, code: 'used' as const, error: 'This invite code has already been used.' };
     }
 
     return { valid: true };
   } catch (error: any) {
-    return { valid: false, error: 'Failed to verify code. Please try again.' };
+    return { valid: false, code: 'failed' as const, error: 'Failed to verify code. Please try again.' };
   }
 }
 
@@ -109,6 +109,10 @@ export async function submitRsvp(
 
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || 'Failed to submit RSVP' };
+    // The guest page shows its own (editable) wording for each code.
+    const code: 'invalid' | 'used' | 'failed' = error.message === 'Invalid invite code' ? 'invalid'
+      : error.message === 'This invite code has already been used.' ? 'used'
+      : 'failed';
+    return { success: false, code, error: error.message || 'Failed to submit RSVP' };
   }
 }

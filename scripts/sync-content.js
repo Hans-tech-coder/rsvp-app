@@ -5,6 +5,19 @@ const path = require('path');
 // Load environment variables from .env.local
 require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
 
+// Same rule as mergeSiteText() in src/lib/siteText.ts
+function mergeText(defaults, data) {
+  if (!data || typeof data !== 'object') return defaults;
+  const out = {};
+  for (const [key, fallback] of Object.entries(defaults)) {
+    const value = data[key];
+    out[key] = typeof fallback === 'string'
+      ? (typeof value === 'string' && value.trim() !== '' ? value : fallback)
+      : mergeText(fallback, value);
+  }
+  return out;
+}
+
 async function syncContent() {
   try {
     if (!admin.apps.length) {
@@ -43,7 +56,7 @@ async function syncContent() {
     const docs = [
       'welcomeScreen', 'globalSettings', 'entranceScreen', 'ourStory',
       'entourage', 'details', 'dressCode', 'gallery', 'faq', 'registry',
-      'rsvpCta', 'rsvpForm'
+      'rsvpCta', 'rsvpForm', 'siteText'
     ];
     
     // Map Firestore document IDs to their corresponding keys in the JSON file
@@ -59,17 +72,21 @@ async function syncContent() {
       'faq': 'faqs',
       'registry': 'registry',
       'rsvpCta': 'rsvpCta',
-      'rsvpForm': 'rsvpForm'
+      'rsvpForm': 'rsvpForm',
+      'siteText': 'siteText'
     };
     
     for (const docId of docs) {
       const docSnap = await db.collection('websiteContent').doc(docId).get();
       if (docSnap.exists) {
         const jsonKey = docToKeyMap[docId];
-        currentContent[jsonKey] = {
-          ...currentContent[jsonKey],
-          ...docSnap.data()
-        };
+        currentContent[jsonKey] = docId === 'siteText'
+          // Nested groups: keep every default key, take non-empty saved text
+          ? mergeText(currentContent[jsonKey], docSnap.data())
+          : {
+            ...currentContent[jsonKey],
+            ...docSnap.data()
+          };
         console.log(`Synced: ${docId}`);
       }
     }

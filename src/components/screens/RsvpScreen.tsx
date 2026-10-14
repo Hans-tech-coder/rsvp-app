@@ -13,6 +13,8 @@ interface RsvpScreenProps {
 import { getVisitorCountry, submitRsvp } from '@/app/actions/rsvp';
 import { Loader2 } from 'lucide-react';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useSiteText } from '@/contexts/SiteTextContext';
+import { fillNodes, fillText, type SiteText } from '@/lib/siteText';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { PhoneField } from '@/components/ui/PhoneField';
 import {
@@ -48,27 +50,27 @@ function validateRsvp(v: {
   phoneCountry: PhoneCountry;
   attendance: 'Yes' | 'No' | null;
   consent: boolean;
-}): Partial<Record<Field, string>> {
+}, t: SiteText['rsvp']['errors']): Partial<Record<Field, string>> {
   const errors: Partial<Record<Field, string>> = {};
 
   const name = v.fullName.trim();
-  if (!name) errors.fullName = 'Please enter your full name.';
-  else if (name.split(/\s+/).length < 2) errors.fullName = 'Please include both your first and last name.';
+  if (!name) errors.fullName = t.fullNameMissing;
+  else if (name.split(/\s+/).length < 2) errors.fullName = t.fullNameIncomplete;
 
   const email = v.email.trim();
-  if (!email) errors.email = 'Please enter your email address.';
-  else if (!EMAIL_RE.test(email)) errors.email = "That email doesn't look right. Try something like name@example.com.";
+  if (!email) errors.email = t.emailMissing;
+  else if (!EMAIL_RE.test(email)) errors.email = t.emailInvalid;
 
   const c = v.phoneCountry;
-  if (!v.phoneDigits) errors.phone = 'Please enter your phone number so we can reach you.';
+  if (!v.phoneDigits) errors.phone = t.phoneMissing;
   else if (v.phoneDigits.length < c.min) {
     errors.phone = c.dial
-      ? `This number is too short. ${c.name} numbers have ${digitRangeLabel(c)} digits after +${c.dial}.`
-      : `This number is too short. Include your country code (at least ${c.min} digits).`;
+      ? fillText(t.phoneTooShort, { country: c.name, digits: digitRangeLabel(c), dial: c.dial })
+      : fillText(t.phoneTooShortOther, { min: c.min });
   }
 
-  if (!v.attendance) errors.attendance = 'Please let us know if you can attend.';
-  if (!v.consent) errors.consent = 'Please tick the box to agree before sending your response.';
+  if (!v.attendance) errors.attendance = t.attendanceMissing;
+  if (!v.consent) errors.consent = t.consentMissing;
 
   return errors;
 }
@@ -85,6 +87,7 @@ function FieldLabel({ htmlFor, required, markAddon, children }: {
   markAddon?: React.ReactNode; // floats from the asterisk (the required hint)
   children: React.ReactNode;
 }) {
+  const text = useSiteText();
   return (
     <label htmlFor={htmlFor} className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">
       {children}{' '}
@@ -95,7 +98,7 @@ function FieldLabel({ htmlFor, required, markAddon, children }: {
           {markAddon}
         </span>
       ) : (
-        <span className="normal-case tracking-normal font-normal italic text-wedding-cream/50">(optional)</span>
+        <span className="normal-case tracking-normal font-normal italic text-wedding-cream/50">{text.rsvp.optional}</span>
       )}
     </label>
   );
@@ -114,6 +117,7 @@ function FieldMessage({ id, error, hint, aside }: { id: string; error?: string |
 export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScreenProps) {
   const { content } = useWeddingContent();
   const formContent = content.rsvpForm;
+  const text = useSiteText();
 
   const [showGifts, setShowGifts] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -168,7 +172,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
   }, []);
   const touch = (field: Field) => setTouched((t) => (t[field] ? t : { ...t, [field]: true }));
 
-  const errors = validateRsvp({ fullName, email, phoneDigits, phoneCountry, attendance, consent });
+  const errors = validateRsvp({ fullName, email, phoneDigits, phoneCountry, attendance, consent }, text.rsvp.errors);
   const errorFor = (field: Field) => (touched[field] || submitAttempted ? errors[field] ?? null : null);
   const errorCount = FIELD_ORDER.filter((f) => errors[f]).length;
 
@@ -226,7 +230,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
         onSubmitSuccess();
       }
     } else {
-      setError(result.error || 'Something went wrong. Please try again.');
+      setError(result.code === 'invalid' ? text.rsvp.errors.codeInvalid : result.code === 'used' ? text.rsvp.errors.codeUsed : text.rsvp.errors.submitFailed);
     }
   };
 
@@ -283,9 +287,9 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                         {/* Same card as the music hint in AudioPlayer.tsx */}
                         <span className="relative flex flex-col gap-0.5 pl-4 pr-5 py-2.5 border border-wedding-gold/50 bg-wedding-dark/85 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
                           <span aria-hidden="true" className="absolute inset-[3px] border border-wedding-gold/20 pointer-events-none"></span>
-                          <span className="font-cinzel text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-wedding-goldlight">Before you begin</span>
+                          <span className="font-cinzel text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-wedding-goldlight">{text.rsvp.requiredHintTitle}</span>
                           <span className="font-cormorant italic text-sm text-wedding-cream/85 tracking-wide">
-                            Fields marked <span className="not-italic text-red-400">*</span> are required
+                            {fillNodes(text.rsvp.requiredHintText, { star: <span className="not-italic text-red-400">*</span> })}
                           </span>
                           {/* Caret pointing left at the asterisk */}
                           <span aria-hidden="true" className="absolute -left-[6px] bottom-[6px] h-2.5 w-2.5 rotate-45 border-l border-b border-wedding-gold/50 bg-wedding-dark"></span>
@@ -303,7 +307,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 onBlur={() => touch('fullName')}
-                placeholder="e.g. Juan Dela Cruz"
+                placeholder={text.rsvp.placeholders.fullName}
                 autoComplete="name"
                 autoCapitalize="words"
                 maxLength={80}
@@ -312,7 +316,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                 aria-describedby="fullname-message"
                 className={inputClass(!!nameError)}
               />
-              <FieldMessage id="fullname-message" error={nameError} hint="Your first and last name, so we can find you on the guest list." />
+              <FieldMessage id="fullname-message" error={nameError} hint={text.rsvp.hints.fullName} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -325,7 +329,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => touch('email')}
-                  placeholder="e.g. juan@gmail.com"
+                  placeholder={text.rsvp.placeholders.email}
                   autoComplete="email"
                   inputMode="email"
                   autoCapitalize="off"
@@ -336,7 +340,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                   aria-describedby="email-message"
                   className={inputClass(!!emailError)}
                 />
-                <FieldMessage id="email-message" error={emailError} hint="We'll send your RSVP confirmation here." />
+                <FieldMessage id="email-message" error={emailError} hint={text.rsvp.hints.email} />
               </div>
 
               {/* Phone */}
@@ -393,7 +397,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                   );
                 })}
               </div>
-              <FieldMessage id="attendance-message" error={attendanceError} hint="Choose one. Your response can only be sent once." />
+              <FieldMessage id="attendance-message" error={attendanceError} hint={text.rsvp.hints.attendance} />
             </fieldset>
 
             {/* Conditional Proxy Field (optional, as its label says "If Any") */}
@@ -419,7 +423,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                       aria-describedby="proxy-message"
                       className={inputClass(false)}
                     />
-                    <FieldMessage id="proxy-message" hint="Someone attending in your place. Leave blank if no one." />
+                    <FieldMessage id="proxy-message" hint={text.rsvp.hints.proxy} />
                   </div>
                 </motion.div>
               )}
@@ -440,7 +444,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
               ></textarea>
               <FieldMessage
                 id="message-message"
-                hint="A wish, a memory, or a few kind words."
+                hint={text.rsvp.hints.message}
                 aside={
                   <span className={`shrink-0 tabular-nums ${message.length >= MESSAGE_MAX ? 'text-wedding-goldlight' : 'text-wedding-cream/45'}`}>
                     {message.length}/{MESSAGE_MAX}
@@ -481,7 +485,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
             <div className="text-center pt-2 space-y-4">
               {submitAttempted && errorCount > 0 && (
                 <p role="alert" className="text-sm text-red-400">
-                  Please check the {errorCount === 1 ? 'highlighted field' : `${errorCount} highlighted fields`} above.
+                  {errorCount === 1 ? text.rsvp.errors.checkOne : fillText(text.rsvp.errors.checkMany, { count: errorCount })}
                 </p>
               )}
               {error && (

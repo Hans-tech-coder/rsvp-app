@@ -7,24 +7,30 @@ import { motion, Variants, useReducedMotion } from 'motion/react';
 import { WeddingCursor } from '@/components/effects/WeddingCursor';
 import { FallingPetals } from '@/components/effects/FallingPetals';
 import weddingContent from '@/data/wedding-content.json';
+import { useSiteText } from '@/contexts/SiteTextContext';
+import { fillNodes, fillText } from '@/lib/siteText';
+import type { SiteGlobal } from '@/lib/siteContentServer';
 
 // Rendered by src/app/not-found.tsx for every unknown URL. It sits outside
-// WeddingContentProvider, so it reads the JSON defaults (kept in step with
-// Firestore by `npm run sync-content`) instead of fetching every override.
-const { global: site, welcomeScreen } = weddingContent;
+// WeddingContentProvider: global settings come from the server (`site`), the
+// wording from the site text, and the photo from the JSON defaults (kept in
+// step with Firestore by `npm run sync-content`).
+const { welcomeScreen } = weddingContent;
 
 const DAY_MS = 1000 * 60 * 60 * 24;
 
 // Days left is read on the client only: the 404 page is prerendered, so a
 // server value would freeze at build time. The server snapshot is null.
 const noSubscribe = () => () => {};
-const getDaysLeft = () =>
-  Math.max(0, Math.ceil((new Date(site.targetDate).getTime() - Date.now()) / DAY_MS));
+const daysUntil = (targetDate: string) =>
+  Math.max(0, Math.ceil((new Date(targetDate).getTime() - Date.now()) / DAY_MS));
 const getServerDaysLeft = () => null;
 
-export function NotFoundScreen() {
+export function NotFoundScreen({ site }: { site: SiteGlobal }) {
   const reduceMotion = useReducedMotion();
-  const daysLeft = useSyncExternalStore(noSubscribe, getDaysLeft, getServerDaysLeft);
+  const text = useSiteText().notFound;
+  const daysLeft = useSyncExternalStore(noSubscribe, () => daysUntil(site.targetDate), getServerDaysLeft);
+  const values = { couple: site.coupleNameFormat, venue: site.venueShort };
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -73,7 +79,7 @@ export function NotFoundScreen() {
                 edge below-right lift it off the page (.t-emboss in globals.css) */}
             <Link
               href="/"
-              aria-label={`${site.coupleNameFormat}, back to the celebration`}
+              aria-label={`${site.coupleNameFormat}, ${text.button}`}
               className="block rounded-full transition-opacity duration-300 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-wedding-gold"
             >
               <Image src={site.logo} alt="" width={128} height={128} className="t-emboss h-24 w-24 sm:h-32 sm:w-32" priority />
@@ -102,14 +108,14 @@ export function NotFoundScreen() {
               variants={itemVariants}
               className="mt-6 max-w-[18ch] text-balance font-cinzel text-[1.75rem] leading-[1.15] tracking-[0.02em] sm:max-w-none sm:text-4xl md:text-5xl"
             >
-              <span className="sr-only">Error 404. </span>Lost on the way to the aisle?
+              <span className="sr-only">Error 404. </span>{text.heading}
             </motion.h1>
 
             <motion.p
               variants={itemVariants}
               className="mt-5 max-w-[34ch] text-balance font-cormorant text-xl italic leading-snug text-wedding-cream/90 sm:text-2xl"
             >
-              This page doesn&apos;t exist or has moved. The celebration is just this way.
+              {text.description}
             </motion.p>
 
             <motion.div variants={itemVariants} className="mt-10 flex flex-col items-center">
@@ -117,10 +123,10 @@ export function NotFoundScreen() {
                 href="/"
                 className="px-8 py-4 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-goldlight hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-cream text-[13px] tracking-[0.25em] font-medium uppercase transition-all duration-500 rounded-sm shadow-lg active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-wedding-gold"
               >
-                Back to the celebration
+                {text.button}
               </Link>
               <p className="mt-5 text-[15px] text-wedding-cream/85">
-                You&apos;ll pick up right where you left off.
+                {text.resumeNote}
               </p>
             </motion.div>
           </div>
@@ -133,12 +139,12 @@ export function NotFoundScreen() {
             {daysLeft === null ? (
               <span className="invisible">{site.venueShort}</span>
             ) : daysLeft > 0 ? (
-              <>
-                <span className="font-cinzel text-wedding-goldlight">{daysLeft}</span>{' '}
-                {daysLeft === 1 ? 'day' : 'days'} until {site.coupleNameFormat} say &ldquo;I do&rdquo; in {site.venueShort}
-              </>
+              fillNodes(daysLeft === 1 ? text.daysLeftOne : text.daysLeftMany, {
+                ...values,
+                days: <span className="font-cinzel text-wedding-goldlight">{daysLeft}</span>,
+              })
             ) : (
-              <>Thank you for celebrating {site.coupleNameFormat} with us</>
+              fillText(text.after, values)
             )}
           </motion.p>
         </div>

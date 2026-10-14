@@ -5,6 +5,7 @@ import { GiftSelectionModal } from './GiftSelectionModal';
 
 import { RegistryGift } from '@/types';
 import { getRegistryGifts, claimGift } from '@/app/actions/registry';
+import { useSiteText } from '@/contexts/SiteTextContext';
 
 interface Gift extends RegistryGift {
   iconFn?: () => React.ReactNode;
@@ -20,6 +21,7 @@ interface CuratedRegistryScreenProps {
 }
 
 export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreenProps) {
+  const text = useSiteText();
   const [gifts, setGifts] = useState<Gift[]>([]);
   const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -78,7 +80,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
       }));
       setSelectedGift(null);
     } else {
-      alert(res.error || 'Failed to claim gift. Please try again.');
+      alert(text.curatedRegistry.errors[res.code ?? 'failed']);
     }
   };
 
@@ -113,9 +115,9 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <span className="text-sm uppercase tracking-[0.4em] text-wedding-gold block mb-4">Curated Registry Suggestions</span>
+          <span className="text-sm uppercase tracking-[0.4em] text-wedding-gold block mb-4">{text.curatedRegistry.title}</span>
           <p className="text-base font-cormorant italic text-wedding-goldlight/80 max-w-xl mx-auto">
-            Should you wish to send a specific home keepsake, please choose one below to select it.
+            {text.curatedRegistry.intro}
           </p>
         </motion.div>
 
@@ -154,7 +156,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
                     rel="noopener noreferrer"
                     className="w-full block text-center py-1.5 sm:py-2 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:border-wedding-gold hover:text-wedding-goldlight text-[8px] sm:text-[9px] tracking-[0.2em] uppercase transition-all duration-300 rounded-sm"
                   >
-                    View Item
+                    {text.curatedRegistry.viewItem}
                   </a>
                   
                   <button 
@@ -166,7 +168,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
                         : 'bg-transparent border-wedding-gold/20 text-wedding-gold/40 cursor-not-allowed'}
                     `}
                   >
-                    {isAvailable ? "Select This Gift" : "Selected"}
+                    {isAvailable ? text.curatedRegistry.selectGift : text.curatedRegistry.selected}
                   </button>
                 </div>
               </motion.div>

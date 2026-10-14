@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useSiteText } from '@/contexts/SiteTextContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { RevealImage } from '@/components/ui/RevealImage';
 
@@ -16,19 +17,20 @@ interface CanvasMenuProps {
 
 export function CanvasMenu({ isOpen, onClose, onNavigate, highestVisitedStep, currentStep }: CanvasMenuProps) {
   const { content } = useWeddingContent();
+  const text = useSiteText();
   const logoUrl = content.global.logo;
 
   const menuItems = [
-    { label: "Welcome", step: 0 },
-    { label: "Our Story", step: 1 },
-    { label: "Entourage", step: 2 },
-    { label: "Details", step: 3 },
-    { label: "Dress Code", step: 4 },
-    { label: "Gallery", step: 5 },
-    { label: "FAQs", step: 6 },
-    { label: "Registry", step: 7 },
-    { label: "Join Our Day", step: 8 },
-    { label: "RSVP", step: 9 },
+    { label: text.menu.welcome, step: 0 },
+    { label: text.menu.ourStory, step: 1 },
+    { label: text.menu.entourage, step: 2 },
+    { label: text.menu.details, step: 3 },
+    { label: text.menu.dressCode, step: 4 },
+    { label: text.menu.gallery, step: 5 },
+    { label: text.menu.faqs, step: 6 },
+    { label: text.menu.registry, step: 7 },
+    { label: text.menu.rsvpCta, step: 8 },
+    { label: text.menu.rsvp, step: 9 },
   ];
 
   return (

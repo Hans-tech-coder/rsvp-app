@@ -52,7 +52,11 @@ export async function claimGift(
 
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || 'Failed to claim gift' };
+    // The guest page shows its own (editable) wording for each code.
+    const code: 'notFound' | 'full' | 'failed' = error.message === 'Gift not found' ? 'notFound'
+      : error.message === 'This gift has already been fully claimed.' ? 'full'
+      : 'failed';
+    return { success: false, code, error: error.message || 'Failed to claim gift' };
   }
 }
 

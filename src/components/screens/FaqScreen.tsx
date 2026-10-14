@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useSiteText } from '@/contexts/SiteTextContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal } from '@/components/ui/ScrollMotion';
 
@@ -18,6 +19,7 @@ interface FaqScreenProps {
 
 export function FaqScreen({ onContinue }: FaqScreenProps) {
   const { content } = useWeddingContent();
+  const text = useSiteText();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const scrollRef = useRef<HTMLElement>(null);
@@ -35,10 +37,10 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
 
       <div className="max-w-4xl mx-auto w-full relative z-10">
         <TextsReveal className="text-center mb-16 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.faqHeader?.subtitle || "Guest Information"}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.faqHeader?.title || "Things You Might Want to Know"}</h2>
+          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.faqHeader?.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.faqHeader?.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6 mb-10"></div>
-          <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-md mx-auto">{content.faqHeader?.description || "Quick answers for our beloved guests"}</p>
+          <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-md mx-auto">{content.faqHeader?.description}</p>
         </TextsReveal>
 
         <div className="space-y-4">
@@ -77,8 +79,8 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
       </div>
 
       <ScrollReveal delay={0.2} className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
-        <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
+        <button onClick={onContinue} aria-label={text.common.continue} className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
+          <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">{text.common.continue}</span>
           <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
             <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>

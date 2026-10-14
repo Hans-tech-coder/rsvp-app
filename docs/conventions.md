@@ -37,6 +37,9 @@ Match the code around you. These are the patterns the codebase already uses.
   writes without reads use `batch()`.
 - Timestamps: `FieldValue.serverTimestamp()` on write; convert with
   `.toDate().toISOString()` before passing to a client component.
+- A guest-facing action that can fail in a way the guest should read also
+  returns a `code` (e.g. `'invalid' | 'used' | 'failed'`); the screen maps the
+  code to a site-text message. The `error` string is for logs only.
 
 ## Guest-site styling
 
@@ -51,6 +54,13 @@ Match the code around you. These are the patterns the codebase already uses.
   in components; add a token to `@theme` if one is truly needed.
 - Mobile-first; the site is used mostly on phones. Use `100dvh`, not `100vh`.
 - Hide scrollbars with `.no-scrollbar` where the design needs it.
+- **No hard-coded guest-visible words in components.** A screen's content comes
+  from `useWeddingContent()`; every button, label, hint, error and menu name
+  comes from `useSiteText()` (`siteText` in `wedding-content.json`, edited in
+  the Site Text tab). Values inside a sentence use `{name}` placeholders
+  filled with `fillText()` / `fillNodes()`, never string concatenation, so the
+  admin can reorder words. `aria-*` labels and image `alt` text are the
+  current exception. Checklist: `docs/content-system.md`.
 
 ## Motion
 

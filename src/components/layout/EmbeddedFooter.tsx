@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion, Variants } from 'motion/react';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useSiteText } from '@/contexts/SiteTextContext';
 
 // "December 20, 2026 15:00:00" -> "20.12.2026"; null when the date can't be parsed
 function formatFooterDate(targetDate: string) {
@@ -14,6 +15,7 @@ function formatFooterDate(targetDate: string) {
 
 export function EmbeddedFooter() {
   const { content } = useWeddingContent();
+  const text = useSiteText();
   const { groomName, brideName, targetDate, footerTagline } = content.global;
   const monogram = `${groomName.trim().charAt(0)} & ${brideName.trim().charAt(0)}`.toUpperCase();
   const footerDate = formatFooterDate(targetDate);
@@ -38,7 +40,7 @@ export function EmbeddedFooter() {
             <span className="w-8 h-[1px] bg-wedding-cream/20"></span>
           </div>
         )}
-        <p className="text-[9px] uppercase tracking-widest text-wedding-cream/60">Designed with modern elegance & love.</p>
+        <p className="text-[9px] uppercase tracking-widest text-wedding-cream/60">{text.footer.credit}</p>
       </div>
     </motion.div>
   );

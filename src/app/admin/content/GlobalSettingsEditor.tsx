@@ -7,6 +7,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
+import { revalidateGuestSite } from '@/app/actions/admin';
 
 export function GlobalSettingsEditor() {
   const [loading, setLoading] = useState(true);
@@ -26,6 +27,7 @@ export function GlobalSettingsEditor() {
     ogImage: weddingContent.global.ogImage || '',
     brideName: weddingContent.global.brideName,
     groomName: weddingContent.global.groomName,
+    coupleNameFormat: weddingContent.global.coupleNameFormat,
     venueShort: weddingContent.global.venueShort,
     targetDate: weddingContent.global.targetDate,
     footerTagline: weddingContent.global.footerTagline,
@@ -119,7 +121,12 @@ export function GlobalSettingsEditor() {
 
       const docRef = doc(db, 'websiteContent', 'globalSettings');
       await setDoc(docRef, formData, { merge: true });
-      
+
+      // Link previews, the browser tab and the 404 page are built on the server
+      // from these settings; regenerate them.
+      const refresh = await revalidateGuestSite();
+      if (!refresh.success) console.error('Guest site refresh failed:', refresh.error);
+
       setOriginalData(formData);
       setHasBackup(true);
       setSaved(true);
@@ -289,6 +296,18 @@ export function GlobalSettingsEditor() {
               onChange={handleChange}
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
             />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Couple Name (as written in sentences)</label>
+            <input
+              type="text"
+              name="coupleNameFormat"
+              value={formData.coupleNameFormat}
+              onChange={handleChange}
+              placeholder="e.g. Hans & Czay"
+              className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
+            />
+            <p className="text-xs text-gray-500 dark:text-zinc-500">Used where the site writes both names together: the link preview and browser tab, the 404 page and the RSVP confirmation email. In Site Text it is <code>{'{couple}'}</code>.</p>
           </div>
         </div>
       </div>

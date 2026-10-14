@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { CuratedRegistryScreen } from './CuratedRegistryScreen';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useSiteText } from '@/contexts/SiteTextContext';
+import { fillText } from '@/lib/siteText';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal, SCROLL_MOTION } from '@/components/ui/ScrollMotion';
@@ -15,6 +17,7 @@ interface RegistryScreenProps {
 
 export function RegistryScreen({ onContinue }: RegistryScreenProps) {
   const { content } = useWeddingContent();
+  const text = useSiteText();
   const [showCuratedRegistry, setShowCuratedRegistry] = useState(false);
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
 
@@ -27,11 +30,11 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
 
       <div className="max-w-4xl mx-auto w-full relative z-10">
         <TextsReveal className="text-center mb-16 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.registry?.header?.subtitle || "Wishing Well"}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.registry?.header?.title || "Registry & Contributions"}</h2>
+          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.registry?.header?.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.registry?.header?.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
           <p className="text-base font-cormorant italic text-wedding-goldlight/70 mt-3 max-w-md mx-auto">
-            {content.registry?.header?.description || "Your presence is our ultimate gift, but should you wish to honor us, we have provided options below."}
+            {content.registry?.header?.description}
           </p>
         </TextsReveal>
 
@@ -43,9 +46,9 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               <div className="w-12 h-12 bg-wedding-gold rounded-full flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-wedding-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
               </div>
-              <h3 className="text-xl font-cinzel text-wedding-cream font-light mb-3">{content.registry?.bankTransfer?.title || "Bank Transfer"}</h3>
+              <h3 className="text-xl font-cinzel text-wedding-cream font-light mb-3">{content.registry?.bankTransfer?.title}</h3>
               <p className="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
-                {content.registry?.bankTransfer?.description || "Directly support our honeymoon adventures or first home goals with an elegant direct bank contribution."}
+                {content.registry?.bankTransfer?.description}
               </p>
               
               <div className={`grid gap-3 mt-auto ${(content.registry?.bankTransfer?.banks || []).length >= 4 ? 'grid-cols-2' : 'grid-cols-1'}`}>
@@ -70,16 +73,16 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               <div className="w-12 h-12 bg-wedding-gold rounded-full flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-wedding-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
               </div>
-              <h3 className="text-xl font-cinzel text-wedding-cream font-light mb-3">{content.registry?.curatedRegistry?.title || "Curated Registry"}</h3>
+              <h3 className="text-xl font-cinzel text-wedding-cream font-light mb-3">{content.registry?.curatedRegistry?.title}</h3>
               <p className="text-sm font-cormorant text-wedding-cream mb-6 leading-relaxed">
-                {content.registry?.curatedRegistry?.description1 || "We have lovingly curated a wedding registry featuring beautiful, elegant keepsakes and lifestyle pieces from our favorite boutiques."}
+                {content.registry?.curatedRegistry?.description1}
               </p>
               <p className="text-xs text-wedding-cream/60 leading-relaxed mb-8">
-                {content.registry?.curatedRegistry?.description2 || "Options include premium vintage collection tablewares, designer home accents, and art contributions for our newly renovated residence."}
+                {content.registry?.curatedRegistry?.description2}
               </p>
             </div>
             <button onClick={() => setShowCuratedRegistry(true)} className="w-full text-center py-3 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.2em] font-medium uppercase transition-all duration-300 rounded-sm">
-              Visit Wedding Registry
+              {text.registry.visitRegistry}
             </button>
           </div>
           </ScrollReveal>
@@ -87,8 +90,8 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
       </div>
 
       <ScrollReveal delay={0.2} className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
-        <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
+        <button onClick={onContinue} aria-label={text.common.continue} className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
+          <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">{text.common.continue}</span>
           <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
             <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>
@@ -127,7 +130,7 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-cinzel text-wedding-goldlight mb-2">{selectedBank}</h3>
-                <p className="text-sm font-cormorant text-wedding-cream/80">Scan the QR code to transfer</p>
+                <p className="text-sm font-cormorant text-wedding-cream/80">{text.registry.scanQr}</p>
               </div>
 
               <div className="bg-white p-4 rounded-lg aspect-square flex items-center justify-center mb-6">
@@ -141,13 +144,13 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
                 ) : (
                   <div className="w-full h-full border-4 border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400">
                     <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4"></path></svg>
-                    <span className="text-xs font-inter uppercase tracking-wider text-center px-4">Place {selectedBank} QR Code Here</span>
+                    <span className="text-xs font-inter uppercase tracking-wider text-center px-4">{fillText(text.registry.qrMissing, { bank: selectedBank })}</span>
                   </div>
                 )}
               </div>
 
               <div className="text-center">
-                <p className="text-xs font-inter text-wedding-cream/60 uppercase tracking-widest">Thank you for your generosity</p>
+                <p className="text-xs font-inter text-wedding-cream/60 uppercase tracking-widest">{text.registry.thankYou}</p>
               </div>
             </motion.div>
           </motion.div>

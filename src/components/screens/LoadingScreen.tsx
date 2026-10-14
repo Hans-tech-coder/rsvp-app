@@ -2,12 +2,14 @@
 
 import React, { useEffect } from 'react';
 import { motion, usePresence, useReducedMotion } from 'motion/react';
+import { useSiteText } from '@/contexts/SiteTextContext';
 
 // Rendered inside <AnimatePresence>. The exit is a CSS opacity fade on the motion
 // tokens, so the first screen mounts underneath and the two crossfade.
 export function LoadingScreen() {
   const [isPresent, safeToRemove] = usePresence();
   const reduceMotion = useReducedMotion();
+  const text = useSiteText();
 
   useEffect(() => {
     if (!isPresent && reduceMotion) safeToRemove();
@@ -60,7 +62,7 @@ export function LoadingScreen() {
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           className="text-wedding-cream/80 font-cinzel text-lg tracking-[0.3em] uppercase mb-3"
         >
-          Curating Elegance
+          {text.loading.title}
         </motion.h2>
         
         <motion.div 
@@ -75,7 +77,7 @@ export function LoadingScreen() {
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
           className="mt-4 text-wedding-cream/40 text-[10px] tracking-[0.4em] uppercase"
         >
-          Please wait
+          {text.loading.subtitle}
         </motion.p>
       </motion.div>
     </div>

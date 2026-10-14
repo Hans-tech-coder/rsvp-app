@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { hasMouse } from '@/lib/pointer';
+import { useSiteText } from '@/contexts/SiteTextContext';
 
 // Onboarding hint for the welcome 3D scene: "move your mouse" on desktop, "tilt
 // your phone" on phones. Appears after the intro and leaves after a few seconds.
@@ -25,11 +26,6 @@ const MAX_SHOWS = 3;
 // Tries only count once the hint has been up this long, so a stray mouse move
 // as it appears does not whisk it away before it is read
 const READ_MS = 1500;
-const COPY = {
-  mouse: { title: 'Move your mouse', sub: 'to bring the scene to life' },
-  tilt: { title: 'Tilt your phone', sub: 'to bring the scene to life' },
-  'tilt-ios': { title: 'Tap to enable motion', sub: 'then tilt your phone' },
-};
 
 type OrientationWithPermission = typeof DeviceOrientationEvent & {
   requestPermission?: () => Promise<'granted' | 'denied'>;
@@ -44,6 +40,7 @@ function detectMode(): Mode | null {
 }
 
 export function MotionHint() {
+  const text = useSiteText().motionHint;
   const [mode, setMode] = useState<Mode | null>(null);
   const [visible, setVisible] = useState(false);
   const [done, setDone] = useState(false);
@@ -153,7 +150,10 @@ export function MotionHint() {
     setDone(true);
   };
 
-  const copy = mode ? COPY[mode] : null;
+  const copy = mode === 'mouse' ? { title: text.mouseTitle, sub: text.mouseText }
+    : mode === 'tilt' ? { title: text.tiltTitle, sub: text.tiltText }
+    : mode === 'tilt-ios' ? { title: text.iosTitle, sub: text.iosText }
+    : null;
   const isButton = mode === 'tilt-ios';
 
   return (

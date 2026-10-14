@@ -5,8 +5,9 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import Script from "next/script";
 import { getThemeScript } from "@teispace/next-themes/server";
-import { getAdminDb } from "@/lib/firebase/admin";
-import weddingContent from "@/data/wedding-content.json";
+import { SiteTextProvider } from "@/contexts/SiteTextContext";
+import { getSiteContent, formatEventDate } from "@/lib/siteContentServer";
+import { fillText } from "@/lib/siteText";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -26,29 +27,17 @@ const inter = Inter({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  let ogImage = weddingContent.global.ogImage;
-  const title = "Hans & Czay | A Celebration of Love";
-  const description = "We joyfully request the honor of your presence as we celebrate the beginning of our forever. Join us on December 20, 2026.";
-
-  try {
-    const db = getAdminDb();
-    const docSnap = await db.collection('websiteContent').doc('globalSettings').get();
-    
-    if (docSnap.exists) {
-      const data = docSnap.data();
-      if (data?.ogImage) {
-        ogImage = data.ogImage;
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching metadata from Firebase:", error);
-  }
+  const { global, siteText } = await getSiteContent();
+  const values = { couple: global.coupleNameFormat, date: formatEventDate(global.targetDate), venue: global.venueShort };
+  const title = fillText(siteText.seo.title, values);
+  const description = fillText(siteText.seo.description, values);
+  const ogImage = global.ogImage;
 
   return {
     title,
     description,
     icons: {
-      icon: "/hansandczay.svg",
+      icon: global.logo,
     },
     openGraph: {
       title,
@@ -73,11 +62,13 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { siteText } = await getSiteContent();
+
   return (
     <html
       lang="en"
@@ -109,8 +100,10 @@ addEventListener('pointerdown',on,{passive:true,capture:true})})()`}
           disableTransitionOnChange
           noScript
         >
-          {children}
-          <AudioPlayer />
+          <SiteTextProvider value={siteText}>
+            {children}
+            <AudioPlayer />
+          </SiteTextProvider>
         </ThemeProvider>
       </body>
     </html>

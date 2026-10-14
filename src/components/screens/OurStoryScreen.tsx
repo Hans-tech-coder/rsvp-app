@@ -6,6 +6,7 @@ import { Play } from 'lucide-react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useSiteText } from '@/contexts/SiteTextContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal, Parallax } from '@/components/ui/ScrollMotion';
 
@@ -16,6 +17,7 @@ interface OurStoryScreenProps {
 
 export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenProps) {
   const { content } = useWeddingContent();
+  const text = useSiteText();
   const [activeVideo, setActiveVideo] = useState<{link: string, coverImage: string} | null>(null);
   const [wasMusicPlaying, setWasMusicPlaying] = useState(false);
   const scrollRef = useRef<HTMLElement>(null);
@@ -111,7 +113,7 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
                     className="mt-6 flex items-center justify-center gap-2 px-6 py-2.5 bg-wedding-gold/10 hover:bg-wedding-gold/20 border border-wedding-gold/30 rounded-full transition-all duration-300 group/btn w-fit"
                   >
                     <Play className="w-4 h-4 text-wedding-gold group-hover/btn:scale-110 transition-transform duration-300" fill="currentColor" />
-                    <span className="text-xs uppercase tracking-widest text-wedding-gold font-medium">Watch Video</span>
+                    <span className="text-xs uppercase tracking-widest text-wedding-gold font-medium">{text.ourStory.watchVideo}</span>
                   </button>
                 )}
               </div>
@@ -123,8 +125,8 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
 
       <ScrollReveal delay={0.2}>
         <div className="w-full flex justify-center mt-8 md:mt-12 relative z-20">
-          <button onClick={onContinue} aria-label="Continue" className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">Continue</span>
+          <button onClick={onContinue} aria-label={text.common.continue} className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
+            <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">{text.common.continue}</span>
             <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
               <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
             </div>

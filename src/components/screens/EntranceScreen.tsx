@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import Image from 'next/image';
 import { InkRevealCanvas } from '@/components/ui/InkRevealCanvas';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useSiteText } from '@/contexts/SiteTextContext';
 
 import { verifyInviteCode } from '@/app/actions/rsvp';
 import { Loader2 } from 'lucide-react';
@@ -21,6 +22,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
   const [isValidating, setIsValidating] = useState(false);
   
   const { content } = useWeddingContent();
+  const text = useSiteText();
   const logoUrl = content.global.logo;
   const [particles, setParticles] = useState<{ id: number; left: string; delay: string; duration: string; size: string }[]>([]);
 
@@ -58,7 +60,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
         onUnlock(inputCode);
       }, 3000);
     } else {
-      setError(res.error || 'Incorrect access code. Please try again.');
+      setError(text.entrance.errors[res.code ?? 'failed']);
     }
   };
 
@@ -155,7 +157,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
         </div>
 
         <div className="text-center">
-          <span className="inline-block text-[10px] uppercase tracking-[0.4em] text-wedding-gold font-medium mb-3 border-b border-wedding-gold/30 pb-1">The Royal Invitation</span>
+          <span className="inline-block text-[10px] uppercase tracking-[0.4em] text-wedding-gold font-medium mb-3 border-b border-wedding-gold/30 pb-1">{text.entrance.eyebrow}</span>
           <h1 className="text-4xl md:text-5xl font-cinzel text-wedding-goldlight font-light tracking-widest mb-4 drop-shadow-md">{content.global.groomName} & {content.global.brideName}</h1>
           <p className="text-sm font-cormorant text-wedding-cream/90 italic tracking-widest mb-10 flex items-center justify-center gap-2">
             <span className="w-8 h-[1px] bg-gradient-to-r from-transparent to-wedding-gold/50"></span>
@@ -180,8 +182,8 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
                    <div className="w-2.5 h-2.5 bg-wedding-gold rounded-full animate-pulse shadow-[0_0_10px_rgba(197,160,89,0.8)]"></div>
                 </div>
               </div>
-              <p className="text-wedding-gold tracking-[0.4em] text-xs uppercase animate-pulse drop-shadow-md">Access Granted</p>
-              <p className="text-wedding-cream/60 tracking-[0.2em] text-[9px] uppercase mt-3">Preparing your royal invitation...</p>
+              <p className="text-wedding-gold tracking-[0.4em] text-xs uppercase animate-pulse drop-shadow-md">{text.entrance.granted}</p>
+              <p className="text-wedding-cream/60 tracking-[0.2em] text-[9px] uppercase mt-3">{text.entrance.preparing}</p>
             </motion.div>
           ) : (
             <motion.div
@@ -190,9 +192,9 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
             >
               <div className="flex justify-center w-full px-1 mb-6">
                 <div className="inline-flex items-center gap-2 sm:gap-4 border-y border-wedding-gold/20 py-2.5 px-3 sm:px-6 bg-gradient-to-r from-transparent via-wedding-gold/5 to-transparent w-full justify-center">
-                  <p className="text-[8px] sm:text-[10px] text-wedding-gold/80 tracking-[0.08em] sm:tracking-[0.12em] uppercase font-medium leading-[1.8] whitespace-nowrap text-center">
-                    Please use the unique access code provided<br />
-                    with your invitation link
+                  <p className="text-[8px] sm:text-[10px] text-wedding-gold/80 tracking-[0.08em] sm:tracking-[0.12em] uppercase font-medium leading-[1.8] whitespace-pre text-center">
+                    {/* Line breaks typed in the admin are kept; lines never wrap */}
+                    {text.entrance.instructions}
                   </p>
                 </div>
               </div>
@@ -203,17 +205,17 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="ENTER CODE" 
+                  placeholder={text.entrance.codePlaceholder} 
                   className="relative w-full bg-wedding-dark/60 border border-wedding-gold/30 rounded-sm text-wedding-gold tracking-[0.4em] text-center placeholder:tracking-widest placeholder:text-wedding-gold/30 py-4 px-4 focus:outline-none focus:border-wedding-gold focus:bg-wedding-dark/80 text-sm font-bold uppercase transition-all duration-300 shadow-inner" 
                 />
                 <div className={`absolute -bottom-6 left-0 right-0 text-[10px] text-red-400 tracking-wider text-center transition-opacity duration-300 font-medium ${error ? 'opacity-100' : 'opacity-0'}`}>
-                  {error || 'Incorrect access code. Please try again.'}
+                  {error || text.entrance.errors.invalid}
                 </div>
               </div>
               
               <button disabled={isValidating || !password} onClick={handleUnlock} className="relative w-full overflow-hidden bg-wedding-burgundy/90 border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy hover:border-wedding-gold hover:text-wedding-goldlight px-6 py-4 text-xs tracking-[0.3em] font-medium transition-all duration-500 uppercase rounded-sm group/btn shadow-lg hover:shadow-wedding-gold/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
                 {isValidating && <Loader2 className="w-4 h-4 animate-spin text-wedding-gold" />}
-                <span className="relative z-10">{isValidating ? 'Validating...' : 'Confirm Attendance'}</span>
+                <span className="relative z-10">{isValidating ? text.entrance.validating : text.entrance.button}</span>
                 <div className="absolute inset-0 h-full w-0 bg-white/10 group-hover/btn:w-full transition-all duration-500 ease-out z-0"></div>
               </button>
               

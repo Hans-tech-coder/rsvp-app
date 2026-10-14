@@ -4,6 +4,7 @@ import { getAdminDb } from '@/lib/firebase/admin';
 import { requireAdmin } from '@/lib/requireAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import crypto from 'crypto';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Generate unique alphanumeric invite codes.
@@ -254,3 +255,18 @@ export async function toggleInviteCopiedStatus(code: string, isCopied: boolean) 
   }
 }
 
+
+/**
+ * Regenerate the static guest pages (home, 404, metadata) on their next visit.
+ * They read site text and global settings on the server at build time, so the
+ * Site Text and Global Settings editors call this after a save.
+ */
+export async function revalidateGuestSite() {
+  try {
+    await requireAdmin();
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to refresh the guest site' };
+  }
+}

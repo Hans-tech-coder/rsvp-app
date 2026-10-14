@@ -81,7 +81,6 @@ export function WeddingContentProvider({ children }: { children: React.ReactNode
             logo: globalData.logo || newContent.global.logo,
             brideName: globalData.brideName || newContent.global.brideName,
             groomName: globalData.groomName || newContent.global.groomName,
-            dateFull: globalData.dateFull || newContent.global.dateFull,
             venueShort: globalData.venueShort || newContent.global.venueShort,
             targetDate: globalData.targetDate || newContent.global.targetDate,
             footerTagline: globalData.footerTagline || newContent.global.footerTagline,

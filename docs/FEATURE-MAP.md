@@ -32,11 +32,12 @@ All editors are in `src/app/admin/content/`.
 | --- | --- |
 | Step state, back/menu buttons, screen transitions, RSVP lock, localStorage | `src/app/page.tsx` |
 | Content loading (JSON defaults + Firestore overrides) | `src/contexts/WeddingContentContext.tsx`, `src/data/wedding-content.json` |
+| Site text: every small guest-visible wording (buttons, labels, hints, errors, menu, loader, 404, link preview). Read on the server, given to all components by the root layout; `useSiteText()` in a component | `src/lib/siteContentServer.ts` (`getSiteContent`, server only), `src/contexts/SiteTextContext.tsx` (`SiteTextProvider`, `useSiteText`), `src/lib/siteText.ts` (`SiteText` type, `mergeSiteText`, `fillText`, `fillNodes`; tested by `src/lib/siteText.test.ts`), JSON key `siteText`; editor `src/app/admin/content/SiteTextEditor.tsx` + field labels `siteTextFields.ts` |
 | Step menu overlay | `src/components/layout/CanvasMenu.tsx` |
 | Footer at the bottom of scrolling screens (monogram from `global.groomName`/`brideName` initials, tagline `global.footerTagline`, date `global.targetDate` as DD.MM.YYYY; all edited in `GlobalSettingsEditor.tsx`) | `src/components/layout/EmbeddedFooter.tsx` |
 | Background music + floating toggle, volume slider, "music is playing" hint | `src/components/AudioPlayer.tsx`, `.t-vol-*` in `src/app/globals.css`, `public/bg-music.mp3` |
-| Fonts, OG/Twitter metadata, theme script | `src/app/layout.tsx` |
-| 404 page for any unknown URL (couple's photo inside the "404", days-to-wedding line, "Back to the celebration" → `/`; same burgundy backdrop and button style as the inner screens; embossed logo `.t-emboss` in `globals.css`; also mounts `FallingPetals` and `WeddingCursor`) | `src/app/not-found.tsx` (metadata) → `src/components/screens/NotFoundScreen.tsx` |
+| Fonts, metadata (title/description from site text, OG image and favicon from global settings), theme script, `SiteTextProvider` | `src/app/layout.tsx` |
+| 404 page for any unknown URL (couple's photo inside the "404", days-to-wedding line, "Back to the celebration" → `/`; global settings read on the server and passed as `site`; wording from site text `notFound`; same burgundy backdrop and button style as the inner screens; embossed logo `.t-emboss` in `globals.css`; also mounts `FallingPetals` and `WeddingCursor`) | `src/app/not-found.tsx` (metadata) → `src/components/screens/NotFoundScreen.tsx` |
 | Colors, fonts, motion tokens, reveal CSS | `src/app/globals.css` |
 | Staggered text reveal on scroll | `src/components/ui/TextsReveal.tsx` |
 | Scroll motion: scroll-container context, `ScrollReveal`/`ScrollRevealItem` (reveal once), `Parallax` (image drift), `SCROLL_MOTION` constants | `src/components/ui/ScrollMotion.tsx` |
@@ -67,6 +68,7 @@ All editors are in `src/app/admin/content/`.
 | `generateInviteCodes`, `deleteInviteCode`, `regenerateInviteCode`, `toggleInviteCopiedStatus`, `getInviteMessageTemplate`, `updateInviteMessageTemplate` | `admin.ts` | `admin/invites/*`, `admin/guests/GuestListClient.tsx` (delete) |
 | `addRegistryGift`, `updateRegistryGift`, `deleteRegistryGift`, `resetRegistryGift` | `admin.ts` | `admin/gifts/GiftsClient.tsx` |
 | `deleteGiftSelection` | `admin.ts` | `admin/registry/RegistrySelectionsClient.tsx` |
+| `revalidateGuestSite` (regenerates the static `/` and 404 after a save) | `admin.ts` | `admin/content/SiteTextEditor.tsx`, `GlobalSettingsEditor.tsx` |
 | `getMyAdminRole` | `admins.ts` | `admin/layout.tsx` (shows Manage Admins for super admins) |
 | `listAdmins`, `addAdmin`, `cancelPendingAdmin`, `removeAdmin` (super only) | `admins.ts` | `admin/components/ManageAdminsModal.tsx` |
 
@@ -84,7 +86,7 @@ server actions and then `router.refresh()`.
 | `/admin/guests` | `src/app/admin/guests/page.tsx` | `GuestListClient.tsx` (CSV export via papaparse) | `guests` |
 | `/admin/gifts` | `src/app/admin/gifts/page.tsx` | `GiftsClient.tsx` | `registryGifts` |
 | `/admin/registry` | `src/app/admin/registry/page.tsx` | `RegistrySelectionsClient.tsx` | `giftSelections` |
-| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder | `websiteContent/*` + Vercel Blob |
+| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder ("Site Text" tab = `SiteTextEditor.tsx`) | `websiteContent/*` + Vercel Blob |
 | sidebar/nav | `src/app/admin/layout.tsx` | – | – |
 | Manage Admins (sidebar button, super admins only; no route) | `src/app/admin/layout.tsx` | `src/app/admin/components/ManageAdminsModal.tsx` | `admins`, `adminAllowlist` |
 | shared UI | `src/app/admin/components/AdminModal.tsx`, `TablePagination.tsx` | | |
@@ -111,16 +113,16 @@ Read these by range (`grep -n` then read around the line), never whole.
 
 | Lines | File |
 | --- | --- |
+| 765 | `src/data/wedding-content.json` |
 | 700 | `src/app/admin/content/DressCodeEditor.tsx` |
 | 661 | `src/app/admin/content/RegistryEditor.tsx` |
 | 597 | `src/app/admin/content/OurStoryEditor.tsx` |
-| 595 | `src/data/wedding-content.json` |
 | 557 | `src/app/admin/content/GalleryEditor.tsx` |
+| 547 | `src/components/screens/RsvpScreen.tsx` |
 | 538 | `src/app/admin/content/EntourageEditor.tsx` |
-| 517 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
+| 536 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
 | 493 | `src/app/admin/content/FaqsEditor.tsx` |
 | 471 | `src/components/ui/circular-image-gallery.tsx` |
 | 469 | `src/app/admin/content/EventDetailsEditor.tsx` |
-| 466 | `src/components/screens/RsvpScreen.tsx` |
 | 464 | `src/app/page.tsx` |
 | 435 | `src/app/admin/content/RsvpFormEditor.tsx` |
