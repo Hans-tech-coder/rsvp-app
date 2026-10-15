@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AudioPlayer } from '@/components/AudioPlayer';
+import { ThemeStyle } from '@/components/ThemeStyle';
 import { SiteTextProvider } from '@/contexts/SiteTextContext';
 import { WeddingContentProvider } from '@/contexts/WeddingContentContext';
 import { getEventContent, formatEventDate } from '@/lib/siteContentServer';
@@ -55,6 +56,7 @@ export default async function EventPage({ params }: PageProps<'/[event]'>) {
 
   return (
     <SiteTextProvider value={site.siteText}>
+      <ThemeStyle theme={site.theme} />
       <WeddingContentProvider eventId={event} content={site.content}>
         <GuestSite />
       </WeddingContentProvider>

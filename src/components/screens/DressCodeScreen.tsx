@@ -52,18 +52,18 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
   return (
     <section ref={scrollRef} className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
       <ScrollContainerProvider containerRef={scrollRef}>
-      <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-surface via-primary-deep to-surface pointer-events-none"></div>
 
       <div className="max-w-4xl mx-auto text-center w-full relative z-10">
         <TextsReveal className="mb-16 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-4">{content.dressCode.header?.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{content.dressCode.header?.title}</h2>
-          <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-6"></div>
+          <span className="text-sm font-cormorant italic text-accent-light/80 tracking-widest block mb-4">{content.dressCode.header?.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-ink font-light tracking-widest drop-shadow-md">{content.dressCode.header?.title}</h2>
+          <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6"></div>
         </TextsReveal>
 
-        <ScrollReveal className="bg-wedding-dark/60 p-8 md:p-12 rounded-xl border border-wedding-gold/20 shadow-md">
-          <p className="text-sm uppercase tracking-[0.2em] text-wedding-gold font-semibold mb-3">Dress Code: {content.dressCode.title}</p>
-          <p className="text-base font-cormorant italic text-wedding-goldlight max-w-2xl mx-auto leading-relaxed mb-10">
+        <ScrollReveal className="bg-surface/60 p-8 md:p-12 rounded-xl border border-accent/20 shadow-md">
+          <p className="text-sm uppercase tracking-[0.2em] text-accent font-semibold mb-3">Dress Code: {content.dressCode.title}</p>
+          <p className="text-base font-cormorant italic text-accent-light max-w-2xl mx-auto leading-relaxed mb-10">
             {content.dressCode.description}
           </p>
 
@@ -73,12 +73,12 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
               <ScrollRevealItem key={index} className={index === 4 ? 'col-span-2 sm:col-span-1' : undefined}>
               <motion.div whileHover={{ scale: 1.05 }} className="flex flex-col items-center">
                 <div 
-                  className="w-16 h-16 rounded-full border border-wedding-burgundy/20 shadow-inner mb-2 flex items-center justify-center mx-auto"
+                  className="w-16 h-16 rounded-full border border-primary/20 shadow-inner mb-2 flex items-center justify-center mx-auto"
                   style={{ backgroundColor: color.hex }}
                 >
                   <div className="w-14 h-14 rounded-full border border-dashed border-white/40"></div>
                 </div>
-                <span className="text-[11px] uppercase tracking-wider text-wedding-cream/80 text-center">{color.name}</span>
+                <span className="text-[11px] uppercase tracking-wider text-ink/80 text-center">{color.name}</span>
               </motion.div>
               </ScrollRevealItem>
             ))}
@@ -86,11 +86,11 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
 
           {/* Attire Guidelines */}
           {guidelines.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left border-t border-wedding-gold/20 pt-8 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left border-t border-accent/20 pt-8 mb-10">
             {guidelines.map((guideline) => (
             <div key={guideline.id}>
-              <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold font-bold mb-3">{guideline.title}</h4>
-              <p className="text-sm font-cormorant text-wedding-cream leading-relaxed">
+              <h4 className="text-xs uppercase tracking-[0.25em] text-accent font-bold mb-3">{guideline.title}</h4>
+              <p className="text-sm font-cormorant text-ink leading-relaxed">
                 {guideline.text}
               </p>
             </div>
@@ -99,8 +99,8 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
           )}
 
           {/* Outfit Inspiration Slider */}
-          <div className="border-t border-wedding-gold/20 pt-8 mt-4">
-            <h4 className="text-xs uppercase tracking-[0.25em] text-wedding-gold/80 font-bold mb-6 text-center">{text.dressCode.inspiration}</h4>
+          <div className="border-t border-accent/20 pt-8 mt-4">
+            <h4 className="text-xs uppercase tracking-[0.25em] text-accent/80 font-bold mb-6 text-center">{text.dressCode.inspiration}</h4>
             
             <div className="relative w-full max-w-full" style={{
               mask: 'linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)',
@@ -109,11 +109,11 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
               <div className="outfit-slider-wrapper w-full py-4">
                 <DraggableSlider speed={0.5}>
                   {inspirationImages.map((img, index) => (
-                    <div key={index} {...(img.url ? viewCardProps(`View ${img.type} outfit`, () => openOutfit(index)) : {})} className={`w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative shadow-sm border border-wedding-gold/20 flex-shrink-0${img.url ? ' t-view-card cursor-pointer' : ''}`}>
+                    <div key={index} {...(img.url ? viewCardProps(`View ${img.type} outfit`, () => openOutfit(index)) : {})} className={`w-[140px] sm:w-[180px] md:w-[200px] aspect-[2/3] rounded-md overflow-hidden relative shadow-sm border border-accent/20 flex-shrink-0${img.url ? ' t-view-card cursor-pointer' : ''}`}>
                       <RevealImage src={img.url} alt={`${img.type} Inspiration ${index + 1}`} className="w-full h-full object-cover pointer-events-none" wrapperClassName="t-view-media w-full h-full" />
                       {img.url && <ViewOverlay />}
                       <div className="absolute bottom-0 inset-x-0 z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-8 pb-2.5 px-2 text-center pointer-events-none">
-                        <span className="block text-[10px] sm:text-[11px] uppercase tracking-widest text-wedding-cream drop-shadow-sm">{img.type}</span>
+                        <span className="block text-[10px] sm:text-[11px] uppercase tracking-widest text-ink drop-shadow-sm">{img.type}</span>
                       </div>
                     </div>
                   ))}
@@ -126,9 +126,9 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
 
       <ScrollReveal delay={0.2} className="w-full flex justify-center pb-8 md:pb-24 pt-8 relative z-20">
         <button onClick={onContinue} aria-label={text.common.continue} className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/70 font-medium group-hover:text-wedding-gold transition-colors duration-300">{text.common.continue}</span>
-          <div className="w-10 h-10 rounded-full border border-wedding-cream/30 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold">
-            <svg className="w-4 h-4 text-wedding-cream/70 transition-transform duration-300 group-hover:text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-ink/70 font-medium group-hover:text-accent transition-colors duration-300">{text.common.continue}</span>
+          <div className="w-10 h-10 rounded-full border border-ink/30 flex items-center justify-center transition-all duration-300 group-hover:bg-accent/10 group-hover:border-accent">
+            <svg className="w-4 h-4 text-ink/70 transition-transform duration-300 group-hover:text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </div>
         </button>
       </ScrollReveal>

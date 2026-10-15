@@ -59,9 +59,9 @@ export function WeddingCursor() {
 
     const css = getComputedStyle(root);
     const token = (name: string) => css.getPropertyValue(name).trim();
-    const gold = token('--color-wedding-gold');
-    const goldLight = token('--color-wedding-goldlight');
-    const cream = token('--color-wedding-cream');
+    const gold = token('--color-accent');
+    const goldLight = token('--color-accent-light');
+    const cream = token('--color-ink');
     const dustColor = () => {
       const r = Math.random();
       return r < 0.65 ? goldLight : r < 0.82 ? cream : gold;
@@ -237,9 +237,9 @@ export function WeddingCursor() {
       <canvas ref={canvasRef} aria-hidden="true" className="fixed inset-0 w-full h-full pointer-events-none z-[9998]" />
       <div ref={cursorRef} aria-hidden="true" className="t-cursor fixed left-0 top-0 pointer-events-none z-[9999]">
         <svg className="t-cursor-ring" width="26" height="30" viewBox="0 0 26 30">
-          <path d="M13 1l5 5-5 5-5-5z" className="fill-wedding-cream stroke-wedding-goldlight" strokeWidth=".8" />
-          <path d="M9.5 7.5L13 11l3.5-3.5M8 6h10" fill="none" className="stroke-wedding-goldlight" strokeWidth=".5" />
-          <circle cx="13" cy="20" r="8" fill="none" className="stroke-wedding-gold" strokeWidth="2.4" />
+          <path d="M13 1l5 5-5 5-5-5z" className="fill-ink stroke-accent-light" strokeWidth=".8" />
+          <path d="M9.5 7.5L13 11l3.5-3.5M8 6h10" fill="none" className="stroke-accent-light" strokeWidth=".5" />
+          <circle cx="13" cy="20" r="8" fill="none" className="stroke-accent" strokeWidth="2.4" />
         </svg>
       </div>
     </>

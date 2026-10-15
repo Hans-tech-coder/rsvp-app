@@ -175,7 +175,7 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose, shape 
         <button 
           ref={closeRef}
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 md:top-6 md:right-6 text-wedding-cream/70 hover:text-wedding-cream transition-colors z-[110] bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
+          className="absolute top-4 right-4 md:top-6 md:right-6 text-ink/70 hover:text-ink transition-colors z-[110] bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
           aria-label="Close gallery"
         >
           <X className="w-6 h-6" />
@@ -211,7 +211,7 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose, shape 
             aria-live="polite"
             className={`absolute inset-x-0 bottom-[120px] md:bottom-[80px] z-[101] flex justify-center px-4 pointer-events-none transition-opacity duration-[var(--duration-medium)] ease-[var(--ease-smooth-out)] motion-reduce:transition-none ${inPlace === opened ? "opacity-100" : "opacity-0"}`}
           >
-            <span className="rounded-full bg-black/55 backdrop-blur-sm px-4 py-1.5 text-xs sm:text-sm uppercase tracking-widest text-wedding-cream drop-shadow-sm">
+            <span className="rounded-full bg-black/55 backdrop-blur-sm px-4 py-1.5 text-xs sm:text-sm uppercase tracking-widest text-ink drop-shadow-sm">
               {caption}
             </span>
           </div>
@@ -219,7 +219,7 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose, shape 
       </div>
 
       <button
-        className="absolute left-4 sm:left-8 top-1/2 z-[101] flex h-16 w-16 -translate-y-1/2 cursor-pointer items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-wedding-cream transition-transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-wedding-cream/70 hover:text-wedding-cream drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]"
+        className="absolute left-4 sm:left-8 top-1/2 z-[101] flex h-16 w-16 -translate-y-1/2 cursor-pointer items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ink transition-transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-ink/70 hover:text-ink drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]"
         onClick={(e) => { e.stopPropagation(); prev(); }}
         disabled={disabled}
         aria-label="Previous Image"
@@ -230,7 +230,7 @@ export function CircularImageGallery({ images, initialIndex = 0, onClose, shape 
       </button>
 
       <button
-        className="absolute right-4 sm:right-8 top-1/2 z-[101] flex h-16 w-16 -translate-y-1/2 cursor-pointer items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-wedding-cream transition-transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-wedding-cream/70 hover:text-wedding-cream drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]"
+        className="absolute right-4 sm:right-8 top-1/2 z-[101] flex h-16 w-16 -translate-y-1/2 cursor-pointer items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ink transition-transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-ink/70 hover:text-ink drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]"
         onClick={(e) => { e.stopPropagation(); next(); }}
         disabled={disabled}
         aria-label="Next Image"
@@ -452,7 +452,7 @@ function Tabs({ images, onSelect, activeIndex }: TabsProps) {
           <button
             key={`${image.url}-tab-${i}`}
             onClick={(e) => { e.stopPropagation(); onSelect(i); }}
-            className={`absolute rounded-full border-2 ${activeIndex === i ? 'border-wedding-gold scale-125 z-10' : 'border-white/70 hover:border-white'} pointer-events-auto overflow-hidden shadow-sm transition-[translate,border-color,transform,z-index] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white`}
+            className={`absolute rounded-full border-2 ${activeIndex === i ? 'border-accent scale-125 z-10' : 'border-white/70 hover:border-white'} pointer-events-auto overflow-hidden shadow-sm transition-[translate,border-color,transform,z-index] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white`}
             style={{
               width: circleRadius * 2 + 4,
               height: circleRadius * 2 + 4,

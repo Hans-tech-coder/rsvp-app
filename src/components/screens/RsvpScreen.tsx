@@ -76,8 +76,8 @@ function validateRsvp(v: {
 }
 
 function inputClass(invalid: boolean) {
-  return `w-full bg-transparent border-b py-2 text-base md:text-sm text-wedding-cream focus:outline-none placeholder:text-wedding-cream/40 transition-colors duration-300 ${
-    invalid ? 'border-red-400/70 focus:border-red-400' : 'border-wedding-gold/30 focus:border-wedding-gold'
+  return `w-full bg-transparent border-b py-2 text-base md:text-sm text-ink focus:outline-none placeholder:text-ink/40 transition-colors duration-300 ${
+    invalid ? 'border-red-400/70 focus:border-red-400' : 'border-accent/30 focus:border-accent'
   }`;
 }
 
@@ -89,7 +89,7 @@ function FieldLabel({ htmlFor, required, markAddon, children }: {
 }) {
   const text = useSiteText();
   return (
-    <label htmlFor={htmlFor} className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-2">
+    <label htmlFor={htmlFor} className="block text-xs uppercase tracking-widest text-accent font-semibold mb-2">
       {children}{' '}
       {required ? (
         <span className="relative inline-block">
@@ -98,7 +98,7 @@ function FieldLabel({ htmlFor, required, markAddon, children }: {
           {markAddon}
         </span>
       ) : (
-        <span className="normal-case tracking-normal font-normal italic text-wedding-cream/50">{text.rsvp.optional}</span>
+        <span className="normal-case tracking-normal font-normal italic text-ink/50">{text.rsvp.optional}</span>
       )}
     </label>
   );
@@ -108,7 +108,7 @@ function FieldLabel({ htmlFor, required, markAddon, children }: {
 function FieldMessage({ id, error, hint, aside }: { id: string; error?: string | null; hint?: string; aside?: React.ReactNode }) {
   return (
     <div id={id} aria-live="polite" className="mt-1.5 flex items-start justify-between gap-3 text-xs leading-snug min-h-[1.25rem]">
-      <span className={error ? 'text-red-400' : 'text-wedding-cream/60'}>{error || hint}</span>
+      <span className={error ? 'text-red-400' : 'text-ink/60'}>{error || hint}</span>
       {aside}
     </div>
   );
@@ -235,16 +235,16 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
 
   return (
     <section className="py-24 px-4 absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between">
-      <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-surface via-primary-deep to-surface pointer-events-none"></div>
 
       {/* Only the heading reveals (TextsReveal); form fields never animate on scroll. */}
       <div className="max-w-4xl mx-auto w-full relative z-10">
-        <div className="bg-wedding-dark/40 p-6 sm:p-8 md:p-12 rounded-xl border border-wedding-burgundylight/30 shadow-lg">
+        <div className="bg-surface/40 p-6 sm:p-8 md:p-12 rounded-xl border border-primary-light/30 shadow-lg">
           <TextsReveal className="text-center mb-12 flex flex-col items-center">
-            <span className="text-sm font-cormorant italic text-wedding-goldlight/80 tracking-widest block mb-1">{formContent.header.subtitle}</span>
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-wedding-cream font-light tracking-widest drop-shadow-md">{formContent.header.title}</h2>
-            <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-5"></div>
-            <p className="text-base font-cormorant italic text-wedding-goldlight/90 mt-6 leading-relaxed max-w-2xl mx-auto whitespace-pre-line">
+            <span className="text-sm font-cormorant italic text-accent-light/80 tracking-widest block mb-1">{formContent.header.subtitle}</span>
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-ink font-light tracking-widest drop-shadow-md">{formContent.header.title}</h2>
+            <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-5"></div>
+            <p className="text-base font-cormorant italic text-accent-light/90 mt-6 leading-relaxed max-w-2xl mx-auto whitespace-pre-line">
               {formContent.header.description}
             </p>
           </TextsReveal>
@@ -279,14 +279,14 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                         transition={{ duration: reduceMotion ? 0.2 : 0.5, ease: [0.22, 1, 0.36, 1] }}
                       >
                         {/* Same card as the music hint in AudioPlayer.tsx */}
-                        <span className="relative flex flex-col gap-0.5 pl-4 pr-5 py-2.5 border border-wedding-gold/50 bg-wedding-dark/85 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
-                          <span aria-hidden="true" className="absolute inset-[3px] border border-wedding-gold/20 pointer-events-none"></span>
-                          <span className="font-cinzel text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-wedding-goldlight">{text.rsvp.requiredHintTitle}</span>
-                          <span className="font-cormorant italic text-sm text-wedding-cream/85 tracking-wide">
+                        <span className="relative flex flex-col gap-0.5 pl-4 pr-5 py-2.5 border border-accent/50 bg-surface/85 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
+                          <span aria-hidden="true" className="absolute inset-[3px] border border-accent/20 pointer-events-none"></span>
+                          <span className="font-cinzel text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-accent-light">{text.rsvp.requiredHintTitle}</span>
+                          <span className="font-cormorant italic text-sm text-ink/85 tracking-wide">
                             {fillNodes(text.rsvp.requiredHintText, { star: <span className="not-italic text-red-400">*</span> })}
                           </span>
                           {/* Caret pointing left at the asterisk */}
-                          <span aria-hidden="true" className="absolute -left-[6px] bottom-[6px] h-2.5 w-2.5 rotate-45 border-l border-b border-wedding-gold/50 bg-wedding-dark"></span>
+                          <span aria-hidden="true" className="absolute -left-[6px] bottom-[6px] h-2.5 w-2.5 rotate-45 border-l border-b border-accent/50 bg-surface"></span>
                         </span>
                       </motion.span>
                     )}
@@ -355,7 +355,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
 
             {/* Attendance Choice */}
             <fieldset aria-describedby="attendance-message">
-              <legend className="block text-xs uppercase tracking-widest text-wedding-gold font-semibold mb-3">
+              <legend className="block text-xs uppercase tracking-widest text-accent font-semibold mb-3">
                 {formContent.labels.attendance} <span className="text-red-400 group-data-[hint=on]/form:motion-safe:animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_3]" aria-hidden="true">*</span>
               </legend>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -364,12 +364,12 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                   return (
                     <label
                       key={option}
-                      className={`relative flex items-center gap-3 min-h-[52px] px-4 py-3 rounded-md border cursor-pointer transition-colors duration-300 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-wedding-gold ${
+                      className={`relative flex items-center gap-3 min-h-[52px] px-4 py-3 rounded-md border cursor-pointer transition-colors duration-300 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent ${
                         selected
-                          ? 'border-wedding-gold bg-wedding-gold/10'
+                          ? 'border-accent bg-accent/10'
                           : attendanceError
                             ? 'border-red-400/60 hover:border-red-400'
-                            : 'border-wedding-gold/25 hover:border-wedding-gold/60'
+                            : 'border-accent/25 hover:border-accent/60'
                       }`}
                     >
                       <input
@@ -381,10 +381,10 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                         onChange={() => setAttendance(option)}
                         className="sr-only"
                       />
-                      <span aria-hidden="true" className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors duration-300 ${selected ? 'border-wedding-gold' : 'border-wedding-gold/60'}`}>
-                        <span className={`w-2.5 h-2.5 rounded-full bg-wedding-gold transition-transform duration-200 ${selected ? 'scale-100' : 'scale-0'}`} />
+                      <span aria-hidden="true" className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors duration-300 ${selected ? 'border-accent' : 'border-accent/60'}`}>
+                        <span className={`w-2.5 h-2.5 rounded-full bg-accent transition-transform duration-200 ${selected ? 'scale-100' : 'scale-0'}`} />
                       </span>
-                      <span className="text-base font-cormorant italic text-wedding-cream">
+                      <span className="text-base font-cormorant italic text-ink">
                         {option === 'Yes' ? formContent.attendanceOptions.yes : formContent.attendanceOptions.no}
                       </span>
                     </label>
@@ -440,7 +440,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                 id="message-message"
                 hint={text.rsvp.hints.message}
                 aside={
-                  <span className={`shrink-0 tabular-nums ${message.length >= MESSAGE_MAX ? 'text-wedding-goldlight' : 'text-wedding-cream/45'}`}>
+                  <span className={`shrink-0 tabular-nums ${message.length >= MESSAGE_MAX ? 'text-accent-light' : 'text-ink/45'}`}>
                     {message.length}/{MESSAGE_MAX}
                   </span>
                 }
@@ -461,13 +461,13 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                     aria-describedby="consent-message"
                     className="peer sr-only"
                   />
-                  <div className={`w-5 h-5 border rounded-sm bg-transparent peer-checked:bg-wedding-gold peer-checked:border-wedding-gold peer-checked:[&>svg]:opacity-100 peer-focus-visible:ring-2 peer-focus-visible:ring-wedding-gold peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-wedding-dark transition-all duration-300 flex items-center justify-center ${consentError ? 'border-red-400' : 'border-wedding-gold/50'}`}>
-                    <svg className="w-3.5 h-3.5 text-wedding-dark opacity-0 transition-opacity duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                  <div className={`w-5 h-5 border rounded-sm bg-transparent peer-checked:bg-accent peer-checked:border-accent peer-checked:[&>svg]:opacity-100 peer-focus-visible:ring-2 peer-focus-visible:ring-accent peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-surface transition-all duration-300 flex items-center justify-center ${consentError ? 'border-red-400' : 'border-accent/50'}`}>
+                    <svg className="w-3.5 h-3.5 text-surface opacity-0 transition-opacity duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                 </div>
-                <span className="text-xs font-inter text-wedding-cream/70 group-hover:text-wedding-cream/90 transition-colors leading-relaxed">
+                <span className="text-xs font-inter text-ink/70 group-hover:text-ink/90 transition-colors leading-relaxed">
                   {formContent.actions.privacyText} <span className="text-red-400 group-data-[hint=on]/form:motion-safe:animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_3]" aria-hidden="true">*</span>
                 </span>
               </label>
@@ -487,7 +487,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                   <p className="text-red-400 text-sm">{error}</p>
                 </div>
               )}
-              <button disabled={isSubmitting} type="submit" className="px-8 py-4 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wedding-gold text-xs tracking-[0.25em] font-medium uppercase transition-all duration-300 rounded-sm shadow-lg w-full md:w-auto flex items-center justify-center gap-2 mx-auto disabled:opacity-70 disabled:cursor-not-allowed">
+              <button disabled={isSubmitting} type="submit" className="px-8 py-4 bg-primary border border-accent/30 text-accent hover:bg-primary/80 hover:border-accent hover:text-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-xs tracking-[0.25em] font-medium uppercase transition-all duration-300 rounded-sm shadow-lg w-full md:w-auto flex items-center justify-center gap-2 mx-auto disabled:opacity-70 disabled:cursor-not-allowed">
                 {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isSubmitting ? formContent.actions.submittingButton : formContent.actions.submitButton}
               </button>
@@ -512,21 +512,21 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="bg-wedding-dark/95 border border-wedding-gold/30 p-8 md:p-12 rounded-xl shadow-2xl max-w-md w-full text-center relative overflow-hidden"
+              className="bg-surface/95 border border-accent/30 p-8 md:p-12 rounded-xl shadow-2xl max-w-md w-full text-center relative overflow-hidden"
             >
               {/* Decorative elements */}
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
 
-              <h3 className="text-3xl font-cinzel text-wedding-goldlight mb-4 tracking-wide">{formContent.successModal.title}</h3>
-              <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mb-6"></div>
+              <h3 className="text-3xl font-cinzel text-accent-light mb-4 tracking-wide">{formContent.successModal.title}</h3>
+              <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mb-6"></div>
 
-              <p className="text-lg font-cormorant italic text-wedding-cream/90 mb-8 leading-relaxed whitespace-pre-line">
+              <p className="text-lg font-cormorant italic text-ink/90 mb-8 leading-relaxed whitespace-pre-line">
                 {formContent.successModal.description}
               </p>
 
               <button
                 onClick={onContinue}
-                className="px-8 py-3 bg-wedding-burgundy/80 border border-wedding-gold/40 text-wedding-gold hover:bg-wedding-burgundy hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.25em] font-medium uppercase transition-all duration-300 rounded-sm w-full"
+                className="px-8 py-3 bg-primary/80 border border-accent/40 text-accent hover:bg-primary hover:border-accent hover:text-accent-light text-xs tracking-[0.25em] font-medium uppercase transition-all duration-300 rounded-sm w-full"
               >
                 {formContent.successModal.buttonText}
               </button>

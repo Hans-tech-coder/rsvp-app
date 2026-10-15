@@ -83,7 +83,7 @@ the client checks `success` and shows the error.
 | `/admin/guests` | RSVP list with search/filter and CSV export (papaparse); delete an entry | `deleteInviteCode` |
 | `/admin/gifts` | Registry gift CRUD (`name`, `link`, `maxCount`); reset claims | `addRegistryGift`, `updateRegistryGift`, `deleteRegistryGift`, `resetRegistryGift` |
 | `/admin/registry` | Who claimed which gift; delete a claim (decrements the gift count) | `deleteGiftSelection` |
-| `/admin/content` | Tabbed editors for every guest screen, plus **Site Text** (every button, label, hint and error message, grouped by screen, with a search box; empty field = default) | none for the content itself — editors write Firestore from the browser (see `docs/content-system.md`), then every editor calls `refreshGuestSite(eventId)` → `revalidateGuestSite` so the cached guest page rebuilds |
+| `/admin/content` | Tabbed editors for every guest screen, plus **Site Text** (every button, label, hint and error message, grouped by screen, with a search box; empty field = default) and **Theme & Colors** (palette presets, color pickers, readability check, live preview; `content/theme`) | none for the content itself — editors write Firestore from the browser (see `docs/content-system.md`), then every editor calls `refreshGuestSite(eventId)` → `revalidateGuestSite` so the cached guest page rebuilds |
 
 ## Adding an admin page
 

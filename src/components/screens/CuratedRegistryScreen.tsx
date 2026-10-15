@@ -96,14 +96,14 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
           animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
           exit={{ opacity: 0, scale: 0.98, filter: "blur(2px)" }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 w-full h-full bg-wedding-dark z-[100] overflow-y-auto overflow-x-hidden flex flex-col"
+          className="fixed inset-0 w-full h-full bg-surface z-[100] overflow-y-auto overflow-x-hidden flex flex-col"
         >
-      <div className="fixed inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-surface via-primary-deep to-surface pointer-events-none"></div>
 
       <button 
         onClick={onClose}
         aria-label="Close registry"
-        className="fixed top-6 left-6 z-[60] w-11 h-11 rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-gold/30 flex items-center justify-center text-wedding-gold hover:text-wedding-goldlight hover:border-wedding-gold transition-all duration-300 active:scale-95"
+        className="fixed top-6 left-6 z-[60] w-11 h-11 rounded-full bg-surface/50 backdrop-blur-sm border border-accent/30 flex items-center justify-center text-accent hover:text-accent-light hover:border-accent transition-all duration-300 active:scale-95"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -117,8 +117,8 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <span className="text-sm uppercase tracking-[0.4em] text-wedding-gold block mb-4">{text.curatedRegistry.title}</span>
-          <p className="text-base font-cormorant italic text-wedding-goldlight/80 max-w-xl mx-auto">
+          <span className="text-sm uppercase tracking-[0.4em] text-accent block mb-4">{text.curatedRegistry.title}</span>
+          <p className="text-base font-cormorant italic text-accent-light/80 max-w-xl mx-auto">
             {text.curatedRegistry.intro}
           </p>
         </motion.div>
@@ -136,17 +136,17 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
               <motion.div 
                 key={gift.id} 
                 variants={itemVariants}
-                className={`bg-wedding-dark/80 rounded-xl border p-3 sm:p-5 flex flex-col items-center justify-between aspect-square transition-all duration-300
-                  ${isAvailable ? 'border-wedding-gold/20 hover:border-wedding-gold/40 shadow-sm hover:shadow-md' : 'border-wedding-gold/10 opacity-60 grayscale'}
+                className={`bg-surface/80 rounded-xl border p-3 sm:p-5 flex flex-col items-center justify-between aspect-square transition-all duration-300
+                  ${isAvailable ? 'border-accent/20 hover:border-accent/40 shadow-sm hover:shadow-md' : 'border-accent/10 opacity-60 grayscale'}
                 `}
               >
                 <div className="flex flex-col items-center w-full mb-2 sm:mb-3">
-                  <div className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center mb-2 sm:mb-3 ${isAvailable ? 'text-wedding-gold' : 'text-wedding-gold/40'}`}>
+                  <div className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center mb-2 sm:mb-3 ${isAvailable ? 'text-accent' : 'text-accent/40'}`}>
                     <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       {gift.iconFn ? gift.iconFn() : defaultIcon()}
                     </svg>
                   </div>
-                  <h3 className={`text-[8px] sm:text-[10px] text-center font-cinzel tracking-widest leading-relaxed uppercase ${isAvailable ? 'text-wedding-cream' : 'text-wedding-cream/50'}`}>
+                  <h3 className={`text-[8px] sm:text-[10px] text-center font-cinzel tracking-widest leading-relaxed uppercase ${isAvailable ? 'text-ink' : 'text-ink/50'}`}>
                     {gift.name}
                   </h3>
                 </div>
@@ -156,7 +156,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
                     href={gift.link}
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="w-full block text-center py-1.5 sm:py-2 bg-transparent border border-wedding-gold/40 text-wedding-gold hover:border-wedding-gold hover:text-wedding-goldlight text-[8px] sm:text-[9px] tracking-[0.2em] uppercase transition-all duration-300 rounded-sm"
+                    className="w-full block text-center py-1.5 sm:py-2 bg-transparent border border-accent/40 text-accent hover:border-accent hover:text-accent-light text-[8px] sm:text-[9px] tracking-[0.2em] uppercase transition-all duration-300 rounded-sm"
                   >
                     {text.curatedRegistry.viewItem}
                   </a>
@@ -166,8 +166,8 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
                     onClick={() => setSelectedGift(gift)}
                     className={`w-full text-center py-1.5 sm:py-2 text-[8px] sm:text-[9px] tracking-[0.2em] uppercase transition-all duration-300 rounded-sm border
                       ${isAvailable 
-                        ? 'bg-transparent border-wedding-gold/30 text-wedding-gold hover:bg-wedding-gold/10 hover:border-wedding-gold hover:text-wedding-goldlight' 
-                        : 'bg-transparent border-wedding-gold/20 text-wedding-gold/40 cursor-not-allowed'}
+                        ? 'bg-transparent border-accent/30 text-accent hover:bg-accent/10 hover:border-accent hover:text-accent-light' 
+                        : 'bg-transparent border-accent/20 text-accent/40 cursor-not-allowed'}
                     `}
                   >
                     {isAvailable ? text.curatedRegistry.selectGift : text.curatedRegistry.selected}

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { AudioPlayer } from '@/components/AudioPlayer';
+import { ThemeStyle } from '@/components/ThemeStyle';
 import { NotFoundScreen } from '@/components/screens/NotFoundScreen';
 import { SiteTextProvider } from '@/contexts/SiteTextContext';
 import { DEFAULT_EVENT_ID } from '@/lib/eventPaths';
@@ -19,9 +20,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NotFound() {
-  const { global, siteText } = await getSiteContent(DEFAULT_EVENT_ID);
+  const { global, siteText, theme } = await getSiteContent(DEFAULT_EVENT_ID);
   return (
     <SiteTextProvider value={siteText}>
+      <ThemeStyle theme={theme} />
       <NotFoundScreen site={global} />
       <AudioPlayer />
     </SiteTextProvider>

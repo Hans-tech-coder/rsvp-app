@@ -10,11 +10,11 @@ import { memo } from 'react';
 const PETAL_COUNT = 24;
 
 const PETAL_COLORS = [
-  'text-wedding-burgundylight/85',
-  'text-wedding-burgundy/90',
-  'text-wedding-burgundylight/70',
-  'text-wedding-cream/50',
-  'text-wedding-cream/35',
+  'text-primary-light/85',
+  'text-primary/90',
+  'text-primary-light/70',
+  'text-ink/50',
+  'text-ink/35',
 ];
 
 // mulberry32: tiny deterministic PRNG
@@ -68,7 +68,7 @@ const FallingPetals = memo(function FallingPetals() {
                 fill="currentColor"
                 d="M10 24C3 19 0 11 2 5c1-3 4-4 6-2l2 2 2-2c2-2 5-1 6 2 2 6-1 14-8 19Z"
               />
-              <path fill="var(--color-wedding-cream)" opacity="0.18" d="M10 21C6 17 5 11 7 7l3 3 3-3c2 4 1 10-3 14Z" />
+              <path fill="var(--color-ink)" opacity="0.18" d="M10 21C6 17 5 11 7 7l3 3 3-3c2 4 1 10-3 14Z" />
             </svg>
           </span>
         </span>

@@ -58,7 +58,7 @@ addEventListener('pointermove',on,{passive:true,capture:true});
 addEventListener('pointerdown',on,{passive:true,capture:true})})()`}
         </Script>
       </head>
-      <body className="min-h-screen bg-wedding-softdark text-wedding-cream overflow-hidden selection:bg-wedding-cream/10 selection:text-wedding-cream font-inter" suppressHydrationWarning>
+      <body className="min-h-screen bg-surface-soft text-ink overflow-hidden selection:bg-ink/10 selection:text-ink font-inter" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -16,8 +16,9 @@ when you find or fix one of these.
   CSV export, gift CRUD, claim list, content editors for all 12 screens (People
   groups, venues, hosts and dress-code guidelines are lists, for any event type,
   since Oct 2026) and
-  a Site Text tab for every button, label, hint and error (Oct 2026), with
-  one-step backup/restore. Google sign-in with an email allowlist; super admins
+  a Site Text tab for every button, label, hint and error (Oct 2026), a
+  Theme & Colors tab (preset palettes, custom colors, contrast check, live
+  preview; Oct 2026), with one-step backup/restore. Google sign-in with an email allowlist; super admins
   add and remove regular admins from the Manage Admins modal in the sidebar.
 
 ## Known issues
@@ -27,6 +28,7 @@ when you find or fix one of these.
 | Welcome 3D scene fetches the photo twice | `DepthParallaxScene.tsx` loads the raw Blob URL; the loader preloads the `next/image` srcset URL | ~220 KB extra on first visit. Feed the scene the same optimized URL to share the cache |
 | Replaced images are never deleted from Blob | all editors | Counts against the shared 1 GB Hobby Blob quota |
 | Legacy Firebase Storage URLs return 402 | Firestore `events/hans-and-czay/content/*` (and the old root `websiteContent/*` copy), `wedding-content.json` |Google billing account closed; replace by re-uploading in the admin, then `npm run sync-content`. See `docs/data-model.md` |
+| RSVP email ignores the event's theme | `src/lib/email/sendRsvpConfirmation.ts` (`COLORS`) | Hard-coded default palette; read `content/theme` in `submitRsvp` and pass it in to fix |
 | `wedding-content.json` has a mixed `gallery` key and an unused `faqs` key | `src/data/wedding-content.json` | Side effect of `sync-content.js`; see `docs/data-model.md` |
 | Content merge is hand-written per doc | `mergeWeddingContent()` in `src/lib/weddingContent.ts` | New fields in field-by-field docs need an explicit line |
 | `RsvpScreen` falls back to `'dev-mode'` as the code | `src/app/[event]/GuestSite.tsx` | Submission fails server-side, which is the intended outcome |

@@ -72,7 +72,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
   };
 
   return (
-    <section className="fixed inset-0 z-50 flex items-center justify-center bg-wedding-dark overflow-hidden">
+    <section className="fixed inset-0 z-50 flex items-center justify-center bg-surface overflow-hidden">
       <motion.div 
         initial={{ scale: 1.05, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -87,7 +87,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
           className="object-cover object-center"
         />
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-t from-wedding-dark/80 via-wedding-dark/30 to-transparent z-0"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-surface/80 via-surface/30 to-transparent z-0"></div>
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes float-up {
@@ -102,7 +102,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
             left: -150%;
             width: 150%;
             height: 100%;
-            background: linear-gradient(to right, transparent 0%, rgba(252, 250, 246, 0.02) 40%, rgba(252, 250, 246, 0.1) 50%, rgba(252, 250, 246, 0.02) 60%, transparent 100%);
+            background: linear-gradient(to right, transparent 0%, color-mix(in srgb, var(--color-ink) 2%, transparent) 40%, color-mix(in srgb, var(--color-ink) 10%, transparent) 50%, color-mix(in srgb, var(--color-ink) 2%, transparent) 60%, transparent 100%);
             transform: skewX(-30deg);
         }
         :where(.t-mouse) .group:hover .shimmer-sweep {
@@ -118,7 +118,7 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
       {particles.map((p) => (
         <div 
           key={p.id}
-          className="absolute rounded-full bg-[#F4EBE8] opacity-30 pointer-events-none"
+          className="absolute rounded-full bg-ink opacity-30 pointer-events-none"
           style={{
             width: p.size,
             height: p.size,
@@ -135,14 +135,14 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.5 }}
-        className="relative z-20 w-[95%] max-w-lg p-10 md:p-14 bg-wedding-dark/80 backdrop-blur-xl rounded-2xl border-t border-l border-wedding-cream/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(128,0,32,0.15)] group"
+        className="relative z-20 w-[95%] max-w-lg p-10 md:p-14 bg-surface/80 backdrop-blur-xl rounded-2xl border-t border-l border-ink/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 hover:shadow-[0_20px_60px_color-mix(in_srgb,var(--color-primary)_15%,transparent)] group"
       >
         <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
           <div className="shimmer-sweep opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
         </div>
 
         <div className="mb-10 flex justify-center relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-wedding-gold/20 via-wedding-burgundy/30 to-transparent blur-[40px] rounded-full animate-pulse-slow"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-accent/20 via-primary/30 to-transparent blur-[40px] rounded-full animate-pulse-slow"></div>
           <div className="w-36 h-36 flex items-center justify-center animate-float relative z-10">
             <img 
               src={logoUrl} 
@@ -151,19 +151,19 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
               height={144} 
               className="w-full h-full object-contain transition-all duration-700 hover:scale-105"
               style={{ 
-                filter: 'drop-shadow(0px 20px 30px rgba(0,0,0,0.8)) drop-shadow(0px 0px 25px rgba(197,160,89,0.6)) drop-shadow(-1px -1px 3px rgba(255,255,255,0.4)) drop-shadow(2px 2px 4px rgba(0,0,0,0.9))'
+                filter: 'drop-shadow(0px 20px 30px rgba(0,0,0,0.8)) drop-shadow(0px 0px 25px color-mix(in srgb, var(--color-accent) 60%, transparent)) drop-shadow(-1px -1px 3px rgba(255,255,255,0.4)) drop-shadow(2px 2px 4px rgba(0,0,0,0.9))'
               }}
             />
           </div>
         </div>
 
         <div className="text-center">
-          <span className="inline-block text-[10px] uppercase tracking-[0.4em] text-wedding-gold font-medium mb-3 border-b border-wedding-gold/30 pb-1">{text.entrance.eyebrow}</span>
-          <h1 className="text-4xl md:text-5xl font-cinzel text-wedding-goldlight font-light tracking-widest mb-4 drop-shadow-md">{joinNames(hostNames(content.global.hosts))}</h1>
-          <p className="text-sm font-cormorant text-wedding-cream/90 italic tracking-widest mb-10 flex items-center justify-center gap-2">
-            <span className="w-8 h-[1px] bg-gradient-to-r from-transparent to-wedding-gold/50"></span>
+          <span className="inline-block text-[10px] uppercase tracking-[0.4em] text-accent font-medium mb-3 border-b border-accent/30 pb-1">{text.entrance.eyebrow}</span>
+          <h1 className="text-4xl md:text-5xl font-cinzel text-accent-light font-light tracking-widest mb-4 drop-shadow-md">{joinNames(hostNames(content.global.hosts))}</h1>
+          <p className="text-sm font-cormorant text-ink/90 italic tracking-widest mb-10 flex items-center justify-center gap-2">
+            <span className="w-8 h-[1px] bg-gradient-to-r from-transparent to-accent/50"></span>
             {new Date(content.global.targetDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} • {content.global.venueShort}
-            <span className="w-8 h-[1px] bg-gradient-to-l from-transparent to-wedding-gold/50"></span>
+            <span className="w-8 h-[1px] bg-gradient-to-l from-transparent to-accent/50"></span>
           </p>
         </div>
 
@@ -176,15 +176,15 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
               className="flex flex-col items-center justify-center w-full"
             >
               <div className="relative w-20 h-20 mb-8">
-                <div className="absolute inset-0 border-t-2 border-r-2 border-wedding-gold/80 rounded-full animate-spin" style={{ animationDuration: '2s' }}></div>
-                <div className="absolute inset-2 border-b-2 border-l-2 border-wedding-burgundylight/60 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '2.5s' }}></div>
-                <div className="absolute inset-4 border-t-2 border-l-2 border-wedding-cream/40 rounded-full animate-spin" style={{ animationDuration: '1.5s' }}></div>
+                <div className="absolute inset-0 border-t-2 border-r-2 border-accent/80 rounded-full animate-spin" style={{ animationDuration: '2s' }}></div>
+                <div className="absolute inset-2 border-b-2 border-l-2 border-primary-light/60 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '2.5s' }}></div>
+                <div className="absolute inset-4 border-t-2 border-l-2 border-ink/40 rounded-full animate-spin" style={{ animationDuration: '1.5s' }}></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                   <div className="w-2.5 h-2.5 bg-wedding-gold rounded-full animate-pulse shadow-[0_0_10px_rgba(197,160,89,0.8)]"></div>
+                   <div className="w-2.5 h-2.5 bg-accent rounded-full animate-pulse shadow-[0_0_10px_color-mix(in_srgb,var(--color-accent)_80%,transparent)]"></div>
                 </div>
               </div>
-              <p className="text-wedding-gold tracking-[0.4em] text-xs uppercase animate-pulse drop-shadow-md">{text.entrance.granted}</p>
-              <p className="text-wedding-cream/60 tracking-[0.2em] text-[9px] uppercase mt-3">{text.entrance.preparing}</p>
+              <p className="text-accent tracking-[0.4em] text-xs uppercase animate-pulse drop-shadow-md">{text.entrance.granted}</p>
+              <p className="text-ink/60 tracking-[0.2em] text-[9px] uppercase mt-3">{text.entrance.preparing}</p>
             </motion.div>
           ) : (
             <motion.div
@@ -192,30 +192,30 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
               className="w-full"
             >
               <div className="flex justify-center w-full px-1 mb-6">
-                <div className="inline-flex items-center gap-2 sm:gap-4 border-y border-wedding-gold/20 py-2.5 px-3 sm:px-6 bg-gradient-to-r from-transparent via-wedding-gold/5 to-transparent w-full justify-center">
-                  <p className="text-[8px] sm:text-[10px] text-wedding-gold/80 tracking-[0.08em] sm:tracking-[0.12em] uppercase font-medium leading-[1.8] whitespace-pre text-center">
+                <div className="inline-flex items-center gap-2 sm:gap-4 border-y border-accent/20 py-2.5 px-3 sm:px-6 bg-gradient-to-r from-transparent via-accent/5 to-transparent w-full justify-center">
+                  <p className="text-[8px] sm:text-[10px] text-accent/80 tracking-[0.08em] sm:tracking-[0.12em] uppercase font-medium leading-[1.8] whitespace-pre text-center">
                     {/* Line breaks typed in the admin are kept; lines never wrap */}
                     {text.entrance.instructions}
                   </p>
                 </div>
               </div>
               <div className="relative mb-8 group/input">
-                <div className="absolute -inset-1 bg-gradient-to-r from-wedding-gold/0 via-wedding-gold/20 to-wedding-gold/0 rounded-lg blur opacity-0 group-focus-within/input:opacity-100 transition duration-500"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-accent/0 via-accent/20 to-accent/0 rounded-lg blur opacity-0 group-focus-within/input:opacity-100 transition duration-500"></div>
                 <input 
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={text.entrance.codePlaceholder} 
-                  className="relative w-full bg-wedding-dark/60 border border-wedding-gold/30 rounded-sm text-wedding-gold tracking-[0.4em] text-center placeholder:tracking-widest placeholder:text-wedding-gold/30 py-4 px-4 focus:outline-none focus:border-wedding-gold focus:bg-wedding-dark/80 text-sm font-bold uppercase transition-all duration-300 shadow-inner" 
+                  className="relative w-full bg-surface/60 border border-accent/30 rounded-sm text-accent tracking-[0.4em] text-center placeholder:tracking-widest placeholder:text-accent/30 py-4 px-4 focus:outline-none focus:border-accent focus:bg-surface/80 text-sm font-bold uppercase transition-all duration-300 shadow-inner" 
                 />
                 <div className={`absolute -bottom-6 left-0 right-0 text-[10px] text-red-400 tracking-wider text-center transition-opacity duration-300 font-medium ${error ? 'opacity-100' : 'opacity-0'}`}>
                   {error || text.entrance.errors.invalid}
                 </div>
               </div>
               
-              <button disabled={isValidating || !password} onClick={handleUnlock} className="relative w-full overflow-hidden bg-wedding-burgundy/90 border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy hover:border-wedding-gold hover:text-wedding-goldlight px-6 py-4 text-xs tracking-[0.3em] font-medium transition-all duration-500 uppercase rounded-sm group/btn shadow-lg hover:shadow-wedding-gold/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
-                {isValidating && <Loader2 className="w-4 h-4 animate-spin text-wedding-gold" />}
+              <button disabled={isValidating || !password} onClick={handleUnlock} className="relative w-full overflow-hidden bg-primary/90 border border-accent/30 text-accent hover:bg-primary hover:border-accent hover:text-accent-light px-6 py-4 text-xs tracking-[0.3em] font-medium transition-all duration-500 uppercase rounded-sm group/btn shadow-lg hover:shadow-accent/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                {isValidating && <Loader2 className="w-4 h-4 animate-spin text-accent" />}
                 <span className="relative z-10">{isValidating ? text.entrance.validating : text.entrance.button}</span>
                 <div className="absolute inset-0 h-full w-0 bg-white/10 group-hover/btn:w-full transition-all duration-500 ease-out z-0"></div>
               </button>

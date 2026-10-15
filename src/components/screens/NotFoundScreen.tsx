@@ -59,9 +59,9 @@ export function NotFoundScreen({ site }: { site: SiteGlobal }) {
   };
 
   return (
-    <main className="relative h-dvh w-full overflow-hidden bg-wedding-dark text-wedding-cream">
+    <main className="relative h-dvh w-full overflow-hidden bg-surface text-ink">
       {/* Same burgundy backdrop as the inner guest screens (Our Story, Details, …) */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-wedding-dark via-wedding-deepburgundy to-wedding-dark pointer-events-none"></div>
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-surface via-primary-deep to-surface pointer-events-none"></div>
       {/* Behind the text, so the petals never cover what guests read */}
       <div className="absolute inset-0 z-[5]">
         <FallingPetals />
@@ -80,7 +80,7 @@ export function NotFoundScreen({ site }: { site: SiteGlobal }) {
             <Link
               href="/"
               aria-label={`${site.coupleNameFormat}, ${text.button}`}
-              className="block rounded-full transition-opacity duration-300 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-wedding-gold"
+              className="block rounded-full transition-opacity duration-300 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
             >
               <Image src={site.logo} alt="" width={128} height={128} className="t-emboss h-24 w-24 sm:h-32 sm:w-32" priority />
             </Link>
@@ -95,7 +95,7 @@ export function NotFoundScreen({ site }: { site: SiteGlobal }) {
               aria-hidden="true"
               className="relative isolate font-cinzel font-bold leading-[0.85] tracking-[-0.03em] text-[clamp(7.5rem,38vw,15rem)] select-none"
             >
-              <span className="block text-wedding-golddark">404</span>
+              <span className="block text-accent-dark">404</span>
               <span
                 className="absolute inset-0 block bg-cover bg-center bg-clip-text text-transparent mix-blend-screen"
                 style={{ backgroundImage: `url(${welcomeScreen.backgroundImage})` }}
@@ -113,7 +113,7 @@ export function NotFoundScreen({ site }: { site: SiteGlobal }) {
 
             <motion.p
               variants={itemVariants}
-              className="mt-5 max-w-[34ch] text-balance font-cormorant text-xl italic leading-snug text-wedding-cream/90 sm:text-2xl"
+              className="mt-5 max-w-[34ch] text-balance font-cormorant text-xl italic leading-snug text-ink/90 sm:text-2xl"
             >
               {text.description}
             </motion.p>
@@ -121,11 +121,11 @@ export function NotFoundScreen({ site }: { site: SiteGlobal }) {
             <motion.div variants={itemVariants} className="mt-10 flex flex-col items-center">
               <Link
                 href="/"
-                className="px-8 py-4 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-goldlight hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-cream text-[13px] tracking-[0.25em] font-medium uppercase transition-all duration-500 rounded-sm shadow-lg active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-wedding-gold"
+                className="px-8 py-4 bg-primary border border-accent/30 text-accent-light hover:bg-primary/80 hover:border-accent hover:text-ink text-[13px] tracking-[0.25em] font-medium uppercase transition-all duration-500 rounded-sm shadow-lg active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
               >
                 {text.button}
               </Link>
-              <p className="mt-5 text-[15px] text-wedding-cream/85">
+              <p className="mt-5 text-[15px] text-ink/85">
                 {text.resumeNote}
               </p>
             </motion.div>
@@ -133,7 +133,7 @@ export function NotFoundScreen({ site }: { site: SiteGlobal }) {
 
           <motion.p
             variants={itemVariants}
-            className="max-w-[36ch] font-cormorant text-lg leading-snug text-wedding-cream/90 sm:text-xl"
+            className="max-w-[36ch] font-cormorant text-lg leading-snug text-ink/90 sm:text-xl"
             aria-live="polite"
           >
             {daysLeft === null ? (
@@ -141,7 +141,7 @@ export function NotFoundScreen({ site }: { site: SiteGlobal }) {
             ) : daysLeft > 0 ? (
               fillNodes(daysLeft === 1 ? text.daysLeftOne : text.daysLeftMany, {
                 ...values,
-                days: <span className="font-cinzel text-wedding-goldlight">{daysLeft}</span>,
+                days: <span className="font-cinzel text-accent-light">{daysLeft}</span>,
               })
             ) : (
               fillText(text.after, values)

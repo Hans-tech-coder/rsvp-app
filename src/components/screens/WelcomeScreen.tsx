@@ -80,7 +80,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
   };
 
   return (
-    <header className="absolute inset-0 w-full h-full overflow-hidden bg-wedding-dark text-center">
+    <header className="absolute inset-0 w-full h-full overflow-hidden bg-surface text-center">
       <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
         {use3d ? (
           <motion.div
@@ -113,7 +113,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
             className="object-cover object-center"
           />
         </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-b from-wedding-dark/60 via-wedding-dark/40 to-wedding-dark/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-surface/60 via-surface/40 to-surface/80"></div>
         {/* Above the dark gradient so the fireflies glow instead of being dimmed */}
         <TwinkleSparks />
         </>
@@ -130,64 +130,64 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         {/* Top group: subtitle + names sit at the top, countdown stays at the bottom */}
         <div className="w-full flex flex-col items-center lg:pt-16">
         <motion.div variants={itemVariants} className="w-full">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-wedding-cream/80 font-medium">{content.welcomeScreen.subtitle}</p>
-          <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto mt-4 mb-2"></div>
+          <p className="text-[11px] uppercase tracking-[0.4em] text-ink/80 font-medium">{content.welcomeScreen.subtitle}</p>
+          <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-4 mb-2"></div>
         </motion.div>
 
         <TextsReveal isHero className="px-4 w-full max-w-4xl mt-6 lg:mt-8">
-          <span className="text-sm font-cormorant italic text-wedding-cream/90 tracking-widest block mb-4">{content.welcomeScreen.topText}</span>
-          <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-cinzel text-wedding-cream font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
+          <span className="text-sm font-cormorant italic text-ink/90 tracking-widest block mb-4">{content.welcomeScreen.topText}</span>
+          <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-cinzel text-ink font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
             {/* "Hans & Czay"; three or more hosts: "A, B & C" */}
             {names.map((name, i) => (
               <React.Fragment key={i}>
-                {i > 0 && (i < names.length - 1 ? ', ' : <> <span className="text-wedding-gold italic font-serif text-3xl sm:text-4xl md:text-6xl font-light">&</span> </>)}
+                {i > 0 && (i < names.length - 1 ? ', ' : <> <span className="text-accent italic font-serif text-3xl sm:text-4xl md:text-6xl font-light">&</span> </>)}
                 {name}
               </React.Fragment>
             ))}
           </h2>
-          <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-wedding-gold/50 to-transparent mx-auto my-8"></div>
-          <p className="text-xs uppercase tracking-[0.3em] text-wedding-cream/90 mb-3">{content.welcomeScreen.bottomText1}</p>
-          <p className="text-lg md:text-2xl font-cormorant italic text-wedding-cream tracking-wider drop-shadow-md">{content.welcomeScreen.bottomText2}</p>
+          <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto my-8"></div>
+          <p className="text-xs uppercase tracking-[0.3em] text-ink/90 mb-3">{content.welcomeScreen.bottomText1}</p>
+          <p className="text-lg md:text-2xl font-cormorant italic text-ink tracking-wider drop-shadow-md">{content.welcomeScreen.bottomText2}</p>
         </TextsReveal>
         </div>
 
         <motion.div variants={itemVariants} className="relative lg:pb-8 w-full max-w-3xl px-4 flex flex-col items-center">
           {/* Anchored to the top of the countdown; absolute, so it never shifts the layout */}
           {use3d && <MotionHint />}
-          <div className="grid grid-cols-4 gap-2 md:gap-8 bg-wedding-dark/50 backdrop-blur-md px-4 md:px-6 py-4 rounded-xl border border-wedding-gold/20 w-full max-w-md mb-6 shadow-xl">
+          <div className="grid grid-cols-4 gap-2 md:gap-8 bg-surface/50 backdrop-blur-md px-4 md:px-6 py-4 rounded-xl border border-accent/20 w-full max-w-md mb-6 shadow-xl">
             <div className="text-center">
-              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">
+              <span className="block text-2xl md:text-3xl font-cinzel text-ink drop-shadow-md">
                 {mounted ? <PopInNumber value={timeLeft.days} /> : '00'}
               </span>
-              <span className="text-[9px] uppercase tracking-widest text-wedding-cream/70">{text.welcome.days}</span>
+              <span className="text-[9px] uppercase tracking-widest text-ink/70">{text.welcome.days}</span>
             </div>
-            <div className="text-center border-l border-wedding-gold/20">
-              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">
+            <div className="text-center border-l border-accent/20">
+              <span className="block text-2xl md:text-3xl font-cinzel text-ink drop-shadow-md">
                 {mounted ? <PopInNumber value={timeLeft.hours} /> : '00'}
               </span>
-              <span className="text-[9px] uppercase tracking-widest text-wedding-cream/70">{text.welcome.hours}</span>
+              <span className="text-[9px] uppercase tracking-widest text-ink/70">{text.welcome.hours}</span>
             </div>
-            <div className="text-center border-l border-wedding-gold/20">
-              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">
+            <div className="text-center border-l border-accent/20">
+              <span className="block text-2xl md:text-3xl font-cinzel text-ink drop-shadow-md">
                 {mounted ? <PopInNumber value={timeLeft.minutes} /> : '00'}
               </span>
-              <span className="text-[9px] uppercase tracking-widest text-wedding-cream/70">{text.welcome.minutes}</span>
+              <span className="text-[9px] uppercase tracking-widest text-ink/70">{text.welcome.minutes}</span>
             </div>
-            <div className="text-center border-l border-wedding-gold/20">
-              <span className="block text-2xl md:text-3xl font-cinzel text-wedding-cream drop-shadow-md">
+            <div className="text-center border-l border-accent/20">
+              <span className="block text-2xl md:text-3xl font-cinzel text-ink drop-shadow-md">
                 {mounted ? <PopInNumber value={timeLeft.seconds} /> : '00'}
               </span>
-              <span className="text-[9px] uppercase tracking-widest text-wedding-cream/70">{text.welcome.seconds}</span>
+              <span className="text-[9px] uppercase tracking-widest text-ink/70">{text.welcome.seconds}</span>
             </div>
           </div>
 
-          <p className="text-xs uppercase tracking-[0.25em] text-wedding-cream/90 mb-4">{content.global.venueShort}</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-ink/90 mb-4">{content.global.venueShort}</p>
           
           <div className="w-full flex justify-center mt-2 relative z-20">
             <button onClick={onContinue} aria-label={text.common.continue} className="group flex flex-col items-center justify-center space-y-3 cursor-pointer focus:outline-none transition-transform hover:-translate-y-1 active:scale-95 mt-4">
-              <span className="text-[10px] uppercase tracking-[0.3em] text-wedding-cream/90 group-hover:text-wedding-gold transition-colors duration-300 drop-shadow-md">{text.common.continue}</span>
-              <div className="w-10 h-10 rounded-full border border-wedding-cream/50 flex items-center justify-center transition-all duration-300 group-hover:bg-wedding-gold/10 group-hover:border-wedding-gold shadow-lg bg-wedding-dark/30 backdrop-blur-sm">
-                <svg className="w-4 h-4 text-wedding-cream group-hover:text-wedding-gold transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-ink/90 group-hover:text-accent transition-colors duration-300 drop-shadow-md">{text.common.continue}</span>
+              <div className="w-10 h-10 rounded-full border border-ink/50 flex items-center justify-center transition-all duration-300 group-hover:bg-accent/10 group-hover:border-accent shadow-lg bg-surface/30 backdrop-blur-sm">
+                <svg className="w-4 h-4 text-ink group-hover:text-accent transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
               </div>
             </button>
           </div>

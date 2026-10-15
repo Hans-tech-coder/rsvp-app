@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, memo } from 'react';
+import { hexToRgb, isHexColor } from '@/lib/theme';
 
 // Welcome background as a 2.5D scene: the photo is shifted per pixel by a depth map
 // (pointer, device tilt, or a slow idle drift), and the fireflies fly at their own
@@ -32,7 +33,6 @@ const TILT_RANGE = 12;
 // How quickly the tilt re-centres on the way the phone is being held (ms), so the
 // scene answers to movement rather than to the grip angle
 const TILT_RECENTER_MS = 4000;
-const DARK = [0x12 / 255, 0x10 / 255, 0x0e / 255]; // --color-wedding-dark
 // Fireflies near the couple also light the photo; each one is a light in the shader.
 const MAX_LIGHTS = 16;
 
@@ -291,6 +291,9 @@ export const DepthParallaxScene = memo(function DepthParallaxScene({ imageSrc, d
     let disposed = false;
     let animationFrameId: number | null = null;
     const cleanups: (() => void)[] = [];
+    // The scene fades in from the theme's background (set on :root by the event page)
+    const surface = getComputedStyle(document.documentElement).getPropertyValue('--color-surface').trim();
+    const DARK = (isHexColor(surface) ? hexToRgb(surface) : [0x12, 0x10, 0x0e]).map((v) => v / 255);
     const fail = () => {
       if (!disposed) onFailRef.current();
     };

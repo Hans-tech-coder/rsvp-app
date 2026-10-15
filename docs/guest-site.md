@@ -104,8 +104,9 @@ browser don't share progress or an unlocked RSVP.
    swatches) when attending, or when declining with a proxy (the intro then
    names the proxy); a decline without a proxy gets only the thank-you and
    answers. The email matches the site's look: the OG image as
-   hero, dark/burgundy/gold colors copied from the `@theme` tokens (email
-   clients cannot read CSS variables), and Cinzel / Cormorant Garamond / Inter
+   hero, dark/burgundy/gold colors copied from the default `@theme` tokens (email
+   clients cannot read CSS variables; an event's own theme from the Theme &
+   Colors tab does not reach the email yet), and Cinzel / Cormorant Garamond / Inter
    from Google Fonts. Gmail and Outlook block web fonts and fall back to
    Georgia/Arial. Content follows the same precedence as `WeddingContentContext` (JSON defaults,
    then the event's `content/details`, `dressCode`, `globalSettings`).Missing Gmail
@@ -309,8 +310,8 @@ straight from `src/data/wedding-content.json` (shows an admin change only after
 `generateMetadata`; without it the root title replaced the 404 title after
 hydration. The days-to-wedding line is read on the client
 (`useSyncExternalStore`), because the page is prerendered. It uses the inner
-screens' burgundy backdrop and their burgundy button (text in `goldlight` for
-contrast). The logo is the original monogram, static, with an embossed
+screens' `primary` backdrop and their `primary` button (text in `accent-light` for
+contrast), in the default event's theme. The logo is the original monogram, static, with an embossed
 look (`.t-emboss` in `globals.css`), and `FallingPetals`
 drifts behind the text (24 petals, 12 on phones; seeded values so server and
 client match; transform-only CSS). Under reduced motion the petals are hidden.

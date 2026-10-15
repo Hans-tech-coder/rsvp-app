@@ -29,19 +29,19 @@ export function EmbeddedFooter() {
   return (
     <motion.div
       variants={itemVariants}
-      className="w-[calc(100%+2rem)] -mx-4 -mb-24 py-8 text-center border-t border-wedding-cream/20 mt-16 shrink-0 relative z-20 flex flex-col justify-center"
+      className="w-[calc(100%+2rem)] -mx-4 -mb-24 py-8 text-center border-t border-ink/20 mt-16 shrink-0 relative z-20 flex flex-col justify-center"
     >
       <div className="max-w-md mx-auto px-4">
-        <div className="text-xl font-cinzel tracking-[0.4em] text-wedding-cream/80 mb-4">{monogram}</div>
-        <p className="text-xs font-cormorant italic text-wedding-cream/80 mb-4">&quot;{footerTagline}&quot;</p>
+        <div className="text-xl font-cinzel tracking-[0.4em] text-ink/80 mb-4">{monogram}</div>
+        <p className="text-xs font-cormorant italic text-ink/80 mb-4">&quot;{footerTagline}&quot;</p>
         {footerDate && (
           <div className="flex items-center justify-center space-x-3 mb-6">
-            <span className="w-8 h-[1px] bg-wedding-cream/20"></span>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-wedding-cream/70 font-medium">{footerDate}</span>
-            <span className="w-8 h-[1px] bg-wedding-cream/20"></span>
+            <span className="w-8 h-[1px] bg-ink/20"></span>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-ink/70 font-medium">{footerDate}</span>
+            <span className="w-8 h-[1px] bg-ink/20"></span>
           </div>
         )}
-        <p className="text-[9px] uppercase tracking-widest text-wedding-cream/60">{text.footer.credit}</p>
+        <p className="text-[9px] uppercase tracking-widest text-ink/60">{text.footer.credit}</p>
       </div>
     </motion.div>
   );

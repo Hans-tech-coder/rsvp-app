@@ -44,6 +44,7 @@ All editors are in `src/app/admin/content/`.
 | Site URL for links that leave the site (link preview base, invite message, RSVP email): `getSiteUrl`, `getEventUrl` | `src/lib/siteUrl.ts` (server only) |
 | 404 page for any unknown URL or event (default event's look: couple's photo inside the "404", days-to-wedding line, "Back to the celebration" → `/`; global settings read on the server and passed as `site`; own `SiteTextProvider` + `AudioPlayer`; wording from site text `notFound`; same burgundy backdrop and button style as the inner screens; embossed logo `.t-emboss` in `globals.css`; also mounts `FallingPetals` and `WeddingCursor`) | `src/app/not-found.tsx` (metadata) → `src/components/screens/NotFoundScreen.tsx` |
 | Colors, fonts, motion tokens, reveal CSS | `src/app/globals.css` |
+| Theme: each event's colors (semantic tokens `ink`, `surface`, `primary`, `accent`… overridden per event as a server-rendered `:root` style; presets, shade derivation, WCAG contrast) | `src/lib/theme.ts` (tested by `src/lib/theme.test.ts`), `src/components/ThemeStyle.tsx` (mounted by `src/app/[event]/page.tsx` and `src/app/not-found.tsx`), read in `src/lib/siteContentServer.ts`; editor `src/app/admin/content/ThemeEditor.tsx` (tab "Theme & Colors"), doc `content/theme` |
 | Staggered text reveal on scroll | `src/components/ui/TextsReveal.tsx` |
 | Scroll motion: scroll-container context, `ScrollReveal`/`ScrollRevealItem` (reveal once), `Parallax` (image drift), `SCROLL_MOTION` constants | `src/components/ui/ScrollMotion.tsx` |
 | Image fade/blur reveal | `src/components/ui/RevealImage.tsx` |
@@ -92,7 +93,7 @@ server actions and then `router.refresh()`.
 | `/admin/guests` | `src/app/admin/guests/page.tsx` | `GuestListClient.tsx` (CSV export via papaparse) | event `guests` |
 | `/admin/gifts` | `src/app/admin/gifts/page.tsx` | `GiftsClient.tsx` | event `registryGifts` |
 | `/admin/registry` | `src/app/admin/registry/page.tsx` | `RegistrySelectionsClient.tsx` | event `giftSelections` |
-| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder ("Site Text" tab = `SiteTextEditor.tsx`); each takes an `eventId` prop from the page | event `content/*` + Vercel Blob |
+| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder ("Site Text" tab = `SiteTextEditor.tsx`, "Theme & Colors" = `ThemeEditor.tsx`); each takes an `eventId` prop from the page | event `content/*` + Vercel Blob |
 | Content editors' shared pieces: sticky Undo / Restore / Save row with live status (`EditorSaveBar.tsx`), "Leave without saving?" guard for tab switch, admin links and page close (`unsavedChanges.tsx`), character limits + counter (`CharCount.tsx`, `TEXT_LIMITS`) | `src/app/admin/content/page.tsx` | `EditorSaveBar.tsx`, `unsavedChanges.tsx`, `CharCount.tsx`; after each live write `refreshGuestSite.ts` | – |
 | sidebar/nav | `src/app/admin/layout.tsx` | – | – |
 | Manage Admins (sidebar button, super admins only; no route) | `src/app/admin/layout.tsx` | `src/app/admin/components/ManageAdminsModal.tsx` | `admins`, `adminAllowlist` |

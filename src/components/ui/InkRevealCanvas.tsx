@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
+import { hexToRgb, isHexColor } from '@/lib/theme';
 
 export function InkRevealCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -12,7 +13,9 @@ export function InkRevealCanvas() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const mc = [28, 25, 23]; // wedding-dark RGB
+    // The ink is the theme's soft background (set on :root by the event page)
+    const surface = getComputedStyle(document.documentElement).getPropertyValue('--color-surface-soft').trim();
+    const mc = isHexColor(surface) ? hexToRgb(surface) : [26, 23, 21];
     const brushSize = 128;
     const lifetime = 600;
     const rStart = 10;

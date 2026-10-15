@@ -19,7 +19,7 @@ src/app/[event]/page.tsx  ->  <WeddingContentProvider content>  ->  useWeddingCo
 1. `src/app/[event]/page.tsx` (a server component) calls
    `getEventContent(eventId)`. It reads `events/{eventId}` first (missing →
    `null` → 404, so a made-up URL costs one read), then the twelve screen docs
-   plus `siteText` in one `getAll`. A Firestore error throws (the cached page
+   plus `siteText` and `theme` in one `getAll`. A Firestore error throws (the cached page
    stays up instead of being replaced by the defaults).
 2. `mergeWeddingContent()` merges each doc over the JSON default. The merge is
    **written by hand per doc** — there is no generic merge. Patterns used:
@@ -101,6 +101,43 @@ src/app/not-found.tsx    -> its own <SiteTextProvider> + NotFoundScreen (default
 `src/app/[event]/page.tsx` gets the OG/Twitter image (`global.ogImage`) the same way;
 link-preview URLs are made absolute with `metadataBase` in `src/app/layout.tsx`
 (`getSiteUrl()` in `src/lib/siteUrl.ts`).
+
+## Theme (colors)
+
+The guest site's colors are the nine semantic tokens in `globals.css` `@theme`
+(`--color-ink`, `--color-surface`, `--color-primary`, …; Tailwind classes
+`bg-surface`, `text-accent`, …). Each event can override them:
+
+```
+src/lib/theme.ts  DEFAULT_THEME (= preset "Burgundy & Gold" = globals.css values)
+          +
+Firestore events/{eventId}/content/theme   (read with the admin SDK on the server)
+          │  getEventContent(eventId) / getSiteContent(eventId) (404) → mergeTheme()
+          ▼
+<ThemeStyle theme> (src/components/ThemeStyle.tsx)  →  <style id="event-theme">:root{--color-…}</style>
+```
+
+- No rebuild: the style is part of the cached page, so a save is live after
+  the usual `refreshGuestSite(eventId)`. It sits on `:root` and is unlayered,
+  so it beats Tailwind's `@layer theme` defaults and reaches portals and the
+  `body` background (`--background` = `var(--color-surface)`).
+- `mergeTheme()` keeps only the nine known keys with a `#RRGGBB` value (the
+  rest stay default), which is what makes the raw `<style>` safe.
+- Not in `wedding-content.json` and not pulled by `sync-content`: the default
+  belongs to the template (`THEME_PRESETS` in `src/lib/theme.ts`).
+  `src/lib/theme.test.ts` fails if the default preset and the `globals.css`
+  values drift apart.
+- Editor (`ThemeEditor.tsx`, tab "Theme & Colors"): preset palettes, a picker
+  + hex box per main color (picking one also moves its shades,
+  `deriveShades`), "Fine-tune shades", a readability list (WCAG contrast of
+  the text/background pairs the site uses, `CONTRAST_PAIRS`; 4.5:1 is "Easy to
+  read", 3–4.5 "Large text only"), a live preview drawn with the guest
+  site's own classes under the edited variables, and "Reset to template
+  default". Saves the whole doc (no `merge`) after writing `theme_backup`;
+  Restore loads the backup into the form (Save to make it live).
+- Not themed: the RSVP email (own copy of the default colors, see
+  `docs/guest-site.md`), the firefly and candle-light glows (Welcome effects
+  are light, not brand), neutral black/white shadows.
 
 ## How an editor works (`src/app/admin/content/*Editor.tsx`)
 

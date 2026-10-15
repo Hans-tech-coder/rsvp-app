@@ -257,12 +257,12 @@ export function AudioPlayer() {
               exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } }}
               transition={{ duration: reduceMotion ? 0.2 : 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="relative flex flex-col gap-0.5 pl-4 pr-5 py-2.5 border border-wedding-gold/50 bg-wedding-dark/85 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
-                <span aria-hidden="true" className="absolute inset-[3px] border border-wedding-gold/20 pointer-events-none"></span>
-                <span className="font-cinzel text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-wedding-goldlight">{text.title}</span>
-                <span className="font-cormorant italic text-sm text-wedding-cream/85 tracking-wide">{hintMode === 'mouse' ? text.mouseHint : text.touchHint}</span>
+              <div className="relative flex flex-col gap-0.5 pl-4 pr-5 py-2.5 border border-accent/50 bg-surface/85 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
+                <span aria-hidden="true" className="absolute inset-[3px] border border-accent/20 pointer-events-none"></span>
+                <span className="font-cinzel text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-accent-light">{text.title}</span>
+                <span className="font-cormorant italic text-sm text-ink/85 tracking-wide">{hintMode === 'mouse' ? text.mouseHint : text.touchHint}</span>
                 {/* Caret pointing down at the button's centre */}
-                <span aria-hidden="true" className="absolute -bottom-[6px] right-[19px] h-2.5 w-2.5 rotate-45 border-r border-b border-wedding-gold/50 bg-wedding-dark"></span>
+                <span aria-hidden="true" className="absolute -bottom-[6px] right-[19px] h-2.5 w-2.5 rotate-45 border-r border-b border-accent/50 bg-surface"></span>
               </div>
             </motion.div>
           )}
@@ -278,14 +278,14 @@ export function AudioPlayer() {
             // detail > 0; a keyboard press (detail 0) keeps the focus-opened panel
             if (e.detail > 0 && !usesMouse()) openPanel(PANEL_IDLE_MS);
           }}
-          className="relative z-10 block p-3 rounded-full bg-wedding-gold/20 backdrop-blur-md border border-wedding-gold/30 text-wedding-gold shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-wedding-gold/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wedding-gold"
+          className="relative z-10 block p-3 rounded-full bg-accent/20 backdrop-blur-md border border-accent/30 text-accent shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           aria-label={isPlaying ? "Mute background music" : "Play background music"}
           aria-controls="audio-volume-panel"
           aria-expanded={panelOpen}
         >
           {/* Gold ring that ripples out while the hint points at the button */}
           {hintVisible && (
-            <span aria-hidden="true" className="absolute inset-0 rounded-full border border-wedding-gold motion-safe:animate-ping pointer-events-none"></span>
+            <span aria-hidden="true" className="absolute inset-0 rounded-full border border-accent motion-safe:animate-ping pointer-events-none"></span>
           )}
           <span className={`block ${isPlaying ? 'motion-safe:animate-[pulse_4s_ease-in-out_infinite]' : ''}`}>
             <VolumeIcon className="w-6 h-6" />
@@ -297,7 +297,7 @@ export function AudioPlayer() {
           data-open={panelOpen}
           className="t-vol-panel absolute inset-y-0 right-0"
         >
-          <div className="t-vol-pill h-full flex items-center gap-3 pl-5 pr-16 rounded-full bg-wedding-dark/90 border border-wedding-gold/30">
+          <div className="t-vol-pill h-full flex items-center gap-3 pl-5 pr-16 rounded-full bg-surface/90 border border-accent/30">
             <input
               type="range"
               min={0}
@@ -319,7 +319,7 @@ export function AudioPlayer() {
               onKeyDown={() => ensureGain(volume)}
               onChange={(e) => changeVolume(Number(e.target.value) / 100)}
             />
-            <span aria-hidden="true" className="w-8 text-right font-inter text-[11px] tabular-nums text-wedding-goldlight/90">{percent}%</span>
+            <span aria-hidden="true" className="w-8 text-right font-inter text-[11px] tabular-nums text-accent-light/90">{percent}%</span>
           </div>
         </div>
       </div>

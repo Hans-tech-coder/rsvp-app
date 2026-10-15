@@ -227,7 +227,7 @@ function MainApp() {
       {!assetsReady ? (
         <LoadingScreen key="loading" />
       ) : (
-        <main key="main" className="relative w-full h-[100dvh] overflow-hidden bg-wedding-dark">
+        <main key="main" className="relative w-full h-[100dvh] overflow-hidden bg-surface">
       
       {/* Global Effect removed to specific screens */}
 
@@ -244,7 +244,7 @@ function MainApp() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 onClick={() => goToStep(currentStep - 1)} 
                 aria-label="Back"
-                className="absolute top-6 left-6 w-11 h-11 z-[40] rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:bg-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300 active:scale-95 pointer-events-auto"
+                className="absolute top-6 left-6 w-11 h-11 z-[40] rounded-full bg-surface/50 backdrop-blur-sm border border-ink/30 flex items-center justify-center text-ink hover:bg-primary hover:border-primary transition-all duration-300 active:scale-95 pointer-events-auto"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -264,7 +264,7 @@ function MainApp() {
                 transition={{ duration: 0.5, delay: 0.3 }}
                 onClick={() => setIsMenuOpen(true)} 
                 aria-label="Menu"
-                className="absolute top-6 right-6 w-11 h-11 z-[40] rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:bg-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300 active:scale-95 pointer-events-auto"
+                className="absolute top-6 right-6 w-11 h-11 z-[40] rounded-full bg-surface/50 backdrop-blur-sm border border-ink/30 flex items-center justify-center text-ink hover:bg-primary hover:border-primary transition-all duration-300 active:scale-95 pointer-events-auto"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -435,14 +435,14 @@ function MainApp() {
                  initial={{ opacity: 0 }}
                  animate={{ opacity: 1 }}
                  exit={{ opacity: 0, transition: { duration: 1.5, ease: "easeInOut" } }}
-                 className="fixed inset-0 z-[100] bg-wedding-dark"
+                 className="fixed inset-0 z-[100] bg-surface"
               >
                  <EntranceScreen onUnlock={handleUnlock} onStartUnlock={handleStartUnlock} />
                  
                  {/* Back button to close Entrance Screen without unlocking */}
                  <button 
                    onClick={() => setShowEntranceScreen(false)}
-                   className="absolute top-6 left-6 z-[110] w-10 h-10 rounded-full bg-wedding-dark/50 backdrop-blur-sm border border-wedding-cream/30 flex items-center justify-center text-wedding-cream hover:text-wedding-burgundy hover:border-wedding-burgundy transition-all duration-300"
+                   className="absolute top-6 left-6 z-[110] w-10 h-10 rounded-full bg-surface/50 backdrop-blur-sm border border-ink/30 flex items-center justify-center text-ink hover:text-primary hover:border-primary transition-all duration-300"
                  >
                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>

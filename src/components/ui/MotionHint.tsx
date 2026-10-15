@@ -195,15 +195,15 @@ function HintBody({ as, onClick, title, sub, icon }: {
   return (
     <Tag
       {...(as === 'button' ? { type: 'button' as const, onClick } : {})}
-      className={`relative flex items-center gap-4 pl-4 pr-6 py-3 [@media(max-height:700px)]:py-1.5 [@media(max-height:700px)]:gap-3 border border-wedding-gold/50 bg-wedding-dark/80 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.45)] text-left ${
+      className={`relative flex items-center gap-4 pl-4 pr-6 py-3 [@media(max-height:700px)]:py-1.5 [@media(max-height:700px)]:gap-3 border border-accent/50 bg-surface/80 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.45)] text-left ${
         as === 'button' ? 'pointer-events-auto cursor-pointer active:scale-[0.98] transition-transform' : ''
       }`}
     >
-      <span aria-hidden="true" className="absolute inset-[3px] border border-wedding-gold/20 pointer-events-none"></span>
-      <span aria-hidden="true" className="flex h-9 w-9 [@media(max-height:700px)]:h-6 [@media(max-height:700px)]:w-6 items-center justify-center text-wedding-goldlight">{icon}</span>
+      <span aria-hidden="true" className="absolute inset-[3px] border border-accent/20 pointer-events-none"></span>
+      <span aria-hidden="true" className="flex h-9 w-9 [@media(max-height:700px)]:h-6 [@media(max-height:700px)]:w-6 items-center justify-center text-accent-light">{icon}</span>
       <span className="flex flex-col">
-        <span className="font-cinzel text-[11px] uppercase tracking-[0.3em] text-wedding-goldlight">{title}</span>
-        <span className="[@media(max-height:700px)]:hidden font-cormorant italic text-sm text-wedding-cream/80 tracking-wide">{sub}</span>
+        <span className="font-cinzel text-[11px] uppercase tracking-[0.3em] text-accent-light">{title}</span>
+        <span className="[@media(max-height:700px)]:hidden font-cormorant italic text-sm text-ink/80 tracking-wide">{sub}</span>
       </span>
     </Tag>
   );

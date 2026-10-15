@@ -3,6 +3,7 @@ import type { DocumentData } from 'firebase-admin/firestore';
 import { getAdminDb } from '@/lib/firebase/admin';
 import { DEFAULT_SITE_TEXT, mergeSiteText, type SiteText } from '@/lib/siteText';
 import { isValidEventId, paths } from '@/lib/eventPaths';
+import { DEFAULT_THEME, mergeTheme, type Theme } from '@/lib/theme';
 import {
   CONTENT_DOC_IDS, mergeGlobal, mergeWeddingContent,
   type ContentDocId, type SiteGlobal, type WeddingContent,
@@ -20,14 +21,14 @@ export type { SiteGlobal };
  * exist. Throws when Firestore can't be read, so a cached page stays up rather
  * than being replaced by the defaults.
  */
-export const getEventContent = cache(async (eventId: string): Promise<{ content: WeddingContent; siteText: SiteText } | null> => {
+export const getEventContent = cache(async (eventId: string): Promise<{ content: WeddingContent; siteText: SiteText; theme: Theme } | null> => {
   if (!isValidEventId(eventId)) return null;
 
   const db = getAdminDb();
-  // The event first, so a made-up URL costs one read, not fourteen.
+  // The event first, so a made-up URL costs one read, not fifteen.
   if (!(await db.doc(paths.event(eventId)).get()).exists) return null;
 
-  const ids = [...CONTENT_DOC_IDS, 'siteText'] as const;
+  const ids = [...CONTENT_DOC_IDS, 'siteText', 'theme'] as const;
   const docs = await db.getAll(...ids.map((id) => db.doc(paths.content(eventId, id))));
 
   // Client components only take plain objects (no Firestore Timestamps).
@@ -36,30 +37,34 @@ export const getEventContent = cache(async (eventId: string): Promise<{ content:
   return {
     content: mergeWeddingContent(data as Record<ContentDocId, DocumentData | undefined>),
     siteText: mergeSiteText(DEFAULT_SITE_TEXT, data.siteText),
+    theme: mergeTheme(data.theme),
   };
 });
 
 /**
- * Only the site text and global settings, for the 404 page. Falls back to the
+ * Only the site text, global settings and theme, for the 404 page. Falls back to the
  * defaults when Firestore can't be read (the 404 is built at deploy time too).
  */
-export const getSiteContent = cache(async (eventId: string): Promise<{ global: SiteGlobal; siteText: SiteText }> => {
+export const getSiteContent = cache(async (eventId: string): Promise<{ global: SiteGlobal; siteText: SiteText; theme: Theme }> => {
   let global = mergeGlobal(undefined);
   let siteText = DEFAULT_SITE_TEXT;
+  let theme = DEFAULT_THEME;
 
   try {
     const db = getAdminDb();
-    const [globalDoc, siteTextDoc] = await Promise.all([
+    const [globalDoc, siteTextDoc, themeDoc] = await Promise.all([
       db.doc(paths.content(eventId, 'globalSettings')).get(),
       db.doc(paths.content(eventId, 'siteText')).get(),
+      db.doc(paths.content(eventId, 'theme')).get(),
     ]);
     global = mergeGlobal(globalDoc.data());
     siteText = mergeSiteText(DEFAULT_SITE_TEXT, siteTextDoc.data());
+    theme = mergeTheme(themeDoc.data());
   } catch (error) {
     console.error('Site content: using defaults, Firestore read failed:', error);
   }
 
-  return { global, siteText };
+  return { global, siteText, theme };
 });
 
 /** "December 20, 2026 15:00:00" -> "December 20, 2026"; the raw text if it can't be parsed. */

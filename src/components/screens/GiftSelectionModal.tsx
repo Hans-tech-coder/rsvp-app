@@ -43,7 +43,7 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-wedding-dark/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-surface/80 backdrop-blur-sm"
             onClick={onClose}
           />
           
@@ -52,12 +52,12 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 10 }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="bg-wedding-dark relative z-10 w-full max-w-md p-8 rounded-xl border border-wedding-gold/30 shadow-2xl"
+            className="bg-surface relative z-10 w-full max-w-md p-8 rounded-xl border border-accent/30 shadow-2xl"
           >
             <button 
               onClick={onClose}
               aria-label="Close modal"
-              className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center text-wedding-cream/60 hover:text-wedding-gold transition-colors active:scale-95"
+              className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center text-ink/60 hover:text-accent transition-colors active:scale-95"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -65,52 +65,52 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
             </button>
 
             <div className="text-center mb-6">
-              <span className="text-xs uppercase tracking-[0.3em] text-wedding-gold block mb-2">{text.giftModal.eyebrow}</span>
-              <h3 className="text-2xl font-cinzel font-light text-wedding-goldlight">
+              <span className="text-xs uppercase tracking-[0.3em] text-accent block mb-2">{text.giftModal.eyebrow}</span>
+              <h3 className="text-2xl font-cinzel font-light text-accent-light">
                 {giftName}
               </h3>
-              <div className="w-12 h-[1px] bg-wedding-gold/30 mx-auto mt-3"></div>
+              <div className="w-12 h-[1px] bg-accent/30 mx-auto mt-3"></div>
             </div>
 
-            <p className="text-sm font-cormorant text-wedding-cream/80 text-center mb-6">
+            <p className="text-sm font-cormorant text-ink/80 text-center mb-6">
               {text.giftModal.intro}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-xs uppercase tracking-widest text-wedding-gold font-medium mb-1">{text.giftModal.nameLabel}</label>
+                <label htmlFor="name" className="block text-xs uppercase tracking-widest text-accent font-medium mb-1">{text.giftModal.nameLabel}</label>
                 <input 
                   type="text" 
                   id="name"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-wedding-dark/50 border border-wedding-gold/30 rounded-sm px-4 py-3 text-wedding-cream font-inter text-sm focus:outline-none focus:border-wedding-gold transition-colors placeholder:text-wedding-cream/30"
+                  className="w-full bg-surface/50 border border-accent/30 rounded-sm px-4 py-3 text-ink font-inter text-sm focus:outline-none focus:border-accent transition-colors placeholder:text-ink/30"
                   placeholder={text.giftModal.namePlaceholder}
                 />
               </div>
               
               <div>
-                <label htmlFor="email" className="block text-xs uppercase tracking-widest text-wedding-gold font-medium mb-1">{text.giftModal.emailLabel}</label>
+                <label htmlFor="email" className="block text-xs uppercase tracking-widest text-accent font-medium mb-1">{text.giftModal.emailLabel}</label>
                 <input 
                   type="email" 
                   id="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-wedding-dark/50 border border-wedding-gold/30 rounded-sm px-4 py-3 text-wedding-cream font-inter text-sm focus:outline-none focus:border-wedding-gold transition-colors placeholder:text-wedding-cream/30"
+                  className="w-full bg-surface/50 border border-accent/30 rounded-sm px-4 py-3 text-ink font-inter text-sm focus:outline-none focus:border-accent transition-colors placeholder:text-ink/30"
                   placeholder={text.giftModal.emailPlaceholder}
                 />
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-xs uppercase tracking-widest text-wedding-gold font-medium mb-1">{text.giftModal.messageLabel}</label>
+                <label htmlFor="message" className="block text-xs uppercase tracking-widest text-accent font-medium mb-1">{text.giftModal.messageLabel}</label>
                 <textarea 
                   id="message"
                   rows={3}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full bg-wedding-dark/50 border border-wedding-gold/30 rounded-sm px-4 py-3 text-wedding-cream font-inter text-sm focus:outline-none focus:border-wedding-gold transition-colors placeholder:text-wedding-cream/30 resize-none"
+                  className="w-full bg-surface/50 border border-accent/30 rounded-sm px-4 py-3 text-ink font-inter text-sm focus:outline-none focus:border-accent transition-colors placeholder:text-ink/30 resize-none"
                   placeholder={text.giftModal.messagePlaceholder}
                 />
               </div>
@@ -120,13 +120,13 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
                 <label className="flex items-start cursor-pointer group">
                   <div className="relative flex items-center justify-center mt-1 mr-3 shrink-0">
                     <input type="checkbox" required className="peer sr-only" />
-                    <div className="w-5 h-5 border border-wedding-gold/50 rounded-sm bg-transparent peer-checked:bg-wedding-gold peer-checked:border-wedding-gold peer-checked:[&>svg]:opacity-100 transition-all duration-300 flex items-center justify-center">
-                      <svg className="w-3.5 h-3.5 text-wedding-dark opacity-0 transition-opacity duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <div className="w-5 h-5 border border-accent/50 rounded-sm bg-transparent peer-checked:bg-accent peer-checked:border-accent peer-checked:[&>svg]:opacity-100 transition-all duration-300 flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-surface opacity-0 transition-opacity duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                   </div>
-                  <span className="text-xs font-inter text-wedding-cream/70 group-hover:text-wedding-cream/90 transition-colors leading-relaxed">
+                  <span className="text-xs font-inter text-ink/70 group-hover:text-ink/90 transition-colors leading-relaxed">
                     {formContent.actions.privacyText}
                   </span>
                 </label>
@@ -136,10 +136,10 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
                 <button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full py-4 bg-wedding-burgundy border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-burgundy/80 hover:border-wedding-gold hover:text-wedding-goldlight text-xs tracking-[0.2em] font-medium uppercase transition-all duration-300 rounded-sm disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center h-12"
+                  className="w-full py-4 bg-primary border border-accent/30 text-accent hover:bg-primary/80 hover:border-accent hover:text-accent-light text-xs tracking-[0.2em] font-medium uppercase transition-all duration-300 rounded-sm disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center h-12"
                 >
                   {isSubmitting ? (
-                    <svg className="animate-spin h-5 w-5 text-wedding-cream" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-5 w-5 text-ink" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>

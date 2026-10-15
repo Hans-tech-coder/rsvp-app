@@ -52,14 +52,25 @@ Match the code around you. These are the patterns the codebase already uses.
 ## Guest-site styling
 
 - Tailwind v4 theme tokens from `globals.css` `@theme`:
-  - colors `wedding-cream`, `-ivory`, `-champagne`, `-beige`, `-burgundy`,
-    `-burgundydark`, `-burgundylight`, `-deepburgundy`, `-dark`, `-softdark`,
-    `-charcoal`, `-gold`, `-goldlight`, `-golddark`
-    (use as `bg-wedding-dark`, `text-wedding-gold`, …)
+  - colors, semantic names (renamed from `wedding-*` in Oct 2026, F6):
+    `ink` (text), `surface` (background), `surface-soft` (panels),
+    `primary`, `primary-light`, `primary-deep`, `accent`, `accent-light`,
+    `accent-dark` (use as `bg-surface`, `text-accent`, `border-accent/30`, …).
+    Each event can change all nine in the Theme & Colors tab; the
+    `globals.css` values are only the Wedding default (see "Theme" in
+    `docs/content-system.md`)
   - fonts `font-cinzel` (headings, uppercase titles), `font-cormorant`
     (elegant body/italic), `font-inter` (UI text, default)
-- Dark background, cream text is the base look. Do not introduce new hex colors
-  in components; add a token to `@theme` if one is truly needed.
+- Dark background, light `ink` text is the base look. Do not introduce new hex
+  or `rgba(...)` colors in components: they would not follow the event's theme.
+  A tinted glow or shadow mixes a token, e.g.
+  `shadow-[0_0_8px_color-mix(in_srgb,var(--color-primary)_80%,transparent)]`
+  (or `color-mix(in srgb, var(--color-accent) 50%, transparent)` in a style or
+  CSS). Neutral black/white shadows are fine. A canvas or WebGL effect reads
+  the token from `getComputedStyle(document.documentElement)` (see
+  `InkRevealCanvas`, `DepthParallaxScene`, `WeddingCursor`). A new color token
+  goes into `@theme`, `src/lib/theme.ts` (`THEME_COLOR_KEYS`, info, every
+  preset) and is then editable.
 - Mobile-first; the site is used mostly on phones. Use `100dvh`, not `100vh`.
 - Hide scrollbars with `.no-scrollbar` where the design needs it.
 - **No hard-coded guest-visible words in components.** A screen's content comes
@@ -92,7 +103,7 @@ Match the code around you. These are the patterns the codebase already uses.
   `tabIndex={0}`, an `aria-label`, Enter on keydown and Space on keyup
   (`viewCardProps` in `ViewOverlay.tsx` does this). Its hover reveal is
   repeated for `:focus-visible` *outside* the hover media query, with a
-  visible gold ring (`--color-wedding-gold`); draw the ring inside the
+  visible gold ring (`--color-accent`); draw the ring inside the
   element when a scroll container would clip it. React to keyboard focus
   only when the target `matches(':focus-visible')`, so mouse and touch
   focus change nothing. A modal moves focus in on open, traps Tab, and

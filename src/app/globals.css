@@ -217,7 +217,7 @@
   position: absolute;
   inset: 0;
   z-index: 20;
-  border: 2px solid var(--color-wedding-gold);
+  border: 2px solid var(--color-accent);
   border-radius: inherit;
   pointer-events: none;
 }
@@ -298,12 +298,12 @@
 .t-vol-range::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 9999px;
-  background: linear-gradient(to right, var(--color-wedding-gold) var(--vol), color-mix(in srgb, var(--color-wedding-cream) 20%, transparent) var(--vol));
+  background: linear-gradient(to right, var(--color-accent) var(--vol), color-mix(in srgb, var(--color-ink) 20%, transparent) var(--vol));
 }
 .t-vol-range::-moz-range-track {
   height: 4px;
   border-radius: 9999px;
-  background: linear-gradient(to right, var(--color-wedding-gold) var(--vol), color-mix(in srgb, var(--color-wedding-cream) 20%, transparent) var(--vol));
+  background: linear-gradient(to right, var(--color-accent) var(--vol), color-mix(in srgb, var(--color-ink) 20%, transparent) var(--vol));
 }
 .t-vol-range::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -312,21 +312,21 @@
   height: 16px;
   margin-top: -6px;
   border-radius: 9999px;
-  background: var(--color-wedding-goldlight);
-  border: 2px solid var(--color-wedding-dark);
-  box-shadow: 0 0 0 1px var(--color-wedding-gold);
+  background: var(--color-accent-light);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-accent);
 }
 .t-vol-range::-moz-range-thumb {
   width: 12px;
   height: 12px;
   border-radius: 9999px;
-  background: var(--color-wedding-goldlight);
-  border: 2px solid var(--color-wedding-dark);
-  box-shadow: 0 0 0 1px var(--color-wedding-gold);
+  background: var(--color-accent-light);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-accent);
 }
 .t-vol-range:focus-visible { outline: none; }
-.t-vol-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--color-wedding-gold); }
-.t-vol-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--color-wedding-gold); }
+.t-vol-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--color-accent); }
+.t-vol-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--color-accent); }
 
 /* Wedding-ring cursor (WeddingCursor.tsx). `t-cursor-on` sits on <html> only
    for a mouse/trackpad without reduced motion; text fields keep the I-beam. */
@@ -357,20 +357,19 @@ html.t-cursor-on :is(textarea, [contenteditable=""], [contenteditable="true"], i
    in layout.tsx from the media query or an actual mouse move). */
 @custom-variant hover (&:where(.t-mouse *):hover);
 @theme {
-  --color-wedding-cream: #FCFAF6;
-  --color-wedding-ivory: #F7F4EB;
-  --color-wedding-champagne: #EFEAE0;
-  --color-wedding-beige: #E4DCCE;
-  --color-wedding-burgundy: #800020;
-  --color-wedding-burgundydark: #4D0013;
-  --color-wedding-burgundylight: #B53351;
-  --color-wedding-dark: #12100E; /* Deepened for more luxury */
-  --color-wedding-softdark: #1A1715; /* Deepened for more luxury */
-  --color-wedding-deepburgundy: #2E000B; /* Deepened for more luxury */
-  --color-wedding-charcoal: #2C2926;
-  --color-wedding-gold: #C5A059; /* Classic elegant gold */
-  --color-wedding-goldlight: #E0C79B; /* Soft gold for highlights */
-  --color-wedding-golddark: #997A44; /* Darker gold for borders/depth */
+  /* Theme colors, semantic names. These values are the Wedding template's
+     default (preset "Burgundy & Gold" in src/lib/theme.ts, kept equal by
+     src/lib/theme.test.ts). Each event's saved theme overrides them at render:
+     src/app/[event]/page.tsx writes a :root style from content/theme. */
+  --color-ink: #FCFAF6;           /* main text, light on the dark surface */
+  --color-surface: #12100E;       /* page background */
+  --color-surface-soft: #1A1715;  /* raised panels, body background */
+  --color-primary: #800020;       /* brand color (buttons, highlights) */
+  --color-primary-light: #B53351; /* hover, active menu item */
+  --color-primary-deep: #2E000B;  /* deep backdrops and gradients */
+  --color-accent: #C5A059;        /* gold: headings, lines, focus rings */
+  --color-accent-light: #E0C79B;  /* soft highlights */
+  --color-accent-dark: #997A44;   /* borders, depth */
 
   --font-cinzel: var(--font-cinzel), serif;
   --font-cormorant: var(--font-cormorant-garamond), serif;
@@ -378,8 +377,8 @@ html.t-cursor-on :is(textarea, [contenteditable=""], [contenteditable="true"], i
 }
 
 :root {
-  --background: #12100E;
-  --foreground: #FCFAF6;
+  --background: var(--color-surface);
+  --foreground: var(--color-ink);
 }
 
 body {
@@ -404,15 +403,15 @@ body {
     height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: rgba(28, 25, 23, 0.8);
+    background: color-mix(in srgb, var(--color-surface-soft) 80%, transparent);
     border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(128, 0, 32, 0.5);
+    background: color-mix(in srgb, var(--color-primary) 50%, transparent);
     border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(128, 0, 32, 0.8);
+    background: color-mix(in srgb, var(--color-primary) 80%, transparent);
 }
 
 /* Falling rose petals (FallingPetals.tsx, 404 page). Each petal falls, sways
@@ -448,7 +447,7 @@ body {
    below-right make the monogram look pressed up from the page. Static. */
 .t-emboss {
   filter:
-    drop-shadow(-1px -1px 0 color-mix(in srgb, var(--color-wedding-cream) 55%, transparent))
+    drop-shadow(-1px -1px 0 color-mix(in srgb, var(--color-ink) 55%, transparent))
     drop-shadow(2px 3px 1px color-mix(in srgb, black 85%, transparent))
     drop-shadow(0 6px 10px color-mix(in srgb, black 40%, transparent));
 }

@@ -33,7 +33,7 @@ shadowed by it; F11 must refuse them.
 | `…/registryGifts` | auto ID | server actions (`admin.ts`, `registry.ts`) | `getRegistryGifts`; admin gifts/dashboard |
 | `…/giftSelections` | auto ID | `claimGift`; deleted by `resetRegistryGift` / `deleteGiftSelection` | admin registry page |
 | `…/settings` | `inviteTemplate` | `updateInviteMessageTemplate` | `getInviteMessageTemplate` |
-| `…/content` | one doc per screen (below) + `<doc>_backup` | admin editors, **from the browser** | the server only (admin SDK, `src/lib/siteContentServer.ts`): all screen docs + `siteText` by `getEventContent(eventId)` for the cached event page and its metadata; `globalSettings` + `siteText` by `getSiteContent(eventId)` for the 404 page and the default invite message; `globalSettings`, `details`, `dressCode` by the RSVP email. The browser no longer reads `content` (the public read rule stays) |
+| `…/content` | one doc per screen (below) + `<doc>_backup` | admin editors, **from the browser** | the server only (admin SDK, `src/lib/siteContentServer.ts`): all screen docs + `siteText` + `theme` by `getEventContent(eventId)` for the cached event page and its metadata; `globalSettings` + `siteText` + `theme` by `getSiteContent(eventId)` for the 404 page and the default invite message; `globalSettings`, `details`, `dressCode` by the RSVP email. The browser no longer reads `content` (the public read rule stays) |
 | `admins` (global) | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); deleted by `removeAdmin` (`admins.ts`, super only) | `firestore.rules`, `storage.rules` (`isAdmin()`), `requireAdmin.ts` |
 | `adminAllowlist` (global) | lowercased email | `scripts/add-admin.js`; `addAdmin` / `cancelPendingAdmin` (`admins.ts`, super only) | `createSessionCookie`, `listAdmins` (server only; rules deny all browser access) |
 
@@ -136,6 +136,7 @@ if present, overrides it (merge rules in `docs/content-system.md`).
 | `registry` | `registry` (`header`, `bankTransfer`, `curatedRegistry`) | `RegistryEditor.tsx` |
 | `rsvpCta` | `rsvpCta` | `RsvpCtaEditor.tsx` |
 | `rsvpForm` | `rsvpForm` (`header`, `labels`, `attendanceOptions`, `actions`, `successModal`) | `RsvpFormEditor.tsx` |
+| `theme` | not in the JSON: `{ preset, colors: { primary, accent, surface, ink, primaryLight, primaryDeep, accentLight, accentDark, surfaceSoft } }`, each color `#RRGGBB`; `preset` is a preset id from `src/lib/theme.ts` or `custom`. No doc = the Wedding default (Burgundy & Gold). Read on the server only (`mergeTheme`), written as a `:root` style. | `ThemeEditor.tsx` ("Theme & Colors" tab) |
 | `siteText` | `siteText`: small UI wording grouped by screen (`common`, `menu`, `loading`, `welcome`, `motionHint`, `music`, `entrance`, `ourStory`, `details`, `dressCode`, `registry`, `curatedRegistry`, `giftModal`, `rsvp`, `phone`, `footer`, `notFound`, `seo`), every leaf a string. Read **on the server only**, into `SiteTextProvider` (not `WeddingContentContext`). | `SiteTextEditor.tsx` ("Site Text" tab) |
 
 `global.coupleNameFormat` ("Hans & Czay", "Ana's 18th", "ACME Summit 2027";

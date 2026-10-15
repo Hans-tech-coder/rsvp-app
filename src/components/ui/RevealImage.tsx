@@ -18,7 +18,7 @@ export function RevealImage({ wrapperClassName = "", className = "", src, alt, s
 
   return (
     <div className={`t-skel ${isRevealed ? 'is-revealed' : ''} ${wrapperClassName}`}>
-      <div className={`t-skel-skeleton absolute inset-0 bg-wedding-gold/10 ${!isRevealed ? 'is-pulsing' : ''} rounded-inherit`}></div>
+      <div className={`t-skel-skeleton absolute inset-0 bg-accent/10 ${!isRevealed ? 'is-pulsing' : ''} rounded-inherit`}></div>
       <img
         src={optimized?.src ?? src}
         srcSet={optimized?.srcSet}
