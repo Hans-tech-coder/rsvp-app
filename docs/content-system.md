@@ -135,8 +135,9 @@ Firestore events/{eventId}/content/theme   (read with the admin SDK on the serve
   site's own classes under the edited variables, and "Reset to template
   default". Saves the whole doc (no `merge`) after writing `theme_backup`;
   Restore loads the backup into the form (Save to make it live).
-- Not themed: the RSVP email (own copy of the default colors, see
-  `docs/guest-site.md`), the firefly and candle-light glows (Welcome effects
+- The RSVP email uses the event's theme too (inlined hex, see
+  `docs/guest-site.md`).
+- Not themed: the firefly and candle-light glows (Welcome effects
   are light, not brand), neutral black/white shadows.
 
 ## How an editor works (`src/app/admin/content/*Editor.tsx`)

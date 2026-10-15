@@ -130,7 +130,8 @@ function rgbToHex([r, g, b]: number[]): string {
   return `#${[r, g, b].map((v) => Math.round(Math.min(255, Math.max(0, v))).toString(16).padStart(2, '0')).join('')}`.toUpperCase();
 }
 
-function mixHex(a: string, b: string, amount: number): string {
+/** `a` blended toward `b` by `amount` (0 to 1); also used for the RSVP email's rgba-free colors. */
+export function mixHex(a: string, b: string, amount: number): string {
   const ca = hexToRgb(a);
   const cb = hexToRgb(b);
   return rgbToHex(ca.map((v, i) => v + (cb[i] - v) * amount));

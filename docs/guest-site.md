@@ -104,12 +104,13 @@ browser don't share progress or an unlocked RSVP.
    swatches) when attending, or when declining with a proxy (the intro then
    names the proxy); a decline without a proxy gets only the thank-you and
    answers. The email matches the site's look: the OG image as
-   hero, dark/burgundy/gold colors copied from the default `@theme` tokens (email
-   clients cannot read CSS variables; an event's own theme from the Theme &
-   Colors tab does not reach the email yet), and Cinzel / Cormorant Garamond / Inter
+   hero, the event's theme colors (`content/theme` through `mergeTheme()`, so the
+   default palette without a saved theme) inlined as hex because email clients
+   cannot read CSS variables (`line` and `muted` are blended with `mixHex()`, since
+   many clients drop `rgba()`), and Cinzel / Cormorant Garamond / Inter
    from Google Fonts. Gmail and Outlook block web fonts and fall back to
    Georgia/Arial. Content follows the same precedence as `WeddingContentContext` (JSON defaults,
-   then the event's `content/details`, `dressCode`, `globalSettings`).Missing Gmail
+   then the event's `content/details`, `dressCode`, `globalSettings`, `theme`).Missing Gmail
    env vars or a failed send are logged and never fail the RSVP.
 4. On success, `onSubmitSuccess` relocks (`isUnlocked = false`, code cleared).
 
