@@ -180,6 +180,12 @@ Match the code around you. These are the patterns the codebase already uses.
   list of guest screens: drag handle plus up/down arrows (touch and keyboard),
   a `role="switch"` show/hide toggle, a name field with the default as
   placeholder; the caller owns the data and the save.
+- Content editors lay out by their pane with Tailwind container queries
+  (`@container` on the pane, `@lg:` / `@2xl:` / `@3xl:` in the editor), so
+  one editor fits the content page and the visual builder drawer.
+- Admin page ↔ draft preview iframe talk only by same-origin `postMessage`
+  with the typed messages of `src/lib/builderMessages.ts` (read with
+  `readBuilderMessage` / `readPreviewMessage`, which drop other origins).
 
 ## Verification
 

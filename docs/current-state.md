@@ -22,7 +22,10 @@ when you find or fix one of these.
   starting volume; Oct 2026), a Screens & Menu tab (reorder, show/hide,
   rename screens; Oct 2026). Editors save drafts (autosaved), a Publish
   button makes them live, History keeps the last 10 published versions per
-  doc, and a phone / desktop preview shows the draft site (F9, Oct 2026). Google sign-in with an email allowlist; super admins
+  doc, and a phone / desktop preview shows the draft site (F9, Oct 2026). A
+  visual builder (`/admin/builder`, tablet and wider) shows the draft site
+  with the section list and the editors around it: click a section to edit
+  it, live preview, undo / redo (F9a, Oct 2026). Google sign-in with an email allowlist; super admins
   add and remove regular admins from the Manage Admins modal in the sidebar.
 
 ## Known issues
@@ -52,6 +55,10 @@ when you find or fix one of these.
 | Publish does not check the live doc for changes made elsewhere | `publishDraft` in `src/app/actions/content.ts` | The `updatedAt` check covers drafts only. A live doc changed outside the drafts (console, script, an older deployed admin still writing `content` from the browser) since the draft was started is overwritten by Publish; that version is not in History either. Until F10 the owner is the only editor |
 | `content` is still writable from the browser by any admin | `firestore.rules` (`events/{eventId}/content`: `allow write: if isAdmin()`) | Editors no longer write it (F9), but the rule was not tightened (needs a rules deploy). Drafts and versions have no rule, so the browser cannot touch them |
 | F9 partly tried against Firestore | `src/app/actions/content.ts` | Checked signed in on :3000 (2026-10-15): load, History, Restore, autosave, the draft in `?preview=` and not on the live page, Discard, and one Publish of an unchanged `globalSettings` (live doc identical before and after, draft deleted, `contentVersions/globalSettings` stored with the publish + "Before drafts" + "Older backup"). Not tried: a two-tab conflict, Restore of a version that differs, the guest page rebuild after Publish on Vercel (dev does not cache) |
+| Visual builder saves not tried (F9a) | `src/app/admin/builder/page.tsx` | Checked on :3000 signed in (2026-10-15, no writes): all 15 panels load in the drawer without overflow at 1440 / 1024 / 768, the phone message at 375; click a Welcome text → its field focused; typing shows in the preview at once and is one undo step; undo / redo; picking a section moves the preview (RSVP form, invite-code screen); hide and undo; a color preset live and undone; the live page has no markers; non-admin `?preview=` → 307. Not tried: Save Draft / Publish from the builder, the save on panel switch, undo across panels (both write a draft), two frames in "Both" |
+| Builder click-to-edit covers the Welcome texts and the section headers only | screens in `src/components/screens/` | Marked (`useFieldMarker`): the Welcome texts, each section's header subtitle / title / description and the Dress Code description (checked on :3000, 2026-10-15: each click focused its input). A click on anything else (list items, cards, the Dress Code main title, Registry cards, the invite-code screen) opens the section's editor at the top. The builder focuses the first input with the name, so a repeated `name` cannot be marked without renaming it (the editors' change handlers use `name`) |
+| Builder undo history is lost on reload and on Discard | `src/lib/builderHistory.ts` | In memory by design; History (published versions) covers the rest. Entries for a doc whose draft was discarded still undo to their old values |
+| A hidden section cannot be shown in the builder preview | `GuestSite.tsx` (`onGoto`) | Picking it opens its editor with a "Hidden" note; the preview stays where it was |
 | Old `<doc>_backup` docs stay in Firestore | `events/{eventId}/content/*_backup` | No longer written; read once as "Older backup" until a doc's first Publish stores its version list. Delete later |
 | The admin preview shares the guest site's RSVP flow | `src/app/[event]/preview/page.tsx` | It is the real site: an RSVP or gift claim sent from the preview is real. Its saved step progress is kept apart (`event:<id>:preview:*` keys) |
 | Timeline entry photo cannot be removed, only replaced | `OurStoryEditor.tsx` | An entry without a photo shows no image block on the site, but the editor has no "remove photo" button |

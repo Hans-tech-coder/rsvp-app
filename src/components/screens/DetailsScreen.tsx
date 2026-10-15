@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useFieldMarker } from '@/contexts/EditMarkersContext';
 import { useSiteText } from '@/contexts/SiteTextContext';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { TextsReveal } from '@/components/ui/TextsReveal';
@@ -16,6 +17,7 @@ interface DetailsScreenProps {
 export function DetailsScreen({ onContinue }: DetailsScreenProps) {
   const [mapUrl, setMapUrl] = useState<string | null>(null);
   const { content } = useWeddingContent();
+  const field = useFieldMarker();
   const text = useSiteText();
 
   const scrollRef = useRef<HTMLElement>(null);
@@ -64,12 +66,12 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
 
       <div className="max-w-6xl mx-auto relative z-10 w-full">
         <TextsReveal className="text-center mb-16 relative z-10 flex flex-col items-center">
-          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.details.header?.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">
+          <span {...field('subtitle')} className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.details.header?.subtitle}</span>
+          <h2 {...field('title')} className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">
             {content.details.header?.title}
           </h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6"></div>
-          <p className="text-base font-elegant italic text-accent-light/70 mt-3 max-w-lg mx-auto">{content.details.header?.description}</p>
+          <p {...field('description')} className="text-base font-elegant italic text-accent-light/70 mt-3 max-w-lg mx-auto">{content.details.header?.description}</p>
         </TextsReveal>
 
         {/* Two cards per row on desktop; one venue, or the last of an odd number, is centered */}

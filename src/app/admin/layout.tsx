@@ -8,7 +8,7 @@ import { getMyAdminRole } from '@/app/actions/admins';
 import type { AdminRole } from '@/types';
 import { ManageAdminsModal } from './components/ManageAdminsModal';
 import { auth } from '@/lib/firebase/client';
-import { LayoutDashboard, Users, Gift, LogOut, Key, ClipboardList, Image as ImageIcon, Menu, X, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, Gift, LogOut, Key, ClipboardList, Image as ImageIcon, Menu, X, ShieldCheck, PanelsTopLeft } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -53,6 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Gifts', href: '/admin/gifts', icon: Gift },
     { name: 'Registry', href: '/admin/registry', icon: ClipboardList },
     { name: 'Content', href: '/admin/content', icon: ImageIcon },
+    { name: 'Visual Builder', href: '/admin/builder', icon: PanelsTopLeft },
   ];
 
   return (

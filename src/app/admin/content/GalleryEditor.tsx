@@ -203,13 +203,14 @@ export function GalleryEditor({ eventId }: { eventId: string }) {
     }
   };
 
+  const toDoc = () => ({ images: gallery.map(item => item.url).filter(url => url !== ''), header });
+
   const saveContent = async () => {
     try {
       setSaving(true);
       setError(null);
 
-      const imageUrls = gallery.map(item => item.url).filter(url => url !== '');
-      if (!(await draft.save({ images: imageUrls, header }, { merge: false }))) return false;
+      if (!(await draft.save(toDoc(), { merge: false }))) return false;
       setOriginalHeader(header);
       setOriginalGallery(gallery);
 
@@ -335,7 +336,7 @@ export function GalleryEditor({ eventId }: { eventId: string }) {
       {error && (
         <p className="mt-12 text-sm text-red-500 dark:text-red-400">{error}</p>
       )}
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
+      <EditorSaveBar draft={draft} doc={toDoc()} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
     </div>
   );
 }

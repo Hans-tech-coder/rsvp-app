@@ -35,7 +35,7 @@ platform: data and guest URLs are already per event (`/<eventId>`).
 | Who | What they do | Where |
 | --- | --- | --- |
 | **Guests** (no account) | Step through up to 10 screens (by default welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form; admins reorder, hide and rename them). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/<eventId>` (one page, screens swap in place; `/` → default event) |
-| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font, the music, and which screens show in what order on the guest site. Edits are drafts (autosaved) until Publish; a preview shows the draft site and History restores earlier published versions. Super admins also add and remove admins from **Manage Admins** in the sidebar. | `/admin/**` |
+| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font, the music, and which screens show in what order on the guest site. Edits are drafts (autosaved) until Publish; a preview shows the draft site and History restores earlier published versions. A **visual builder** (tablet and wider) shows the draft site with the sections and editors around it: click a section to edit it, live, with undo / redo. Super admins also add and remove admins from **Manage Admins** in the sidebar. | `/admin/**` |
 
 ---
 
@@ -91,7 +91,7 @@ src/
   app/
     page.tsx                 redirects / to the default event
     [event]/page.tsx         one event's guest site: server read, metadata, ISR cache -> EventSite.tsx (providers, <AudioPlayer/>)
-    [event]/preview/page.tsx admin draft preview (/<eventId>?preview=<token>, rewritten in next.config.ts)
+    [event]/preview/page.tsx admin draft preview (/<eventId>?preview=<token>, rewritten in next.config.ts) -> PreviewSite.tsx (builds the site in the browser; live edits, hover/click for the builder)
     [event]/GuestSite.tsx    the whole step flow, driven by the event's screens list (client component)
     layout.tsx               theme script, metadataBase, mounts fonts.ts (reads no Firestore)
     fonts.ts                 every font of every pairing (next/font), CSS variables on <html>
@@ -102,8 +102,9 @@ src/
     api/upload/route.ts      admin-only Vercel Blob upload token
     api/logout/route.ts      clears the session cookie, redirects to /admin/login
     admin/                   admin portal (layout.tsx = sidebar)
+      builder/               Visual builder: page.tsx (sections, preview canvas, editor drawer, undo/redo) + builderContext (editor <-> builder link)
       content/               Content manager: page.tsx (tabs, preview) + one *Editor.tsx per screen + EditorSaveBar / contentDraft (draft, publish, history)
-      components/            AdminModal, ManageAdminsModal, TablePagination, ScreenList (reorder/show/rename screens), PreviewFrame (phone/desktop draft preview)
+      components/            AdminModal, ManageAdminsModal, TablePagination, ScreenList (reorder/show/rename screens), PreviewFrame (phone/desktop draft preview, builder canvas)
       dashboard|invites|guests|gifts|registry|login/
   components/
     screens/                 one file per guest screen (+ GiftSelectionModal, LoadingScreen)
@@ -112,6 +113,7 @@ src/
     layout/                  CanvasMenu (step menu), EmbeddedFooter
   contexts/WeddingContentContext.tsx   server-merged content + eventId from [event]/page.tsx -> useWeddingContent()
   contexts/SiteTextContext.tsx         site text (buttons, labels, errors) from [event]/page.tsx -> useSiteText()
+  contexts/EditMarkersContext.tsx      preview only: useFieldMarker() puts data-field on texts for the builder
   data/wedding-content.json  default/fallback content for every screen
   lib/eventPaths.ts          every Firestore path (events/{eventId}/content|guests|registryGifts|giftSelections|settings, admins) (+ .test.ts)
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
@@ -122,9 +124,12 @@ src/
   lib/theme.ts               event colors + font pairing: tokens, presets, mergeTheme, contrast (+ .test.ts); applied by components/ThemeStyle.tsx
   lib/fonts.ts               font roles (heading/elegant/body), families, pairings (+ .test.ts)
   lib/music.ts               event background music: type, mergeMusic, default track (+ .test.ts)
-  lib/screens.ts             which screens an event shows, order, menu names: SCREEN_TYPES, mergeScreens (+ .test.ts)
+  lib/screens.ts             which screens an event shows, order, menu names: SCREEN_TYPES, SCREEN_NAMES, mergeScreens (+ .test.ts)
   lib/contentDrafts.ts       content drafts + published versions: shapes, mergeDoc, version list (+ .test.ts)
-  lib/siteContentServer.ts   getEventContent() (event page), getEventDraftContent() (preview), getSiteContent() (404) via admin SDK (server only)
+  lib/eventSite.ts           buildEventSite(): raw content docs -> everything the guest site shows (pure; server and preview)
+  lib/builderHistory.ts      visual builder undo / redo (+ .test.ts)
+  lib/builderMessages.ts     builder <-> preview postMessage types, same-origin readers
+  lib/siteContentServer.ts   getEventContent() (event page), getEventDraftDocs() (preview), getSiteContent() (404) via admin SDK (server only)
   lib/weddingContent.ts      JSON defaults + content docs merge (mergeWeddingContent, mergeGlobal, DEFAULT_CONTENT)
   lib/genericContent.ts      hosts / People groups / venues / guidelines: types, readers, old-shape adapters (+ .test.ts)
   lib/siteUrl.ts             getSiteUrl(), getEventUrl() for links that leave the site (server only)

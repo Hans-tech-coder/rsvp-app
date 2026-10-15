@@ -133,8 +133,8 @@ export function RsvpCtaEditor({ eventId }: { eventId: string }) {
       <div className="space-y-6">
         <div className="bg-gray-50 dark:bg-zinc-900/50 p-6 rounded-xl border border-gray-200 dark:border-zinc-800">
           <h3 className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-4">Background Image</h3>
-          <div className="flex flex-col md:flex-row gap-6 items-start">
-            <div className="relative w-full md:w-64 h-40 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0">
+          <div className="flex flex-col @2xl:flex-row gap-6 items-start">
+            <div className="relative w-full @2xl:w-64 h-40 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0">
               {formData.backgroundImage ? (
                 <Image 
                   src={formData.backgroundImage} 
@@ -185,7 +185,7 @@ export function RsvpCtaEditor({ eventId }: { eventId: string }) {
         <div className="bg-gray-50 dark:bg-zinc-900/50 p-6 rounded-xl border border-gray-200 dark:border-zinc-800">
           <h3 className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-4">Content</h3>
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-zinc-300">Subtitle</label>
                 <input
@@ -239,7 +239,7 @@ export function RsvpCtaEditor({ eventId }: { eventId: string }) {
         </div>
       </div>
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={formData} merge hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

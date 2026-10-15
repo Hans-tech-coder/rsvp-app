@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, Variants, useReducedMotion } from 'motion/react';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { OurStoryScreen } from '@/components/screens/OurStoryScreen';
@@ -20,6 +20,14 @@ import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { getImageProps } from 'next/image';
 import { useSiteText } from '@/contexts/SiteTextContext';
 import { LOCKED_SCREEN, screenLabel, visibleScreens, type ScreenConfig, type ScreenType } from '@/lib/screens';
+import { EditMarkersProvider } from '@/contexts/EditMarkersContext';
+
+/**
+ * Admin draft preview only (src/app/[event]/preview). Its presence marks the
+ * screens with `data-section` / `data-field` for the visual builder;
+ * `onGoto` subscribes to the builder asking to show a section.
+ */
+export type PreviewControl = { onGoto: (listener: (section: string) => void) => () => void };
 
 // Longest the loader waits for fonts and the hero image (ms after navigation),
 // so a slow network never traps guests on it. Content comes with the page.
@@ -43,7 +51,7 @@ function preloadImage(src: string): Promise<unknown> {
 // admin preview keeps its own, so previewing never moves the admin's live progress.
 const storageKey = (eventId: string, name: string) => `event:${eventId}:${name}`;
 
-function MainApp({ screens, preview }: { screens: ScreenConfig[]; preview: boolean }) {
+function MainApp({ screens, preview }: { screens: ScreenConfig[]; preview?: PreviewControl }) {
   const { eventId, content } = useWeddingContent();
   const storeId = preview ? `${eventId}:preview` : eventId;
   const text = useSiteText();
@@ -148,6 +156,38 @@ function MainApp({ screens, preview }: { screens: ScreenConfig[]; preview: boole
       setHighestVisitedStep(step);
     }
   };
+
+  // Preview: when the builder reorders or hides screens, stay on the screen
+  // shown (its step number may change), or the nearest one if it was hidden.
+  const shownType = useRef<ScreenType | undefined>(undefined);
+  useEffect(() => {
+    if (!preview) return;
+    const index = steps.findIndex((s) => s.type === shownType.current);
+    setCurrentStep((step) => (index >= 0 ? index : Math.min(step, steps.length - 1)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [steps]);
+  useEffect(() => {
+    shownType.current = steps[currentStep]?.type;
+  }, [steps, currentStep]);
+
+  // Preview: the builder shows a section (opens the code screen for
+  // `entrance`). The RSVP form opens without a code here.
+  useEffect(() => {
+    if (!preview) return;
+    return preview.onGoto((section) => {
+      setIsMenuOpen(false);
+      if (section === 'entrance') {
+        setShowEntranceScreen(true);
+        return;
+      }
+      const index = steps.findIndex((s) => s.type === section);
+      if (index < 0) return;
+      setShowEntranceScreen(false);
+      if (index === lockedStep) setIsUnlocked(true);
+      setCurrentStep(index);
+      setHighestVisitedStep((highest) => Math.max(highest, index));
+    });
+  }, [preview, steps, lockedStep]);
 
   const handleStartUnlock = () => {
     setIsUnlocked(true);
@@ -326,6 +366,7 @@ function MainApp({ screens, preview }: { screens: ScreenConfig[]; preview: boole
                   animate="animate"
                   exit="exit"
                   className="absolute inset-0 w-full h-full pointer-events-auto"
+                  data-section={preview ? current.type : undefined}
                 >
                   {renderScreen(current.type)}
                 </motion.div>
@@ -351,6 +392,7 @@ function MainApp({ screens, preview }: { screens: ScreenConfig[]; preview: boole
                  animate={{ opacity: 1 }}
                  exit={{ opacity: 0, transition: { duration: 1.5, ease: "easeInOut" } }}
                  className="fixed inset-0 z-[100] bg-surface"
+                 data-section={preview ? 'entrance' : undefined}
               >
                  <EntranceScreen onUnlock={handleUnlock} onStartUnlock={handleStartUnlock} />
                  
@@ -375,11 +417,11 @@ function MainApp({ screens, preview }: { screens: ScreenConfig[]; preview: boole
 }
 
 /** The guest site; src/app/[event]/EventSite.tsx wraps it in the event's content. */
-export function GuestSite({ screens, preview = false }: { screens: ScreenConfig[]; preview?: boolean }) {
+export function GuestSite({ screens, preview }: { screens: ScreenConfig[]; preview?: PreviewControl }) {
   return (
-    <>
+    <EditMarkersProvider value={!!preview}>
       <MainApp screens={screens} preview={preview} />
       <WeddingCursor />
-    </>
+    </EditMarkersProvider>
   );
 }

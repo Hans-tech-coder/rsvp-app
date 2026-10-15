@@ -200,20 +200,21 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
     }
   };
 
+  // The saved doc, less its updatedAt: the banks without their list ids.
+  const toDoc = () => ({
+    header,
+    bankTransfer: {
+      ...bankTransfer,
+      banks: banks.map(({ id, ...rest }) => rest)
+    },
+    curatedRegistry
+  });
+
   const saveContent = async () => {
     try {
       setSaving(true);
       
-      const banksToSave = banks.map(({ id, ...rest }) => rest);
-      const ok = await draft.save({
-        header,
-        bankTransfer: {
-          ...bankTransfer,
-          banks: banksToSave
-        },
-        curatedRegistry,
-        updatedAt: new Date().toISOString()
-      }, { merge: false });
+      const ok = await draft.save({ ...toDoc(), updatedAt: new Date().toISOString() }, { merge: false });
       if (!ok) return false;
 
       setOriginalHeader(header);
@@ -354,7 +355,7 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 @2xl:grid-cols-3 gap-4">
                 <SortableContext 
                   items={banks.map(item => item.id)}
                   strategy={verticalListSortingStrategy}
@@ -417,7 +418,7 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
 
 
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImageIndex !== null} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
+      <EditorSaveBar draft={draft} doc={toDoc()} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImageIndex !== null} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
 
       <AdminModal
         isOpen={isDeleteModalOpen}

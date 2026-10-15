@@ -108,8 +108,8 @@ export function EntranceScreenEditor({ eventId }: { eventId: string }) {
       {/* Background Image Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Entrance Screen Background Image</h3>
-        <div className="flex flex-col md:flex-row gap-6 items-start">
-          <div className="relative w-full md:w-64 aspect-video bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0">
+        <div className="flex flex-col @2xl:flex-row gap-6 items-start">
+          <div className="relative w-full @2xl:w-64 aspect-video bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0">
             {formData.backgroundImage ? (
               <img 
                 src={formData.backgroundImage} 
@@ -157,7 +157,7 @@ export function EntranceScreenEditor({ eventId }: { eventId: string }) {
 
       <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={formData} merge hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

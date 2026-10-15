@@ -5,7 +5,7 @@ import { Loader2, TriangleAlert } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc } from 'firebase/firestore';
-import { DEFAULT_SCREENS, mergeScreens, type ScreenConfig, type ScreensDoc } from '@/lib/screens';
+import { DEFAULT_SCREENS, mergeScreens, type ScreenConfig, type ScreenType, type ScreensDoc } from '@/lib/screens';
 import { DEFAULT_SITE_TEXT, mergeSiteText } from '@/lib/siteText';
 import { ScreenList } from '../components/ScreenList';
 import { EditorSaveBar } from './EditorSaveBar';
@@ -14,7 +14,12 @@ import type { DocumentData } from 'firebase/firestore';
 
 // Which screens guests see, their order and their names in the menu
 // (`content/screens`). Read on the server and walked by src/app/[event]/GuestSite.tsx.
-export function ScreensEditor({ eventId }: { eventId: string }) {
+// The visual builder shows it as its section list (`selected` / `onSelect`).
+export function ScreensEditor({ eventId, selected, onSelect }: {
+  eventId: string;
+  selected?: ScreenType | null;
+  onSelect?: (type: ScreenType) => void;
+}) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -93,11 +98,13 @@ export function ScreensEditor({ eventId }: { eventId: string }) {
   const ctaLeadsNowhere = isShown('rsvpCta') && !isShown('rsvp');
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className={onSelect ? 'space-y-4' : 'space-y-6 max-w-2xl'}>
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Screens</h3>
+        <h3 className={`${onSelect ? 'text-sm' : 'text-lg'} font-semibold text-gray-900 dark:text-zinc-100`}>{onSelect ? 'Sections' : 'Screens'}</h3>
         <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
-          Guests go through the shown screens from top to bottom. Drag a screen or use the arrows to change the order, switch one off to hide it from the site and the menu, and rename it in the menu. Leave a name blank to keep the one in grey.
+          {onSelect
+            ? 'Pick one to edit it. Drag to change the order, switch off to hide.'
+            : 'Guests go through the shown screens from top to bottom. Drag a screen or use the arrows to change the order, switch one off to hide it from the site and the menu, and rename it in the menu. Leave a name blank to keep the one in grey.'}
         </p>
       </div>
 
@@ -108,9 +115,9 @@ export function ScreensEditor({ eventId }: { eventId: string }) {
         </p>
       )}
 
-      <ScreenList screens={formData} onChange={handleChange} defaultLabels={defaultLabels} />
+      <ScreenList screens={formData} onChange={handleChange} defaultLabels={defaultLabels} selected={selected} onSelect={onSelect} />
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={{ screens: formData }} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

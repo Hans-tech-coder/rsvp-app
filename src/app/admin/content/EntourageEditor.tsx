@@ -290,7 +290,7 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
         </DndContext>
       </div>
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploading !== null} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={data} merge hasChanges={hasChanges} saving={saving} saved={saved} busy={uploading !== null} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
 
       <AdminModal
         isOpen={groupToDelete !== null}
@@ -334,7 +334,7 @@ function SortableGroup({
 
   return (
     <div ref={setNodeRef} style={style} className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm space-y-4">
-      <div className="flex flex-col md:flex-row md:items-start gap-3">
+      <div className="flex flex-col @2xl:flex-row @2xl:items-start gap-3">
         <div className="flex-1 space-y-1">
           <label className="block text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-zinc-400">Group #{index + 1} title</label>
           <input
@@ -349,7 +349,7 @@ function SortableGroup({
         </div>
         <div className="space-y-1">
           <label className="block text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-zinc-400">Layout</label>
-          <div className="relative w-full md:w-40">
+          <div className="relative w-full @2xl:w-40">
             <select
               value={group.layout}
               onChange={(e) => onChange(g => withLayout(g, e.target.value as PeopleLayout))}
@@ -360,7 +360,7 @@ function SortableGroup({
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-zinc-400" />
           </div>
         </div>
-        <div className="flex items-center gap-1 md:pt-6">
+        <div className="flex items-center gap-1 @2xl:pt-6">
           <div
             className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing transition-colors"
             title="Drag to reorder"
@@ -407,7 +407,7 @@ function PeopleRows({
       {group.people.map((person, index) => {
         const isUploading = uploading === `${group.id}:${index}`;
         return (
-          <div key={index} className="flex flex-col sm:flex-row gap-2 sm:items-center">
+          <div key={index} className="flex flex-col @lg:flex-row gap-2 @lg:items-center">
             <div className="flex gap-2 items-center">
               <button
                 type="button"
@@ -453,11 +453,11 @@ function PeopleRows({
               onChange={(e) => update(index, 'role', e.target.value)}
               placeholder="Role (optional)"
               aria-label="Role"
-              className={`sm:w-48 min-w-0 ${inputClass}`}
+              className={`@lg:w-48 min-w-0 ${inputClass}`}
             />
             <button
               onClick={() => onChange(g => ({ ...g, people: g.people.filter((_, i) => i !== index) }))}
-              className="p-2 text-gray-400 hover:text-red-500 transition-colors self-end sm:self-auto"
+              className="p-2 text-gray-400 hover:text-red-500 transition-colors self-end @lg:self-auto"
               title="Remove name"
             >
               <Trash2 className="w-5 h-5" />
@@ -554,7 +554,7 @@ function PairRows({ group, onChange }: { group: PeopleGroup; onChange: (change: 
                 <Trash2 className="w-5 h-5" />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
               {renderSide(index, 'left')}
               {renderSide(index, 'right')}
             </div>

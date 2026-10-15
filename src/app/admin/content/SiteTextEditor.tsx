@@ -202,7 +202,7 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
         )}
       </div>
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={formData} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

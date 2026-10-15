@@ -2,17 +2,15 @@ import { AudioPlayer } from '@/components/AudioPlayer';
 import { ThemeStyle } from '@/components/ThemeStyle';
 import { SiteTextProvider } from '@/contexts/SiteTextContext';
 import { WeddingContentProvider } from '@/contexts/WeddingContentContext';
-import type { getEventContent } from '@/lib/siteContentServer';
-import { GuestSite } from './GuestSite';
-
-type Site = NonNullable<Awaited<ReturnType<typeof getEventContent>>>;
+import type { EventSiteData } from '@/lib/eventSite';
+import { GuestSite, type PreviewControl } from './GuestSite';
 
 /**
- * One event's guest site from its server-read content. Rendered by the cached
- * live page (src/app/[event]/page.tsx) and, with the drafts applied, by the
- * admin preview (src/app/[event]/preview/page.tsx), so the preview is the real site.
+ * One event's guest site from its content. Rendered by the cached live page
+ * (src/app/[event]/page.tsx) and, with the drafts applied, by the admin
+ * preview (src/app/[event]/preview/PreviewSite.tsx), so the preview is the real site.
  */
-export function EventSite({ eventId, site, preview = false }: { eventId: string; site: Site; preview?: boolean }) {
+export function EventSite({ eventId, site, preview }: { eventId: string; site: EventSiteData; preview?: PreviewControl }) {
   return (
     <SiteTextProvider value={site.siteText}>
       <ThemeStyle theme={site.theme} />

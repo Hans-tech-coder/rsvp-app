@@ -19,34 +19,26 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { LOCKED_SCREEN, PINNED_SCREEN, SCREEN_LABEL_MAX, type ScreenConfig, type ScreenType } from '@/lib/screens';
+import { LOCKED_SCREEN, PINNED_SCREEN, SCREEN_LABEL_MAX, SCREEN_NAMES, type ScreenConfig, type ScreenType } from '@/lib/screens';
 import { CharCount } from '../content/CharCount';
-
-/** What admins call each screen (matches the content tab names). */
-export const SCREEN_NAMES: Record<ScreenType, string> = {
-  welcome: 'Welcome Screen',
-  ourStory: 'Timeline (Our Story)',
-  entourage: 'People (Entourage)',
-  details: 'Venues (Event Details)',
-  dressCode: 'Dress Code',
-  gallery: 'Gallery',
-  faqs: 'FAQs',
-  registry: 'Registry',
-  rsvpCta: 'RSVP Call to Action',
-  rsvp: 'RSVP Form',
-};
 
 interface ScreenListProps {
   screens: ScreenConfig[];
   onChange: (screens: ScreenConfig[]) => void;
   /** Menu name used when a screen's own is blank (site text `menu`) */
   defaultLabels: Record<ScreenType, string>;
+  /**
+   * Visual builder: rows are picked by clicking their name, and only the
+   * picked row shows its arrows and menu name (a narrow column).
+   */
+  selected?: ScreenType | null;
+  onSelect?: (type: ScreenType) => void;
 }
 
 // The guest screens as a list to reorder (drag or arrows), show / hide and
-// rename. Controlled: the caller owns the list and saves it (ScreensEditor.tsx;
-// later the visual builder's section list). Welcome stays first and shown.
-export function ScreenList({ screens, onChange, defaultLabels }: ScreenListProps) {
+// rename. Controlled: the caller owns the list and saves it (ScreensEditor.tsx,
+// also the visual builder's section list). Welcome stays first and shown.
+export function ScreenList({ screens, onChange, defaultLabels, selected = null, onSelect }: ScreenListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -73,7 +65,7 @@ export function ScreenList({ screens, onChange, defaultLabels }: ScreenListProps
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={screens.map((s) => s.type)} strategy={verticalListSortingStrategy}>
-        <ol className="space-y-3">
+        <ol className={onSelect ? 'space-y-2' : 'space-y-3'}>
           {screens.map((screen, index) => (
             <ScreenRow
               key={screen.type}
@@ -85,6 +77,7 @@ export function ScreenList({ screens, onChange, defaultLabels }: ScreenListProps
               onToggle={(enabled) => update(screen.type, { enabled })}
               onRename={(label) => update(screen.type, { label })}
               defaultLabel={defaultLabels[screen.type]}
+              select={onSelect && { selected: selected === screen.type, onSelect: () => onSelect(screen.type) }}
             />
           ))}
         </ol>
@@ -96,7 +89,7 @@ export function ScreenList({ screens, onChange, defaultLabels }: ScreenListProps
 const iconButton =
   'p-2 rounded-lg text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-zinc-100 transition-colors disabled:opacity-30 disabled:pointer-events-none';
 
-function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onRename, defaultLabel }: {
+function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onRename, defaultLabel, select }: {
   screen: ScreenConfig;
   /** Position guests see it at, or null when hidden */
   step: number | null;
@@ -106,6 +99,7 @@ function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onR
   onToggle: (enabled: boolean) => void;
   onRename: (label: string) => void;
   defaultLabel: string;
+  select?: { selected: boolean; onSelect: () => void };
 }) {
   const ids = useId();
   const pinned = screen.type === PINNED_SCREEN;
@@ -114,16 +108,31 @@ function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onR
     id: screen.type,
     disabled: pinned,
   });
+  // In the builder only the picked row shows its arrows and menu name.
+  const expanded = !select || select.selected;
+
+  const arrows = !pinned && (
+    <>
+      <button type="button" className={iconButton} disabled={!canMoveUp} onClick={() => onMove(-1)} aria-label={`Move ${name} up`}>
+        <ArrowUp className="w-4 h-4" aria-hidden="true" />
+      </button>
+      <button type="button" className={iconButton} disabled={!canMoveDown} onClick={() => onMove(1)} aria-label={`Move ${name} down`}>
+        <ArrowDown className="w-4 h-4" aria-hidden="true" />
+      </button>
+    </>
+  );
 
   return (
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 50 : 'auto' }}
-      className={`relative rounded-xl border p-4 transition-colors ${
-        isDragging ? 'shadow-lg border-gray-400 dark:border-zinc-500 bg-white dark:bg-zinc-900' : 'border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50'
+      className={`relative rounded-xl border transition-colors ${select ? 'p-2' : 'p-4'} ${
+        isDragging ? 'shadow-lg border-gray-400 dark:border-zinc-500 bg-white dark:bg-zinc-900'
+          : select?.selected ? 'border-gray-900 dark:border-zinc-100 bg-white dark:bg-zinc-900 ring-1 ring-gray-900 dark:ring-zinc-100'
+            : 'border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50'
       }`}
     >
-      <div className="flex items-center gap-3">
+      <div className={`flex items-center ${select ? 'gap-2' : 'gap-3'}`}>
         {pinned ? (
           <span className="p-2 text-gray-400 dark:text-zinc-500" title="Always the first screen">
             <Pin className="w-4 h-4" aria-hidden="true" />
@@ -150,9 +159,20 @@ function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onR
         </span>
 
         <div className="min-w-0 flex-1">
+          {select ? (
+            <button
+              type="button"
+              onClick={select.onSelect}
+              aria-current={select.selected ? 'true' : undefined}
+              className={`w-full text-left min-h-9 text-sm font-medium leading-snug rounded focus-visible:outline-2 focus-visible:outline-gray-900 dark:focus-visible:outline-zinc-100 ${step ? 'text-gray-900 dark:text-zinc-100' : 'text-gray-400 dark:text-zinc-500 line-through'}`}
+            >
+              {name}
+            </button>
+          ) : (
           <p className={`text-sm font-medium leading-snug ${step ? 'text-gray-900 dark:text-zinc-100' : 'text-gray-400 dark:text-zinc-500 line-through'}`}>
             {name}
           </p>
+          )}
           {pinned && <p className="text-xs text-gray-500 dark:text-zinc-400">Always first and shown</p>}
           {screen.type === LOCKED_SCREEN && (
             <p className="flex items-center gap-1 text-xs text-gray-500 dark:text-zinc-400">
@@ -163,12 +183,7 @@ function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onR
 
         {!pinned && (
           <div className="flex items-center gap-1 shrink-0">
-            <button type="button" className={iconButton} disabled={!canMoveUp} onClick={() => onMove(-1)} aria-label={`Move ${name} up`}>
-              <ArrowUp className="w-4 h-4" aria-hidden="true" />
-            </button>
-            <button type="button" className={iconButton} disabled={!canMoveDown} onClick={() => onMove(1)} aria-label={`Move ${name} down`}>
-              <ArrowDown className="w-4 h-4" aria-hidden="true" />
-            </button>
+            {!select && arrows}
             <button
               type="button"
               role="switch"
@@ -188,7 +203,9 @@ function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onR
         )}
       </div>
 
-      <div className="mt-3 sm:pl-[5.5rem]">
+      {expanded && (
+      <div className={select ? 'mt-2' : 'mt-3 sm:pl-[5.5rem]'}>
+        {select && arrows && <div className="flex justify-end gap-1 mb-1">{arrows}</div>}
         <label htmlFor={`${ids}-label`} className="block text-xs font-medium text-gray-600 dark:text-zinc-400 mb-1">
           Name in the menu
         </label>
@@ -203,6 +220,7 @@ function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onR
         />
         <CharCount value={screen.label} max={SCREEN_LABEL_MAX} />
       </div>
+      )}
     </li>
   );
 }

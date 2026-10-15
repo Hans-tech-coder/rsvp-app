@@ -189,7 +189,7 @@ export function MusicEditor({ eventId }: { eventId: string }) {
         </section>
       </fieldset>
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploading} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={formData} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploading} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

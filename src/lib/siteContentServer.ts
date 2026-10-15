@@ -1,52 +1,39 @@
 import { cache } from 'react';
-import type { DocumentData } from 'firebase-admin/firestore';
 import { getAdminDb } from '@/lib/firebase/admin';
 import { DEFAULT_SITE_TEXT, mergeSiteText, type SiteText } from '@/lib/siteText';
 import { isValidEventId, paths } from '@/lib/eventPaths';
 import { DEFAULT_THEME, mergeTheme, type Theme } from '@/lib/theme';
 import { DEFAULT_MUSIC, mergeMusic, type Music } from '@/lib/music';
-import { mergeScreens, type ScreenConfig } from '@/lib/screens';
-import {
-  CONTENT_DOC_IDS, mergeGlobal, mergeWeddingContent,
-  type ContentDocId, type SiteGlobal, type WeddingContent,
-} from '@/lib/weddingContent';
+import { EDITABLE_DOC_IDS } from '@/lib/contentDrafts';
+import { buildEventSite, type EventSiteData, type SiteDocs } from '@/lib/eventSite';
+import { mergeGlobal, type SiteGlobal } from '@/lib/weddingContent';
 
 // Server-only. Guest-site content is read here with the admin SDK when a page
 // is (re)generated, never from the browser. The pages are cached (ISR); an
 // admin Publish (publishDraft) revalidates them so the next visit rebuilds
 // them. Memoized per request (generateMetadata and the page share one read).
+// The docs are merged into the site by buildEventSite (src/lib/eventSite.ts).
 
 export type { SiteGlobal };
 
-type EventSite = { content: WeddingContent; siteText: SiteText; theme: Theme; music: Music; screens: ScreenConfig[] };
-
-const SITE_DOC_IDS = [...CONTENT_DOC_IDS, 'siteText', 'theme', 'music', 'screens'] as const;
-
-async function readEventSite(eventId: string, withDrafts: boolean): Promise<EventSite | null> {
+/** The event's raw content docs (drafts over live when `withDrafts`), or null when the event does not exist. */
+async function readEventDocs(eventId: string, withDrafts: boolean): Promise<SiteDocs | null> {
   if (!isValidEventId(eventId)) return null;
 
   const db = getAdminDb();
   // The event first, so a made-up URL costs one read, not fifteen.
   if (!(await db.doc(paths.event(eventId)).get()).exists) return null;
 
-  const ids = SITE_DOC_IDS;
+  const ids = EDITABLE_DOC_IDS;
   const docs = await db.getAll(...ids.map((id) => db.doc(paths.content(eventId, id))));
   // Preview: a doc's draft (the whole doc as it will be published) replaces the live one.
   const drafts = withDrafts ? await db.getAll(...ids.map((id) => db.doc(paths.draft(eventId, id)))) : [];
 
   // Client components only take plain objects (no Firestore Timestamps).
-  const data = Object.fromEntries(ids.map((id, i) => {
+  return Object.fromEntries(ids.map((id, i) => {
     const doc = drafts[i]?.exists ? drafts[i].get('data') : docs[i].data();
     return [id, JSON.parse(JSON.stringify(doc ?? null)) ?? undefined];
   }));
-
-  return {
-    content: mergeWeddingContent(data as Record<ContentDocId, DocumentData | undefined>),
-    siteText: mergeSiteText(DEFAULT_SITE_TEXT, data.siteText),
-    theme: mergeTheme(data.theme),
-    music: mergeMusic(data.music),
-    screens: mergeScreens(data.screens),
-  };
 }
 
 /**
@@ -54,10 +41,17 @@ async function readEventSite(eventId: string, withDrafts: boolean): Promise<Even
  * exist. Throws when Firestore can't be read, so a cached page stays up rather
  * than being replaced by the defaults.
  */
-export const getEventContent = cache((eventId: string) => readEventSite(eventId, false));
+export const getEventContent = cache(async (eventId: string): Promise<EventSiteData | null> => {
+  const docs = await readEventDocs(eventId, false);
+  return docs && buildEventSite(docs);
+});
 
-/** The same with every unpublished draft applied, for the admin preview (`/<eventId>?preview=…`). Never cached. */
-export const getEventDraftContent = cache((eventId: string) => readEventSite(eventId, true));
+/**
+ * The raw docs with every unpublished draft applied, for the admin preview
+ * (`/<eventId>?preview=…`). The preview builds the site from them in the
+ * browser, so the visual builder can change it live. Never cached.
+ */
+export const getEventDraftDocs = cache((eventId: string) => readEventDocs(eventId, true));
 
 /**
  * Only the site text, global settings, theme and music, for the 404 page. Falls back to the

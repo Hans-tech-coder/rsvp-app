@@ -177,16 +177,17 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
     }
   };
 
+  const toDoc = () => ({
+    subtitle: header.subtitle,
+    title: header.title,
+    description: header.description,
+    items: items.map(({ id, ...rest }) => rest)
+  });
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload = {
-        subtitle: header.subtitle,
-        title: header.title,
-        description: header.description,
-        items: items.map(({ id, ...rest }) => rest)
-      };
-      if (!(await draft.save(payload, { merge: true }))) return false;
+      if (!(await draft.save(toDoc(), { merge: true }))) return false;
 
       setOriginalItems(items);
       setOriginalHeader(header);
@@ -316,7 +317,7 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
         </div>
       </DndContext>
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImageIndex !== null} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={toDoc()} merge hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImageIndex !== null} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
 
       <AdminModal
         isOpen={isDeleteModalOpen}
@@ -390,8 +391,8 @@ function SortableStoryItem({
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6 mt-4">
-        <div className="relative w-full md:w-48 h-48 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0">
+      <div className="flex flex-col @2xl:flex-row gap-6 mt-4">
+        <div className="relative w-full @2xl:w-48 h-48 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0">
           {item.image ? (
             <img 
               src={item.image} 
@@ -431,7 +432,7 @@ function SortableStoryItem({
         </div>
 
         <div className="flex-1 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Date / Timeframe</label>
               <input 

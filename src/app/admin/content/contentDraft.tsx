@@ -101,7 +101,7 @@ export function useContentDraft(eventId: string, docId: EditableDocId) {
   }, [eventId, docId]);
 
   return {
-    load, save, publish, discard, fetchVersion, resolveConflict,
+    docId, load, save, publish, discard, fetchVersion, resolveConflict,
     hasDraft, versions, publishing, published, conflict,
   };
 }

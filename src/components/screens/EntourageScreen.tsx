@@ -3,6 +3,7 @@
 import React, { useRef } from 'react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useFieldMarker } from '@/contexts/EditMarkersContext';
 import { useSiteText } from '@/contexts/SiteTextContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { RevealImage } from '@/components/ui/RevealImage';
@@ -132,6 +133,7 @@ function PairsGroup({ group }: { group: PeopleGroup }) {
 
 export function EntourageScreen({ onContinue }: EntourageScreenProps) {
   const { content } = useWeddingContent();
+  const field = useFieldMarker();
   const text = useSiteText();
   const scrollRef = useRef<HTMLElement>(null);
   const rows = toRows(content.entourage.groups.filter(groupHasPeople));
@@ -143,8 +145,8 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
 
       <div className="max-w-6xl mx-auto relative z-10 w-full">
         <TextsReveal className="text-center mb-16 md:mb-20 flex flex-col items-center">
-          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.entourage.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md text-center">{content.entourage.title}</h2>
+          <span {...field('subtitle')} className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.entourage.subtitle}</span>
+          <h2 {...field('title')} className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md text-center">{content.entourage.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6"></div>
         </TextsReveal>
 

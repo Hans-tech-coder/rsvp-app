@@ -6,6 +6,7 @@ import { Play } from 'lucide-react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useFieldMarker } from '@/contexts/EditMarkersContext';
 import { useSiteText } from '@/contexts/SiteTextContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal, Parallax } from '@/components/ui/ScrollMotion';
@@ -17,6 +18,7 @@ interface OurStoryScreenProps {
 
 export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenProps) {
   const { content } = useWeddingContent();
+  const field = useFieldMarker();
   const text = useSiteText();
   const [activeVideo, setActiveVideo] = useState<{link: string, coverImage: string} | null>(null);
   const [wasMusicPlaying, setWasMusicPlaying] = useState(false);
@@ -68,10 +70,10 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
       
       <div className="max-w-5xl mx-auto relative z-10 w-full">
         <TextsReveal className="text-center mb-20 flex flex-col items-center">
-          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.ourStory.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{content.ourStory.title}</h2>
+          <span {...field('subtitle')} className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.ourStory.subtitle}</span>
+          <h2 {...field('title')} className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{content.ourStory.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6"></div>
-          <p className="text-base font-elegant italic text-accent-light/70 mt-3 max-w-md mx-auto">{content.ourStory.description}</p>
+          <p {...field('description')} className="text-base font-elegant italic text-accent-light/70 mt-3 max-w-md mx-auto">{content.ourStory.description}</p>
         </TextsReveal>
 
         <div className="relative border-l border-accent/20 ml-4 md:border-l-0 md:ml-0 md:flex md:flex-col md:items-center">

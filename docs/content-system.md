@@ -100,10 +100,12 @@ first Publish stores both, so nothing the single backup kept is lost.
 **Preview.** `/<eventId>?preview=<token>` is rewritten (`next.config.ts`,
 `beforeFiles`) to `src/app/[event]/preview/page.tsx`: rendered per request,
 `noindex`, admins only (anyone else is redirected to the live page). It reads
-every doc's draft over the live one (`getEventDraftContent` in
-`src/lib/siteContentServer.ts`) and renders the same `EventSite` as the live
-page, so the preview is the real guest site, with a small "Draft preview"
-badge. The token is any value; the content manager sends a fresh one to
+every doc's draft over the live one (`getEventDraftDocs` in
+`src/lib/siteContentServer.ts`) and hands the raw docs to `PreviewSite.tsx`,
+which merges them in the browser with the same pure `buildEventSite`
+(`src/lib/eventSite.ts`) the live page uses on the server and renders the same
+`EventSite`, so the preview is the real guest site, with a small "Draft preview"
+badge. Building in the browser is what lets the visual builder change it live. The token is any value; the content manager sends a fresh one to
 reload. The cached live page is untouched (it stays ISR).
 
 **Preview frame.** `src/app/admin/components/PreviewFrame.tsx` shows that URL
@@ -111,8 +113,51 @@ in a phone (390×844) and/or desktop (1440×900) iframe, drawn at the device
 size and scaled to fit (Phone / Desktop / Both, reload, open in a new tab).
 The content page has a **Preview** button: docked beside the editor from
 1024 px wide (the tab list becomes the dropdown), full screen over it below.
-It reloads after every draft save, publish and discard. Built to be the F9a
-builder's canvas (`DEVICES`, `onFrameLoad` gives each iframe once loaded).
+It reloads after every draft save, publish and discard. It is also the visual
+builder's canvas (below).
+
+## Visual builder (F9a)
+
+`/admin/builder` (`src/app/admin/builder/page.tsx`, full screen; "Visual
+builder" button on the content page and in the sidebar) shows one event to
+edit in place. Left: **Sections** = `ScreensEditor` with `ScreenList` in pick
+mode (`selected` / `onSelect`: click a name to edit it; the picked row shows
+its arrows and menu name; drag and the switch as usual), then **Whole site**
+panels (Invite code screen, Names / date / links = Global Settings, Colors &
+Fonts, Music, Buttons & labels = Site Text). Middle: `PreviewFrame` (phone by
+default). Right: the picked panel's editor, the same `*Editor.tsx` as the tab
+(docked from 1024 px; below that it covers the section list, so the preview
+stays in view; phones get a link to the content page instead).
+
+- **Live preview.** Every editor hands its `EditorSaveBar` the doc as it
+  would save it now (`doc`, plus `merge` for editors saved with merge). In the
+  builder the bar passes it on (`builderContext.tsx`), and the builder posts
+  it to the preview frames; `PreviewSite` puts it over its raw doc
+  (`mergeDoc` when `merge`) and re-renders. No server call while typing.
+- **Preview → builder.** Messages are same-origin only
+  (`src/lib/builderMessages.ts`). The frame says `preview:ready` when it
+  listens (also after a reload); the builder answers `builder:init` (turns on
+  hover outlines and click-to-select), the docs of the open editors, and
+  `builder:goto` for the picked section. Hover outlines the screen (or a text
+  marked `data-field`) with its name; a click that is not on a button or link
+  sends `preview:select`, which opens that section's editor and focuses the
+  input whose `name` equals the `data-field`. Buttons and links in the
+  preview still work (Continue, the menu).
+- **Go to a section.** Picking a section moves the preview to its step
+  (`builder:goto`; the RSVP form opens without a code, `entrance` opens the
+  invite-code screen). A hidden section cannot be shown; its drawer says so.
+- **Undo / redo.** One in-memory history across panels (`src/lib/builderHistory.ts`):
+  each entry is one doc `before` → `after`; consecutive edits to the same
+  field merge; a new edit drops redo; the last 100 are kept; a reload empties
+  it. Undo opens the entry's panel if needed and loads `before` into the form
+  through the editor's `onRestore`, so "unsaved" works as usual (undo back to
+  the saved state = no changes). Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z and Ctrl+Y work
+  outside text fields. The tab editors' own Undo (back to saved) stays.
+- **Saving.** Each panel has its own `EditorSaveBar` (Save Draft, Publish,
+  History, autosave) as on the content page. Switching panels with unsaved
+  edits saves them as that panel's draft first (never live); if that fails,
+  the panel stays open. Leaving the page with unsaved edits asks first.
+- Owner-only for now (any admin); F10 adds the client locks.
 
 The type of `content` is `WeddingContent` (`src/lib/weddingContent.ts`): the
 type of `wedding-content.json` with the generic lists typed by
@@ -267,9 +312,12 @@ a new one):
    bar fetches the version and asks first.
 7. Lists (story items, FAQs, gallery, dress-code images, banks) are sortable with
    `@dnd-kit` and get ids from `nanoid`.
-8. **Save row:** render `<EditorSaveBar draft hasChanges saving saved busy?
-   onUndo onRestore onSave />` (`EditorSaveBar.tsx`), never a hand-made button
-   row. It sticks to the bottom of the editor and holds: the status ("Unsaved
+8. **Save row:** render `<EditorSaveBar draft doc merge? hasChanges saving
+   saved busy? onUndo onRestore onSave />` (`EditorSaveBar.tsx`), never a
+   hand-made button row. `doc` is exactly what `onSave` would save now
+   (build it with one `toDoc()` used by both, without `updatedAt` or list
+   ids), `merge` when saved with `merge: true`: the visual builder's live
+   preview and undo run on it, and `onRestore` must accept it back. It sticks to the bottom of the editor and holds: the status ("Unsaved
    changes (saved as a draft in a moment)" / "Draft saved. Not live until you
    publish." / "Draft not published yet" / "Published. Live on the website
    now." / "All changes are live"); Undo; **History** (the published versions,
@@ -289,6 +337,22 @@ a new one):
    `<CharCount value max />` under the input (`CharCount.tsx`). Site Text
    fields take a `max` in `siteTextFields.ts`; buttons and menu names have one.
    An older saved value over the limit is kept and the counter turns red.
+10. **Layout by the pane, not the window:** editors use container-query
+   variants (`@lg:` ≈ old `sm:`, `@2xl:` ≈ `md:`, `@3xl:` ≈ `lg:`), never
+   `sm:` / `md:` / `lg:`, because the same editor sits in the wide content
+   page pane and in the narrow builder drawer (both are `@container`).
+11. **Click-to-edit (optional, cheap cases):** give the input a `name`, and
+   the text on the guest screen `{...field('<that name>')}` from
+   `useFieldMarker()` (`src/contexts/EditMarkersContext.tsx`; renders nothing
+   on the live site). The builder focuses the **first** input in the drawer
+   with that `name`, so mark a text only when its input is the first one
+   with the name (the header inputs come first). Done for the Welcome texts
+   and the header subtitle / title / description of Our Story, People,
+   Venues, Dress Code, Gallery, FAQs, Registry, RSVP Call to Action and the
+   RSVP form, plus the Dress Code description. Not marked: list items, the
+   Dress Code main title and Registry card texts (their `name` repeats a
+   header's), buttons (a click on them works the button), and texts that
+   another panel edits (Site Text, Global Settings: the invite-code screen).
 
 **Venue and time have one source.** Each venue's time, location and address
 are edited only on its card in the Venues (Event Details) tab

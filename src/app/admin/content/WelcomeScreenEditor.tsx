@@ -127,8 +127,8 @@ export function WelcomeScreenEditor({ eventId }: { eventId: string }) {
       {/* Background Image Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Background Image</h3>
-        <div className="flex flex-col md:flex-row gap-6 items-start">
-          <div className="relative w-full md:w-64 h-40 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0">
+        <div className="flex flex-col @2xl:flex-row gap-6 items-start">
+          <div className="relative w-full @2xl:w-64 h-40 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0">
             {formData.backgroundImage ? (
               <img 
                 src={formData.backgroundImage} 
@@ -246,7 +246,7 @@ export function WelcomeScreenEditor({ eventId }: { eventId: string }) {
         </div>
       </div>
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={formData} merge hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

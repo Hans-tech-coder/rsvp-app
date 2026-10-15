@@ -116,7 +116,7 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
 
   return (
     <div className="space-y-8">
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+      <div className="grid gap-8 @3xl:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
         <div className="space-y-8 min-w-0">
           {/* Presets */}
           <section className="space-y-4">
@@ -126,7 +126,7 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
                 Start from a palette, then adjust any color below.
               </p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 @lg:grid-cols-3 gap-3">
               {THEME_PRESETS.map((preset) => {
                 const active = formData.preset === preset.id;
                 return (
@@ -162,7 +162,7 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
           {/* Colors */}
           <section className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Colors</h3>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid @lg:grid-cols-2 gap-4">
               {MAIN_KEYS.map((key) => (
                 <ColorField key={key} colorKey={key} value={colors[key]} onChange={(v) => setColor(key, v)} />
               ))}
@@ -172,7 +172,7 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
                 Fine-tune shades
                 <span className="ml-2 font-normal text-gray-500 dark:text-zinc-400">(they follow their main color when you pick it)</span>
               </summary>
-              <div className="grid sm:grid-cols-2 gap-4 p-4 pt-1">
+              <div className="grid @lg:grid-cols-2 gap-4 p-4 pt-1">
                 {SHADE_KEYS.map((key) => (
                   <ColorField key={key} colorKey={key} value={colors[key]} onChange={(v) => setColor(key, v)} />
                 ))}
@@ -188,7 +188,7 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
                 Three fonts chosen to go together: {FONT_ROLES.map((role) => FONT_ROLE_INFO[role].label.toLowerCase()).join(', ')}.
               </p>
             </div>
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div className="grid @lg:grid-cols-2 gap-3">
               {FONT_PAIRINGS.map((option) => {
                 const active = formData.fontPairing === option.id;
                 return (
@@ -263,13 +263,13 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
         </div>
 
         {/* Live preview with the guest site's own classes */}
-        <div className="lg:sticky lg:top-0 self-start w-full">
+        <div className="@3xl:sticky @3xl:top-0 self-start w-full">
           <p className="text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">Preview</p>
           <ThemePreview colors={colors} pairing={pairing} />
         </div>
       </div>
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={formData} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

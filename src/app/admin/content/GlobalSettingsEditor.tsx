@@ -162,7 +162,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
       {/* Logo Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Global Logo</h3>
-        <div className="flex flex-col md:flex-row gap-6 items-start">
+        <div className="flex flex-col @2xl:flex-row gap-6 items-start">
           <div className="relative w-32 h-32 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0 flex items-center justify-center p-4">
             <img 
               src={formData.logo} 
@@ -208,7 +208,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
       {/* OG Image Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Link Preview Image (Open Graph)</h3>
-        <div className="flex flex-col md:flex-row gap-6 items-start">
+        <div className="flex flex-col @2xl:flex-row gap-6 items-start">
           <div className="relative w-64 h-32 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-shrink-0 flex items-center justify-center p-4">
             <img 
               src={formData.ogImage} 
@@ -268,7 +268,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
         </div>
         <div className="space-y-3">
           {formData.hosts.map((host, index) => (
-            <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+            <div key={index} className="grid grid-cols-1 @2xl:grid-cols-[1fr_1fr_auto] gap-3 items-end">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Name</label>
                 <input
@@ -322,8 +322,8 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
           <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Global Date & Location</h3>
           <p className="text-sm text-gray-500 dark:text-zinc-400">These are the primary display dates and locations used on the Welcome and Entrance screens and in the footer.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2 md:col-span-2">
+        <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-6">
+          <div className="space-y-2 @2xl:col-span-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Short Venue</label>
             <input 
               type="text" 
@@ -335,7 +335,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
             />
           </div>
 
-          <div className="space-y-2 md:col-span-2">
+          <div className="space-y-2 @2xl:col-span-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Target Date (Countdown Timer)</label>
             <input 
               type="text" 
@@ -376,7 +376,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
 
       <p className="text-sm text-gray-500 dark:text-zinc-400">Venue times, places and addresses are edited in the Venues (Event Details) tab.</p>
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImage || uploadingOgImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={formData} merge hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImage || uploadingOgImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

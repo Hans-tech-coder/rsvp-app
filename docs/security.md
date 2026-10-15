@@ -97,7 +97,12 @@ through `/api/upload`.
 unpublished drafts (`src/app/[event]/preview/page.tsx`, per request,
 `noindex`). It checks `getAdmin()` itself (the proxy does not run there) and
 redirects anyone else to the live page, so drafts are never shown to guests.
-The token carries no access; only the admin session does.
+The token carries no access; only the admin session does. In the visual
+builder the preview frame and `/admin/builder` exchange `postMessage`s;
+both sides ignore any message whose origin is not the site's own
+(`src/lib/builderMessages.ts`), and the preview only accepts them from its
+parent window. They carry draft content to show, never anything saved: saves
+still go through the admin-checked server actions.
 
 ## Secrets
 

@@ -102,12 +102,13 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
         {/* Header Section */}
         <div className="bg-gray-50 dark:bg-zinc-900/50 p-6 rounded-xl border border-gray-200 dark:border-zinc-800">
           <h3 className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-4">Screen Header</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-zinc-300">Subtitle</label>
               <input
                 maxLength={TEXT_LIMITS.heading}
                 type="text"
+                name="subtitle"
                 value={formData.header.subtitle}
                 onChange={(e) => handleChange('header', 'subtitle', e.target.value)}
                 className="w-full px-4 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg outline-none transition-all dark:text-zinc-100"
@@ -119,15 +120,17 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
               <input
                 maxLength={TEXT_LIMITS.heading}
                 type="text"
+                name="title"
                 value={formData.header.title}
                 onChange={(e) => handleChange('header', 'title', e.target.value)}
                 className="w-full px-4 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg outline-none transition-all dark:text-zinc-100"
               />
               <CharCount value={formData.header.title} max={TEXT_LIMITS.heading} />
             </div>
-            <div className="space-y-2 col-span-1 md:col-span-2">
+            <div className="space-y-2 col-span-1 @2xl:col-span-2">
               <label className="text-sm font-medium text-gray-700 dark:text-zinc-300">Description</label>
               <textarea
+                name="description"
                 value={formData.header.description}
                 onChange={(e) => handleChange('header', 'description', e.target.value)}
                 rows={3}
@@ -140,7 +143,7 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
         {/* Labels Section */}
         <div className="bg-gray-50 dark:bg-zinc-900/50 p-6 rounded-xl border border-gray-200 dark:border-zinc-800">
           <h3 className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-4">Form Labels</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-zinc-300">Full Name Label</label>
               <input
@@ -219,7 +222,7 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
         {/* Attendance Options Section */}
         <div className="bg-gray-50 dark:bg-zinc-900/50 p-6 rounded-xl border border-gray-200 dark:border-zinc-800">
           <h3 className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-4">Attendance Options</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-zinc-300">Accepting Invitation</label>
               <input
@@ -244,8 +247,8 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
         {/* Actions Section */}
         <div className="bg-gray-50 dark:bg-zinc-900/50 p-6 rounded-xl border border-gray-200 dark:border-zinc-800">
           <h3 className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-4">Actions & Consent</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2 col-span-1 md:col-span-2">
+          <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
+            <div className="space-y-2 col-span-1 @2xl:col-span-2">
               <label className="text-sm font-medium text-gray-700 dark:text-zinc-300">Privacy Act Text</label>
               <textarea
                 value={formData.actions.privacyText}
@@ -319,7 +322,7 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
 
       </div>
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={formData} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

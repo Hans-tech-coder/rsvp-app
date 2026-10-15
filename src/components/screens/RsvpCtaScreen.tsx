@@ -6,6 +6,7 @@ import { InkRevealCanvas } from '@/components/ui/InkRevealCanvas';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollReveal } from '@/components/ui/ScrollMotion';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useFieldMarker } from '@/contexts/EditMarkersContext';
 
 interface RsvpCtaScreenProps {
   onContinue: () => void;
@@ -13,6 +14,7 @@ interface RsvpCtaScreenProps {
 
 export function RsvpCtaScreen({ onContinue }: RsvpCtaScreenProps) {
   const { content } = useWeddingContent();
+  const field = useFieldMarker();
   const [isReady, setIsReady] = React.useState(false);
 
   React.useEffect(() => {
@@ -36,10 +38,10 @@ export function RsvpCtaScreen({ onContinue }: RsvpCtaScreenProps) {
 
       <div className="relative z-20 max-w-3xl mx-auto text-center px-4">
         <TextsReveal className="flex flex-col items-center">
-          <span className="text-sm font-elegant italic tracking-widest text-accent-light/80 block mb-2">{content.rsvpCta.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md mb-6">{content.rsvpCta.title}</h2>
+          <span {...field('subtitle')} className="text-sm font-elegant italic tracking-widest text-accent-light/80 block mb-2">{content.rsvpCta.subtitle}</span>
+          <h2 {...field('title')} className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md mb-6">{content.rsvpCta.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mb-6 mt-4"></div>
-          <p className="text-lg font-elegant italic text-accent-light/90 mb-10 leading-relaxed max-w-2xl mx-auto">
+          <p {...field('description')} className="text-lg font-elegant italic text-accent-light/90 mb-10 leading-relaxed max-w-2xl mx-auto">
             {content.rsvpCta.description}
           </p>
         </TextsReveal>

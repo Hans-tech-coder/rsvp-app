@@ -147,16 +147,14 @@ export function FaqsEditor({ eventId }: { eventId: string }) {
     }
   };
 
+  // The saved doc, less its updatedAt: the items without their list ids.
+  const toDoc = () => ({ header, items: items.map(({ id, ...rest }) => rest) });
+
   const saveContent = async () => {
     try {
       setSaving(true);
       
-      const dataToSave = items.map(({ id, ...rest }) => rest);
-      const ok = await draft.save({
-        header,
-        items: dataToSave,
-        updatedAt: new Date().toISOString()
-      }, { merge: false });
+      const ok = await draft.save({ ...toDoc(), updatedAt: new Date().toISOString() }, { merge: false });
       if (!ok) return false;
 
       setOriginalHeader(header);
@@ -280,7 +278,7 @@ export function FaqsEditor({ eventId }: { eventId: string }) {
         </DndContext>
       </div>
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
+      <EditorSaveBar draft={draft} doc={toDoc()} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
 
       <AdminModal
         isOpen={isDeleteModalOpen}

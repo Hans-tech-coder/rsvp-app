@@ -6,8 +6,8 @@ import { ExternalLink, Loader2, RotateCw } from 'lucide-react';
 // The guest site with its drafts, in a phone and/or desktop frame (F9). Each
 // frame is an iframe of `/<eventId>?preview=<token>` drawn at the device's
 // real size and scaled down to fit, so the site lays out exactly as on that
-// device. Built to be the visual builder's canvas (F9a): `onFrameLoad` hands
-// out each iframe once loaded (same origin, for postMessage).
+// device. Also the visual builder's canvas (F9a); the frames there announce
+// themselves by postMessage (src/lib/builderMessages.ts).
 
 export const DEVICES = {
   phone: { label: 'Phone', width: 390, height: 844 },
@@ -26,7 +26,6 @@ interface PreviewFrameProps {
   reloadKey: number;
   /** Starting mode; the admin can switch. */
   initialMode?: Mode;
-  onFrameLoad?: (frame: HTMLIFrameElement, device: Device) => void;
 }
 
 function useSize<T extends HTMLElement>() {
@@ -55,7 +54,7 @@ function scales(mode: Mode, width: number, height: number): Partial<Record<Devic
   return { phone, desktop };
 }
 
-export function PreviewFrame({ eventId, reloadKey, initialMode = 'both', onFrameLoad }: PreviewFrameProps) {
+export function PreviewFrame({ eventId, reloadKey, initialMode = 'both' }: PreviewFrameProps) {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [areaRef, area] = useSize<HTMLDivElement>();
   const [manualReload, setManualReload] = useState(0);
@@ -72,7 +71,7 @@ export function PreviewFrame({ eventId, reloadKey, initialMode = 'both', onFrame
 
   return (
     <div className="flex flex-col h-full min-h-0 gap-3">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div role="radiogroup" aria-label="Preview size" className="inline-flex rounded-lg bg-gray-100 dark:bg-zinc-800 p-1">
           {modes.map((m) => (
             <button
@@ -127,10 +126,7 @@ export function PreviewFrame({ eventId, reloadKey, initialMode = 'both', onFrame
               <iframe
                 src={src}
                 title={`${label} preview of the draft site`}
-                onLoad={(e) => {
-                  setLoaded((prev) => ({ ...prev, [key]: true }));
-                  onFrameLoad?.(e.currentTarget, device);
-                }}
+                onLoad={() => setLoaded((prev) => ({ ...prev, [key]: true }))}
                 className="absolute top-0 left-0 border-0 origin-top-left"
                 style={{ width, height, transform: `scale(${s})` }}
               />

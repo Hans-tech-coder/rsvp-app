@@ -345,7 +345,7 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
         </div>
       </div>
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={isUploadingImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
+      <EditorSaveBar draft={draft} doc={data} merge hasChanges={hasChanges} saving={saving} saved={saved} busy={isUploadingImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
 
       <AdminModal
         isOpen={venueToDelete !== null}
@@ -382,7 +382,7 @@ function SortableVenue({
   };
 
   const field = (name: keyof Venue, label: string, opts: { placeholder?: string; max?: number; mono?: boolean; wide?: boolean } = {}) => (
-    <div className={`space-y-2 ${opts.wide ? 'md:col-span-2' : ''}`}>
+    <div className={`space-y-2 ${opts.wide ? '@2xl:col-span-2' : ''}`}>
       <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">{label}</label>
       <input
         type="text"
@@ -420,13 +420,13 @@ function SortableVenue({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-6">
         {field('subtitle', 'Card Subtitle (e.g., The Vows)', { max: TEXT_LIMITS.cardTitle })}
         {field('title', 'Title', { max: TEXT_LIMITS.cardTitle })}
         {field('time', 'Time', { placeholder: 'e.g. 3:00 PM' })}
         {field('location', 'Location Name')}
         {field('address', 'Full Address', { wide: true })}
-        <div className="space-y-2 md:col-span-2">
+        <div className="space-y-2 @2xl:col-span-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Description</label>
           <textarea
             value={venue.description}

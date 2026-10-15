@@ -10,6 +10,20 @@ export const SCREEN_TYPES = [
 
 export type ScreenType = (typeof SCREEN_TYPES)[number];
 
+/** What admins call each screen (matches the content tab names; admin and the builder preview). */
+export const SCREEN_NAMES: Record<ScreenType, string> = {
+  welcome: 'Welcome Screen',
+  ourStory: 'Timeline (Our Story)',
+  entourage: 'People (Entourage)',
+  details: 'Venues (Event Details)',
+  dressCode: 'Dress Code',
+  gallery: 'Gallery',
+  faqs: 'FAQs',
+  registry: 'Registry',
+  rsvpCta: 'RSVP Call to Action',
+  rsvp: 'RSVP Form',
+};
+
 export type ScreenConfig = {
   type: ScreenType;
   /** Off leaves the screen out of the flow and the menu */

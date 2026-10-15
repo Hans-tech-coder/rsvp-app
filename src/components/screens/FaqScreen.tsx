@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { EmbeddedFooter } from '@/components/layout/EmbeddedFooter';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useFieldMarker } from '@/contexts/EditMarkersContext';
 import { useSiteText } from '@/contexts/SiteTextContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal } from '@/components/ui/ScrollMotion';
@@ -19,6 +20,7 @@ interface FaqScreenProps {
 
 export function FaqScreen({ onContinue }: FaqScreenProps) {
   const { content } = useWeddingContent();
+  const field = useFieldMarker();
   const text = useSiteText();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -37,10 +39,10 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
 
       <div className="max-w-4xl mx-auto w-full relative z-10">
         <TextsReveal className="text-center mb-16 flex flex-col items-center">
-          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.faqHeader?.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{content.faqHeader?.title}</h2>
+          <span {...field('subtitle')} className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.faqHeader?.subtitle}</span>
+          <h2 {...field('title')} className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{content.faqHeader?.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6 mb-10"></div>
-          <p className="text-base font-elegant italic text-accent-light/70 mt-3 max-w-md mx-auto">{content.faqHeader?.description}</p>
+          <p {...field('description')} className="text-base font-elegant italic text-accent-light/70 mt-3 max-w-md mx-auto">{content.faqHeader?.description}</p>
         </TextsReveal>
 
         <div className="space-y-4">

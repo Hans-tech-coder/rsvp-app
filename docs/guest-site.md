@@ -11,7 +11,11 @@ sets the title and link preview, and renders the cached page (see Caching in
 theme, `GuestSite`, music). Admins see unpublished drafts at
 `/<eventId>?preview=<token>`: the same `EventSite` with `preview`, which adds a
 "Draft preview" badge and keeps its own saved progress (see "Drafts, preview
-and versions" in `docs/content-system.md`). Inside it, the guest site is **one client
+and versions" in `docs/content-system.md`). In the preview only, the shown
+screen carries `data-section="<type>"` (`entrance` for the invite-code
+overlay), marked texts carry `data-field`, `preview.onGoto` lets the visual
+builder show a section, and a reorder keeps the shown screen in view (see
+"Visual builder" in `docs/content-system.md`). The live site has none of it. Inside it, the guest site is **one client
 component** (`src/app/[event]/GuestSite.tsx`) that swaps full-screen "screens"
 in place. There is no routing between screens and no URL per screen.
 

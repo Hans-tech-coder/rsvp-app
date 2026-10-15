@@ -247,17 +247,18 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
     }
   };
 
+  // The saved doc: the form without the photos' list ids.
+  const toDoc = () => ({
+    ...data,
+    inspirationImages: data.inspirationImages.map(({ id, ...rest }) => rest)
+  });
+
   const saveContent = async () => {
     setIsSaving(true);
     setError(null);
     
     try {
-      const payloadToSave = {
-        ...data,
-        inspirationImages: data.inspirationImages.map(({ id, ...rest }) => rest)
-      };
-
-      if (!(await draft.save(payloadToSave, { merge: true }))) return false;
+      if (!(await draft.save(toDoc(), { merge: true }))) return false;
 
       setOriginalData(data);
       setSaved(true);
@@ -365,7 +366,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
             Add guideline
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-6">
           {data.guidelines.map((guideline, index) => (
             <div key={guideline.id} className="space-y-2 p-4 rounded-xl border border-gray-200 dark:border-zinc-800">
               <div className="flex items-center gap-2">
@@ -397,7 +398,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
             </div>
           ))}
           {data.guidelines.length === 0 && (
-            <div className="md:col-span-2 text-center py-8 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-sm text-gray-500">
+            <div className="@2xl:col-span-2 text-center py-8 bg-gray-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-sm text-gray-500">
               No guidelines. The section is hidden on the site.
             </div>
           )}
@@ -419,7 +420,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
         
         <div className="space-y-4">
           {data.colors.map((color, index) => (
-            <div key={index} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4 bg-gray-50 dark:bg-zinc-900/50 rounded-lg border border-gray-200 dark:border-zinc-800">
+            <div key={index} className="flex flex-col @lg:flex-row gap-4 items-start @lg:items-center p-4 bg-gray-50 dark:bg-zinc-900/50 rounded-lg border border-gray-200 dark:border-zinc-800">
               <div className="w-12 h-12 rounded-full shadow-inner border border-gray-200 dark:border-zinc-700 flex-shrink-0" style={{ backgroundColor: color.hex }} />
               
               <div className="flex-1 w-full space-y-2">
@@ -444,7 +445,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
 
               <button 
                 onClick={() => removeColor(index)}
-                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors mt-6 sm:mt-0"
+                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors mt-6 @lg:mt-0"
                 title="Remove Color"
               >
                 <Trash2 className="w-5 h-5" />
@@ -475,7 +476,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
             <SortableContext 
               items={data.inspirationImages.map(img => img.id!)}
               strategy={rectSortingStrategy}
@@ -505,7 +506,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
         </div>
       )}
 
-      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={isSaving} saved={saved} busy={uploadingImageIndex !== null} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
+      <EditorSaveBar draft={draft} doc={toDoc()} merge hasChanges={hasChanges} saving={isSaving} saved={saved} busy={uploadingImageIndex !== null} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
     </div>
   );
 }
@@ -545,7 +546,7 @@ function SortableInspirationImage({
     <div 
       ref={setNodeRef} 
       style={style} 
-      className="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4 bg-gray-50 dark:bg-zinc-900/50 rounded-lg border border-gray-200 dark:border-zinc-800 relative pt-10 sm:pt-4 group"
+      className="flex flex-col @lg:flex-row gap-4 items-start @lg:items-center p-4 bg-gray-50 dark:bg-zinc-900/50 rounded-lg border border-gray-200 dark:border-zinc-800 relative pt-10 @lg:pt-4 group"
     >
       <div className="absolute top-2 left-3 z-10 flex items-center justify-center w-6 h-6 bg-gray-200 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 text-xs font-semibold rounded-full">
         {index + 1}

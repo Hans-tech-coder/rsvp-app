@@ -12,6 +12,7 @@ import { TextsReveal } from '@/components/ui/TextsReveal';
 import { MotionHint } from '@/components/ui/MotionHint';
 import { DEPTH_MAPS } from '@/lib/welcomeDepthMaps';
 import { hostNames } from '@/lib/genericContent';
+import { useFieldMarker } from '@/contexts/EditMarkersContext';
 
 interface WelcomeScreenProps {
   onContinue: () => void;
@@ -21,6 +22,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
   const { content } = useWeddingContent();
   const text = useSiteText();
   const names = hostNames(content.global.hosts);
+  const field = useFieldMarker();
   const [timeLeft, setTimeLeft] = useState({ days: '00', hours: '00', minutes: '00', seconds: '00' });
   const [mounted, setMounted] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -130,12 +132,12 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         {/* Top group: subtitle + names sit at the top, countdown stays at the bottom */}
         <div className="w-full flex flex-col items-center lg:pt-16">
         <motion.div variants={itemVariants} className="w-full">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-ink/80 font-medium">{content.welcomeScreen.subtitle}</p>
+          <p {...field('subtitle')} className="text-[11px] uppercase tracking-[0.4em] text-ink/80 font-medium">{content.welcomeScreen.subtitle}</p>
           <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-4 mb-2"></div>
         </motion.div>
 
         <TextsReveal isHero className="px-4 w-full max-w-4xl mt-6 lg:mt-8">
-          <span className="text-sm font-elegant italic text-ink/90 tracking-widest block mb-4">{content.welcomeScreen.topText}</span>
+          <span {...field('topText')} className="text-sm font-elegant italic text-ink/90 tracking-widest block mb-4">{content.welcomeScreen.topText}</span>
           <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-heading text-ink font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
             {/* "Hans & Czay"; three or more hosts: "A, B & C" */}
             {names.map((name, i) => (
@@ -146,8 +148,8 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
             ))}
           </h2>
           <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto my-8"></div>
-          <p className="text-xs uppercase tracking-[0.3em] text-ink/90 mb-3">{content.welcomeScreen.bottomText1}</p>
-          <p className="text-lg md:text-2xl font-elegant italic text-ink tracking-wider drop-shadow-md">{content.welcomeScreen.bottomText2}</p>
+          <p {...field('bottomText1')} className="text-xs uppercase tracking-[0.3em] text-ink/90 mb-3">{content.welcomeScreen.bottomText1}</p>
+          <p {...field('bottomText2')} className="text-lg md:text-2xl font-elegant italic text-ink tracking-wider drop-shadow-md">{content.welcomeScreen.bottomText2}</p>
         </TextsReveal>
         </div>
 

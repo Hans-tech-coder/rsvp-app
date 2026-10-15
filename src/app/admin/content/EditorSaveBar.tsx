@@ -7,7 +7,8 @@ import { useReportUnsavedChanges } from './unsavedChanges';
 import { AdminModal } from '../components/AdminModal';
 import type { ContentDraft } from './contentDraft';
 import type { DocumentData } from 'firebase/firestore';
-import type { VersionInfo } from '@/lib/contentDrafts';
+import type { DocData, VersionInfo } from '@/lib/contentDrafts';
+import { useBuilderLink } from '../builder/builderContext';
 
 /** Unsaved edits are saved as a draft (never live) after this long without a change. */
 export const AUTOSAVE_MS = 10_000;
@@ -26,10 +27,14 @@ interface EditorSaveBarProps {
   onRestore: (data: DocumentData) => void;
   /** Holds autosave off (e.g. while a photo uploads). */
   busy?: boolean;
+  /** The doc as onSave would save it now, for the visual builder's live preview and undo. */
+  doc?: DocData;
+  /** True when the doc holds only the editor's fields (saved with merge). */
+  merge?: boolean;
 }
 
 const secondaryButton =
-  'flex flex-1 sm:flex-none justify-center items-center gap-2 min-h-11 px-3 sm:px-5 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50';
+  'flex flex-1 @xl:flex-none justify-center items-center gap-2 min-h-11 px-3 @xl:px-5 py-2.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50';
 
 const when = (ms: number) =>
   new Date(ms).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
@@ -43,7 +48,7 @@ function versionTitle(v: VersionInfo) {
 // draft live; History lists the last published versions to load back into the
 // form, and drops the draft. Reports unsaved edits to the content page
 // (unsavedChanges.tsx) and asks before overwriting a draft saved elsewhere.
-export function EditorSaveBar({ draft, hasChanges, saving, saved, onUndo, onSave, onRestore, busy = false }: EditorSaveBarProps) {
+export function EditorSaveBar({ draft, hasChanges, saving, saved, onUndo, onSave, onRestore, busy = false, doc, merge = false }: EditorSaveBarProps) {
   useReportUnsavedChanges(hasChanges);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [confirmPublish, setConfirmPublish] = useState(false);
@@ -75,6 +80,25 @@ export function EditorSaveBar({ draft, hasChanges, saving, saved, onUndo, onSave
     setAutosaveOff(!ok);
     return ok;
   };
+
+  // In the visual builder: every change of the doc goes to its live preview,
+  // and the builder can load a doc into the form (undo / redo) or save it.
+  const builder = useBuilderLink();
+  const docJson = doc === undefined ? null : JSON.stringify(doc);
+  useEffect(() => {
+    if (builder && docJson !== null) builder.docChanged(draft.docId, JSON.parse(docJson), merge);
+  }, [builder, draft.docId, docJson, merge]);
+  const handle = useRef({ restore: onRestore, save: saveNow });
+  useEffect(() => {
+    handle.current = { restore: onRestore, save: saveNow };
+  });
+  useEffect(() => {
+    if (!builder) return;
+    return builder.register(draft.docId, {
+      restore: (data) => handle.current.restore(data),
+      save: () => handle.current.save(),
+    });
+  }, [builder, draft.docId]);
 
   useEffect(() => {
     if (!historyOpen) return;
@@ -135,7 +159,10 @@ export function EditorSaveBar({ draft, hasChanges, saving, saved, onUndo, onSave
             : { text: 'All changes are live', className: 'text-gray-500 dark:text-zinc-400' };
 
   return (
-    <div className="sticky bottom-0 z-10 -mx-6 lg:-mx-8 px-6 lg:px-8 py-4 mt-12 bg-white/95 dark:bg-zinc-900/95 backdrop-blur border-t border-gray-200 dark:border-zinc-800 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+    // Laid out by its own width (container queries), so it fits the content
+    // page and the narrower builder drawer alike.
+    <div className="@container sticky bottom-0 z-10 -mx-6 lg:-mx-8 px-6 lg:px-8 py-4 mt-12 bg-white/95 dark:bg-zinc-900/95 backdrop-blur border-t border-gray-200 dark:border-zinc-800">
+      <div className="flex flex-col @xl:flex-row justify-between items-stretch @xl:items-center gap-3">
       <p role="status" className={`flex items-center gap-2 text-sm font-medium ${status.className}`}>
         {hasChanges && !saving && !draft.publishing ? (
           <span className="w-2 h-2 shrink-0 rounded-full bg-amber-500" aria-hidden="true" />
@@ -147,15 +174,15 @@ export function EditorSaveBar({ draft, hasChanges, saving, saved, onUndo, onSave
         {status.text}
       </p>
       {/* One row on phones (short labels) so the bar leaves room for the form. */}
-      <div className="flex w-full sm:w-auto items-stretch sm:items-center gap-2">
+      <div className="flex w-full @xl:w-auto items-stretch @xl:items-center gap-2">
         {hasChanges && (
           <button onClick={onUndo} disabled={anyBusy} className={secondaryButton} aria-label="Undo" title="Back to the last saved version">
             <RotateCcw className="w-4 h-4 shrink-0" aria-hidden="true" />
-            <span className="hidden sm:inline">Undo</span>
+            <span className="hidden @xl:inline">Undo</span>
           </button>
         )}
 
-        <div ref={historyRef} className="flex flex-1 sm:flex-none">
+        <div ref={historyRef} className="flex flex-1 @xl:flex-none">
           <button
             onClick={() => setHistoryOpen((open) => !open)}
             disabled={anyBusy}
@@ -165,14 +192,14 @@ export function EditorSaveBar({ draft, hasChanges, saving, saved, onUndo, onSave
             className={`${secondaryButton} w-full`}
           >
             <History className="w-4 h-4 shrink-0" aria-hidden="true" />
-            <span className="hidden sm:inline">History</span>
+            <span className="hidden @xl:inline">History</span>
           </button>
           {/* Positioned against the (sticky) bar, so it stays inside the editor on phones. */}
           {historyOpen && (
             <div
               role="dialog"
               aria-label="Published versions"
-              className="absolute bottom-full mb-2 left-4 right-4 sm:left-auto sm:right-6 sm:w-80 max-h-[60vh] overflow-y-auto rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-xl p-2"
+              className="absolute bottom-full mb-2 left-4 right-4 @xl:left-auto @xl:right-6 @xl:w-80 max-h-[60vh] overflow-y-auto rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-xl p-2"
             >
               <div className="flex items-center justify-between px-2 py-1.5">
                 <p className="text-sm font-semibold text-gray-900 dark:text-zinc-100">Published versions</p>
@@ -217,13 +244,13 @@ export function EditorSaveBar({ draft, hasChanges, saving, saved, onUndo, onSave
 
         <button onClick={saveNow} disabled={anyBusy || !hasChanges} className={secondaryButton}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : saved && !hasChanges ? <Check className="w-4 h-4" aria-hidden="true" /> : <Save className="w-4 h-4" aria-hidden="true" />}
-          Save<span className="hidden sm:inline"> Draft</span>
+          Save<span className="hidden @xl:inline"> Draft</span>
         </button>
 
         <button
           onClick={() => setConfirmPublish(true)}
           disabled={!canPublish}
-          className={`flex flex-1 sm:flex-none justify-center items-center gap-2 min-h-11 px-3 sm:px-5 py-2.5 rounded-lg transition-colors ${
+          className={`flex flex-1 @xl:flex-none justify-center items-center gap-2 min-h-11 px-3 @xl:px-5 py-2.5 rounded-lg transition-colors ${
             !canPublish
               ? 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed'
               : 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800 dark:hover:bg-zinc-200'
@@ -232,6 +259,8 @@ export function EditorSaveBar({ draft, hasChanges, saving, saved, onUndo, onSave
           {draft.publishing ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Send className="w-4 h-4" aria-hidden="true" />}
           Publish
         </button>
+      </div>
+
       </div>
 
       {/* Through a portal: the bar's backdrop-blur would trap `fixed` modals inside it. */}

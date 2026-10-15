@@ -7,6 +7,7 @@ import { DraggableSlider } from '@/components/ui/DraggableSlider';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { ViewOverlay, viewCardProps } from '@/components/ui/ViewOverlay';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useFieldMarker } from '@/contexts/EditMarkersContext';
 import { useSiteText } from '@/contexts/SiteTextContext';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { ScrollContainerProvider, ScrollReveal, ScrollRevealItem } from '@/components/ui/ScrollMotion';
@@ -19,6 +20,7 @@ interface DressCodeScreenProps {
 
 export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScreenProps) {
   const { content } = useWeddingContent();
+  const field = useFieldMarker();
   const text = useSiteText();
   const guidelines = content.dressCode.guidelines.filter((g) => g.title.trim() || g.text.trim());
   const scrollRef = useRef<HTMLElement>(null);
@@ -56,14 +58,14 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
 
       <div className="max-w-4xl mx-auto text-center w-full relative z-10">
         <TextsReveal className="mb-16 flex flex-col items-center">
-          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.dressCode.header?.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{content.dressCode.header?.title}</h2>
+          <span {...field('subtitle')} className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.dressCode.header?.subtitle}</span>
+          <h2 {...field('title')} className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{content.dressCode.header?.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6"></div>
         </TextsReveal>
 
         <ScrollReveal className="bg-surface/60 p-8 md:p-12 rounded-xl border border-accent/20 shadow-md">
           <p className="text-sm uppercase tracking-[0.2em] text-accent font-semibold mb-3">Dress Code: {content.dressCode.title}</p>
-          <p className="text-base font-elegant italic text-accent-light max-w-2xl mx-auto leading-relaxed mb-10">
+          <p {...field('description')} className="text-base font-elegant italic text-accent-light max-w-2xl mx-auto leading-relaxed mb-10">
             {content.dressCode.description}
           </p>
 

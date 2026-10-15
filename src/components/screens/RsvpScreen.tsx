@@ -13,6 +13,7 @@ interface RsvpScreenProps {
 import { getVisitorCountry, submitRsvp } from '@/app/actions/rsvp';
 import { Loader2 } from 'lucide-react';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useFieldMarker } from '@/contexts/EditMarkersContext';
 import { useSiteText } from '@/contexts/SiteTextContext';
 import { fillNodes, fillText, type SiteText } from '@/lib/siteText';
 import { TextsReveal } from '@/components/ui/TextsReveal';
@@ -116,6 +117,7 @@ function FieldMessage({ id, error, hint, aside }: { id: string; error?: string |
 
 export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScreenProps) {
   const { content, eventId } = useWeddingContent();
+  const field = useFieldMarker();
   const formContent = content.rsvpForm;
   const text = useSiteText();
 
@@ -241,10 +243,10 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
       <div className="max-w-4xl mx-auto w-full relative z-10">
         <div className="bg-surface/40 p-6 sm:p-8 md:p-12 rounded-xl border border-primary-light/30 shadow-lg">
           <TextsReveal className="text-center mb-12 flex flex-col items-center">
-            <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-1">{formContent.header.subtitle}</span>
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{formContent.header.title}</h2>
+            <span {...field('subtitle')} className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-1">{formContent.header.subtitle}</span>
+            <h2 {...field('title')} className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{formContent.header.title}</h2>
             <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-5"></div>
-            <p className="text-base font-elegant italic text-accent-light/90 mt-6 leading-relaxed max-w-2xl mx-auto whitespace-pre-line">
+            <p {...field('description')} className="text-base font-elegant italic text-accent-light/90 mt-6 leading-relaxed max-w-2xl mx-auto whitespace-pre-line">
               {formContent.header.description}
             </p>
           </TextsReveal>

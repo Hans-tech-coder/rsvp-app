@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Eye, EyeOff, X } from 'lucide-react';
+import Link from 'next/link';
+import { Eye, EyeOff, PanelsTopLeft, X } from 'lucide-react';
 import { WelcomeScreenEditor } from './WelcomeScreenEditor';
 import { GlobalSettingsEditor } from './GlobalSettingsEditor';
 import { EntranceScreenEditor } from './EntranceScreenEditor';
@@ -74,6 +75,15 @@ export default function ContentManagerPage() {
             Edits are saved as a draft. Check them in the preview, then Publish to show guests.
           </p>
         </div>
+        <div className="shrink-0 flex items-center gap-2">
+        {/* The builder needs a tablet or wider. */}
+        <Link
+          href="/admin/builder"
+          className="hidden md:inline-flex items-center gap-2 min-h-11 px-4 rounded-lg bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-sm font-medium hover:bg-gray-800 dark:hover:bg-zinc-200 transition-colors"
+        >
+          <PanelsTopLeft className="w-4 h-4" aria-hidden="true" />
+          Visual builder
+        </Link>
         <button
           onClick={togglePreview}
           aria-pressed={previewOpen}
@@ -82,6 +92,7 @@ export default function ContentManagerPage() {
           {previewOpen ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
           {previewOpen ? 'Hide preview' : 'Preview'}
         </button>
+        </div>
       </div>
 
       <div className="flex-1 min-h-0 flex gap-4">
@@ -126,8 +137,8 @@ export default function ContentManagerPage() {
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 p-6 lg:p-8 overflow-y-auto bg-white dark:bg-zinc-900">
+        {/* Main Content Area: editors lay out by its width (container queries), as in the builder drawer. */}
+        <div className="@container flex-1 p-6 lg:p-8 overflow-y-auto bg-white dark:bg-zinc-900">
           <UnsavedChangesProvider value={setDirty}>
           <ContentPageProvider value={pageHooks}>
           <div key={editorKey}>
