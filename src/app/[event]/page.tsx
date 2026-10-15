@@ -60,7 +60,7 @@ export default async function EventPage({ params }: PageProps<'/[event]'>) {
       <WeddingContentProvider eventId={event} content={site.content}>
         <GuestSite />
       </WeddingContentProvider>
-      <AudioPlayer />
+      <AudioPlayer music={site.music} />
     </SiteTextProvider>
   );
 }

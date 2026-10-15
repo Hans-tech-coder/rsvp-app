@@ -35,7 +35,7 @@ platform: data and guest URLs are already per event (`/<eventId>`).
 | Who | What they do | Where |
 | --- | --- | --- |
 | **Guests** (no account) | Step through a 10-screen story (welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/<eventId>` (one page, screens swap in place; `/` → default event) |
-| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image and color on the guest site. Super admins also add and remove admins from **Manage Admins** in the sidebar. | `/admin/**` |
+| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font and the music on the guest site. Super admins also add and remove admins from **Manage Admins** in the sidebar. | `/admin/**` |
 
 ---
 
@@ -92,9 +92,10 @@ src/
     page.tsx                 redirects / to the default event
     [event]/page.tsx         one event's guest site: server read, metadata, ISR cache, providers, <AudioPlayer/>
     [event]/GuestSite.tsx    the whole 10-step flow (client component)
-    layout.tsx               fonts, theme script, metadataBase (reads no Firestore)
+    layout.tsx               theme script, metadataBase, mounts fonts.ts (reads no Firestore)
+    fonts.ts                 every font of every pairing (next/font), CSS variables on <html>
     not-found.tsx            404 for unknown URLs/events (default event's look)
-    globals.css              Tailwind @theme colors (Wedding default)/fonts + motion tokens + reveal CSS
+    globals.css              Tailwind @theme colors + font roles (Wedding default) + motion tokens + reveal CSS
     actions/                 server actions: rsvp.ts, registry.ts, admin.ts, admins.ts, auth.ts
     api/download/route.ts    image download proxy (used by DetailsScreen)
     api/upload/route.ts      admin-only Vercel Blob upload token
@@ -114,9 +115,12 @@ src/
   lib/eventPaths.ts          every Firestore path (events/{eventId}/content|guests|registryGifts|giftSelections|settings, admins) (+ .test.ts)
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
   lib/blob/uploadImage.ts    compress + upload an image to Vercel Blob (all editors)
+  lib/blob/uploadAudio.ts    upload a music file to Vercel Blob (Music editor)
   lib/requireAdmin.ts        admin check for server actions and admin pages (server only)
   lib/siteText.ts            SiteText type, merge, {placeholder} fill (+ .test.ts)
-  lib/theme.ts               event colors: tokens, presets, mergeTheme, contrast (+ .test.ts); applied by components/ThemeStyle.tsx
+  lib/theme.ts               event colors + font pairing: tokens, presets, mergeTheme, contrast (+ .test.ts); applied by components/ThemeStyle.tsx
+  lib/fonts.ts               font roles (heading/elegant/body), families, pairings (+ .test.ts)
+  lib/music.ts               event background music: type, mergeMusic, default track (+ .test.ts)
   lib/siteContentServer.ts   getEventContent() (event page), getSiteContent() (404) via admin SDK (server only)
   lib/weddingContent.ts      JSON defaults + content docs merge (mergeWeddingContent, mergeGlobal, DEFAULT_CONTENT)
   lib/genericContent.ts      hosts / People groups / venues / guidelines: types, readers, old-shape adapters (+ .test.ts)

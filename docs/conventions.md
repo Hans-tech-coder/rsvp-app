@@ -56,11 +56,16 @@ Match the code around you. These are the patterns the codebase already uses.
     `ink` (text), `surface` (background), `surface-soft` (panels),
     `primary`, `primary-light`, `primary-deep`, `accent`, `accent-light`,
     `accent-dark` (use as `bg-surface`, `text-accent`, `border-accent/30`, …).
-    Each event can change all nine in the Theme & Colors tab; the
+    Each event can change all nine in the Colors & Fonts tab; the
     `globals.css` values are only the Wedding default (see "Theme" in
     `docs/content-system.md`)
-  - fonts `font-cinzel` (headings, uppercase titles), `font-cormorant`
-    (elegant body/italic), `font-inter` (UI text, default)
+  - font roles (renamed from `font-cinzel`/`-cormorant`/`-inter` in Oct 2026,
+    F7): `font-heading` (titles, names, uppercase), `font-elegant` (subtitles,
+    italic prose), `font-body` (UI text, the default). Each event picks a
+    pairing that fills the three roles (Colors & Fonts tab; default Classic =
+    Cinzel / Cormorant Garamond / Inter). Never name a family in a component
+    (`font-[Cinzel]`, `style={{fontFamily}}`): it would not follow the pairing.
+    `font-serif`/`font-sans` are Tailwind's system stacks, not the event's fonts
 - Dark background, light `ink` text is the base look. Do not introduce new hex
   or `rgba(...)` colors in components: they would not follow the event's theme.
   A tinted glow or shadow mixes a token, e.g.

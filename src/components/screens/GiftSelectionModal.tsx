@@ -66,13 +66,13 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
 
             <div className="text-center mb-6">
               <span className="text-xs uppercase tracking-[0.3em] text-accent block mb-2">{text.giftModal.eyebrow}</span>
-              <h3 className="text-2xl font-cinzel font-light text-accent-light">
+              <h3 className="text-2xl font-heading font-light text-accent-light">
                 {giftName}
               </h3>
               <div className="w-12 h-[1px] bg-accent/30 mx-auto mt-3"></div>
             </div>
 
-            <p className="text-sm font-cormorant text-ink/80 text-center mb-6">
+            <p className="text-sm font-elegant text-ink/80 text-center mb-6">
               {text.giftModal.intro}
             </p>
 
@@ -85,7 +85,7 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-surface/50 border border-accent/30 rounded-sm px-4 py-3 text-ink font-inter text-sm focus:outline-none focus:border-accent transition-colors placeholder:text-ink/30"
+                  className="w-full bg-surface/50 border border-accent/30 rounded-sm px-4 py-3 text-ink font-body text-sm focus:outline-none focus:border-accent transition-colors placeholder:text-ink/30"
                   placeholder={text.giftModal.namePlaceholder}
                 />
               </div>
@@ -98,7 +98,7 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-surface/50 border border-accent/30 rounded-sm px-4 py-3 text-ink font-inter text-sm focus:outline-none focus:border-accent transition-colors placeholder:text-ink/30"
+                  className="w-full bg-surface/50 border border-accent/30 rounded-sm px-4 py-3 text-ink font-body text-sm focus:outline-none focus:border-accent transition-colors placeholder:text-ink/30"
                   placeholder={text.giftModal.emailPlaceholder}
                 />
               </div>
@@ -110,7 +110,7 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
                   rows={3}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full bg-surface/50 border border-accent/30 rounded-sm px-4 py-3 text-ink font-inter text-sm focus:outline-none focus:border-accent transition-colors placeholder:text-ink/30 resize-none"
+                  className="w-full bg-surface/50 border border-accent/30 rounded-sm px-4 py-3 text-ink font-body text-sm focus:outline-none focus:border-accent transition-colors placeholder:text-ink/30 resize-none"
                   placeholder={text.giftModal.messagePlaceholder}
                 />
               </div>
@@ -126,7 +126,7 @@ export function GiftSelectionModal({ isOpen, onClose, giftName, onSubmit }: Gift
                       </svg>
                     </div>
                   </div>
-                  <span className="text-xs font-inter text-ink/70 group-hover:text-ink/90 transition-colors leading-relaxed">
+                  <span className="text-xs font-body text-ink/70 group-hover:text-ink/90 transition-colors leading-relaxed">
                     {formContent.actions.privacyText}
                   </span>
                 </label>

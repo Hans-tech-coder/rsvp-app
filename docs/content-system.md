@@ -102,7 +102,7 @@ src/app/not-found.tsx    -> its own <SiteTextProvider> + NotFoundScreen (default
 link-preview URLs are made absolute with `metadataBase` in `src/app/layout.tsx`
 (`getSiteUrl()` in `src/lib/siteUrl.ts`).
 
-## Theme (colors)
+## Theme (colors and fonts)
 
 The guest site's colors are the nine semantic tokens in `globals.css` `@theme`
 (`--color-ink`, `--color-surface`, `--color-primary`, …; Tailwind classes
@@ -114,31 +114,57 @@ src/lib/theme.ts  DEFAULT_THEME (= preset "Burgundy & Gold" = globals.css values
 Firestore events/{eventId}/content/theme   (read with the admin SDK on the server)
           │  getEventContent(eventId) / getSiteContent(eventId) (404) → mergeTheme()
           ▼
-<ThemeStyle theme> (src/components/ThemeStyle.tsx)  →  <style id="event-theme">:root{--color-…}</style>
+<ThemeStyle theme> (src/components/ThemeStyle.tsx)  →  <style id="event-theme">:root{--color-…;--font-heading:…}</style>
 ```
+
+The same doc holds the **font pairing** (`fontPairing`, an id from
+`FONT_PAIRINGS` in `src/lib/fonts.ts`). The site has three font roles
+(`font-heading` titles and names, `font-elegant` subtitles and italic prose,
+`font-body` UI text); a pairing names one loaded family per role, and
+`themeCss()` writes `--font-heading: var(--font-montserrat), sans-serif` etc.
+into the same `:root` rule. Every family of every pairing is loaded once by
+`next/font` in `src/app/fonts.ts` (a CSS variable each on `<html>`); only the
+default pairing (Classic: Cinzel / Cormorant Garamond / Inter) is preloaded,
+so the browser downloads another pairing's files only on an event that uses
+it. A new pairing: add any new family to `src/app/fonts.ts` and
+`FONT_FAMILIES` (same variable name; `fonts.test.ts` checks), then the pairing
+to `FONT_PAIRINGS`.
 
 - No rebuild: the style is part of the cached page, so a save is live after
   the usual `refreshGuestSite(eventId)`. It sits on `:root` and is unlayered,
   so it beats Tailwind's `@layer theme` defaults and reaches portals and the
   `body` background (`--background` = `var(--color-surface)`).
-- `mergeTheme()` keeps only the nine known keys with a `#RRGGBB` value (the
-  rest stay default), which is what makes the raw `<style>` safe.
+- `mergeTheme()` keeps only the nine known keys with a `#RRGGBB` value and a
+  known pairing id (the rest stay default), which is what makes the raw
+  `<style>` safe.
 - Not in `wedding-content.json` and not pulled by `sync-content`: the default
   belongs to the template (`THEME_PRESETS` in `src/lib/theme.ts`).
-  `src/lib/theme.test.ts` fails if the default preset and the `globals.css`
-  values drift apart.
-- Editor (`ThemeEditor.tsx`, tab "Theme & Colors"): preset palettes, a picker
+  `src/lib/theme.test.ts` / `src/lib/fonts.test.ts` fail if the default
+  preset or pairing and the `globals.css` values drift apart.
+- Editor (`ThemeEditor.tsx`, tab "Colors & Fonts"): preset palettes, a picker
   + hex box per main color (picking one also moves its shades,
   `deriveShades`), "Fine-tune shades", a readability list (WCAG contrast of
   the text/background pairs the site uses, `CONTRAST_PAIRS`; 4.5:1 is "Easy to
-  read", 3–4.5 "Large text only"), a live preview drawn with the guest
-  site's own classes under the edited variables, and "Reset to template
-  default". Saves the whole doc (no `merge`) after writing `theme_backup`;
+  read", 3–4.5 "Large text only"), a Fonts list (one card per pairing, each
+  drawn in its own fonts), a live preview drawn with the guest site's own
+  classes under the edited variables, and "Reset to template default" (colors
+  and fonts). Saves the whole doc (no `merge`) after writing `theme_backup`;
   Restore loads the backup into the form (Save to make it live).
-- The RSVP email uses the event's theme too (inlined hex, see
-  `docs/guest-site.md`).
+- The RSVP email uses the event's theme colors too (inlined hex, see
+  `docs/guest-site.md`), but always the Classic fonts.
 - Not themed: the firefly and candle-light glows (Welcome effects
   are light, not brand), neutral black/white shadows.
+
+## Music
+
+Each event's background music is the `content/music` doc (`src/lib/music.ts`:
+`enabled`, `url`, `fileName`, `volume`), read on the server with the other
+docs (`getEventContent` / `getSiteContent` → `mergeMusic()`) and passed to
+`<AudioPlayer music>`. No doc = on, the default track (`public/bg-music.mp3`),
+50 %. Editor `MusicEditor.tsx` (tab "Music"): on/off, upload a song
+(`uploadAudio()`, straight to Blob, no re-encoding, 10 MB cap), "Use the
+default song", a listen player, and the starting volume (10–100 %). Same
+backup/restore/save pattern as the other editors (`music_backup`).
 
 ## How an editor works (`src/app/admin/content/*Editor.tsx`)
 

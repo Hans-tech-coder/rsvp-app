@@ -6,19 +6,25 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { hasMouse } from '@/lib/pointer';
 import { useSiteText } from '@/contexts/SiteTextContext';
+import { musicSrc, type Music } from '@/lib/music';
 
-const DEFAULT_VOLUME = 0.5;
+// Used when the guest unmutes after sliding the volume to zero, if the event's
+// start volume is unusable
+const FALLBACK_VOLUME = 0.5;
 // Onboarding hint: shown once per page load, a moment after the music first
 // starts (the first tap also swaps the screen), then leaves on its own
 const HINT_DELAY_MS = 1800;
 const HINT_VISIBLE_MS = 7000;
 // Touch has no hover, so a tap opens the slider and it closes after this idle time
 const PANEL_IDLE_MS = 3500;
-export function AudioPlayer() {
+// The event's background music (`content/music`, read on the server): its
+// track and start volume; nothing at all when the event turned music off.
+export function AudioPlayer({ music }: { music: Music }) {
   const pathname = usePathname();
   const text = useSiteText().music;
+  const startVolume = music.volume > 0 ? music.volume : FALLBACK_VOLUME;
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(DEFAULT_VOLUME);
+  const [volume, setVolume] = useState(startVolume);
   const [panelOpen, setPanelOpen] = useState(false);
   const [hintVisible, setHintVisible] = useState(false);
   const [hintMode, setHintMode] = useState<'mouse' | 'touch'>('touch');
@@ -36,8 +42,8 @@ export function AudioPlayer() {
   const ctxRef = useRef<AudioContext | null>(null);
   const gainRef = useRef<GainNode | null>(null);
 
-  // Do not render anything if we are on an admin route
-  const isAdmin = pathname?.startsWith('/admin');
+  // Do not render anything on an admin route or when the event has no music
+  const isOff = pathname?.startsWith('/admin') || !music.enabled;
 
   // Hover only exists for a mouse. Trust the input the guest actually used (the
   // tap or click that started the music) over the media query, which some
@@ -49,10 +55,12 @@ export function AudioPlayer() {
       : hasMouse();
 
   useEffect(() => {
-    if (isAdmin) return;
+    if (isOff) return;
     if (audioRef.current) {
-      audioRef.current.volume = DEFAULT_VOLUME; // Set default volume to 50%
-      nativeVolume.current = Math.abs(audioRef.current.volume - DEFAULT_VOLUME) < 0.01;
+      // iOS reads back 1 whatever is set: probe with a value below 1, then start at the event's volume
+      audioRef.current.volume = 0.5;
+      nativeVolume.current = Math.abs(audioRef.current.volume - 0.5) < 0.01;
+      audioRef.current.volume = startVolume;
     }
 
     const handleInteraction = (e: Event) => {
@@ -99,7 +107,7 @@ export function AudioPlayer() {
       });
       document.removeEventListener('pointerdown', trackPointer, true);
     };
-  }, []);
+  }, [isOff, startVolume]);
 
   // Show the hint once, the first time the music plays
   useEffect(() => {
@@ -188,7 +196,7 @@ export function AudioPlayer() {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        if (volume === 0) applyVolume(DEFAULT_VOLUME);
+        if (volume === 0) applyVolume(startVolume);
         audioRef.current.play().catch(console.error);
         interactionDone.current = true; // Ensure logic knows user interacted
       }
@@ -196,7 +204,7 @@ export function AudioPlayer() {
     }
   };
 
-  if (isAdmin) {
+  if (isOff) {
     return null;
   }
 
@@ -213,7 +221,7 @@ export function AudioPlayer() {
       <audio
         id="wedding-bg-music"
         ref={audioRef}
-        src="/bg-music.mp3"
+        src={musicSrc(music)}
         loop
         preload="none"
         onPlay={() => {
@@ -259,8 +267,8 @@ export function AudioPlayer() {
             >
               <div className="relative flex flex-col gap-0.5 pl-4 pr-5 py-2.5 border border-accent/50 bg-surface/85 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
                 <span aria-hidden="true" className="absolute inset-[3px] border border-accent/20 pointer-events-none"></span>
-                <span className="font-cinzel text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-accent-light">{text.title}</span>
-                <span className="font-cormorant italic text-sm text-ink/85 tracking-wide">{hintMode === 'mouse' ? text.mouseHint : text.touchHint}</span>
+                <span className="font-heading text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-accent-light">{text.title}</span>
+                <span className="font-elegant italic text-sm text-ink/85 tracking-wide">{hintMode === 'mouse' ? text.mouseHint : text.touchHint}</span>
                 {/* Caret pointing down at the button's centre */}
                 <span aria-hidden="true" className="absolute -bottom-[6px] right-[19px] h-2.5 w-2.5 rotate-45 border-r border-b border-accent/50 bg-surface"></span>
               </div>
@@ -319,7 +327,7 @@ export function AudioPlayer() {
               onKeyDown={() => ensureGain(volume)}
               onChange={(e) => changeVolume(Number(e.target.value) / 100)}
             />
-            <span aria-hidden="true" className="w-8 text-right font-inter text-[11px] tabular-nums text-accent-light/90">{percent}%</span>
+            <span aria-hidden="true" className="w-8 text-right font-body text-[11px] tabular-nums text-accent-light/90">{percent}%</span>
           </div>
         </div>
       </div>

@@ -68,10 +68,10 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
       
       <div className="max-w-5xl mx-auto relative z-10 w-full">
         <TextsReveal className="text-center mb-20 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-accent-light/80 tracking-widest block mb-4">{content.ourStory.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-ink font-light tracking-widest drop-shadow-md">{content.ourStory.title}</h2>
+          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.ourStory.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{content.ourStory.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6"></div>
-          <p className="text-base font-cormorant italic text-accent-light/70 mt-3 max-w-md mx-auto">{content.ourStory.description}</p>
+          <p className="text-base font-elegant italic text-accent-light/70 mt-3 max-w-md mx-auto">{content.ourStory.description}</p>
         </TextsReveal>
 
         <div className="relative border-l border-accent/20 ml-4 md:border-l-0 md:ml-0 md:flex md:flex-col md:items-center">
@@ -97,7 +97,7 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
               </div>
               <div className="bg-surface/40 p-6 md:p-8 rounded-lg shadow-sm border border-accent/10 hover:shadow-lg hover:border-accent/30 transition-all duration-500">
                 <span className="text-xs uppercase tracking-widest text-accent/70 font-semibold block mb-1">{item.date}</span>
-                <h3 className="text-2xl font-cinzel text-ink font-light mb-3">{item.title}</h3>
+                <h3 className="text-2xl font-heading text-ink font-light mb-3">{item.title}</h3>
                 {/* The photo is optional (a program or agenda entry may have none) */}
                 {item.image && (
                 <div className="relative w-full h-64 md:h-72 mb-6 rounded-xl overflow-hidden group shadow-lg">
@@ -108,7 +108,7 @@ export function OurStoryScreen({ onContinue, onLightboxChange }: OurStoryScreenP
                   <div className="absolute inset-0 ring-1 ring-inset ring-accent/20 rounded-xl" />
                 </div>
                 )}
-                <p className="text-sm font-cormorant text-ink leading-relaxed">{item.description}</p>
+                <p className="text-sm font-elegant text-ink leading-relaxed">{item.description}</p>
                 {item.videoLink && (
                   <button
                     onClick={() => openVideo(item.videoLink!, item.image)}

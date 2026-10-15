@@ -32,8 +32,8 @@ export function EmbeddedFooter() {
       className="w-[calc(100%+2rem)] -mx-4 -mb-24 py-8 text-center border-t border-ink/20 mt-16 shrink-0 relative z-20 flex flex-col justify-center"
     >
       <div className="max-w-md mx-auto px-4">
-        <div className="text-xl font-cinzel tracking-[0.4em] text-ink/80 mb-4">{monogram}</div>
-        <p className="text-xs font-cormorant italic text-ink/80 mb-4">&quot;{footerTagline}&quot;</p>
+        <div className="text-xl font-heading tracking-[0.4em] text-ink/80 mb-4">{monogram}</div>
+        <p className="text-xs font-elegant italic text-ink/80 mb-4">&quot;{footerTagline}&quot;</p>
         {footerDate && (
           <div className="flex items-center justify-center space-x-3 mb-6">
             <span className="w-8 h-[1px] bg-ink/20"></span>

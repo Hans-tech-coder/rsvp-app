@@ -93,7 +93,7 @@ export function NotFoundScreen({ site }: { site: SiteGlobal }) {
             <motion.div
               variants={numeralVariants}
               aria-hidden="true"
-              className="relative isolate font-cinzel font-bold leading-[0.85] tracking-[-0.03em] text-[clamp(7.5rem,38vw,15rem)] select-none"
+              className="relative isolate font-heading font-bold leading-[0.85] tracking-[-0.03em] text-[clamp(7.5rem,38vw,15rem)] select-none"
             >
               <span className="block text-accent-dark">404</span>
               <span
@@ -106,14 +106,14 @@ export function NotFoundScreen({ site }: { site: SiteGlobal }) {
 
             <motion.h1
               variants={itemVariants}
-              className="mt-6 max-w-[18ch] text-balance font-cinzel text-[1.75rem] leading-[1.15] tracking-[0.02em] sm:max-w-none sm:text-4xl md:text-5xl"
+              className="mt-6 max-w-[18ch] text-balance font-heading text-[1.75rem] leading-[1.15] tracking-[0.02em] sm:max-w-none sm:text-4xl md:text-5xl"
             >
               <span className="sr-only">Error 404. </span>{text.heading}
             </motion.h1>
 
             <motion.p
               variants={itemVariants}
-              className="mt-5 max-w-[34ch] text-balance font-cormorant text-xl italic leading-snug text-ink/90 sm:text-2xl"
+              className="mt-5 max-w-[34ch] text-balance font-elegant text-xl italic leading-snug text-ink/90 sm:text-2xl"
             >
               {text.description}
             </motion.p>
@@ -133,7 +133,7 @@ export function NotFoundScreen({ site }: { site: SiteGlobal }) {
 
           <motion.p
             variants={itemVariants}
-            className="max-w-[36ch] font-cormorant text-lg leading-snug text-ink/90 sm:text-xl"
+            className="max-w-[36ch] font-elegant text-lg leading-snug text-ink/90 sm:text-xl"
             aria-live="polite"
           >
             {daysLeft === null ? (
@@ -141,7 +141,7 @@ export function NotFoundScreen({ site }: { site: SiteGlobal }) {
             ) : daysLeft > 0 ? (
               fillNodes(daysLeft === 1 ? text.daysLeftOne : text.daysLeftMany, {
                 ...values,
-                days: <span className="font-cinzel text-accent-light">{daysLeft}</span>,
+                days: <span className="font-heading text-accent-light">{daysLeft}</span>,
               })
             ) : (
               fillText(text.after, values)

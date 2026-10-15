@@ -55,7 +55,7 @@ export function LoadingScreen() {
           <motion.div 
             animate={{ scale: [0.95, 1.05, 0.95], opacity: [0.7, 1, 0.7] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="text-accent text-2xl font-cinzel tracking-widest"
+            className="text-accent text-2xl font-heading tracking-widest"
           >
             {initials.map((initial, i) => (
               <React.Fragment key={i}>
@@ -69,7 +69,7 @@ export function LoadingScreen() {
         <motion.h2 
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          className="text-ink/80 font-cinzel text-lg tracking-[0.3em] uppercase mb-3"
+          className="text-ink/80 font-heading text-lg tracking-[0.3em] uppercase mb-3"
         >
           {text.loading.title}
         </motion.h2>

@@ -37,10 +37,10 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
 
       <div className="max-w-4xl mx-auto w-full relative z-10">
         <TextsReveal className="text-center mb-16 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-accent-light/80 tracking-widest block mb-4">{content.faqHeader?.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-ink font-light tracking-widest drop-shadow-md">{content.faqHeader?.title}</h2>
+          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.faqHeader?.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{content.faqHeader?.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6 mb-10"></div>
-          <p className="text-base font-cormorant italic text-accent-light/70 mt-3 max-w-md mx-auto">{content.faqHeader?.description}</p>
+          <p className="text-base font-elegant italic text-accent-light/70 mt-3 max-w-md mx-auto">{content.faqHeader?.description}</p>
         </TextsReveal>
 
         <div className="space-y-4">
@@ -54,7 +54,7 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
                 onClick={() => toggleFaq(index)} 
                 className="w-full flex justify-between items-center p-6 text-left focus:outline-none group"
               >
-                <span className="font-cinzel text-sm md:text-base tracking-wider text-ink font-medium group-hover:text-accent transition-colors">{faq.q}</span>
+                <span className="font-heading text-sm md:text-base tracking-wider text-ink font-medium group-hover:text-accent transition-colors">{faq.q}</span>
                 <span className={`text-accent font-light text-2xl transition-transform duration-300 ${openIndex === index ? 'rotate-45' : ''}`}>+</span>
               </button>
               <AnimatePresence>
@@ -67,7 +67,7 @@ export function FaqScreen({ onContinue }: FaqScreenProps) {
                     className="overflow-hidden"
                   >
                     <div className="border-t border-accent/20"></div>
-                    <p className="p-6 text-sm md:text-base font-cormorant text-ink leading-relaxed">
+                    <p className="p-6 text-sm md:text-base font-elegant text-ink leading-relaxed">
                       {faq.a}
                     </p>
                   </motion.div>

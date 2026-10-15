@@ -159,8 +159,8 @@ export function EntranceScreen({ onUnlock, onStartUnlock }: EntranceScreenProps)
 
         <div className="text-center">
           <span className="inline-block text-[10px] uppercase tracking-[0.4em] text-accent font-medium mb-3 border-b border-accent/30 pb-1">{text.entrance.eyebrow}</span>
-          <h1 className="text-4xl md:text-5xl font-cinzel text-accent-light font-light tracking-widest mb-4 drop-shadow-md">{joinNames(hostNames(content.global.hosts))}</h1>
-          <p className="text-sm font-cormorant text-ink/90 italic tracking-widest mb-10 flex items-center justify-center gap-2">
+          <h1 className="text-4xl md:text-5xl font-heading text-accent-light font-light tracking-widest mb-4 drop-shadow-md">{joinNames(hostNames(content.global.hosts))}</h1>
+          <p className="text-sm font-elegant text-ink/90 italic tracking-widest mb-10 flex items-center justify-center gap-2">
             <span className="w-8 h-[1px] bg-gradient-to-r from-transparent to-accent/50"></span>
             {new Date(content.global.targetDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} • {content.global.venueShort}
             <span className="w-8 h-[1px] bg-gradient-to-l from-transparent to-accent/50"></span>

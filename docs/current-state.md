@@ -17,8 +17,9 @@ when you find or fix one of these.
   groups, venues, hosts and dress-code guidelines are lists, for any event type,
   since Oct 2026) and
   a Site Text tab for every button, label, hint and error (Oct 2026), a
-  Theme & Colors tab (preset palettes, custom colors, contrast check, live
-  preview; Oct 2026), with one-step backup/restore. Google sign-in with an email allowlist; super admins
+  Colors & Fonts tab (preset palettes, custom colors, contrast check, five
+  font pairings, live preview; Oct 2026), a Music tab (on/off, upload a song,
+  starting volume; Oct 2026), with one-step backup/restore. Google sign-in with an email allowlist; super admins
   add and remove regular admins from the Manage Admins modal in the sidebar.
 
 ## Known issues
@@ -36,6 +37,8 @@ when you find or fix one of these.
 | Circular gallery loads GSAP from cdnjs at runtime | `src/components/ui/circular-image-gallery.tsx` (`loadGsap`) | Third-party script without SRI, and a second animation library next to Motion. Removing it is a design decision |
 | Guest page starts Firebase Auth (iframe + gapi scripts) though guests never sign in | `src/lib/firebase/client.ts:18` (`getAuth` at module scope) | Extra startup requests on every guest load |
 | FAQ question cards keep `transition-all` while Motion animates them | `FaqScreen.tsx` (`ScrollReveal` className) | CSS may also transition Motion's inline opacity/transform; no jank measured |
+| RSVP email ignores the event's font pairing | `src/lib/email/sendRsvpConfirmation.ts` (`font`) | Always Classic (Cinzel / Cormorant Garamond / Inter, mostly blocked by mail clients anyway). Colors do follow the theme |
+| Music upload and save not tried signed in (F7) | `MusicEditor.tsx`, `/api/upload` (`music/` branch) | Checked: the editor loads and reads, on/off and volume, the default track plays on the guest site. Not checked: a real upload to Blob, a saved custom track or "off" on the guest site |
 | Music volume on iOS goes through Web Audio after the first slider touch | `AudioPlayer.tsx` (`ensureGain`) | Only checked in a desktop browser. On iOS < 17 the ringer switch may silence the music once that happens; the AudioContext is resumed on each `play` |
 | A few guest-visible words are still in code | country names in `phoneCountries.ts`; dates formatted with `en-US` (`EntranceScreen`, metadata `{date}`); image `alt` and `aria-*` labels; "Visit Our Website" in the RSVP email | |
 | A content change made outside the admin shows within the hour | `src/app/[event]/page.tsx` (`revalidate = 3600`), `revalidateGuestSite` in `admin.ts` | Event pages are cached; an admin save rebuilds them at once. A Firestore console or script edit waits for the hourly rebuild (the 404 page: the next default-event save or deploy). Facebook and Messenger cache link previews on their side |

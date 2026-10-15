@@ -10,6 +10,7 @@ import {
   contrastLevel, contrastRatio, deriveShades, isHexColor, mergeTheme,
   type Theme, type ThemeColorKey, type ThemeColors,
 } from '@/lib/theme';
+import { FONT_FAMILIES, FONT_PAIRINGS, FONT_ROLES, FONT_ROLE_INFO, FONT_ROLE_VARS, fontStack, getFontPairing, type FontPairing } from '@/lib/fonts';
 import { refreshGuestSite } from './refreshGuestSite';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
@@ -17,13 +18,19 @@ import { EditorSaveBar } from './EditorSaveBar';
 const MAIN_KEYS = THEME_COLOR_KEYS.filter((key) => !THEME_COLOR_INFO[key].shadeOf);
 const SHADE_KEYS = THEME_COLOR_KEYS.filter((key) => THEME_COLOR_INFO[key].shadeOf);
 
-/** The colors as CSS variables, so guest-site classes (bg-surface, text-accent…) inside follow them. */
-const themeVars = (colors: ThemeColors) =>
-  Object.fromEntries(THEME_COLOR_KEYS.map((key) => [THEME_COLOR_INFO[key].cssVar, colors[key]])) as CSSProperties;
+/** A pairing's font roles as CSS variables, so font-heading/-elegant/-body inside follow it. */
+const fontVars = (pairing: FontPairing) =>
+  Object.fromEntries(FONT_ROLES.map((role) => [FONT_ROLE_VARS[role], fontStack(pairing, role)])) as CSSProperties;
 
-// Colors of the guest site (`content/theme`). Written as CSS variables on the
-// event page's :root at render (src/components/ThemeStyle.tsx), so a save is
-// live after the page refresh, with no rebuild.
+/** The colors and fonts as CSS variables, so guest-site classes (bg-surface, text-accent, font-heading…) inside follow them. */
+const themeVars = (colors: ThemeColors, pairing: FontPairing) => ({
+  ...Object.fromEntries(THEME_COLOR_KEYS.map((key) => [THEME_COLOR_INFO[key].cssVar, colors[key]])),
+  ...fontVars(pairing),
+}) as CSSProperties;
+
+// Colors and fonts of the guest site (`content/theme`). Written as CSS
+// variables on the event page's :root at render (src/components/ThemeStyle.tsx),
+// so a save is live after the page refresh, with no rebuild.
 export function ThemeEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -63,7 +70,12 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
   const applyPreset = (id: string) => {
     const preset = THEME_PRESETS.find((p) => p.id === id);
     if (!preset) return;
-    setFormData({ preset: preset.id, colors: { ...preset.colors } });
+    setFormData((prev) => ({ ...prev, preset: preset.id, colors: { ...preset.colors } }));
+    setSaved(false);
+  };
+
+  const setFontPairing = (id: string) => {
+    setFormData((prev) => ({ ...prev, fontPairing: id }));
     setSaved(false);
   };
 
@@ -71,7 +83,7 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
   const setColor = (key: ThemeColorKey, value: string) => {
     setFormData((prev) => {
       const colors = { ...prev.colors, [key]: value.toUpperCase() };
-      return { preset: CUSTOM_PRESET_ID, colors: THEME_COLOR_INFO[key].shadeOf ? colors : deriveShades(colors, key) };
+      return { ...prev, preset: CUSTOM_PRESET_ID, colors: THEME_COLOR_INFO[key].shadeOf ? colors : deriveShades(colors, key) };
     });
     setSaved(false);
   };
@@ -122,6 +134,7 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
   }
 
   const { colors } = formData;
+  const pairing = getFontPairing(formData.fontPairing);
 
   return (
     <div className="space-y-8">
@@ -189,6 +202,48 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
             </details>
           </section>
 
+          {/* Fonts */}
+          <section className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Fonts</h3>
+              <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
+                Three fonts chosen to go together: {FONT_ROLES.map((role) => FONT_ROLE_INFO[role].label.toLowerCase()).join(', ')}.
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {FONT_PAIRINGS.map((option) => {
+                const active = formData.fontPairing === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setFontPairing(option.id)}
+                    aria-pressed={active}
+                    className={`text-left p-4 rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 dark:focus-visible:ring-zinc-100 ${
+                      active
+                        ? 'border-gray-900 dark:border-zinc-100 bg-gray-50 dark:bg-zinc-800'
+                        : 'border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'
+                    }`}
+                  >
+                    <span style={fontVars(option)} className="block text-gray-900 dark:text-zinc-100" aria-hidden="true">
+                      <span className="block font-heading text-xl uppercase tracking-[0.12em] truncate">Ana &amp; Ben</span>
+                      <span className="block font-elegant italic text-lg leading-snug">together with their families</span>
+                      <span className="block font-body text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-400 mt-1">RSVP · 3:00 PM</span>
+                    </span>
+                    <span className="mt-3 flex items-center justify-between gap-2 text-sm font-medium text-gray-900 dark:text-zinc-100">
+                      {option.name}
+                      {active && <Check className="w-4 h-4 shrink-0" aria-hidden="true" />}
+                    </span>
+                    <span className="block text-xs text-gray-500 dark:text-zinc-400">{option.mood}</span>
+                    <span className="block text-xs text-gray-400 dark:text-zinc-500 mt-1">
+                      {FONT_ROLES.map((role) => FONT_FAMILIES[option.fonts[role]].name).join(' · ')}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           {/* Contrast */}
           <section className="space-y-4">
             <div>
@@ -232,7 +287,7 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
         {/* Live preview with the guest site's own classes */}
         <div className="lg:sticky lg:top-0 self-start w-full">
           <p className="text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">Preview</p>
-          <ThemePreview colors={colors} />
+          <ThemePreview colors={colors} pairing={pairing} />
         </div>
       </div>
 
@@ -265,7 +320,7 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleSave}
         title="Publish Changes?"
-        message="This will change the colors of the whole website immediately. A backup of the current colors will be saved."
+        message="This will change the colors and fonts of the whole website immediately. A backup of the current look will be saved."
         type="confirm"
         variant="info"
         confirmText="Yes, Publish Now"
@@ -344,21 +399,21 @@ function ContrastBadge({ ratio }: { ratio: number }) {
 }
 
 /** A small mock of a guest screen, drawn with the guest site's classes under the edited variables. */
-function ThemePreview({ colors }: { colors: ThemeColors }) {
+function ThemePreview({ colors, pairing }: { colors: ThemeColors; pairing: FontPairing }) {
   return (
-    <div style={themeVars(colors)} className="rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 shadow-sm" aria-hidden="true">
+    <div style={themeVars(colors, pairing)} className="font-body rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 shadow-sm" aria-hidden="true">
       <div className="relative bg-surface px-6 pt-8 pb-6 text-center">
         <div className="absolute inset-0 bg-gradient-to-b from-primary-deep/80 to-transparent" />
         <div className="relative">
           <p className="text-[10px] uppercase tracking-[0.3em] text-accent-light">You are invited</p>
-          <p className="mt-3 font-cinzel text-2xl text-accent">Event Title</p>
+          <p className="mt-3 font-heading text-2xl text-accent">Event Title</p>
           <div className="w-12 h-px bg-accent/50 mx-auto my-3" />
-          <p className="font-cormorant italic text-lg text-ink/90">to a celebration</p>
+          <p className="font-elegant italic text-lg text-ink/90">to a celebration</p>
         </div>
       </div>
       <div className="bg-surface px-6 pb-6 space-y-4">
         <div className="bg-surface-soft border border-accent-dark/40 rounded-lg p-4">
-          <p className="font-cinzel text-sm text-accent">The Venue</p>
+          <p className="font-heading text-sm text-accent">The Venue</p>
           <p className="mt-1 text-xs text-ink/80">3:00 PM · Venue address</p>
         </div>
         <div className="flex gap-4 justify-center text-[10px] uppercase tracking-[0.2em]">

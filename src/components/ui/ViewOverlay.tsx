@@ -11,7 +11,7 @@ export function ViewOverlay() {
       <span className="t-view-button relative flex items-center gap-2.5 px-4 py-2.5 border border-accent/60 bg-surface/60 shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
         <span className="absolute inset-[3px] border border-accent/20"></span>
         <span className="h-px w-3 bg-accent/60"></span>
-        <span className="font-cinzel text-[11px] uppercase tracking-[0.35em] pl-[0.35em] text-accent-light">{text.common.view}</span>
+        <span className="font-heading text-[11px] uppercase tracking-[0.35em] pl-[0.35em] text-accent-light">{text.common.view}</span>
         <span className="h-px w-3 bg-accent/60"></span>
       </span>
     </div>

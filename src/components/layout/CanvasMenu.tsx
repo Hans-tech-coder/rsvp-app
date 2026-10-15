@@ -80,7 +80,7 @@ export function CanvasMenu({ isOpen, onClose, onNavigate, highestVisitedStep, cu
 
         <div className="w-12 h-[1px] bg-ink/20 mx-auto mb-8"></div>
 
-        <nav className="flex flex-col gap-6 font-cinzel tracking-[0.2em] uppercase text-sm h-[40vh] overflow-y-auto no-scrollbar py-4 relative z-10">
+        <nav className="flex flex-col gap-6 font-heading tracking-[0.2em] uppercase text-sm h-[40vh] overflow-y-auto no-scrollbar py-4 relative z-10">
           {menuItems.map((item, idx) => {
             const isVisited = item.step <= highestVisitedStep;
             const isActive = item.step === currentStep;

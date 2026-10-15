@@ -20,12 +20,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NotFound() {
-  const { global, siteText, theme } = await getSiteContent(DEFAULT_EVENT_ID);
+  const { global, siteText, theme, music } = await getSiteContent(DEFAULT_EVENT_ID);
   return (
     <SiteTextProvider value={siteText}>
       <ThemeStyle theme={theme} />
       <NotFoundScreen site={global} />
-      <AudioPlayer />
+      <AudioPlayer music={music} />
     </SiteTextProvider>
   );
 }

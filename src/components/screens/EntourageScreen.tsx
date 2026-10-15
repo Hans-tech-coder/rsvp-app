@@ -18,9 +18,9 @@ interface EntourageScreenProps {
 // reveal as they scroll in.
 const SECOND_COLUMN_DELAY = SCROLL_MOTION.revealStagger;
 
-const SPONSOR_NAME_CLASS = "font-cormorant text-xl md:text-2xl lg:text-3xl text-ink/85 hover:text-accent-light hover:drop-shadow-[0_0_12px_color-mix(in_srgb,var(--color-accent)_40%,transparent)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default";
-const FEATURED_NAME_CLASS = "font-cormorant text-2xl md:text-3xl lg:text-4xl text-ink font-medium tracking-widest group-hover:text-accent-light group-hover:drop-shadow-[0_0_12px_color-mix(in_srgb,var(--color-accent)_40%,transparent)] transition-all duration-500 whitespace-nowrap";
-const GROUP_TITLE_CLASS = "font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-accent/80 text-center flex items-center justify-center gap-4 w-full";
+const SPONSOR_NAME_CLASS = "font-elegant text-xl md:text-2xl lg:text-3xl text-ink/85 hover:text-accent-light hover:drop-shadow-[0_0_12px_color-mix(in_srgb,var(--color-accent)_40%,transparent)] hover:scale-105 transition-all duration-500 tracking-wider cursor-default";
+const FEATURED_NAME_CLASS = "font-elegant text-2xl md:text-3xl lg:text-4xl text-ink font-medium tracking-widest group-hover:text-accent-light group-hover:drop-shadow-[0_0_12px_color-mix(in_srgb,var(--color-accent)_40%,transparent)] transition-all duration-500 whitespace-nowrap";
+const GROUP_TITLE_CLASS = "font-heading text-[10px] md:text-xs uppercase tracking-[0.3em] text-accent/80 text-center flex items-center justify-center gap-4 w-full";
 const DIVIDER_CLASS = "absolute left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-accent/20 to-transparent -translate-x-1/2 hidden md:block";
 
 /**
@@ -50,7 +50,7 @@ function PersonExtras({ person, children }: { person: Person; children: React.Re
         />
       )}
       {children}
-      {person.role && <p className="font-cormorant italic text-sm md:text-base text-accent-light/70 tracking-wide mt-1">{person.role}</p>}
+      {person.role && <p className="font-elegant italic text-sm md:text-base text-accent-light/70 tracking-wide mt-1">{person.role}</p>}
     </>
   );
 }
@@ -89,7 +89,7 @@ function GroupColumn({ group, delay }: { group: PeopleGroup; delay?: number }) {
 function PairsGroup({ group }: { group: PeopleGroup }) {
   return (
     <div className="mb-24 md:mb-32">
-      <h3 className="font-cinzel text-[10px] md:text-xs uppercase tracking-[0.3em] text-accent/80 text-center mb-12 flex items-center justify-center gap-4">
+      <h3 className="font-heading text-[10px] md:text-xs uppercase tracking-[0.3em] text-accent/80 text-center mb-12 flex items-center justify-center gap-4">
         <span className="w-16 md:w-32 h-[1px] bg-gradient-to-r from-transparent to-accent/30"></span>
         {group.title}
         <span className="w-16 md:w-32 h-[1px] bg-gradient-to-l from-transparent to-accent/30"></span>
@@ -143,8 +143,8 @@ export function EntourageScreen({ onContinue }: EntourageScreenProps) {
 
       <div className="max-w-6xl mx-auto relative z-10 w-full">
         <TextsReveal className="text-center mb-16 md:mb-20 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-accent-light/80 tracking-widest block mb-4">{content.entourage.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-ink font-light tracking-widest drop-shadow-md text-center">{content.entourage.title}</h2>
+          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.entourage.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md text-center">{content.entourage.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6"></div>
         </TextsReveal>
 

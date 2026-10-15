@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server';
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
 import { paths } from '@/lib/eventPaths';
+import { MUSIC_MAX_BYTES, MUSIC_UPLOAD_PREFIX } from '@/lib/music';
 
 // Issues short-lived Vercel Blob client-upload tokens to signed-in admins only.
-// The browser then uploads straight to Blob (see src/lib/blob/uploadImage.ts).
+// The browser then uploads straight to Blob (see src/lib/blob/uploadImage.ts,
+// and uploadAudio.ts for paths under music/, which get the audio type and cap).
 // Auth is the Firebase ID token sent as clientPayload, not the `session`
 // cookie: the editors already act with the client SDK login (auto-refreshed),
 // while the 5-day session cookie can expire with the admin page still open.
@@ -23,11 +25,12 @@ export async function POST(request: Request) {
     const result = await handleUpload({
       body,
       request,
-      onBeforeGenerateToken: async (_pathname, clientPayload) => {
+      onBeforeGenerateToken: async (pathname, clientPayload) => {
         await assertAdmin(clientPayload);
+        const isMusic = pathname.startsWith(MUSIC_UPLOAD_PREFIX);
         return {
-          allowedContentTypes: ['image/*'],
-          maximumSizeInBytes: 20 * 1024 * 1024,
+          allowedContentTypes: isMusic ? ['audio/*'] : ['image/*'],
+          maximumSizeInBytes: isMusic ? MUSIC_MAX_BYTES : 20 * 1024 * 1024,
           addRandomSuffix: true,
           // Keep the ID token out of the signed client token.
           tokenPayload: null,

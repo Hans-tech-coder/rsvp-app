@@ -108,7 +108,7 @@ browser don't share progress or an unlocked RSVP.
    default palette without a saved theme) inlined as hex because email clients
    cannot read CSS variables (`line` and `muted` are blended with `mixHex()`, since
    many clients drop `rgba()`), and Cinzel / Cormorant Garamond / Inter
-   from Google Fonts. Gmail and Outlook block web fonts and fall back to
+   from Google Fonts (the Classic pairing, whatever the event's font pairing). Gmail and Outlook block web fonts and fall back to
    Georgia/Arial. Content follows the same precedence as `WeddingContentContext` (JSON defaults,
    then the event's `content/details`, `dressCode`, `globalSettings`, `theme`).Missing Gmail
    env vars or a failed send are logged and never fail the RSVP.
@@ -255,8 +255,11 @@ click throws a gold sparkle burst. The particles are drawn on one fixed canvas
 
 ## Music
 
-`AudioPlayer` (mounted in `src/app/[event]/page.tsx` and `not-found.tsx`) renders `<audio id="wedding-bg-music"
-src="/bg-music.mp3" preload="none">` and a toggle. It downloads only when
+`AudioPlayer` (mounted in `src/app/[event]/page.tsx` and `not-found.tsx` with
+the event's `content/music`, see `docs/content-system.md`) renders `<audio id="wedding-bg-music"
+src=… preload="none">` and a toggle: the event's uploaded track, or
+`/bg-music.mp3` when none. When the event turned music off it renders nothing
+(the `getElementById` callers below already allow a missing element). It downloads only when
 `.play()` is first called, so the 5.4 MB file does not compete with the first load. Browsers block autoplay, so `nextStep` on
 step 0 (the first user tap) calls `.play()`. `OurStoryScreen` also reaches the
 element by id.
@@ -266,7 +269,7 @@ The controls sit bottom-right (`#audio-controls`, hidden while
 
 - **Mute button.** A tap/click pauses or resumes the music. The icon follows the
   state (`VolumeX` muted, `Volume1` below 50 %, `Volume2` otherwise).
-- **Volume slider** (0–100 %, default 50 %). A solid pill that slides out of
+- **Volume slider** (0–100 %, starts at the event's saved volume, default 50 %). A solid pill that slides out of
   the button to the left (400 ms smooth-out) and back into it (350 ms
   ease-in-out), transform only and no fade: its left border leads out, and on
   close the right side goes in first and the left border last

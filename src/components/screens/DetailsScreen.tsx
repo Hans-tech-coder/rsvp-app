@@ -64,12 +64,12 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
 
       <div className="max-w-6xl mx-auto relative z-10 w-full">
         <TextsReveal className="text-center mb-16 relative z-10 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-accent-light/80 tracking-widest block mb-4">{content.details.header?.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-ink font-light tracking-widest drop-shadow-md">
+          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.details.header?.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">
             {content.details.header?.title}
           </h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6"></div>
-          <p className="text-base font-cormorant italic text-accent-light/70 mt-3 max-w-lg mx-auto">{content.details.header?.description}</p>
+          <p className="text-base font-elegant italic text-accent-light/70 mt-3 max-w-lg mx-auto">{content.details.header?.description}</p>
         </TextsReveal>
 
         {/* Two cards per row on desktop; one venue, or the last of an odd number, is centered */}
@@ -83,14 +83,14 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
             <div>
               <div className="flex justify-between items-start mb-6">
                 {venue.subtitle ? <span className="text-[10px] uppercase tracking-[0.3em] bg-accent/10 border border-accent/30 text-accent-light px-3 py-1 font-semibold rounded-full">{venue.subtitle}</span> : <span />}
-                <span className="text-sm font-cinzel text-accent-light/70">{venue.time}</span>
+                <span className="text-sm font-heading text-accent-light/70">{venue.time}</span>
               </div>
-              <h3 className="text-3xl font-cinzel text-ink font-light tracking-wide mb-4">{venue.title}</h3>
+              <h3 className="text-3xl font-heading text-ink font-light tracking-wide mb-4">{venue.title}</h3>
               <div className="w-16 h-[1px] bg-gradient-to-r from-accent/50 to-transparent mb-6"></div>
-              <p className="text-sm font-cormorant text-ink mb-6 leading-relaxed">
+              <p className="text-sm font-elegant text-ink mb-6 leading-relaxed">
                 {venue.description}
               </p>
-              <div className="space-y-3 text-sm text-ink mb-8 font-cormorant tracking-wide">
+              <div className="space-y-3 text-sm text-ink mb-8 font-elegant tracking-wide">
                 {venue.location && (
                 <div className="flex items-start">
                   <span className="text-accent mr-3 mt-[2px]">✦</span>
@@ -184,7 +184,7 @@ export function DetailsScreen({ onContinue }: DetailsScreenProps) {
               className="bg-surface border border-primary-light/30 w-full max-w-4xl h-[80vh] rounded-xl overflow-hidden relative flex flex-col shadow-2xl"
             >
               <div className="flex justify-between items-center p-4 border-b border-accent/20 bg-surface">
-                <h3 className="font-cinzel tracking-widest text-accent-light">{text.details.mapTitle}</h3>
+                <h3 className="font-heading tracking-widest text-accent-light">{text.details.mapTitle}</h3>
                 <button onClick={closeMap} className="text-ink/70 hover:text-accent transition-colors">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>

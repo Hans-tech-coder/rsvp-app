@@ -241,10 +241,10 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
       <div className="max-w-4xl mx-auto w-full relative z-10">
         <div className="bg-surface/40 p-6 sm:p-8 md:p-12 rounded-xl border border-primary-light/30 shadow-lg">
           <TextsReveal className="text-center mb-12 flex flex-col items-center">
-            <span className="text-sm font-cormorant italic text-accent-light/80 tracking-widest block mb-1">{formContent.header.subtitle}</span>
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-ink font-light tracking-widest drop-shadow-md">{formContent.header.title}</h2>
+            <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-1">{formContent.header.subtitle}</span>
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{formContent.header.title}</h2>
             <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-5"></div>
-            <p className="text-base font-cormorant italic text-accent-light/90 mt-6 leading-relaxed max-w-2xl mx-auto whitespace-pre-line">
+            <p className="text-base font-elegant italic text-accent-light/90 mt-6 leading-relaxed max-w-2xl mx-auto whitespace-pre-line">
               {formContent.header.description}
             </p>
           </TextsReveal>
@@ -255,7 +255,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
             onInput={() => setRequiredHint(false)}
             noValidate
             data-hint={requiredHint ? 'on' : undefined}
-            className="group/form space-y-8 font-inter"
+            className="group/form space-y-8 font-body"
           >
 
             {/* Full Name (its asterisk carries the form-wide "required" hint) */}
@@ -281,8 +281,8 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                         {/* Same card as the music hint in AudioPlayer.tsx */}
                         <span className="relative flex flex-col gap-0.5 pl-4 pr-5 py-2.5 border border-accent/50 bg-surface/85 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
                           <span aria-hidden="true" className="absolute inset-[3px] border border-accent/20 pointer-events-none"></span>
-                          <span className="font-cinzel text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-accent-light">{text.rsvp.requiredHintTitle}</span>
-                          <span className="font-cormorant italic text-sm text-ink/85 tracking-wide">
+                          <span className="font-heading text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-accent-light">{text.rsvp.requiredHintTitle}</span>
+                          <span className="font-elegant italic text-sm text-ink/85 tracking-wide">
                             {fillNodes(text.rsvp.requiredHintText, { star: <span className="not-italic text-red-400">*</span> })}
                           </span>
                           {/* Caret pointing left at the asterisk */}
@@ -384,7 +384,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                       <span aria-hidden="true" className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors duration-300 ${selected ? 'border-accent' : 'border-accent/60'}`}>
                         <span className={`w-2.5 h-2.5 rounded-full bg-accent transition-transform duration-200 ${selected ? 'scale-100' : 'scale-0'}`} />
                       </span>
-                      <span className="text-base font-cormorant italic text-ink">
+                      <span className="text-base font-elegant italic text-ink">
                         {option === 'Yes' ? formContent.attendanceOptions.yes : formContent.attendanceOptions.no}
                       </span>
                     </label>
@@ -467,7 +467,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
                     </svg>
                   </div>
                 </div>
-                <span className="text-xs font-inter text-ink/70 group-hover:text-ink/90 transition-colors leading-relaxed">
+                <span className="text-xs font-body text-ink/70 group-hover:text-ink/90 transition-colors leading-relaxed">
                   {formContent.actions.privacyText} <span className="text-red-400 group-data-[hint=on]/form:motion-safe:animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_3]" aria-hidden="true">*</span>
                 </span>
               </label>
@@ -517,10 +517,10 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
               {/* Decorative elements */}
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
 
-              <h3 className="text-3xl font-cinzel text-accent-light mb-4 tracking-wide">{formContent.successModal.title}</h3>
+              <h3 className="text-3xl font-heading text-accent-light mb-4 tracking-wide">{formContent.successModal.title}</h3>
               <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mb-6"></div>
 
-              <p className="text-lg font-cormorant italic text-ink/90 mb-8 leading-relaxed whitespace-pre-line">
+              <p className="text-lg font-elegant italic text-ink/90 mb-8 leading-relaxed whitespace-pre-line">
                 {formContent.successModal.description}
               </p>
 

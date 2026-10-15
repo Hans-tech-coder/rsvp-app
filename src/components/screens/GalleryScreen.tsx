@@ -124,8 +124,8 @@ export function GalleryScreen({ onContinue, onLightboxChange }: GalleryScreenPro
 
       <div className="max-w-7xl mx-auto text-center w-full relative z-10">
         <TextsReveal className="mb-16 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-accent-light/80 tracking-widest block mb-4">{content.galleryHeader?.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-ink font-light tracking-widest drop-shadow-md">{content.galleryHeader?.title}</h2>
+          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.galleryHeader?.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{content.galleryHeader?.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6"></div>
         </TextsReveal>
 

@@ -118,7 +118,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
           className="text-center mb-16"
         >
           <span className="text-sm uppercase tracking-[0.4em] text-accent block mb-4">{text.curatedRegistry.title}</span>
-          <p className="text-base font-cormorant italic text-accent-light/80 max-w-xl mx-auto">
+          <p className="text-base font-elegant italic text-accent-light/80 max-w-xl mx-auto">
             {text.curatedRegistry.intro}
           </p>
         </motion.div>
@@ -146,7 +146,7 @@ export function CuratedRegistryScreen({ isOpen, onClose }: CuratedRegistryScreen
                       {gift.iconFn ? gift.iconFn() : defaultIcon()}
                     </svg>
                   </div>
-                  <h3 className={`text-[8px] sm:text-[10px] text-center font-cinzel tracking-widest leading-relaxed uppercase ${isAvailable ? 'text-ink' : 'text-ink/50'}`}>
+                  <h3 className={`text-[8px] sm:text-[10px] text-center font-heading tracking-widest leading-relaxed uppercase ${isAvailable ? 'text-ink' : 'text-ink/50'}`}>
                     {gift.name}
                   </h3>
                 </div>

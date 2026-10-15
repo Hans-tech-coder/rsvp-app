@@ -56,14 +56,14 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
 
       <div className="max-w-4xl mx-auto text-center w-full relative z-10">
         <TextsReveal className="mb-16 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-accent-light/80 tracking-widest block mb-4">{content.dressCode.header?.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-ink font-light tracking-widest drop-shadow-md">{content.dressCode.header?.title}</h2>
+          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.dressCode.header?.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{content.dressCode.header?.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6"></div>
         </TextsReveal>
 
         <ScrollReveal className="bg-surface/60 p-8 md:p-12 rounded-xl border border-accent/20 shadow-md">
           <p className="text-sm uppercase tracking-[0.2em] text-accent font-semibold mb-3">Dress Code: {content.dressCode.title}</p>
-          <p className="text-base font-cormorant italic text-accent-light max-w-2xl mx-auto leading-relaxed mb-10">
+          <p className="text-base font-elegant italic text-accent-light max-w-2xl mx-auto leading-relaxed mb-10">
             {content.dressCode.description}
           </p>
 
@@ -90,7 +90,7 @@ export function DressCodeScreen({ onContinue, onLightboxChange }: DressCodeScree
             {guidelines.map((guideline) => (
             <div key={guideline.id}>
               <h4 className="text-xs uppercase tracking-[0.25em] text-accent font-bold mb-3">{guideline.title}</h4>
-              <p className="text-sm font-cormorant text-ink leading-relaxed">
+              <p className="text-sm font-elegant text-ink leading-relaxed">
                 {guideline.text}
               </p>
             </div>

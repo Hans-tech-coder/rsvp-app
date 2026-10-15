@@ -1,7 +1,10 @@
 // Each event's color theme: the semantic color tokens of globals.css `@theme`
 // (`--color-ink`, `--color-primary`, ...), saved per event in `content/theme`
 // and written as a `:root` style by the event page, so a new palette needs no
-// rebuild. Pure, used by the server pages and the Theme editor.
+// rebuild. The doc also holds the event's font pairing (src/lib/fonts.ts),
+// written into the same style. Pure, used by the server pages and the Theme editor.
+
+import { DEFAULT_FONT_PAIRING_ID, fontDeclarations, getFontPairing, isFontPairingId } from './fonts';
 
 export const THEME_COLOR_KEYS = [
   'primary', 'accent', 'surface', 'ink',
@@ -11,8 +14,11 @@ export const THEME_COLOR_KEYS = [
 export type ThemeColorKey = (typeof THEME_COLOR_KEYS)[number];
 export type ThemeColors = Record<ThemeColorKey, string>;
 
-/** The `content/theme` doc. `preset` is the preset the colors came from, or 'custom'. */
-export type Theme = { preset: string; colors: ThemeColors };
+/**
+ * The `content/theme` doc. `preset` is the preset the colors came from, or
+ * 'custom'; `fontPairing` is an id from FONT_PAIRINGS.
+ */
+export type Theme = { preset: string; colors: ThemeColors; fontPairing: string };
 
 type ColorInfo = {
   /** CSS variable in globals.css `@theme` (Tailwind: bg-/text-/border-<name>) */
@@ -90,17 +96,19 @@ export const CUSTOM_PRESET_ID = 'custom';
 export const DEFAULT_THEME: Theme = {
   preset: DEFAULT_THEME_PRESET_ID,
   colors: { ...THEME_PRESETS.find((p) => p.id === DEFAULT_THEME_PRESET_ID)!.colors },
+  fontPairing: DEFAULT_FONT_PAIRING_ID,
 };
 
 const HEX = /^#[0-9a-f]{6}$/i;
 export const isHexColor = (value: unknown): value is string => typeof value === 'string' && HEX.test(value);
 
-/** A saved `content/theme` doc over the default: known keys only, an invalid color keeps the default. */
+/** A saved `content/theme` doc over the default: known keys only, an invalid color or pairing keeps the default. */
 export function mergeTheme(doc: unknown): Theme {
-  const theme: Theme = { preset: DEFAULT_THEME.preset, colors: { ...DEFAULT_THEME.colors } };
+  const theme: Theme = { ...DEFAULT_THEME, colors: { ...DEFAULT_THEME.colors } };
   if (!doc || typeof doc !== 'object') return theme;
-  const { preset, colors } = doc as { preset?: unknown; colors?: Record<string, unknown> };
+  const { preset, colors, fontPairing } = doc as { preset?: unknown; colors?: Record<string, unknown>; fontPairing?: unknown };
   if (typeof preset === 'string' && preset) theme.preset = preset;
+  if (isFontPairingId(fontPairing)) theme.fontPairing = fontPairing;
   if (colors && typeof colors === 'object') {
     for (const key of THEME_COLOR_KEYS) {
       if (isHexColor(colors[key])) theme.colors[key] = colors[key].toUpperCase();
@@ -114,9 +122,13 @@ export function themeDeclarations(colors: ThemeColors): string {
   return THEME_COLOR_KEYS.map((key) => `${THEME_COLOR_INFO[key].cssVar}:${colors[key]};`).join('');
 }
 
-/** The `:root` rule the event page writes; unlayered, so it beats Tailwind's `@layer theme`. */
-export function themeCss(colors: ThemeColors): string {
-  return `:root{${themeDeclarations(colors)}}`;
+/**
+ * The `:root` rule the event page writes (colors and font roles); unlayered,
+ * so it beats Tailwind's `@layer theme`. The theme must be merged: hex colors
+ * and a known pairing only.
+ */
+export function themeCss(theme: Theme): string {
+  return `:root{${themeDeclarations(theme.colors)}${fontDeclarations(getFontPairing(theme.fontPairing))}}`;
 }
 
 // ---- color math (sRGB hex) ----

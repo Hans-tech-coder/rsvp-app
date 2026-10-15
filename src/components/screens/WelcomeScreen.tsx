@@ -135,8 +135,8 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         </motion.div>
 
         <TextsReveal isHero className="px-4 w-full max-w-4xl mt-6 lg:mt-8">
-          <span className="text-sm font-cormorant italic text-ink/90 tracking-widest block mb-4">{content.welcomeScreen.topText}</span>
-          <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-cinzel text-ink font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
+          <span className="text-sm font-elegant italic text-ink/90 tracking-widest block mb-4">{content.welcomeScreen.topText}</span>
+          <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-heading text-ink font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
             {/* "Hans & Czay"; three or more hosts: "A, B & C" */}
             {names.map((name, i) => (
               <React.Fragment key={i}>
@@ -147,7 +147,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           </h2>
           <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto my-8"></div>
           <p className="text-xs uppercase tracking-[0.3em] text-ink/90 mb-3">{content.welcomeScreen.bottomText1}</p>
-          <p className="text-lg md:text-2xl font-cormorant italic text-ink tracking-wider drop-shadow-md">{content.welcomeScreen.bottomText2}</p>
+          <p className="text-lg md:text-2xl font-elegant italic text-ink tracking-wider drop-shadow-md">{content.welcomeScreen.bottomText2}</p>
         </TextsReveal>
         </div>
 
@@ -156,25 +156,25 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           {use3d && <MotionHint />}
           <div className="grid grid-cols-4 gap-2 md:gap-8 bg-surface/50 backdrop-blur-md px-4 md:px-6 py-4 rounded-xl border border-accent/20 w-full max-w-md mb-6 shadow-xl">
             <div className="text-center">
-              <span className="block text-2xl md:text-3xl font-cinzel text-ink drop-shadow-md">
+              <span className="block text-2xl md:text-3xl font-heading text-ink drop-shadow-md">
                 {mounted ? <PopInNumber value={timeLeft.days} /> : '00'}
               </span>
               <span className="text-[9px] uppercase tracking-widest text-ink/70">{text.welcome.days}</span>
             </div>
             <div className="text-center border-l border-accent/20">
-              <span className="block text-2xl md:text-3xl font-cinzel text-ink drop-shadow-md">
+              <span className="block text-2xl md:text-3xl font-heading text-ink drop-shadow-md">
                 {mounted ? <PopInNumber value={timeLeft.hours} /> : '00'}
               </span>
               <span className="text-[9px] uppercase tracking-widest text-ink/70">{text.welcome.hours}</span>
             </div>
             <div className="text-center border-l border-accent/20">
-              <span className="block text-2xl md:text-3xl font-cinzel text-ink drop-shadow-md">
+              <span className="block text-2xl md:text-3xl font-heading text-ink drop-shadow-md">
                 {mounted ? <PopInNumber value={timeLeft.minutes} /> : '00'}
               </span>
               <span className="text-[9px] uppercase tracking-widest text-ink/70">{text.welcome.minutes}</span>
             </div>
             <div className="text-center border-l border-accent/20">
-              <span className="block text-2xl md:text-3xl font-cinzel text-ink drop-shadow-md">
+              <span className="block text-2xl md:text-3xl font-heading text-ink drop-shadow-md">
                 {mounted ? <PopInNumber value={timeLeft.seconds} /> : '00'}
               </span>
               <span className="text-[9px] uppercase tracking-widest text-ink/70">{text.welcome.seconds}</span>

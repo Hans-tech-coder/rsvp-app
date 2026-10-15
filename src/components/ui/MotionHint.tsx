@@ -202,8 +202,8 @@ function HintBody({ as, onClick, title, sub, icon }: {
       <span aria-hidden="true" className="absolute inset-[3px] border border-accent/20 pointer-events-none"></span>
       <span aria-hidden="true" className="flex h-9 w-9 [@media(max-height:700px)]:h-6 [@media(max-height:700px)]:w-6 items-center justify-center text-accent-light">{icon}</span>
       <span className="flex flex-col">
-        <span className="font-cinzel text-[11px] uppercase tracking-[0.3em] text-accent-light">{title}</span>
-        <span className="[@media(max-height:700px)]:hidden font-cormorant italic text-sm text-ink/80 tracking-wide">{sub}</span>
+        <span className="font-heading text-[11px] uppercase tracking-[0.3em] text-accent-light">{title}</span>
+        <span className="[@media(max-height:700px)]:hidden font-elegant italic text-sm text-ink/80 tracking-wide">{sub}</span>
       </span>
     </Tag>
   );

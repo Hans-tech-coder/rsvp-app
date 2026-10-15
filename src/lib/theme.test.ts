@@ -32,10 +32,17 @@ describe('theme', () => {
     expect(mergeTheme(undefined)).toEqual(DEFAULT_THEME);
   });
 
+  it('mergeTheme keeps a known font pairing only', () => {
+    expect(mergeTheme({ fontPairing: 'modern' }).fontPairing).toBe('modern');
+    expect(mergeTheme({ fontPairing: 'comic-sans' }).fontPairing).toBe(DEFAULT_THEME.fontPairing);
+    expect(mergeTheme({ fontPairing: '</style>' }).fontPairing).toBe(DEFAULT_THEME.fontPairing);
+  });
+
   it('themeCss writes one :root rule with every variable', () => {
-    const css = themeCss(DEFAULT_THEME.colors);
+    const css = themeCss(DEFAULT_THEME);
     expect(css.startsWith(':root{')).toBe(true);
     expect(css).toContain('--color-primary:#800020;');
+    expect(css).toContain('--font-heading:var(--font-cinzel), serif;');
     expect(css).not.toMatch(/[<>]/);
   });
 

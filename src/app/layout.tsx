@@ -1,27 +1,10 @@
 import type { Metadata } from "next";
-import { Cinzel, Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Script from "next/script";
 import { getThemeScript } from "@teispace/next-themes/server";
 import { getSiteUrl } from "@/lib/siteUrl";
-
-const cinzel = Cinzel({
-  variable: "--font-cinzel",
-  subsets: ["latin"],
-});
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant-garamond",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
+import { fontVariables } from "./fonts";
 
 // Event pages and the 404 set their own title, icon and link preview
 // (src/app/[event]/page.tsx); this title is what the admin pages show.
@@ -38,7 +21,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cinzel.variable} ${cormorant.variable} ${inter.variable} antialiased`}
+      className={`${fontVariables} antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -58,7 +41,7 @@ addEventListener('pointermove',on,{passive:true,capture:true});
 addEventListener('pointerdown',on,{passive:true,capture:true})})()`}
         </Script>
       </head>
-      <body className="min-h-screen bg-surface-soft text-ink overflow-hidden selection:bg-ink/10 selection:text-ink font-inter" suppressHydrationWarning>
+      <body className="min-h-screen bg-surface-soft text-ink overflow-hidden selection:bg-ink/10 selection:text-ink font-body" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -30,10 +30,10 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
 
       <div className="max-w-4xl mx-auto w-full relative z-10">
         <TextsReveal className="text-center mb-16 flex flex-col items-center">
-          <span className="text-sm font-cormorant italic text-accent-light/80 tracking-widest block mb-4">{content.registry?.header?.subtitle}</span>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-cinzel text-ink font-light tracking-widest drop-shadow-md">{content.registry?.header?.title}</h2>
+          <span className="text-sm font-elegant italic text-accent-light/80 tracking-widest block mb-4">{content.registry?.header?.subtitle}</span>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-ink font-light tracking-widest drop-shadow-md">{content.registry?.header?.title}</h2>
           <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-accent/50 to-transparent mx-auto mt-6"></div>
-          <p className="text-base font-cormorant italic text-accent-light/70 mt-3 max-w-md mx-auto">
+          <p className="text-base font-elegant italic text-accent-light/70 mt-3 max-w-md mx-auto">
             {content.registry?.header?.description}
           </p>
         </TextsReveal>
@@ -46,8 +46,8 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-surface" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
               </div>
-              <h3 className="text-xl font-cinzel text-ink font-light mb-3">{content.registry?.bankTransfer?.title}</h3>
-              <p className="text-sm font-cormorant text-ink mb-6 leading-relaxed">
+              <h3 className="text-xl font-heading text-ink font-light mb-3">{content.registry?.bankTransfer?.title}</h3>
+              <p className="text-sm font-elegant text-ink mb-6 leading-relaxed">
                 {content.registry?.bankTransfer?.description}
               </p>
               
@@ -73,8 +73,8 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-surface" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
               </div>
-              <h3 className="text-xl font-cinzel text-ink font-light mb-3">{content.registry?.curatedRegistry?.title}</h3>
-              <p className="text-sm font-cormorant text-ink mb-6 leading-relaxed">
+              <h3 className="text-xl font-heading text-ink font-light mb-3">{content.registry?.curatedRegistry?.title}</h3>
+              <p className="text-sm font-elegant text-ink mb-6 leading-relaxed">
                 {content.registry?.curatedRegistry?.description1}
               </p>
               <p className="text-xs text-ink/60 leading-relaxed mb-8">
@@ -129,8 +129,8 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
               </button>
               
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-cinzel text-accent-light mb-2">{selectedBank}</h3>
-                <p className="text-sm font-cormorant text-ink/80">{text.registry.scanQr}</p>
+                <h3 className="text-2xl font-heading text-accent-light mb-2">{selectedBank}</h3>
+                <p className="text-sm font-elegant text-ink/80">{text.registry.scanQr}</p>
               </div>
 
               <div className="bg-white p-4 rounded-lg aspect-square flex items-center justify-center mb-6">
@@ -144,13 +144,13 @@ export function RegistryScreen({ onContinue }: RegistryScreenProps) {
                 ) : (
                   <div className="w-full h-full border-4 border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400">
                     <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4"></path></svg>
-                    <span className="text-xs font-inter uppercase tracking-wider text-center px-4">{fillText(text.registry.qrMissing, { bank: selectedBank })}</span>
+                    <span className="text-xs font-body uppercase tracking-wider text-center px-4">{fillText(text.registry.qrMissing, { bank: selectedBank })}</span>
                   </div>
                 )}
               </div>
 
               <div className="text-center">
-                <p className="text-xs font-inter text-ink/60 uppercase tracking-widest">{text.registry.thankYou}</p>
+                <p className="text-xs font-body text-ink/60 uppercase tracking-widest">{text.registry.thankYou}</p>
               </div>
             </motion.div>
           </motion.div>
