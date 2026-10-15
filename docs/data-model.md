@@ -16,20 +16,22 @@ collection (the Node scripts keep their own copy of the names). The rest of the
 docs write event subcollections short: `guests` means
 `events/{eventId}/guests`, `content/<doc>` means `events/{eventId}/content/<doc>`.
 
-There is one event, `hans-and-czay` (`DEFAULT_EVENT_ID`, override with
-`NEXT_PUBLIC_DEFAULT_EVENT_ID`). The event ID is also its URL: the guest site
+The default event is `hans-and-czay` (`DEFAULT_EVENT_ID`, override with
+`NEXT_PUBLIC_DEFAULT_EVENT_ID`): `/` opens it. Admins add more from All
+Events (`/admin`, F11). The event ID is also its URL: the guest site
 is `/<eventId>` (`src/app/[event]/page.tsx`), and an ID without an
-`events/{eventId}` doc is a 404. Until the admin event switcher (F11) exists,
-every admin page (`const eventId = DEFAULT_EVENT_ID`) edits the default event.
+`events/{eventId}` doc, or an archived event, is a 404. The admin pages edit
+the event picked in the sidebar switcher (`adminEvent` cookie,
+`getCurrentEventId`; see `docs/admin.md`).
 Guest components get the ID from `useWeddingContent().eventId`; admin client
 components and content editors get it as an `eventId` prop. Every server
 action takes `eventId` as its first argument and checks the caller's role
-in that event (`docs/security.md`). Event IDs that equal a top-level route (`admin`, `api`) would be
-shadowed by it; F11 must refuse them.
+in that event (`docs/security.md`). Event IDs that equal a top-level route or `public/` folder (`admin`, `api`,
+`images`) would be shadowed by it; `isFreeEventId` refuses them for new events.
 
 | Path | Doc ID | Written by | Read by |
 | --- | --- | --- | --- |
-| `events/{eventId}` | event ID: lowercase letters, digits, inner hyphens, max 64 (`isValidEventId`) | `scripts/migrate-to-events.js` | `getEventContent` (exists → the event's page is served; fields not read yet). Fields: `slug` (= the ID), `type` (`'wedding'`), `status` (`'active'`), `createdAt` |
+| `events/{eventId}` | event ID: lowercase letters, digits, inner hyphens, max 64 (`isValidEventId`) | `scripts/migrate-to-events.js`; `createEvent`, `duplicateEvent`, `renameEvent` (new ID; the old one is deleted with every subcollection), `setEventArchived`, `deleteEvent` (`src/app/actions/events.ts`) | `readEventDocs` (exists and not archived → the event's page is served; the admin preview ignores `status`); `src/lib/platformEvents.ts` (All Events, switcher). Fields: `slug` (= the ID), `name` (list name; missing on `hans-and-czay`, which falls back to `globalSettings.coupleNameFormat`, then the ID), `type` (`'wedding'`), `status` (`'active'` or `'archived'`), `createdAt`, `createdBy` (uid), `duplicatedFrom` / `renamedFrom` (event ID) |
 | `…/guests` | the invite code (e.g. `K7MPQ2`), unique per event | server actions (`admin.ts`, `rsvp.ts`) | admin pages; `verifyInviteCode` |
 | `…/registryGifts` | auto ID | server actions (`admin.ts`, `registry.ts`) | `getRegistryGifts`; admin gifts/dashboard |
 | `…/giftSelections` | auto ID | `claimGift`; deleted by `resetRegistryGift` / `deleteGiftSelection` | admin registry page |

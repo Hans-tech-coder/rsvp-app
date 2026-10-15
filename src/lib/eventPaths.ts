@@ -23,13 +23,33 @@ export function isValidEventId(eventId: unknown): eventId is string {
 }
 
 /**
- * The event `/` redirects to, and the one the admin edits until the event
- * switcher (F11). The event ID is also its URL: `site.com/<eventId>`.
+ * The event `/` redirects to (and whose look the 404 page uses), and the one
+ * the admin opens first. The event ID is also its URL: `site.com/<eventId>`.
  * Override with NEXT_PUBLIC_DEFAULT_EVENT_ID (read at build time).
  */
 export const DEFAULT_EVENT_ID = isValidEventId(process.env.NEXT_PUBLIC_DEFAULT_EVENT_ID)
   ? process.env.NEXT_PUBLIC_DEFAULT_EVENT_ID
   : 'hans-and-czay';
+
+/** Top-level routes and folders: an event with one of these IDs would be shadowed by them. */
+const RESERVED_EVENT_IDS = ['admin', 'api', 'images'];
+
+/** A valid ID that no route or `public/` folder uses: allowed for a new event. */
+export function isFreeEventId(eventId: unknown): eventId is string {
+  return isValidEventId(eventId) && !RESERVED_EVENT_IDS.includes(eventId);
+}
+
+/** "Ana's 18th — 2027" -> "anas-18th-2027": a suggested ID (= URL) for an event name. */
+export function toEventId(name: string): string {
+  return name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .slice(0, 64)
+    .replace(/^-+|-+$/g, '');
+}
 
 // A slash in an ID would point the path at another document.
 function segment(id: string): string {
@@ -43,6 +63,7 @@ function event(eventId: string): string {
 }
 
 export const paths = {
+  events: () => 'events',
   event,
   content: (eventId: string, docId: string) => `${event(eventId)}/content/${segment(docId)}`,
   draft: (eventId: string, docId: string) => `${event(eventId)}/drafts/${segment(docId)}`,

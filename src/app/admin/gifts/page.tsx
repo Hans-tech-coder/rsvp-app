@@ -1,15 +1,13 @@
 import { getAdminDb } from '@/lib/firebase/admin';
-import { requireEventPage } from '@/lib/requireAdmin';
-import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
+import { requireCurrentEventPage } from '@/lib/requireAdmin';
+import { paths } from '@/lib/eventPaths';
 import { RegistryGift } from '@/types';
 import GiftsClient from './GiftsClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function GiftsPage() {
-  // The only event until the event switcher (F11)
-  const eventId = DEFAULT_EVENT_ID;
-  await requireEventPage(eventId);
+  const { eventId } = await requireCurrentEventPage();
 
   let gifts: RegistryGift[] = [];
   let errorMsg = null;

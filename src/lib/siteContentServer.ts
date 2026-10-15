@@ -16,13 +16,15 @@ import { mergeGlobal, type SiteGlobal } from '@/lib/weddingContent';
 
 export type { SiteGlobal };
 
-/** The event's raw content docs (drafts over live when `withDrafts`), or null when the event does not exist. */
+/** The event's raw content docs (drafts over live when `withDrafts`), or null when the event does not exist (or, live, is archived). */
 async function readEventDocs(eventId: string, withDrafts: boolean): Promise<SiteDocs | null> {
   if (!isValidEventId(eventId)) return null;
 
   const db = getAdminDb();
-  // The event first, so a made-up URL costs one read, not fifteen.
-  if (!(await db.doc(paths.event(eventId)).get()).exists) return null;
+  // The event first, so a made-up URL costs one read, not fifteen. An
+  // archived event is a 404 for guests; admins still preview it.
+  const event = await db.doc(paths.event(eventId)).get();
+  if (!event.exists || (!withDrafts && event.get('status') === 'archived')) return null;
 
   const ids = EDITABLE_DOC_IDS;
   const docs = await db.getAll(...ids.map((id) => db.doc(paths.content(eventId, id))));

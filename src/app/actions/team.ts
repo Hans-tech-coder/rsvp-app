@@ -3,16 +3,16 @@
 import { FieldPath, FieldValue } from 'firebase-admin/firestore';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
 import { paths } from '@/lib/eventPaths';
-import { getEventAccess, requireEventRole } from '@/lib/requireAdmin';
+import { requireEventRole } from '@/lib/requireAdmin';
 import { logActivity } from '@/lib/auditLog';
-import { ROLE_NAMES, isEventRole, type AccessRole, type EventRole } from '@/lib/permissions';
+import { ROLE_NAMES, isEventRole, type EventRole } from '@/lib/permissions';
 
 // An event's team (F10), for the Team page (src/app/admin/team/). Members
 // live in `events/{eventId}/members/{uid}`; each account also lists its
 // events in `admins/{uid}.eventIds` (sign-in, upload check). Someone who has
 // never signed in waits as `adminAllowlist/{email}.events[eventId]` and is
 // added on their first Google sign-in (createSessionCookie in auth.ts).
-// Organizers and owners only, except getMyEventAccess. Platform owners
+// Organizers and owners only. Platform owners
 // (`role: 'super'`) are not members: they are made with scripts/add-admin.js.
 
 const EMAIL_PATTERN = /^[^\s@/]+@[^\s@/]+\.[^\s@/]+$/;
@@ -26,12 +26,6 @@ function errorCode(error: unknown) {
 }
 
 const normalizeEmail = (raw: string) => String(raw ?? '').trim().toLowerCase();
-
-/** The signed-in account's role in the event, for the admin UI (sidebar, locks). UI only: every action checks again. */
-export async function getMyEventAccess(eventId: string): Promise<{ role: AccessRole; clientDesign: boolean; email: string | null } | null> {
-  const access = await getEventAccess(eventId);
-  return access && { role: access.role, clientDesign: access.clientDesign, email: access.email };
-}
 
 export async function addMember(eventId: string, rawEmail: string, role: EventRole) {
   try {

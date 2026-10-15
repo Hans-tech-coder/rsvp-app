@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_EVENT_ID, isValidEventId, paths } from './eventPaths';
+import { DEFAULT_EVENT_ID, isFreeEventId, isValidEventId, paths, toEventId } from './eventPaths';
 
 describe('event paths', () => {
   it('nests event data under events/{eventId}', () => {
@@ -28,5 +28,17 @@ describe('event paths', () => {
     expect(() => paths.guest('x/guests/y', 'K7MPQ2')).toThrow();
     expect(() => paths.guest('hans-and-czay', 'A/B')).toThrow();
     expect(() => paths.content('hans-and-czay', '')).toThrow();
+  });
+
+  it('refuses IDs a route would shadow', () => {
+    expect(isFreeEventId('ana-18th')).toBe(true);
+    for (const taken of ['admin', 'api', 'images', 'Bad']) expect(isFreeEventId(taken)).toBe(false);
+  });
+
+  it('suggests an ID from an event name', () => {
+    expect(toEventId("Ana's 18th — 2027")).toBe('anas-18th-2027');
+    expect(toEventId('  José & María  ')).toBe('jose-maria');
+    expect(toEventId('!!!')).toBe('');
+    expect(isValidEventId(toEventId('x'.repeat(80)))).toBe(true);
   });
 });

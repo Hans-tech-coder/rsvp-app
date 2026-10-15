@@ -2,7 +2,7 @@ import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
-import { isValidEventId, paths } from '@/lib/eventPaths';
+import { DEFAULT_EVENT_ID, isValidEventId, paths } from '@/lib/eventPaths';
 import { hasRole, isEventRole, type AccessRole, type EventAccess } from '@/lib/permissions';
 
 /** A signed-in account. `isOwner` = platform owner (`role: 'super'`), who may open every event. */
@@ -74,4 +74,53 @@ export async function requireEventPage(eventId: string, min: AccessRole = 'clien
   if (!access) redirect('/api/logout');
   if (!hasRole(access.role, min)) redirect('/admin/dashboard');
   return access;
+}
+
+/** The event the admin pages show (set by /admin/open/<eventId>, the event switcher). */
+export const ADMIN_EVENT_COOKIE = 'adminEvent';
+
+export const ADMIN_EVENT_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  path: '/',
+  maxAge: 60 * 60 * 24 * 365,
+} as const;
+
+/** The event exists and the signed-in account has a role in it. */
+export async function canOpenEvent(eventId: unknown): Promise<boolean> {
+  if (!isValidEventId(eventId)) return false;
+  const access = await getEventAccess(eventId);
+  if (!access) return false;
+  // An owner's role does not prove the event exists; a member's doc is deleted with its event.
+  return access.role !== 'owner' || (await getAdminDb().doc(paths.event(eventId)).get()).exists;
+}
+
+/**
+ * The event the signed-in account is working on: the one picked in the
+ * switcher (`adminEvent` cookie) while the account still has access to it,
+ * else the default event, else the account's first event. Null when there is
+ * no session or no event to open.
+ */
+export const getCurrentEventId = cache(async (): Promise<string | null> => {
+  const admin = await getAdmin();
+  if (!admin) return null;
+
+  const picked = (await cookies()).get(ADMIN_EVENT_COOKIE)?.value;
+  for (const eventId of new Set([picked, DEFAULT_EVENT_ID, ...admin.eventIds])) {
+    if (isValidEventId(eventId) && (await canOpenEvent(eventId))) return eventId;
+  }
+  if (!admin.isOwner) return null;
+  const first = await getAdminDb().collection(paths.events()).limit(1).get();
+  return first.empty ? null : first.docs[0].id;
+});
+
+/**
+ * requireEventPage for the current event, plus its ID. An account with no
+ * event to open goes to the events list (/admin), where an owner can make one.
+ */
+export async function requireCurrentEventPage(min: AccessRole = 'client'): Promise<EventSession & { eventId: string }> {
+  const eventId = await getCurrentEventId();
+  if (!eventId) redirect((await getAdmin()) ? '/admin' : '/api/logout');
+  return { ...(await requireEventPage(eventId, min)), eventId };
 }

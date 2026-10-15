@@ -3,16 +3,23 @@
 import { createContext, useContext } from 'react';
 import type { AccessRole, EventAccess } from '@/lib/permissions';
 
-// The signed-in account's role in the event being edited, loaded once by the
-// admin layout (getMyEventAccess). UI only, to hide or disable what the role
-// may not change (src/lib/permissions.ts); every server action checks again.
-export type MyEventAccess = { role: AccessRole; clientDesign: boolean; email: string | null };
+// The event being edited (picked in the event switcher) and the signed-in
+// account's role in it, read by the server admin layout (layout.tsx). UI only,
+// to hide or disable what the role may not change (src/lib/permissions.ts);
+// every server action checks again. Null on the login page and for an
+// account with no event to open.
+export type MyEventAccess = { eventId: string; role: AccessRole; clientDesign: boolean; email: string | null };
 
 const EventAccessContext = createContext<MyEventAccess | null>(null);
 
 export const EventAccessProvider = EventAccessContext.Provider;
 
-/** Least access until the layout has loaded it, so locked controls never flash for a client. */
+/** The current event's ID, or null when there is none (the page then shows the events list link). */
+export function useCurrentEventId(): string | null {
+  return useContext(EventAccessContext)?.eventId ?? null;
+}
+
+/** Least access when there is none, so locked controls never show for a client. */
 const LOADING: EventAccess = { role: 'client', clientDesign: false };
 
 export function useEventAccess(): { access: MyEventAccess | null; rules: EventAccess } {

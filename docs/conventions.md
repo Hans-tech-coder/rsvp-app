@@ -11,7 +11,9 @@ Match the code around you. These are the patterns the codebase already uses.
 - `cookies()` is async: `const store = await cookies()`.
 - Server actions: file starts with `'use server'`, lives in `src/app/actions/`.
 - Admin data pages use `export const dynamic = 'force-dynamic'` and call
-  `await requireEventPage(eventId, min?)` first. Every admin server action
+  `const { eventId } = await requireCurrentEventPage(min?)` first (the event
+  picked in the switcher); client admin pages read it with
+  `useCurrentEventId()`. No admin page names `DEFAULT_EVENT_ID`. Every admin server action
   calls `await requireEventRole(eventId, min?)` as the first line inside its
   `try`, and records a mutation with `logActivity(eventId, actor, action,
   target)` (see `docs/security.md`). Who may do what is decided in

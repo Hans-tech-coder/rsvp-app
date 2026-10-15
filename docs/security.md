@@ -76,9 +76,24 @@ with the admin UI:
   `isValidEventId` and the doc ID against `EDITABLE_DOC_IDS`), `team.ts`
   (`'organizer'`) and `editLock.ts` calls it first inside its `try`, so an
   unauthorized call returns `{ success: false, error: 'Unauthorized' }`.
-  Any new admin action must do the same. `getMyEventAccess()` in `team.ts`
-  only reports the caller's role, for the sidebar and the locks; hiding a
-  control is UI only, the actions are the boundary.
+  Any new admin action must do the same. The server admin layout only reports
+  the caller's role, for the sidebar and the locks; hiding a control is UI
+  only, the actions are the boundary.
+- The current event (`adminEvent` cookie, set by `/admin/open/<eventId>`)
+  only picks which event the pages show: `getCurrentEventId` ignores a
+  cookie for an event the account cannot open (`canOpenEvent`: a role in it,
+  and for an owner, the event exists), and every page and action still checks
+  the role in the event it is given. The open link is a GET, so another site
+  could switch which of your events is shown (the sidebar shows it), never
+  open one you have no role in.
+- Platform event actions (`src/app/actions/events.ts`): `createEvent` needs
+  an owner or an organizer of any event; `duplicateEvent` an organizer of the
+  source; `renameEvent` and `setEventArchived` an organizer of the event;
+  `deleteEvent` an owner (`requireEventRole(eventId, 'owner')`) and the link
+  typed back. The default event is refused by rename, archive and delete. A
+  new event ID must pass `isFreeEventId` (not `admin`, `api`, `images`), and
+  `create()` refuses a taken ID. An archived event's guest page is a 404
+  (`readEventDocs`); its RSVP / registry actions are not blocked yet.
 - Content locks: `saveDraft`, `publishDraft` and `discardDraft` refuse a
   design doc (`theme`, `music`) unless `canEditDoc` allows it, and
   `saveDraft` refuses a `screens` doc whose order differs from the current
@@ -91,9 +106,11 @@ with the admin UI:
   owner) the account doc is deleted and `revokeRefreshTokens(uid)` called,
   so `verifySessionCookie(…, true)` rejects their 5-day session on their
   **next request**. It refuses to remove or re-role the caller.
-- `requireEventPage(eventId, min)` is the first line of every admin server
-  page (`dashboard`, `invites`, `guests`, `gifts`, `registry`: any member;
-  `team`: organizers). Without access it redirects to `/api/logout`, which
+- `requireCurrentEventPage(min)` (= `requireEventPage` on the current
+  event) is the first line of every admin server page (`dashboard`,
+  `invites`, `guests`, `gifts`, `registry`: any member; `team`:
+  organizers); with no event to open it goes to `/admin` (All Events, which
+  only needs a valid account). Without access it redirects to `/api/logout`, which
   deletes the cookie and redirects to `/admin/login` (going straight to login
   would loop, because the proxy bounces any cookie holder from login to the
   dashboard); a member below `min` goes to the dashboard.

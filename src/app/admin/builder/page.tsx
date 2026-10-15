@@ -24,9 +24,9 @@ import { ContentPageProvider } from '../content/contentDraft';
 import { PreviewFrame } from '../components/PreviewFrame';
 import { BuilderProvider, type BuilderLink, type EditorHandle } from './builderContext';
 import { useEditLock, type EditLockStatus } from './useEditLock';
-import { useEventAccess } from '../eventAccess';
+import { useCurrentEventId, useEventAccess } from '../eventAccess';
+import { NoEvent } from '../components/NoEvent';
 import { canEditDesign, DESIGN_DOC_IDS } from '@/lib/permissions';
-import { DEFAULT_EVENT_ID } from '@/lib/eventPaths';
 import { SCREEN_NAMES, SCREEN_TYPES, mergeScreens, type ScreenType } from '@/lib/screens';
 import { EMPTY_HISTORY, recordEdit, redoEntry, undoEntry } from '@/lib/builderHistory';
 import { readPreviewMessage, type BuilderMessage } from '@/lib/builderMessages';
@@ -83,9 +83,14 @@ const APPLY_WINDOW_MS = 1500;
 const toolButton =
   'inline-flex items-center gap-2 min-h-10 px-3 rounded-lg text-sm font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:pointer-events-none';
 
+/** The current event's VisualBuilderPage; nothing to edit until the account has an event. */
 export default function VisualBuilderPage() {
-  // The only event until the event switcher (F11)
-  const eventId = DEFAULT_EVENT_ID;
+  const eventId = useCurrentEventId();
+  if (!eventId) return <NoEvent />;
+  return <VisualBuilder key={eventId} eventId={eventId} />;
+}
+
+function VisualBuilder({ eventId }: { eventId: string }) {
   const [selected, setSelected] = useState<PanelId>('welcome');
   const [drawerOpen, setDrawerOpen] = useState(true);
   const [focusField, setFocusField] = useState<string | null>(null);

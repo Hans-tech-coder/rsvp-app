@@ -1,7 +1,7 @@
 import { FieldPath, Timestamp } from 'firebase-admin/firestore';
 import { getAdminDb } from '@/lib/firebase/admin';
-import { requireEventPage } from '@/lib/requireAdmin';
-import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
+import { requireCurrentEventPage } from '@/lib/requireAdmin';
+import { paths } from '@/lib/eventPaths';
 import { readActivity, type ActivityEntry } from '@/lib/auditLog';
 import { EVENT_ROLES, isEventRole, type EventRole } from '@/lib/permissions';
 import { TeamClient, type TeamInvite, type TeamMember } from './TeamClient';
@@ -13,9 +13,8 @@ const toIso = (value: unknown) => (value instanceof Timestamp ? value.toDate().t
 // The event's team (members, pending invites), the client design switch and
 // the activity log. Organizers and owners only.
 export default async function TeamPage() {
-  // The only event until the event switcher (F11)
-  const eventId = DEFAULT_EVENT_ID;
-  const me = await requireEventPage(eventId, 'organizer');
+  const me = await requireCurrentEventPage('organizer');
+  const { eventId } = me;
 
   let members: TeamMember[] = [];
   let invites: TeamInvite[] = [];

@@ -20,15 +20,20 @@ import { ThemeEditor } from './ThemeEditor';
 import { MusicEditor } from './MusicEditor';
 import { ScreensEditor } from './ScreensEditor';
 import { UnsavedChangesProvider, useUnsavedChangesGuard } from './unsavedChanges';
-import { DEFAULT_EVENT_ID } from '@/lib/eventPaths';
 import { ContentPageProvider } from './contentDraft';
 import { PreviewFrame } from '../components/PreviewFrame';
-import { useEventAccess } from '../eventAccess';
+import { useCurrentEventId, useEventAccess } from '../eventAccess';
+import { NoEvent } from '../components/NoEvent';
 import { canEditDesign } from '@/lib/permissions';
 
+/** The current event's ContentManagerPage; nothing to edit until the account has an event. */
 export default function ContentManagerPage() {
-  // The only event until the event switcher (F11)
-  const eventId = DEFAULT_EVENT_ID;
+  const eventId = useCurrentEventId();
+  if (!eventId) return <NoEvent />;
+  return <ContentManager key={eventId} eventId={eventId} />;
+}
+
+function ContentManager({ eventId }: { eventId: string }) {
   const [activeTab, setActiveTab] = useState('global-settings');
   const { setDirty, guard, dialog } = useUnsavedChangesGuard();
   // Draft preview beside the editor (lg and up) or over it (smaller screens).

@@ -2,7 +2,8 @@
 
 Private dashboard for each event's team (organizers and clients) and the
 platform owners. Sidebar and mobile header are in
-`src/app/admin/layout.tsx` (skipped on `/admin/login`). Admin UI uses plain
+`src/app/admin/AdminShell.tsx` (skipped on `/admin/login`), rendered by the
+server layout `src/app/admin/layout.tsx`. Admin UI uses plain
 Tailwind grays (`gray-*` light, `zinc-*` dark) and lucide icons — **not** the
 wedding palette.
 
@@ -27,16 +28,57 @@ wedding palette.
    (`src/lib/requireAdmin.ts`), which sends an invalid or revoked session, or
    one with no access to the event, to `/api/logout` (clears the cookie, then
    `/admin/login`).
-4. Sign out (`layout.tsx`): `auth.signOut()` + `clearSessionCookie()`.
+4. Sign out (`AdminShell.tsx`): `auth.signOut()` + `clearSessionCookie()`.
 
-Every admin page and action works on one event (the default event until the
-event switcher, F11) and checks the signed-in person's role **in that event**:
-owner, organizer or client (`src/lib/permissions.ts`, details in
-`docs/security.md`). The sidebar shows the role and email above Sign Out, and
-loads it once (`getMyEventAccess`) into `EventAccessProvider`
-(`src/app/admin/eventAccess.tsx`); editors read it with `useEventAccess()` to
-hide what the role may not change. Until it has loaded they assume the least
-access, so locked controls never flash.
+Every admin page and action works on one event, **the current event**, and
+checks the signed-in person's role **in that event**: owner, organizer or
+client (`src/lib/permissions.ts`, details in `docs/security.md`). The current
+event is the one picked in the sidebar's event switcher, kept in the
+`adminEvent` cookie (`getCurrentEventId` in `src/lib/requireAdmin.ts`); when
+it is missing or no longer open to the account, the default event, else the
+account's first event. Server pages call `requireCurrentEventPage(min?)`,
+which returns the event ID with the role. The server layout (`layout.tsx`)
+reads the current event, the role and the account's events and hands them to
+`AdminShell` → `EventAccessProvider` (`src/app/admin/eventAccess.tsx`);
+client pages read the event with `useCurrentEventId()` and the role with
+`useEventAccess()` to hide what the role may not change. Without a current
+event the sidebar shows only All Events, and Content / Visual Builder show a
+link to it (`components/NoEvent.tsx`).
+
+## All Events and the event switcher (F11)
+
+`/admin` (`page.tsx` server, `EventsClient.tsx`) lists every event the
+account may open: all of them for an owner, the memberships for anyone else.
+Each card shows the name, link, type, the date the guest site shows, the
+account's role, badges (Open now, Home page = the default event, Live /
+Archived) and the RSVP counts (attending, not attending, no reply yet,
+invites; Firestore count queries). Archived events are listed apart, below.
+
+- **Open** / the switcher: a plain link to `/admin/open/<eventId>`
+  (`open/[event]/route.ts`), which sets the `adminEvent` cookie and goes to
+  the dashboard. A plain link, so the content editors' leave guard asks first.
+- **New event** (owners, and organizers of any event): name + link
+  (suggested from the name with `toEventId`, editable). It starts with the
+  default Wedding content (templates are F12). An organizer who creates one
+  becomes its organizer; then the new event opens.
+- **Duplicate** (organizers of the event): a new event with the published
+  content, the invite message and the client design switch; guests, RSVPs,
+  gifts, drafts, versions, team and log stay behind. Then it opens.
+- **Change link** (organizers): copies every doc to the new ID, moves the
+  members' `eventIds` and pending invites, deletes the old ID. The old URL
+  becomes a 404, so do it before invitations go out.
+- **Archive / Restore** (organizers): `status: 'archived'` makes the guest
+  page a 404; nothing is deleted. Admins can still open and preview it.
+- **Delete** (owners only): type the link to confirm; deletes the event doc
+  and every subcollection. Uploaded images stay in Blob (F13).
+- The default event (`/` opens it) cannot be renamed, archived or deleted.
+- Links equal to a top-level route or `public/` folder (`admin`, `api`,
+  `images`) are refused (`isFreeEventId`).
+
+The sidebar's **event switcher** (`EventSwitcher.tsx`, above the nav) shows
+the current event and lists the account's events (archived ones marked) plus
+"Manage events" (`/admin`). The list is read by the server layout, so it is
+fresh on every full load and after `router.refresh()`.
 
 Platform owners: `node scripts/add-admin.js <email> --super` (reads
 `FIREBASE_ADMIN_*` from `.env.local`, or `GOOGLE_APPLICATION_CREDENTIALS`).
@@ -117,9 +159,10 @@ the client checks `success` and shows the error.
 ## Adding an admin page
 
 1. Create `src/app/admin/<name>/page.tsx` (server) + `<Name>Client.tsx`.
-2. Add a nav item in `navItems` in `src/app/admin/layout.tsx`.
+2. Add a nav item in `navItems` in `src/app/admin/AdminShell.tsx`.
 3. Put new mutations in `src/app/actions/admin.ts` (return the
    `{success, error}` shape) — start each with `requireEventRole(eventId, …)`
-   (see `docs/security.md`), call `requireEventPage(eventId, …)` first in the
-   page, and record the change with `logActivity`.
+   (see `docs/security.md`), call `const { eventId } = await
+   requireCurrentEventPage(…)` first in the page, and record the change with
+   `logActivity`.
 4. Update `docs/FEATURE-MAP.md` and this file.

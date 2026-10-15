@@ -1,15 +1,13 @@
 import { getAdminDb } from '@/lib/firebase/admin';
-import { requireEventPage } from '@/lib/requireAdmin';
-import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
+import { requireCurrentEventPage } from '@/lib/requireAdmin';
+import { paths } from '@/lib/eventPaths';
 import { Guest } from '@/types';
 import GuestListClient from './GuestListClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function GuestsPage() {
-  // The only event until the event switcher (F11)
-  const eventId = DEFAULT_EVENT_ID;
-  await requireEventPage(eventId);
+  const { eventId } = await requireCurrentEventPage();
 
   let guests: Guest[] = [];
   let errorMsg = null;

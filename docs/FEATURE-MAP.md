@@ -75,12 +75,12 @@ All editors are in `src/app/admin/content/`.
 | `verifyInviteCode` | `rsvp.ts` | `EntranceScreen.tsx` |
 | `submitRsvp`, `getVisitorCountry` (`x-vercel-ip-country`, else `api.country.is`) | `rsvp.ts` | `RsvpScreen.tsx` |
 | `getRegistryGifts`, `claimGift` | `registry.ts` | `CuratedRegistryScreen.tsx` |
-| `createSessionCookie`, `clearSessionCookie` | `auth.ts` | `admin/login/page.tsx`, `admin/layout.tsx` |
+| `createSessionCookie`, `clearSessionCookie` | `auth.ts` | `admin/login/page.tsx`, `admin/AdminShell.tsx` |
 | `generateInviteCodes`, `deleteInviteCode`, `regenerateInviteCode`, `toggleInviteCopiedStatus`, `getInviteMessageTemplate`, `updateInviteMessageTemplate` | `admin.ts` | `admin/invites/*`, `admin/guests/GuestListClient.tsx` (delete) |
 | `addRegistryGift`, `updateRegistryGift`, `deleteRegistryGift`, `resetRegistryGift` | `admin.ts` | `admin/gifts/GiftsClient.tsx` |
 | `deleteGiftSelection` | `admin.ts` | `admin/registry/RegistrySelectionsClient.tsx` |
 | `loadDraft`, `saveDraft` (conflict check on the draft's `updatedAt`), `publishDraft` (draft → live, version list, rebuilds the event's cached page; the default event also the 404), `discardDraft`, `getVersion`; doc shapes and pure helpers in `src/lib/contentDrafts.ts` (tested by `contentDrafts.test.ts`) | `content.ts` | every content editor, through `admin/content/contentDraft.tsx` (`useContentDraft`) and `EditorSaveBar.tsx` |
-| `getMyEventAccess` (the caller's role in the event, for the UI) | `team.ts` | `admin/layout.tsx` → `EventAccessProvider` (`admin/eventAccess.tsx`, `useEventAccess`) |
+| `createEvent`, `duplicateEvent`, `renameEvent` (change link), `setEventArchived`, `deleteEvent` (owners); copies and account moves in `src/lib/platformEvents.ts` | `events.ts` | `admin/EventsClient.tsx` |
 | `addMember`, `changeMemberRole`, `removeMember`, `cancelInvite`, `setClientDesign` (organizers and owners) | `team.ts` | `admin/team/TeamClient.tsx` |
 | `holdEditLock`, `releaseEditLock` (the visual builder's one-tab lock) | `editLock.ts` | `admin/builder/useEditLock.ts` |
 
@@ -93,6 +93,8 @@ server actions and then `router.refresh()`.
 | Route | Server page | Client component | Data |
 | --- | --- | --- | --- |
 | `/admin/login` | `src/app/admin/login/page.tsx` (client) | – | Google popup sign-in → session cookie (allowlist claim in `auth.ts`) |
+| `/admin` (All Events, F11): every event the account may open with its date, RSVP counts and badges (open now, home page, live / archived); New event, Open, View site, Duplicate, Change link, Archive / Restore, Delete (owners) | `src/app/admin/page.tsx` | `EventsClient.tsx` | `events`, each event's `content/globalSettings` and `guests` (count queries) via `src/lib/platformEvents.ts` (`listEventSummaries`) |
+| `/admin/open/<eventId>`: makes an event the current one (`adminEvent` cookie), then its dashboard | `src/app/admin/open/[event]/route.ts` (route handler) | – | `canOpenEvent` in `src/lib/requireAdmin.ts` |
 | `/admin/dashboard` | `src/app/admin/dashboard/page.tsx` | – (stat cards inline) | event `guests`, `registryGifts` |
 | `/admin/invites` | `src/app/admin/invites/page.tsx` | `InviteListClient.tsx` | event `guests` (all codes), `settings/inviteTemplate` |
 | `/admin/guests` | `src/app/admin/guests/page.tsx` | `GuestListClient.tsx` (CSV export via papaparse) | event `guests` |
@@ -102,24 +104,25 @@ server actions and then `router.refresh()`.
 | Visual builder (F9a): full-screen; section list (the Screens editor with `ScreenList` in pick mode) + "Whole site" panels on the left, the draft preview (`PreviewFrame`) in the middle, the picked section's editor (the same `*Editor.tsx`) in a drawer; click in the preview opens a section (and focuses a marked field), edits show live, one undo / redo across panels, unsaved edits saved as a draft when switching panels; tablet and wider (phones: a link to Content) | `src/app/admin/builder/page.tsx` | `builderContext.tsx` (editor ↔ builder link, used by `EditorSaveBar`), `src/lib/builderHistory.ts` (undo / redo, tested by `builderHistory.test.ts`), `src/lib/builderMessages.ts` (postMessage protocol), `src/app/[event]/preview/PreviewSite.tsx` | `drafts/*`, `contentVersions/*` via the editors |
 | Content editors' shared pieces: sticky Undo / History / Save Draft / Publish row with draft status, 10 s autosave to the draft, conflict prompt; `doc` / `merge` props hand the doc as it would be saved to the visual builder (`EditorSaveBar.tsx`, laid out by container queries); draft / publish / versions hook and the page context that reloads the preview or the editor (`contentDraft.tsx`); "Leave without saving?" guard for tab switch, admin links and page close (`unsavedChanges.tsx`); character limits + counter (`CharCount.tsx`, `TEXT_LIMITS`) | `src/app/admin/content/page.tsx` | `EditorSaveBar.tsx`, `contentDraft.tsx`, `unsavedChanges.tsx`, `CharCount.tsx` | `drafts/*`, `contentVersions/*` via `src/app/actions/content.ts` |
 | Draft preview frame: Preview button on the content page (docked from 1024 px, full screen below); phone / desktop / both iframes of `?preview=`, scaled to fit; also the visual builder's canvas | `src/app/admin/content/page.tsx`, `src/app/admin/builder/page.tsx` | `src/app/admin/components/PreviewFrame.tsx` | – |
-| sidebar/nav (Team for organizers and owners; role + email above Sign Out; loads the role for every admin page) | `src/app/admin/layout.tsx` | `src/app/admin/eventAccess.tsx` | – |
+| sidebar/nav (All Events; the current event's pages only when there is one; Team for organizers and owners; role + email above Sign Out). The server layout reads the current event, the role in it and the account's events; the client shell draws them | `src/app/admin/layout.tsx` (server) | `AdminShell.tsx`, `EventSwitcher.tsx` (event picker: links to `/admin/open/<eventId>`, "Manage events"), `eventAccess.tsx` (`useEventAccess`, `useCurrentEventId`), `components/NoEvent.tsx` (content / builder with no event) | `events` + `content/globalSettings` (`listEventChoices`) |
 | `/admin/team`: members (role select, remove), invites (cancel), "Clients may change the design" switch, activity log | `src/app/admin/team/page.tsx` | `TeamClient.tsx` | `members`, `adminAllowlist`, `settings/permissions`, `auditLog` |
 | Client locks (no Colors & Fonts / Music, no reordering without design rights) | `src/app/admin/content/page.tsx`, `src/app/admin/builder/page.tsx` | `ScreensEditor.tsx`, `ScreenList.tsx` (`reorder`) | rules in `src/lib/permissions.ts` |
 | Builder edit lock ("X is editing this event", Take over) | `src/app/admin/builder/page.tsx` (`EditLockOverlay`) | `src/app/admin/builder/useEditLock.ts`; release beacon on tab close `src/app/api/edit-lock/release/route.ts` | `settings/editLock` |
-| shared UI | `src/app/admin/components/AdminModal.tsx`, `TablePagination.tsx`, `PreviewFrame.tsx`, `ScreenList.tsx` | | |
+| shared UI | `src/app/admin/components/AdminModal.tsx`, `TablePagination.tsx`, `PreviewFrame.tsx`, `ScreenList.tsx`, `NoEvent.tsx` | | |
 
 ## Auth, rules, infrastructure
 
 | Feature | Files |
 | --- | --- |
 | `/admin` redirect when no cookie | `src/proxy.ts` |
-| Admin check (session cookie + account + role in the event) for actions and pages | `src/lib/requireAdmin.ts` (`getAdmin`, `getEventAccess`, `requireEventRole`, `requireEventPage`) |
+| Admin check (session cookie + account + role in the event) for actions and pages; the current event (`adminEvent` cookie: `getCurrentEventId`, `canOpenEvent`, `requireCurrentEventPage`) | `src/lib/requireAdmin.ts` (`getAdmin`, `getEventAccess`, `requireEventRole`, `requireEventPage`) |
+| The platform's events: lists for the switcher and All Events, the copy behind Duplicate / Change link, moving members and invites to a new ID | `src/lib/platformEvents.ts` (server only) |
 | Roles and what each may change (owner / organizer / client, design lock, screen order check) | `src/lib/permissions.ts`, tested by `src/lib/permissions.test.ts` |
 | Activity log: write after each admin mutation, read for the Team page | `src/lib/auditLog.ts` (`logActivity`, `readActivity`, server only) |
 | Give pre-F10 admins and invites a role in an event (dry run / `--write` / `--verify`) | `scripts/migrate-members-f10.js` |
 | Clear a bad session and go to login | `src/app/api/logout/route.ts` |
 | RSVP confirmation email to the guest (Gmail SMTP) | `src/lib/email/sendRsvpConfirmation.ts`, called via `after()` in `submitRsvp` |
-| Firestore paths: every collection and doc path, event-scoped (`paths`, `DEFAULT_EVENT_ID` (env `NEXT_PUBLIC_DEFAULT_EVENT_ID`), `isValidEventId`) | `src/lib/eventPaths.ts`, tested by `src/lib/eventPaths.test.ts` |
+| Firestore paths: every collection and doc path, event-scoped (`paths`, `DEFAULT_EVENT_ID` (env `NEXT_PUBLIC_DEFAULT_EVENT_ID`), `isValidEventId`, `isFreeEventId` (not a route), `toEventId` (name → link)) | `src/lib/eventPaths.ts`, tested by `src/lib/eventPaths.test.ts` |
 | Copy root collections into an event (dry run / `--write` / `--overwrite` / `--verify`) | `scripts/migrate-to-events.js` |
 | Add the generic content fields to old-shape content docs (dry run / `--write` / `--verify` / `--dump`) | `scripts/migrate-content-f5.js` |
 | Firebase client init | `src/lib/firebase/client.ts` |
