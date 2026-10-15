@@ -34,8 +34,8 @@ platform: data and guest URLs are already per event (`/<eventId>`).
 
 | Who | What they do | Where |
 | --- | --- | --- |
-| **Guests** (no account) | Step through a 10-screen story (welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/<eventId>` (one page, screens swap in place; `/` → default event) |
-| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font and the music on the guest site. Super admins also add and remove admins from **Manage Admins** in the sidebar. | `/admin/**` |
+| **Guests** (no account) | Step through up to 10 screens (by default welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form; admins reorder, hide and rename them). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/<eventId>` (one page, screens swap in place; `/` → default event) |
+| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font, the music, and which screens show in what order on the guest site. Super admins also add and remove admins from **Manage Admins** in the sidebar. | `/admin/**` |
 
 ---
 
@@ -91,7 +91,7 @@ src/
   app/
     page.tsx                 redirects / to the default event
     [event]/page.tsx         one event's guest site: server read, metadata, ISR cache, providers, <AudioPlayer/>
-    [event]/GuestSite.tsx    the whole 10-step flow (client component)
+    [event]/GuestSite.tsx    the whole step flow, driven by the event's screens list (client component)
     layout.tsx               theme script, metadataBase, mounts fonts.ts (reads no Firestore)
     fonts.ts                 every font of every pairing (next/font), CSS variables on <html>
     not-found.tsx            404 for unknown URLs/events (default event's look)
@@ -102,7 +102,7 @@ src/
     api/logout/route.ts      clears the session cookie, redirects to /admin/login
     admin/                   admin portal (layout.tsx = sidebar)
       content/               Content manager: page.tsx (tabs) + one *Editor.tsx per screen
-      components/            AdminModal, ManageAdminsModal, TablePagination
+      components/            AdminModal, ManageAdminsModal, TablePagination, ScreenList (reorder/show/rename screens)
       dashboard|invites|guests|gifts|registry|login/
   components/
     screens/                 one file per guest screen (+ GiftSelectionModal, LoadingScreen)
@@ -121,6 +121,7 @@ src/
   lib/theme.ts               event colors + font pairing: tokens, presets, mergeTheme, contrast (+ .test.ts); applied by components/ThemeStyle.tsx
   lib/fonts.ts               font roles (heading/elegant/body), families, pairings (+ .test.ts)
   lib/music.ts               event background music: type, mergeMusic, default track (+ .test.ts)
+  lib/screens.ts             which screens an event shows, order, menu names: SCREEN_TYPES, mergeScreens (+ .test.ts)
   lib/siteContentServer.ts   getEventContent() (event page), getSiteContent() (404) via admin SDK (server only)
   lib/weddingContent.ts      JSON defaults + content docs merge (mergeWeddingContent, mergeGlobal, DEFAULT_CONTENT)
   lib/genericContent.ts      hosts / People groups / venues / guidelines: types, readers, old-shape adapters (+ .test.ts)

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SITE_TEXT, fillText, mergeSiteText } from './siteText';
 import { SITE_TEXT_GROUPS } from '../app/admin/content/siteTextFields';
+import { SCREEN_TYPES } from './screens';
 
 function leafPaths(node: object, prefix = ''): string[] {
   return Object.entries(node).flatMap(([key, value]) =>
@@ -34,8 +35,9 @@ describe('fillText', () => {
 });
 
 describe('Site Text editor fields', () => {
-  it('lists every siteText key exactly once', () => {
+  it('lists every siteText key exactly once (menu names: the Screens & Menu tab)', () => {
     const editable = SITE_TEXT_GROUPS.flatMap((group) => group.fields.map((field) => field.path));
-    expect([...editable].sort()).toEqual(leafPaths(DEFAULT_SITE_TEXT).sort());
+    const menu = SCREEN_TYPES.map((type) => `menu.${type}`);
+    expect([...editable, ...menu].sort()).toEqual(leafPaths(DEFAULT_SITE_TEXT).sort());
   });
 });

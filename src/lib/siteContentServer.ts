@@ -5,6 +5,7 @@ import { DEFAULT_SITE_TEXT, mergeSiteText, type SiteText } from '@/lib/siteText'
 import { isValidEventId, paths } from '@/lib/eventPaths';
 import { DEFAULT_THEME, mergeTheme, type Theme } from '@/lib/theme';
 import { DEFAULT_MUSIC, mergeMusic, type Music } from '@/lib/music';
+import { mergeScreens, type ScreenConfig } from '@/lib/screens';
 import {
   CONTENT_DOC_IDS, mergeGlobal, mergeWeddingContent,
   type ContentDocId, type SiteGlobal, type WeddingContent,
@@ -22,14 +23,14 @@ export type { SiteGlobal };
  * exist. Throws when Firestore can't be read, so a cached page stays up rather
  * than being replaced by the defaults.
  */
-export const getEventContent = cache(async (eventId: string): Promise<{ content: WeddingContent; siteText: SiteText; theme: Theme; music: Music } | null> => {
+export const getEventContent = cache(async (eventId: string): Promise<{ content: WeddingContent; siteText: SiteText; theme: Theme; music: Music; screens: ScreenConfig[] } | null> => {
   if (!isValidEventId(eventId)) return null;
 
   const db = getAdminDb();
   // The event first, so a made-up URL costs one read, not fifteen.
   if (!(await db.doc(paths.event(eventId)).get()).exists) return null;
 
-  const ids = [...CONTENT_DOC_IDS, 'siteText', 'theme', 'music'] as const;
+  const ids = [...CONTENT_DOC_IDS, 'siteText', 'theme', 'music', 'screens'] as const;
   const docs = await db.getAll(...ids.map((id) => db.doc(paths.content(eventId, id))));
 
   // Client components only take plain objects (no Firestore Timestamps).
@@ -40,6 +41,7 @@ export const getEventContent = cache(async (eventId: string): Promise<{ content:
     siteText: mergeSiteText(DEFAULT_SITE_TEXT, data.siteText),
     theme: mergeTheme(data.theme),
     music: mergeMusic(data.music),
+    screens: mergeScreens(data.screens),
   };
 });
 

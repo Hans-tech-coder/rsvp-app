@@ -13,23 +13,33 @@ in place. There is no routing between screens and no URL per screen.
 
 ## Step flow
 
-`currentStep` (0–9) picks the screen. Order and labels are defined twice and
-must stay in sync: the `currentStep === n` blocks in `GuestSite.tsx` and
-`menuItems` in `src/components/layout/CanvasMenu.tsx` (labels from
-`siteText.menu`, editable in the Site Text tab).
+The steps are the event's **screens config**, `content/screens`
+(`src/lib/screens.ts`, edited in the **Screens & Menu** tab): a list of
+`{ type, enabled, label }` whose order is the step order. The server reads it
+with the rest of the content (`getEventContent` → `mergeScreens`) and passes it
+to `<GuestSite screens>`. `steps = visibleScreens(screens)` (the shown ones);
+`currentStep` is an index into `steps`, and `renderScreen(type)` picks the
+component. `CanvasMenu` gets one label per step from `GuestSite`
+(`screenLabel`: the screen's own `label`, else `siteText.menu[type]`).
 
-| Step | Screen | Menu label |
+Rules kept by `mergeScreens`: Welcome is always first and shown
+(`PINNED_SCREEN`; the music starts on its Continue, the loader waits for its
+photo); unknown or repeated types are dropped; a type missing from the doc
+(added to the app later) goes back after its default neighbour. No doc = the
+Wedding order below, all shown, site text names.
+
+| Default step | Screen (`type`) | Menu label (site text default) |
 | --- | --- | --- |
-| 0 | `WelcomeScreen` | Welcome |
-| 1 | `OurStoryScreen` (timeline; a photo per entry is optional) | Our Story |
-| 2 | `EntourageScreen` (People groups) | Entourage |
-| 3 | `DetailsScreen` | Details |
-| 4 | `DressCodeScreen` | Dress Code |
-| 5 | `GalleryScreen` | Gallery |
-| 6 | `FaqScreen` | FAQs |
-| 7 | `RegistryScreen` | Registry |
-| 8 | `RsvpCtaScreen` | Join Our Day |
-| 9 | `RsvpScreen` (locked) | RSVP |
+| 0 | `WelcomeScreen` (`welcome`, pinned) | Welcome |
+| 1 | `OurStoryScreen` (`ourStory`; timeline, a photo per entry is optional) | Our Story |
+| 2 | `EntourageScreen` (`entourage`; People groups) | Entourage |
+| 3 | `DetailsScreen` (`details`) | Details |
+| 4 | `DressCodeScreen` (`dressCode`) | Dress Code |
+| 5 | `GalleryScreen` (`gallery`) | Gallery |
+| 6 | `FaqScreen` (`faqs`) | FAQs |
+| 7 | `RegistryScreen` (`registry`) | Registry |
+| 8 | `RsvpCtaScreen` (`rsvpCta`) | Join Our Day |
+| 9 | `RsvpScreen` (`rsvp`, locked) | RSVP |
 
 **Any event type.** The wedding-specific parts are content lists (shapes in
 `docs/data-model.md` → Generic content shapes): Welcome / Entrance show the
@@ -44,10 +54,18 @@ Every screen takes `onContinue` (→ `nextStep`). Some also take
 `onLightboxChange` (Our Story, Gallery, Dress Code) so `GuestSite.tsx` can hide the back/menu
 buttons and add `body.lightbox-open`.
 
-To **add, remove, or reorder a screen**: edit the step blocks in `GuestSite.tsx`,
-`menuItems` in `CanvasMenu.tsx`, the hard-coded `9` (RSVP step) in
-`goToStep` / `handleStartUnlock`, the `goToStep(7)` back target of `RsvpScreen`,
-and the table in `docs/FEATURE-MAP.md`.
+Admins **reorder, hide or rename** screens in the Screens & Menu tab, no code
+change. To **add a new screen type** to the app: add it to `SCREEN_TYPES` in
+`src/lib/screens.ts`, a `siteText.menu` default in `wedding-content.json`, a
+case in `renderScreen` (`GuestSite.tsx`), its admin name in `SCREEN_NAMES`
+(`src/app/admin/components/ScreenList.tsx`), and the table in
+`docs/FEATURE-MAP.md`. Saved docs pick it up automatically (after its default
+neighbour).
+
+Found by type, not position: the RSVP lock (`LOCKED_SCREEN` = `rsvp`,
+`lockedStep`) and where `RsvpScreen`'s success button goes (the `registry`
+step if shown, else the step before the form). `nextStep` past the last step
+does nothing.
 
 ## State kept in `GuestSite.tsx`
 
@@ -56,7 +74,7 @@ browser don't share progress or an unlocked RSVP.
 
 | State | Purpose | Persisted in `localStorage` |
 | --- | --- | --- |
-| `currentStep` | visible screen | `event:<eventId>:currentStep` |
+| `currentStep` | visible screen (index into the shown screens) | `event:<eventId>:currentStep` |
 | `highestVisitedStep` | menu only allows steps already reached | `event:<eventId>:highestVisitedStep` |
 | `isUnlocked` | RSVP step is reachable | `event:<eventId>:isUnlocked` |
 | `validatedInviteCode` | code passed to `RsvpScreen` | `event:<eventId>:inviteCode` |
@@ -64,12 +82,15 @@ browser don't share progress or an unlocked RSVP.
 | `isMenuOpen`, `isLightboxOpen` | overlays | no |
 
 `mounted` guards the first render so localStorage is read only on the client.
+The saved steps are indexes: after an admin hides or reorders screens, a
+returning guest resumes at the same position (clamped to the last step), which
+may now be a different screen.
 
 ## RSVP lock
 
-1. Going to step 9 while `!isUnlocked` opens the `EntranceScreen` overlay instead.
+1. Going to the RSVP form step (`lockedStep`, step 9 by default) while `!isUnlocked` opens the `EntranceScreen` overlay instead.
 2. `EntranceScreen` calls `verifyInviteCode(code)` (server action). On success it
-   calls `onStartUnlock` (unlocks, moves to step 9 behind the overlay), then
+   calls `onStartUnlock` (unlocks, moves to the RSVP form step behind the overlay), then
    `onUnlock(code)` (stores the code, closes the overlay).
 3. `RsvpScreen` validates in the browser first (`validateRsvp`, form is
    `noValidate`): full name (two words), email, phone (country minimum digits),

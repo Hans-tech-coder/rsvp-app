@@ -3,7 +3,6 @@
 import React from 'react';
 import Image from 'next/image';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
-import { useSiteText } from '@/contexts/SiteTextContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { RevealImage } from '@/components/ui/RevealImage';
 import { hostNames, joinNames } from '@/lib/genericContent';
@@ -12,27 +11,17 @@ interface CanvasMenuProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (stepIndex: number) => void;
+  /** Menu name of each step, in step order (GuestSite.tsx, from the event's screens) */
+  labels: string[];
   highestVisitedStep: number;
   currentStep: number;
 }
 
-export function CanvasMenu({ isOpen, onClose, onNavigate, highestVisitedStep, currentStep }: CanvasMenuProps) {
+export function CanvasMenu({ isOpen, onClose, onNavigate, labels, highestVisitedStep, currentStep }: CanvasMenuProps) {
   const { content } = useWeddingContent();
-  const text = useSiteText();
   const logoUrl = content.global.logo;
 
-  const menuItems = [
-    { label: text.menu.welcome, step: 0 },
-    { label: text.menu.ourStory, step: 1 },
-    { label: text.menu.entourage, step: 2 },
-    { label: text.menu.details, step: 3 },
-    { label: text.menu.dressCode, step: 4 },
-    { label: text.menu.gallery, step: 5 },
-    { label: text.menu.faqs, step: 6 },
-    { label: text.menu.registry, step: 7 },
-    { label: text.menu.rsvpCta, step: 8 },
-    { label: text.menu.rsvp, step: 9 },
-  ];
+  const menuItems = labels.map((label, step) => ({ label, step }));
 
   return (
     <AnimatePresence>

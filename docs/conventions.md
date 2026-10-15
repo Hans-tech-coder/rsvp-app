@@ -176,6 +176,10 @@ Match the code around you. These are the patterns the codebase already uses.
   still uses `alert()` for errors).
 - Tables: client-side search/filter + `TablePagination`.
 - Sortable lists: `@dnd-kit/core` + `@dnd-kit/sortable`, ids from `nanoid`.
+  `ScreenList` (`src/app/admin/components/`) is the controlled pattern for a
+  list of guest screens: drag handle plus up/down arrows (touch and keyboard),
+  a `role="switch"` show/hide toggle, a name field with the default as
+  placeholder; the caller owns the data and the save.
 
 ## Verification
 

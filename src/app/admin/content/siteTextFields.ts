@@ -31,23 +31,7 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
       { path: 'common.view', label: '"View" label on Gallery and Dress Code photos (computers, on hover)', max: TEXT_LIMITS.button },
     ],
   },
-  {
-    id: 'menu',
-    title: 'Menu',
-    description: 'Names of the screens in the menu (top-right button).',
-    fields: [
-      { path: 'menu.welcome', label: 'Welcome', max: TEXT_LIMITS.button },
-      { path: 'menu.ourStory', label: 'Timeline (Our Story)', max: TEXT_LIMITS.button },
-      { path: 'menu.entourage', label: 'People (Entourage)', max: TEXT_LIMITS.button },
-      { path: 'menu.details', label: 'Venues (Event Details)', max: TEXT_LIMITS.button },
-      { path: 'menu.dressCode', label: 'Dress Code', max: TEXT_LIMITS.button },
-      { path: 'menu.gallery', label: 'Gallery', max: TEXT_LIMITS.button },
-      { path: 'menu.faqs', label: 'FAQs', max: TEXT_LIMITS.button },
-      { path: 'menu.registry', label: 'Registry', max: TEXT_LIMITS.button },
-      { path: 'menu.rsvpCta', label: 'RSVP call to action', max: TEXT_LIMITS.button },
-      { path: 'menu.rsvp', label: 'RSVP form', max: TEXT_LIMITS.button },
-    ],
-  },
+  // Menu names are edited in the Screens & Menu tab (ScreensEditor.tsx); siteText.menu holds the defaults.
   {
     id: 'loading',
     title: 'Loading screen',

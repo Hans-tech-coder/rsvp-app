@@ -83,7 +83,7 @@ the client checks `success` and shows the error.
 | `/admin/guests` | RSVP list with search/filter and CSV export (papaparse); delete an entry | `deleteInviteCode` |
 | `/admin/gifts` | Registry gift CRUD (`name`, `link`, `maxCount`); reset claims | `addRegistryGift`, `updateRegistryGift`, `deleteRegistryGift`, `resetRegistryGift` |
 | `/admin/registry` | Who claimed which gift; delete a claim (decrements the gift count) | `deleteGiftSelection` |
-| `/admin/content` | Tabbed editors for every guest screen, plus **Site Text** (every button, label, hint and error message, grouped by screen, with a search box; empty field = default) **Colors & Fonts** (palette presets, color pickers, readability check, font pairings, live preview; `content/theme`) and **Music** (on/off, song upload, starting volume; `content/music`) | none for the content itself — editors write Firestore from the browser (see `docs/content-system.md`), then every editor calls `refreshGuestSite(eventId)` → `revalidateGuestSite` so the cached guest page rebuilds |
+| `/admin/content` | Tabbed editors for every guest screen, plus **Site Text** (every button, label, hint and error message, grouped by screen, with a search box; empty field = default) **Screens & Menu** (reorder, show/hide and rename the guest screens; `content/screens`), **Colors & Fonts** (palette presets, color pickers, readability check, font pairings, live preview; `content/theme`) and **Music** (on/off, song upload, starting volume; `content/music`) | none for the content itself — editors write Firestore from the browser (see `docs/content-system.md`), then every editor calls `refreshGuestSite(eventId)` → `revalidateGuestSite` so the cached guest page rebuilds |
 
 ## Adding an admin page
 

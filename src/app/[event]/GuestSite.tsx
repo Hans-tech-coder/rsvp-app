@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, Variants, useReducedMotion } from 'motion/react';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { OurStoryScreen } from '@/components/screens/OurStoryScreen';
@@ -18,6 +18,8 @@ import { LoadingScreen } from '@/components/screens/LoadingScreen';
 import { WeddingCursor } from '@/components/effects/WeddingCursor';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
 import { getImageProps } from 'next/image';
+import { useSiteText } from '@/contexts/SiteTextContext';
+import { LOCKED_SCREEN, screenLabel, visibleScreens, type ScreenConfig, type ScreenType } from '@/lib/screens';
 
 // Longest the loader waits for fonts and the hero image (ms after navigation),
 // so a slow network never traps guests on it. Content comes with the page.
@@ -40,8 +42,13 @@ function preloadImage(src: string): Promise<unknown> {
 // Saved progress is per event, so two events in one browser don't mix.
 const storageKey = (eventId: string, name: string) => `event:${eventId}:${name}`;
 
-function MainApp() {
+function MainApp({ screens }: { screens: ScreenConfig[] }) {
   const { eventId, content } = useWeddingContent();
+  const text = useSiteText();
+  // Steps are the shown screens in the admin's order (Screens tab); the RSVP
+  // form is found by type, so it stays locked wherever it sits.
+  const steps = useMemo(() => visibleScreens(screens), [screens]);
+  const lockedStep = steps.findIndex((s) => s.type === LOCKED_SCREEN);
   const [assetsReady, setAssetsReady] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showEntranceScreen, setShowEntranceScreen] = useState(false);
@@ -63,11 +70,13 @@ function MainApp() {
       const savedUnlocked = localStorage.getItem(storageKey(eventId, 'isUnlocked'));
       const savedInviteCode = localStorage.getItem(storageKey(eventId, 'inviteCode'));
       
+      // A saved step past the end (screens hidden since) resumes on the last one.
+      const lastStep = steps.length - 1;
       if (savedStep !== null) {
-        setCurrentStep(parseInt(savedStep, 10));
+        setCurrentStep(Math.min(parseInt(savedStep, 10) || 0, lastStep));
       }
       if (savedHighestStep !== null) {
-        setHighestVisitedStep(parseInt(savedHighestStep, 10));
+        setHighestVisitedStep(Math.min(parseInt(savedHighestStep, 10) || 0, lastStep));
       }
       if (savedUnlocked === 'true') {
         setIsUnlocked(true);
@@ -78,14 +87,17 @@ function MainApp() {
     } catch (error) {
       console.error('Error loading from localStorage:', error);
     }
+    // Restores once per event; steps.length only clamps the saved step.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
   // Keep the loader up until fonts and the first screen's hero image are ready.
+  const onWelcome = steps[currentStep]?.type === 'welcome';
   useEffect(() => {
     if (!mounted || assetsReady) return;
     let cancelled = false;
     const waits: Promise<unknown>[] = [document.fonts.ready];
-    if (currentStep === 0) waits.push(preloadImage(content.welcomeScreen.backgroundImage));
+    if (onWelcome) waits.push(preloadImage(content.welcomeScreen.backgroundImage));
     const cap = new Promise((resolve) =>
       setTimeout(resolve, Math.max(0, LOADER_MAX_WAIT_MS - performance.now()))
     );
@@ -93,7 +105,7 @@ function MainApp() {
       if (!cancelled) setAssetsReady(true);
     });
     return () => { cancelled = true; };
-  }, [mounted, assetsReady, currentStep, content]);
+  }, [mounted, assetsReady, onWelcome, content]);
 
   // Save state changes to localStorage
   useEffect(() => {
@@ -122,13 +134,13 @@ function MainApp() {
   }, [isLightboxOpen]);
 
   const goToStep = (step: number) => {
-    if (step === currentStep) return;
-    
-    if (step === 9 && !isUnlocked) {
+    if (step === currentStep || step < 0 || step >= steps.length) return;
+
+    if (step === lockedStep && !isUnlocked) {
       setShowEntranceScreen(true);
       return;
     }
-    
+
     setCurrentStep(step);
     if (step > highestVisitedStep) {
       setHighestVisitedStep(step);
@@ -137,9 +149,9 @@ function MainApp() {
 
   const handleStartUnlock = () => {
     setIsUnlocked(true);
-    setCurrentStep(9);
-    if (9 > highestVisitedStep) {
-      setHighestVisitedStep(9);
+    setCurrentStep(lockedStep);
+    if (lockedStep > highestVisitedStep) {
+      setHighestVisitedStep(lockedStep);
     }
   };
 
@@ -166,6 +178,33 @@ function MainApp() {
     setIsUnlocked(false);
     setValidatedInviteCode(null);
   };
+
+  // After the RSVP, guests go to the registry (to pick a gift), else one step back.
+  const registryStep = steps.findIndex((s) => s.type === 'registry');
+  const afterRsvpStep = registryStep >= 0 ? registryStep : lockedStep - 1;
+
+  const renderScreen = (type: ScreenType) => {
+    switch (type) {
+      case 'welcome': return <WelcomeScreen onContinue={nextStep} />;
+      case 'ourStory': return <OurStoryScreen onContinue={nextStep} onLightboxChange={setIsLightboxOpen} />;
+      case 'entourage': return <EntourageScreen onContinue={nextStep} />;
+      case 'details': return <DetailsScreen onContinue={nextStep} />;
+      case 'dressCode': return <DressCodeScreen onContinue={nextStep} onLightboxChange={setIsLightboxOpen} />;
+      case 'gallery': return <GalleryScreen onContinue={nextStep} onLightboxChange={setIsLightboxOpen} />;
+      case 'faqs': return <FaqScreen onContinue={nextStep} />;
+      case 'registry': return <RegistryScreen onContinue={nextStep} />;
+      case 'rsvpCta': return <RsvpCtaScreen onContinue={nextStep} />;
+      case 'rsvp': return (
+        <RsvpScreen
+          inviteCode={validatedInviteCode || 'dev-mode'}
+          onContinue={() => goToStep(afterRsvpStep)}
+          onSubmitSuccess={handleRsvpSubmitSuccess}
+        />
+      );
+    }
+  };
+
+  const current = steps[currentStep];
 
   // Screen swap is a crossfade: screens are absolute inset-0, so the new one
   // starts entering on the tap and fades in on top of the old one (no blank gap).
@@ -277,143 +316,16 @@ function MainApp() {
           <div className="absolute inset-0 z-10 pointer-events-none">
             {/* No mode="wait": old and new screens overlap as a crossfade. */}
             <AnimatePresence>
-              {currentStep === 0 && (
+              {current && (
                 <motion.div
-                  key="welcome-screen"
+                  key={`${current.type}-screen`}
                   variants={pageVariants}
                   initial="initial"
                   animate="animate"
                   exit="exit"
                   className="absolute inset-0 w-full h-full pointer-events-auto"
                 >
-                  <WelcomeScreen onContinue={nextStep} />
-                </motion.div>
-              )}
-              
-              {currentStep === 1 && (
-                <motion.div
-                  key="our-story-screen"
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  className="absolute inset-0 w-full h-full pointer-events-auto"
-                >
-                  <OurStoryScreen 
-                    onContinue={nextStep} 
-                    onLightboxChange={setIsLightboxOpen}
-                  />
-                </motion.div>
-              )}
-
-              {currentStep === 2 && (
-                <motion.div
-                  key="entourage-screen"
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  className="absolute inset-0 w-full h-full pointer-events-auto"
-                >
-                  <EntourageScreen onContinue={nextStep} />
-                </motion.div>
-              )}
-
-              {currentStep === 3 && (
-                <motion.div
-                  key="details-screen"
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  className="absolute inset-0 w-full h-full pointer-events-auto"
-                >
-                  <DetailsScreen onContinue={nextStep} />
-                </motion.div>
-              )}
-
-              {currentStep === 4 && (
-                <motion.div
-                  key="dresscode-screen"
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  className="absolute inset-0 w-full h-full pointer-events-auto"
-                >
-                  <DressCodeScreen onContinue={nextStep} onLightboxChange={setIsLightboxOpen} />
-                </motion.div>
-              )}
-
-              {currentStep === 5 && (
-                <motion.div
-                  key="gallery-screen"
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  className="absolute inset-0 w-full h-full pointer-events-auto"
-                >
-                  <GalleryScreen 
-                    onContinue={nextStep} 
-                    onLightboxChange={setIsLightboxOpen} 
-                  />
-                </motion.div>
-              )}
-
-              {currentStep === 6 && (
-                <motion.div
-                  key="faq-screen"
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  className="absolute inset-0 w-full h-full pointer-events-auto"
-                >
-                  <FaqScreen onContinue={nextStep} />
-                </motion.div>
-              )}
-
-              {currentStep === 7 && (
-                <motion.div
-                  key="registry-screen"
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  className="absolute inset-0 w-full h-full pointer-events-auto"
-                >
-                  <RegistryScreen onContinue={nextStep} />
-                </motion.div>
-              )}
-
-              {currentStep === 8 && (
-                <motion.div
-                  key="rsvp-cta-screen"
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  className="absolute inset-0 w-full h-full pointer-events-auto"
-                >
-                  <RsvpCtaScreen onContinue={nextStep} />
-                </motion.div>
-              )}
-
-              {currentStep === 9 && (
-                <motion.div
-                  key="rsvp-screen"
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  className="absolute inset-0 w-full h-full pointer-events-auto"
-                >
-                  <RsvpScreen 
-                    inviteCode={validatedInviteCode || 'dev-mode'} 
-                    onContinue={() => goToStep(7)} 
-                    onSubmitSuccess={handleRsvpSubmitSuccess}
-                  />
+                  {renderScreen(current.type)}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -424,6 +336,7 @@ function MainApp() {
             isOpen={isMenuOpen} 
             onClose={() => setIsMenuOpen(false)} 
             onNavigate={goToStep}
+            labels={steps.map((s) => screenLabel(s, text.menu))}
             highestVisitedStep={highestVisitedStep}
             currentStep={currentStep}
           />
@@ -460,10 +373,10 @@ function MainApp() {
 }
 
 /** The guest site; src/app/[event]/page.tsx wraps it in the event's content. */
-export function GuestSite() {
+export function GuestSite({ screens }: { screens: ScreenConfig[] }) {
   return (
     <>
-      <MainApp />
+      <MainApp screens={screens} />
       <WeddingCursor />
     </>
   );

@@ -5,7 +5,7 @@ when you find or fix one of these.
 
 ## Shipped
 
-- 10-step guest site with Motion (`motion/react`) crossfade screen swaps,
+- Guest site of up to 10 screens (admins reorder, hide and rename them; Oct 2026) with Motion (`motion/react`) crossfade screen swaps,
   text/image reveal animations, scroll reveals and light parallax, circular 3D
   gallery lightbox, background music. The 2026-09 motion work measured CLS 0
   and ≤ 1.6 % slow frames on every swap and scroll, and passed a real-phone
@@ -19,7 +19,8 @@ when you find or fix one of these.
   a Site Text tab for every button, label, hint and error (Oct 2026), a
   Colors & Fonts tab (preset palettes, custom colors, contrast check, five
   font pairings, live preview; Oct 2026), a Music tab (on/off, upload a song,
-  starting volume; Oct 2026), with one-step backup/restore. Google sign-in with an email allowlist; super admins
+  starting volume; Oct 2026), a Screens & Menu tab (reorder, show/hide,
+  rename screens; Oct 2026), with one-step backup/restore. Google sign-in with an email allowlist; super admins
   add and remove regular admins from the Manage Admins modal in the sidebar.
 
 ## Known issues
@@ -48,6 +49,8 @@ when you find or fix one of these.
 | Content docs still hold the old wedding-only fields (F5) | `globalSettings` (`groomName`, `brideName`, venue fields), `entourage` (fixed lists), `details` (`ceremony`, `reception`), `dressCode` (`ladiesGuideline`, `gentlemenGuideline`) | Kept on purpose for a rollback to pre-F5 code; frozen at the 2026-10-14 migration. Remove in a later step (`docs/data-model.md` → Generic content shapes) |
 | Timeline entry photo cannot be removed, only replaced | `OurStoryEditor.tsx` | An entry without a photo shows no image block on the site, but the editor has no "remove photo" button |
 | Sign Out does not warn about unsaved content edits | `src/app/admin/layout.tsx` (`handleLogout`) | Tab switch, admin links and page close do (`unsavedChanges.tsx`) |
+| Screens save not tried signed in (F8) | `ScreensEditor.tsx` | Checked: the editor reads the live doc with no false "unsaved" state, the list reorders (arrows, keyboard drag), hides and renames at phone width; the guest flow with a reordered/hidden list (temporary route, removed). Not checked: a real Save to `content/screens` and the rebuilt guest page |
+| A guest's saved step is a position, not a screen | `GuestSite.tsx` (`event:<eventId>:currentStep`, `highestVisitedStep`) | After an admin reorders or hides screens, a returning guest resumes at the same position (clamped to the last), which may be another screen; the menu unlocks by position too |
 | Circular gallery keeps the last-closed photo mounted | `circular-image-gallery.tsx` (`closing` state never resets) | Two extra SVG `<image>`s at most; harmless |
 
 ## Unused code and dependencies

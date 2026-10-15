@@ -58,7 +58,7 @@ export default async function EventPage({ params }: PageProps<'/[event]'>) {
     <SiteTextProvider value={site.siteText}>
       <ThemeStyle theme={site.theme} />
       <WeddingContentProvider eventId={event} content={site.content}>
-        <GuestSite />
+        <GuestSite screens={site.screens} />
       </WeddingContentProvider>
       <AudioPlayer music={site.music} />
     </SiteTextProvider>

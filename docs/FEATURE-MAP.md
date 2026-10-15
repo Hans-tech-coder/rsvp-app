@@ -8,8 +8,9 @@ added, moved, or deleted.
 
 `/` redirects to the default event (`src/app/page.tsx`). Each event's guest
 site is one cached server page, `src/app/[event]/page.tsx`, around one client
-component. Step numbers are the `currentStep` values in
-`src/app/[event]/GuestSite.tsx`.
+component. Step numbers are the default order (no `content/screens` doc);
+admins reorder, hide and rename screens in the Screens & Menu tab, so an
+event's `currentStep` values follow its own list (see Screens below).
 
 | Step | Feature | Screen file | Content key(s) | Admin editor |
 | --- | --- | --- | --- | --- |
@@ -23,7 +24,7 @@ component. Step numbers are the `currentStep` values in
 | 6 | FAQs | `src/components/screens/FaqScreen.tsx` | `faq`, `faqHeader` | `FaqsEditor.tsx` |
 | 7 | Registry (bank transfer + curated gifts) | `src/components/screens/RegistryScreen.tsx`, `CuratedRegistryScreen.tsx`, `GiftSelectionModal.tsx` | `registry` (+ `rsvpForm` labels in modal) | `RegistryEditor.tsx`; gifts in `/admin/gifts` |
 | 8 | RSVP call-to-action ("Join Our Day") | `src/components/screens/RsvpCtaScreen.tsx` | `rsvpCta` | `RsvpCtaEditor.tsx` |
-| – | Invite-code lock overlay (before step 9) | `src/components/screens/EntranceScreen.tsx` | `entranceScreen`, `global` | `EntranceScreenEditor.tsx` |
+| – | Invite-code lock overlay (before the RSVP form step) | `src/components/screens/EntranceScreen.tsx` | `entranceScreen`, `global` | `EntranceScreenEditor.tsx` |
 | 9 | RSVP form (inline validation, phone field) | `src/components/screens/RsvpScreen.tsx`, `src/components/ui/PhoneField.tsx`, `src/lib/phoneCountries.ts` (+ `.test.ts`) | `rsvpForm` | `RsvpFormEditor.tsx` |
 
 All editors are in `src/app/admin/content/`.
@@ -34,10 +35,11 @@ All editors are in `src/app/admin/content/`.
 | --- | --- |
 | Per-event route: 404 for an unknown event, title/description/link preview (`generateMetadata`), ISR cache (`revalidate`, empty `generateStaticParams`), mounts `SiteTextProvider`, `WeddingContentProvider`, `AudioPlayer` | `src/app/[event]/page.tsx` |
 | `/` → default event redirect | `src/app/page.tsx` |
-| Step state, back/menu buttons, screen transitions, RSVP lock, localStorage (keys `event:<eventId>:…`) | `src/app/[event]/GuestSite.tsx` |
+| Step state, back/menu buttons, screen transitions, RSVP lock, localStorage (keys `event:<eventId>:…`); `renderScreen(type)` maps a screen type to its component | `src/app/[event]/GuestSite.tsx` |
+| Screens: which screens are shown, their order and menu names per event (`content/screens`; `SCREEN_TYPES`, `mergeScreens`, `visibleScreens`, `screenLabel`, Welcome pinned, RSVP locked by type); passed as `<GuestSite screens>` | `src/lib/screens.ts` (tested by `screens.test.ts`), read in `src/lib/siteContentServer.ts`; editor `src/app/admin/content/ScreensEditor.tsx` (tab "Screens & Menu") around the reusable list `src/app/admin/components/ScreenList.tsx` (drag / arrows, show-hide switch, rename; also the future visual builder's section list) |
 | Content loading: read on the server (`getEventContent`, admin SDK), merged over the JSON defaults (`mergeWeddingContent`, `mergeGlobal`, `CONTENT_DOC_IDS`), handed to the browser with the event ID | `src/lib/siteContentServer.ts` (server only), `src/lib/weddingContent.ts`, `src/contexts/WeddingContentContext.tsx` (`useWeddingContent`), `src/data/wedding-content.json` |
-| Site text: every small guest-visible wording (buttons, labels, hints, errors, menu, loader, 404, link preview). Read on the server, given to all guest components by `src/app/[event]/page.tsx` (404: `not-found.tsx`); `useSiteText()` in a component | `src/lib/siteContentServer.ts` (`getEventContent` / `getSiteContent`, server only), `src/contexts/SiteTextContext.tsx` (`SiteTextProvider`, `useSiteText`), `src/lib/siteText.ts` (`SiteText` type, `mergeSiteText`, `fillText`, `fillNodes`; tested by `src/lib/siteText.test.ts`), JSON key `siteText`; editor `src/app/admin/content/SiteTextEditor.tsx` + field labels `siteTextFields.ts` |
-| Step menu overlay | `src/components/layout/CanvasMenu.tsx` |
+| Site text: every small guest-visible wording (buttons, labels, hints, errors, default menu names, loader, 404, link preview). Read on the server, given to all guest components by `src/app/[event]/page.tsx` (404: `not-found.tsx`); `useSiteText()` in a component | `src/lib/siteContentServer.ts` (`getEventContent` / `getSiteContent`, server only), `src/contexts/SiteTextContext.tsx` (`SiteTextProvider`, `useSiteText`), `src/lib/siteText.ts` (`SiteText` type, `mergeSiteText`, `fillText`, `fillNodes`; tested by `src/lib/siteText.test.ts`), JSON key `siteText`; editor `src/app/admin/content/SiteTextEditor.tsx` + field labels `siteTextFields.ts` |
+| Step menu overlay (labels per step come from `GuestSite.tsx`) | `src/components/layout/CanvasMenu.tsx` |
 | Footer at the bottom of scrolling screens (monogram from `global.hosts` initials, tagline `global.footerTagline`, date `global.targetDate` as DD.MM.YYYY; all edited in `GlobalSettingsEditor.tsx`) | `src/components/layout/EmbeddedFooter.tsx` |
 | Background music + floating toggle, volume slider, "music is playing" hint (track, on/off and start volume per event from `content/music`) | `src/components/AudioPlayer.tsx`, `.t-vol-*` in `src/app/globals.css`, `public/bg-music.mp3` (default track); `src/lib/music.ts` (type, `mergeMusic`, tested by `music.test.ts`); editor `src/app/admin/content/MusicEditor.tsx` (tab "Music"), upload `src/lib/blob/uploadAudio.ts` |
 | Theme script, `metadataBase` (site URL) and the admin pages' title; mounts the fonts | `src/app/layout.tsx` |
@@ -94,7 +96,7 @@ server actions and then `router.refresh()`.
 | `/admin/guests` | `src/app/admin/guests/page.tsx` | `GuestListClient.tsx` (CSV export via papaparse) | event `guests` |
 | `/admin/gifts` | `src/app/admin/gifts/page.tsx` | `GiftsClient.tsx` | event `registryGifts` |
 | `/admin/registry` | `src/app/admin/registry/page.tsx` | `RegistrySelectionsClient.tsx` | event `giftSelections` |
-| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder ("Site Text" tab = `SiteTextEditor.tsx`, "Colors & Fonts" = `ThemeEditor.tsx`, "Music" = `MusicEditor.tsx`); each takes an `eventId` prop from the page | event `content/*` + Vercel Blob |
+| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder ("Site Text" tab = `SiteTextEditor.tsx`, "Screens & Menu" = `ScreensEditor.tsx`, "Colors & Fonts" = `ThemeEditor.tsx`, "Music" = `MusicEditor.tsx`); each takes an `eventId` prop from the page | event `content/*` + Vercel Blob |
 | Content editors' shared pieces: sticky Undo / Restore / Save row with live status (`EditorSaveBar.tsx`), "Leave without saving?" guard for tab switch, admin links and page close (`unsavedChanges.tsx`), character limits + counter (`CharCount.tsx`, `TEXT_LIMITS`) | `src/app/admin/content/page.tsx` | `EditorSaveBar.tsx`, `unsavedChanges.tsx`, `CharCount.tsx`; after each live write `refreshGuestSite.ts` | – |
 | sidebar/nav | `src/app/admin/layout.tsx` | – | – |
 | Manage Admins (sidebar button, super admins only; no route) | `src/app/admin/layout.tsx` | `src/app/admin/components/ManageAdminsModal.tsx` | `admins`, `adminAllowlist` |
@@ -134,7 +136,6 @@ Read these by range (`grep -n` then read around the line), never whole.
 | 512 | `src/app/admin/content/GalleryEditor.tsx` |
 | 504 | `src/app/admin/content/EventDetailsEditor.tsx` |
 | 471 | `src/components/ui/circular-image-gallery.tsx` |
-| 470 | `src/app/[event]/GuestSite.tsx` |
 | 458 | `src/app/admin/content/FaqsEditor.tsx` |
 | 451 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
 | 408 | `src/app/admin/content/RsvpFormEditor.tsx` |

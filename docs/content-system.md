@@ -166,6 +166,22 @@ docs (`getEventContent` / `getSiteContent` → `mergeMusic()`) and passed to
 default song", a listen player, and the starting volume (10–100 %). Same
 backup/restore/save pattern as the other editors (`music_backup`).
 
+## Screens and menu
+
+Which guest screens are shown, their order and their names in the menu are
+the `content/screens` doc (`src/lib/screens.ts`: `{ screens: [{ type,
+enabled, label }] }`, array order = step order), read on the server
+(`getEventContent` → `mergeScreens()`) and passed to `<GuestSite screens>`. No
+doc = the Wedding order, all shown. Editor `ScreensEditor.tsx` (tab "Screens &
+Menu") wraps the reusable `ScreenList` (`src/app/admin/components/`): drag or
+up/down arrows to reorder, a switch to show/hide, a name field per screen
+(blank = the `siteText.menu` default, shown greyed). Welcome is pinned first
+and shown; the RSVP form keeps its invite-code lock wherever it sits; a
+warning shows while the RSVP form is hidden but its call to action is not.
+Same backup/restore/save pattern as the other editors (`screens_backup`); the
+saved list is normalized by `mergeScreens` first. Menu names are no longer in
+the Site Text tab; `siteText.menu` stays as their defaults.
+
 ## How an editor works (`src/app/admin/content/*Editor.tsx`)
 
 All the editors follow the same pattern (copy an existing one, do not invent
