@@ -80,8 +80,9 @@ All editors are in `src/app/admin/content/`.
 | `addRegistryGift`, `updateRegistryGift`, `deleteRegistryGift`, `resetRegistryGift` | `admin.ts` | `admin/gifts/GiftsClient.tsx` |
 | `deleteGiftSelection` | `admin.ts` | `admin/registry/RegistrySelectionsClient.tsx` |
 | `loadDraft`, `saveDraft` (conflict check on the draft's `updatedAt`), `publishDraft` (draft → live, version list, rebuilds the event's cached page; the default event also the 404), `discardDraft`, `getVersion`; doc shapes and pure helpers in `src/lib/contentDrafts.ts` (tested by `contentDrafts.test.ts`) | `content.ts` | every content editor, through `admin/content/contentDraft.tsx` (`useContentDraft`) and `EditorSaveBar.tsx` |
-| `getMyAdminRole` | `admins.ts` | `admin/layout.tsx` (shows Manage Admins for super admins) |
-| `listAdmins`, `addAdmin`, `cancelPendingAdmin`, `removeAdmin` (super only) | `admins.ts` | `admin/components/ManageAdminsModal.tsx` |
+| `getMyEventAccess` (the caller's role in the event, for the UI) | `team.ts` | `admin/layout.tsx` → `EventAccessProvider` (`admin/eventAccess.tsx`, `useEventAccess`) |
+| `addMember`, `changeMemberRole`, `removeMember`, `cancelInvite`, `setClientDesign` (organizers and owners) | `team.ts` | `admin/team/TeamClient.tsx` |
+| `holdEditLock`, `releaseEditLock` (the visual builder's one-tab lock) | `editLock.ts` | `admin/builder/useEditLock.ts` |
 
 ## Admin portal (`/admin/**`)
 
@@ -101,16 +102,21 @@ server actions and then `router.refresh()`.
 | Visual builder (F9a): full-screen; section list (the Screens editor with `ScreenList` in pick mode) + "Whole site" panels on the left, the draft preview (`PreviewFrame`) in the middle, the picked section's editor (the same `*Editor.tsx`) in a drawer; click in the preview opens a section (and focuses a marked field), edits show live, one undo / redo across panels, unsaved edits saved as a draft when switching panels; tablet and wider (phones: a link to Content) | `src/app/admin/builder/page.tsx` | `builderContext.tsx` (editor ↔ builder link, used by `EditorSaveBar`), `src/lib/builderHistory.ts` (undo / redo, tested by `builderHistory.test.ts`), `src/lib/builderMessages.ts` (postMessage protocol), `src/app/[event]/preview/PreviewSite.tsx` | `drafts/*`, `contentVersions/*` via the editors |
 | Content editors' shared pieces: sticky Undo / History / Save Draft / Publish row with draft status, 10 s autosave to the draft, conflict prompt; `doc` / `merge` props hand the doc as it would be saved to the visual builder (`EditorSaveBar.tsx`, laid out by container queries); draft / publish / versions hook and the page context that reloads the preview or the editor (`contentDraft.tsx`); "Leave without saving?" guard for tab switch, admin links and page close (`unsavedChanges.tsx`); character limits + counter (`CharCount.tsx`, `TEXT_LIMITS`) | `src/app/admin/content/page.tsx` | `EditorSaveBar.tsx`, `contentDraft.tsx`, `unsavedChanges.tsx`, `CharCount.tsx` | `drafts/*`, `contentVersions/*` via `src/app/actions/content.ts` |
 | Draft preview frame: Preview button on the content page (docked from 1024 px, full screen below); phone / desktop / both iframes of `?preview=`, scaled to fit; also the visual builder's canvas | `src/app/admin/content/page.tsx`, `src/app/admin/builder/page.tsx` | `src/app/admin/components/PreviewFrame.tsx` | – |
-| sidebar/nav | `src/app/admin/layout.tsx` | – | – |
-| Manage Admins (sidebar button, super admins only; no route) | `src/app/admin/layout.tsx` | `src/app/admin/components/ManageAdminsModal.tsx` | `admins`, `adminAllowlist` |
-| shared UI | `src/app/admin/components/AdminModal.tsx`, `TablePagination.tsx`, `PreviewFrame.tsx` | | |
+| sidebar/nav (Team for organizers and owners; role + email above Sign Out; loads the role for every admin page) | `src/app/admin/layout.tsx` | `src/app/admin/eventAccess.tsx` | – |
+| `/admin/team`: members (role select, remove), invites (cancel), "Clients may change the design" switch, activity log | `src/app/admin/team/page.tsx` | `TeamClient.tsx` | `members`, `adminAllowlist`, `settings/permissions`, `auditLog` |
+| Client locks (no Colors & Fonts / Music, no reordering without design rights) | `src/app/admin/content/page.tsx`, `src/app/admin/builder/page.tsx` | `ScreensEditor.tsx`, `ScreenList.tsx` (`reorder`) | rules in `src/lib/permissions.ts` |
+| Builder edit lock ("X is editing this event", Take over) | `src/app/admin/builder/page.tsx` (`EditLockOverlay`) | `src/app/admin/builder/useEditLock.ts`; release beacon on tab close `src/app/api/edit-lock/release/route.ts` | `settings/editLock` |
+| shared UI | `src/app/admin/components/AdminModal.tsx`, `TablePagination.tsx`, `PreviewFrame.tsx`, `ScreenList.tsx` | | |
 
 ## Auth, rules, infrastructure
 
 | Feature | Files |
 | --- | --- |
 | `/admin` redirect when no cookie | `src/proxy.ts` |
-| Admin check (session cookie + `admins/{uid}`) for actions and pages | `src/lib/requireAdmin.ts` (`getAdmin`, `getAdminUid`, `requireAdmin`, `requireSuperAdmin`, `requireAdminPage`) |
+| Admin check (session cookie + account + role in the event) for actions and pages | `src/lib/requireAdmin.ts` (`getAdmin`, `getEventAccess`, `requireEventRole`, `requireEventPage`) |
+| Roles and what each may change (owner / organizer / client, design lock, screen order check) | `src/lib/permissions.ts`, tested by `src/lib/permissions.test.ts` |
+| Activity log: write after each admin mutation, read for the Team page | `src/lib/auditLog.ts` (`logActivity`, `readActivity`, server only) |
+| Give pre-F10 admins and invites a role in an event (dry run / `--write` / `--verify`) | `scripts/migrate-members-f10.js` |
 | Clear a bad session and go to login | `src/app/api/logout/route.ts` |
 | RSVP confirmation email to the guest (Gmail SMTP) | `src/lib/email/sendRsvpConfirmation.ts`, called via `after()` in `submitRsvp` |
 | Firestore paths: every collection and doc path, event-scoped (`paths`, `DEFAULT_EVENT_ID` (env `NEXT_PUBLIC_DEFAULT_EVENT_ID`), `isValidEventId`) | `src/lib/eventPaths.ts`, tested by `src/lib/eventPaths.test.ts` |
@@ -121,7 +127,7 @@ server actions and then `router.refresh()`.
 | Firestore / Storage rules | `firestore.rules`, `storage.rules`, `firebase.json`, `.firebaserc` |
 | Shared types | `src/types/index.ts` |
 | Pull Firestore content into JSON | `scripts/sync-content.js` |
-| Allowlist an admin or super admin (`--super`) | `scripts/add-admin.js` |
+| Invite a platform owner (`--super`) or an event member (`--event <id> [--role organizer|client]`) | `scripts/add-admin.js` |
 | Next config (remote image hosts, dev origin) | `next.config.ts` |
 
 ## Files over 400 lines

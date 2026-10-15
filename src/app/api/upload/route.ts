@@ -4,7 +4,8 @@ import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
 import { paths } from '@/lib/eventPaths';
 import { MUSIC_MAX_BYTES, MUSIC_UPLOAD_PREFIX } from '@/lib/music';
 
-// Issues short-lived Vercel Blob client-upload tokens to signed-in admins only.
+// Issues short-lived Vercel Blob client-upload tokens to signed-in event
+// members and platform owners only (Blob paths are not per event).
 // The browser then uploads straight to Blob (see src/lib/blob/uploadImage.ts,
 // and uploadAudio.ts for paths under music/, which get the audio type and cap).
 // Auth is the Firebase ID token sent as clientPayload, not the `session`
@@ -15,7 +16,9 @@ async function assertAdmin(idToken: string | null) {
 
   const { uid } = await getAdminAuth().verifyIdToken(idToken, true);
   const admin = await getAdminDb().doc(paths.admin(uid)).get();
-  if (!admin.exists) throw new Error('Not an admin');
+  const eventIds = admin.get('eventIds');
+  const isMember = Array.isArray(eventIds) && eventIds.length > 0;
+  if (!admin.exists || !(admin.get('role') === 'super' || isMember)) throw new Error('Not an admin');
 }
 
 export async function POST(request: Request) {

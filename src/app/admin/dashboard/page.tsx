@@ -1,5 +1,5 @@
 import { getAdminDb } from '@/lib/firebase/admin';
-import { requireAdminPage } from '@/lib/requireAdmin';
+import { requireEventPage } from '@/lib/requireAdmin';
 import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
 import { Guest, RegistryGift } from '@/types';
 import { Users, UserCheck, UserX, Gift, CheckCircle2 } from 'lucide-react';
@@ -8,9 +8,9 @@ import { Users, UserCheck, UserX, Gift, CheckCircle2 } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  await requireAdminPage();
   // The only event until the event switcher (F11)
   const eventId = DEFAULT_EVENT_ID;
+  await requireEventPage(eventId);
 
   let totalCodes = 0, unusedCodes = 0, attendingCount = 0, notAttendingCount = 0;
   let totalGifts = 0, fullyClaimedGifts = 0, availableGifts = 0;

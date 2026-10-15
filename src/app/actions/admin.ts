@@ -1,7 +1,8 @@
 'use server';
 
 import { getAdminDb } from '@/lib/firebase/admin';
-import { requireAdmin } from '@/lib/requireAdmin';
+import { requireEventRole } from '@/lib/requireAdmin';
+import { logActivity } from '@/lib/auditLog';
 import { FieldValue } from 'firebase-admin/firestore';
 import crypto from 'crypto';
 import { paths } from '@/lib/eventPaths';
@@ -38,7 +39,7 @@ const newInvite = (code: string) => ({
 
 export async function generateInviteCodes(eventId: string, count: number) {
   try {
-    await requireAdmin();
+    const me = await requireEventRole(eventId);
     const guestsRef = getAdminDb().collection(paths.guests(eventId));
 
     // Codes are unique per event: create() fails the whole batch if one already
@@ -52,6 +53,7 @@ export async function generateInviteCodes(eventId: string, count: number) {
 
       try {
         await batch.commit();
+        await logActivity(eventId, me, `Generated ${count} invite code${count === 1 ? '' : 's'}`);
         return { success: true, count, codes: [...codes] };
       } catch (error) {
         if (!isAlreadyExists(error) || attempt >= CODE_ATTEMPTS) throw error;
@@ -64,8 +66,9 @@ export async function generateInviteCodes(eventId: string, count: number) {
 
 export async function deleteInviteCode(eventId: string, code: string) {
   try {
-    await requireAdmin();
+    const me = await requireEventRole(eventId);
     await getAdminDb().doc(paths.guest(eventId, code)).delete();
+    await logActivity(eventId, me, 'Deleted invite code', code);
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to delete code' };
@@ -74,7 +77,7 @@ export async function deleteInviteCode(eventId: string, code: string) {
 
 export async function regenerateInviteCode(eventId: string, oldCode: string) {
   try {
-    await requireAdmin();
+    const me = await requireEventRole(eventId);
     const oldRef = getAdminDb().doc(paths.guest(eventId, oldCode));
 
     for (let attempt = 1; ; attempt++) {
@@ -87,6 +90,7 @@ export async function regenerateInviteCode(eventId: string, oldCode: string) {
 
       try {
         await batch.commit();
+        await logActivity(eventId, me, 'Replaced invite code', `${oldCode} → ${newCode}`);
         return { success: true, newCode };
       } catch (error) {
         if (!isAlreadyExists(error) || attempt >= CODE_ATTEMPTS) throw error;
@@ -99,7 +103,7 @@ export async function regenerateInviteCode(eventId: string, oldCode: string) {
 
 export async function addRegistryGift(eventId: string, data: { name: string; link: string; maxCount: number }) {
   try {
-    await requireAdmin();
+    const me = await requireEventRole(eventId);
     const giftRef = getAdminDb().collection(paths.registryGifts(eventId)).doc();
     await giftRef.set({
       ...data,
@@ -107,6 +111,7 @@ export async function addRegistryGift(eventId: string, data: { name: string; lin
       isFull: false,
       createdAt: FieldValue.serverTimestamp(),
     });
+    await logActivity(eventId, me, 'Added gift', data.name);
     return { success: true, id: giftRef.id };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to add gift' };
@@ -115,7 +120,7 @@ export async function addRegistryGift(eventId: string, data: { name: string; lin
 
 export async function updateRegistryGift(eventId: string, giftId: string, data: Partial<{ name: string; link: string; maxCount: number }>) {
   try {
-    await requireAdmin();
+    const me = await requireEventRole(eventId);
     const giftRef = getAdminDb().doc(paths.registryGift(eventId, giftId));
     
     await getAdminDb().runTransaction(async (transaction) => {
@@ -133,6 +138,7 @@ export async function updateRegistryGift(eventId: string, giftId: string, data: 
       transaction.update(giftRef, updates);
     });
 
+    await logActivity(eventId, me, 'Edited gift', data.name ?? giftId);
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to update gift' };
@@ -141,8 +147,9 @@ export async function updateRegistryGift(eventId: string, giftId: string, data: 
 
 export async function deleteRegistryGift(eventId: string, giftId: string) {
   try {
-    await requireAdmin();
+    const me = await requireEventRole(eventId);
     await getAdminDb().doc(paths.registryGift(eventId, giftId)).delete();
+    await logActivity(eventId, me, 'Deleted gift', giftId);
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to delete gift' };
@@ -184,7 +191,7 @@ async function getDefaultInviteTemplate(eventId: string) {
 
 export async function getInviteMessageTemplate(eventId: string) {
   try {
-    await requireAdmin();
+    await requireEventRole(eventId);
     const doc = await getAdminDb().doc(paths.setting(eventId, 'inviteTemplate')).get();
     return doc.data()?.template || await getDefaultInviteTemplate(eventId);
   } catch (error) {
@@ -195,8 +202,9 @@ export async function getInviteMessageTemplate(eventId: string) {
 
 export async function updateInviteMessageTemplate(eventId: string, template: string) {
   try {
-    await requireAdmin();
+    const me = await requireEventRole(eventId);
     await getAdminDb().doc(paths.setting(eventId, 'inviteTemplate')).set({ template });
+    await logActivity(eventId, me, 'Edited the invite message');
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to update template' };
@@ -205,7 +213,7 @@ export async function updateInviteMessageTemplate(eventId: string, template: str
 
 export async function resetRegistryGift(eventId: string, giftId: string) {
   try {
-    await requireAdmin();
+    const me = await requireEventRole(eventId);
     const batch = getAdminDb().batch();
 
     // 1. Reset the gift
@@ -226,6 +234,7 @@ export async function resetRegistryGift(eventId: string, giftId: string) {
     });
 
     await batch.commit();
+    await logActivity(eventId, me, 'Reset gift claims', giftId);
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to reset gift' };
@@ -234,7 +243,7 @@ export async function resetRegistryGift(eventId: string, giftId: string) {
 
 export async function deleteGiftSelection(eventId: string, selectionId: string, giftId: string) {
   try {
-    await requireAdmin();
+    const me = await requireEventRole(eventId);
     const selectionRef = getAdminDb().doc(paths.giftSelection(eventId, selectionId));
     const giftRef = getAdminDb().doc(paths.registryGift(eventId, giftId));
 
@@ -255,6 +264,7 @@ export async function deleteGiftSelection(eventId: string, selectionId: string, 
       transaction.delete(selectionRef);
     });
 
+    await logActivity(eventId, me, 'Deleted gift claim', giftId);
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to delete gift selection' };
@@ -263,7 +273,7 @@ export async function deleteGiftSelection(eventId: string, selectionId: string, 
 
 export async function toggleInviteCopiedStatus(eventId: string, code: string, isCopied: boolean) {
   try {
-    await requireAdmin();
+    await requireEventRole(eventId);
     const guestsRef = getAdminDb().doc(paths.guest(eventId, code));
     await guestsRef.update({
       isCopied,

@@ -9,7 +9,8 @@ field, update this file.
 ## Firestore collections
 
 Event data is **scoped to an event**: everything a guest or an editor touches
-lives under `events/{eventId}`. Admin accounts are still global. Every path is
+lives under `events/{eventId}`, including its team (`members`). Accounts
+(`admins`, `adminAllowlist`) are global. Every path is
 built by `paths` in **`src/lib/eventPaths.ts`**; no other file in `src/` names a
 collection (the Node scripts keep their own copy of the names). The rest of the
 docs write event subcollections short: `guests` means
@@ -22,8 +23,8 @@ is `/<eventId>` (`src/app/[event]/page.tsx`), and an ID without an
 every admin page (`const eventId = DEFAULT_EVENT_ID`) edits the default event.
 Guest components get the ID from `useWeddingContent().eventId`; admin client
 components and content editors get it as an `eventId` prop. Every server
-action takes `eventId` as its first argument (except the global admin
-actions). Event IDs that equal a top-level route (`admin`, `api`) would be
+action takes `eventId` as its first argument and checks the caller's role
+in that event (`docs/security.md`). Event IDs that equal a top-level route (`admin`, `api`) would be
 shadowed by it; F11 must refuse them.
 
 | Path | Doc ID | Written by | Read by |
@@ -32,12 +33,14 @@ shadowed by it; F11 must refuse them.
 | `…/guests` | the invite code (e.g. `K7MPQ2`), unique per event | server actions (`admin.ts`, `rsvp.ts`) | admin pages; `verifyInviteCode` |
 | `…/registryGifts` | auto ID | server actions (`admin.ts`, `registry.ts`) | `getRegistryGifts`; admin gifts/dashboard |
 | `…/giftSelections` | auto ID | `claimGift`; deleted by `resetRegistryGift` / `deleteGiftSelection` | admin registry page |
-| `…/settings` | `inviteTemplate` | `updateInviteMessageTemplate` | `getInviteMessageTemplate` |
+| `…/settings` | `inviteTemplate`, `permissions`, `editLock` | `updateInviteMessageTemplate`; `setClientDesign` (`team.ts`); `holdEditLock` / `releaseEditLock` (`editLock.ts`) | `getInviteMessageTemplate`; `getEventAccess` (`requireAdmin.ts`); `holdEditLock`. Server only |
+| `…/members` | Firebase Auth UID (F10) | `addMember`, `changeMemberRole`, `removeMember` (`team.ts`); `createSessionCookie` (claims an invite); `scripts/migrate-members-f10.js` | `getEventAccess`, the Team page. Server only |
+| `…/auditLog` | auto ID (F10) | `logActivity` (`src/lib/auditLog.ts`) after each admin mutation | `readActivity` (Team page). Server only |
 | `…/content` | one doc per screen (below) + old `<doc>_backup` (no longer written, F9) | `publishDraft` (`src/app/actions/content.ts`), copying the doc's draft. Editors no longer write it from the browser | the server only (admin SDK, `src/lib/siteContentServer.ts`): all screen docs + `siteText` + `theme` + `music` + `screens` by `getEventContent(eventId)` for the cached event page and its metadata; `globalSettings` + `siteText` + `theme` + `music` by `getSiteContent(eventId)` for the 404 page and the default invite message; `globalSettings`, `details`, `dressCode`, `theme` by the RSVP email. The browser no longer reads `content` (the public read rule stays) |
 | `…/drafts` | the content doc's ID (`EDITABLE_DOC_IDS` in `src/lib/contentDrafts.ts`) | `saveDraft` (also editor autosave); deleted by `publishDraft` / `discardDraft` | `loadDraft` (editors), `getEventDraftDocs` (admin preview). Fields: `data` (the whole doc as it will be published), `updatedAt` (ms, strictly increasing; the editors' conflict check), `updatedBy` (admin email). Server only (no rule = no browser access) |
 | `…/contentVersions` | the content doc's ID | `publishDraft` (adds the published doc on top, keeps the last 10, fewer if they pass ~900 KB) | `loadDraft` / `saveDraft` / `publishDraft` return the list without data; `getVersion` one version's `data`. Field: `items[]` of `{ id, publishedAt, publishedBy, label?, data }`. Before a doc's first publish the list is made up from the live doc and `<doc>_backup` and stored on that publish. Server only |
-| `admins` (global) | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); deleted by `removeAdmin` (`admins.ts`, super only) | `firestore.rules`, `storage.rules` (`isAdmin()`), `requireAdmin.ts` |
-| `adminAllowlist` (global) | lowercased email | `scripts/add-admin.js`; `addAdmin` / `cancelPendingAdmin` (`admins.ts`, super only) | `createSessionCookie`, `listAdmins` (server only; rules deny all browser access) |
+| `admins` (global) | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); `eventIds` by `addMember` / `removeMember` (`team.ts`), which also deletes the doc with the last event; `scripts/migrate-members-f10.js` | `firestore.rules` (`isOwner()`, old root `isAdmin()`), `storage.rules` (`isAdmin()`), `requireAdmin.ts`, `/api/upload`, `addMember` (by email) |
+| `adminAllowlist` (global) | lowercased email | `scripts/add-admin.js`; `addMember` / `cancelInvite` (`team.ts`); `scripts/migrate-members-f10.js` | `createSessionCookie`, the Team page (`events.<eventId>` query) (server only; rules deny all browser access) |
 
 A path helper throws on an invalid event ID or a document ID containing `/`,
 so a guest-typed code can never point at another document; the action's
@@ -100,18 +103,48 @@ Invariant: `isFull === currentCount >= maxCount`. Every action that changes
 `selectedAt`. Deleting one through `deleteGiftSelection` decrements the gift's
 `currentCount`.
 
-### `admins/{uid}`
+### `admins/{uid}` (account)
 
-`email`, `role` (`'super' | 'admin'`; a doc without it counts as `'admin'`),
-`addedAt`, `addedBy` (UID of the super admin who added them, or `'script'`).
-Its existence is what makes a user an admin. Type `AdminUser`, `AdminRole`.
+`email`, `role` (`'super'` = platform owner, every event; `'admin'` or none =
+an ordinary account), `eventIds` (the events it is a member of; kept in step
+with `members` by the Team actions and the sign-in claim), `addedAt`, `addedBy`
+(UID of whoever added them, or `'script'`). An account with no `eventIds`
+that is not an owner gets no session. Type `AdminUser`, `AdminRole`.
 
-### `adminAllowlist/{email}`
+### `events/{eventId}/members/{uid}` (F10)
 
-`role`, `addedAt`, `addedBy`. A pending grant for someone who **may** become an
-admin. On their next Google sign-in, `createSessionCookie` copies it onto
-`admins/{uid}` in a transaction (creating the doc, or setting `role` on an
-existing one) and deletes the entry.
+`email`, `role` (`'organizer' | 'client'`, `EventRole` in
+`src/lib/permissions.ts`), `addedAt`, `addedBy` (UID, `'script'` or
+`'migrate-members-f10'`). What a role may do: `docs/security.md`. Platform
+owners have no member doc.
+
+### `adminAllowlist/{email}` (invites)
+
+`role` (`'super'` for a platform owner, else `'admin'`), `events`
+(`{ [eventId]: 'organizer' | 'client' }`, the events it joins), `addedAt`,
+`addedBy`. A pending grant for someone who has not signed in yet. On their
+next Google sign-in, `createSessionCookie` creates or updates `admins/{uid}`
+(never downgrading an owner), adds a member doc per event (an existing one
+keeps its role) and deletes the entry, in one transaction. An entry with
+neither `'super'` nor an event (from before F10) is left alone; the F10
+migration gives it the default event.
+
+### `settings/permissions` (per event, F10)
+
+`{ clientDesign: boolean }`: true lets clients change the section order,
+colors & fonts and music. Missing = false. Set on the Team page.
+
+### `settings/editLock` (per event, F10)
+
+`{ holder, uid, email, at }`: who has the visual builder open (`holder` is a
+random ID per browser tab; `at` in ms, renewed every 30 s, free after 90 s
+without a heartbeat). Deleted when the builder closes.
+
+### `auditLog/{id}` (per event, F10)
+
+`{ at (server timestamp), uid, email, action, target }`, e.g. `Published` /
+`welcomeScreen`, `Added to the team` / `a@b.co as Client`. Never edited; no
+cleanup yet (one small doc per admin change).
 
 ### `settings/inviteTemplate` (per event)
 

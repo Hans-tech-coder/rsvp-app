@@ -3,7 +3,9 @@
 import { revalidatePath } from 'next/cache';
 import type { DocumentReference, DocumentSnapshot, Firestore, Transaction } from 'firebase-admin/firestore';
 import { getAdminDb } from '@/lib/firebase/admin';
-import { requireAdmin } from '@/lib/requireAdmin';
+import { requireEventRole } from '@/lib/requireAdmin';
+import { logActivity } from '@/lib/auditLog';
+import { canEditDesign, canEditDoc, keepsScreenOrder } from '@/lib/permissions';
 import { DEFAULT_EVENT_ID, isValidEventId, paths } from '@/lib/eventPaths';
 import {
   addVersion, isEditableDocId, isSameDraft, nextDraftData, seedVersions, toPlain, versionInfo,
@@ -13,6 +15,8 @@ import {
 // Draft / publish / versions for the content editors (F9). Editors no longer
 // write `content/*` from the browser: they save a draft here, and Publish
 // copies it to the live doc. Shapes and paths: src/lib/contentDrafts.ts.
+// Every member of the event may read; saving, publishing and discarding
+// follow the role's locks (src/lib/permissions.ts).
 
 type Fail = { success: false; error: string };
 
@@ -33,6 +37,14 @@ export type SaveDraftResult =
 function check(eventId: string, docId: string) {
   if (!isValidEventId(eventId)) throw new Error('Invalid event');
   if (!isEditableDocId(docId)) throw new Error('Invalid content doc');
+}
+
+/** A member who may change this doc; throws otherwise. */
+async function requireDocEdit(eventId: string, docId: string) {
+  const access = await requireEventRole(eventId);
+  check(eventId, docId);
+  if (!canEditDoc(access, docId)) throw new Error('Your role cannot change this part of the site.');
+  return access;
 }
 
 function refs(db: Firestore, eventId: string, docId: string) {
@@ -66,7 +78,7 @@ function refreshGuestSite(eventId: string) {
 
 export async function loadDraft(eventId: string, docId: string): Promise<({ success: true } & DraftState) | Fail> {
   try {
-    await requireAdmin();
+    await requireEventRole(eventId);
     check(eventId, docId);
     const db = getAdminDb();
     const r = refs(db, eventId, docId);
@@ -99,8 +111,7 @@ export async function saveDraft(
   options: { merge: boolean; expectedUpdatedAt: number | null; force?: boolean },
 ): Promise<SaveDraftResult> {
   try {
-    const admin = await requireAdmin();
-    check(eventId, docId);
+    const admin = await requireDocEdit(eventId, docId);
     const db = getAdminDb();
     const r = refs(db, eventId, docId);
     if (typeof data !== 'object' || data === null || Array.isArray(data)) throw new Error('Invalid content');
@@ -116,7 +127,12 @@ export async function saveDraft(
       const { items } = await readVersions((ref) => tx.get(ref), r, live);
       // Strictly increasing, so two quick saves never share an updatedAt.
       const updatedAt = Math.max(Date.now(), (draft?.updatedAt ?? 0) + 1);
-      const next: DraftDoc = { data: nextDraftData(plain, options.merge, draft, live), updatedAt, updatedBy: admin.email };
+      const nextData = nextDraftData(plain, options.merge, draft, live);
+      // Without design rights a member may show, hide and rename sections, not reorder them.
+      if (docId === 'screens' && !canEditDesign(admin) && !keepsScreenOrder(nextData, draft?.data ?? live)) {
+        throw new Error('Your role cannot change the order of the sections.');
+      }
+      const next: DraftDoc = { data: nextData, updatedAt, updatedBy: admin.email };
       tx.set(r.draft, next);
       return { success: true, updatedAt, versions: versionInfo(items, live) };
     });
@@ -128,8 +144,7 @@ export async function saveDraft(
 /** Copies the draft over the live doc, records the version, deletes the draft and refreshes the guest site. */
 export async function publishDraft(eventId: string, docId: string): Promise<({ success: true; versions: VersionInfo[] }) | Fail> {
   try {
-    const admin = await requireAdmin();
-    check(eventId, docId);
+    const admin = await requireDocEdit(eventId, docId);
     const db = getAdminDb();
     const r = refs(db, eventId, docId);
 
@@ -151,6 +166,7 @@ export async function publishDraft(eventId: string, docId: string): Promise<({ s
     });
 
     refreshGuestSite(eventId);
+    await logActivity(eventId, admin, 'Published', docId);
     return { success: true, versions };
   } catch (error) {
     return { success: false, error: (error as Error).message || 'Failed to publish' };
@@ -160,9 +176,9 @@ export async function publishDraft(eventId: string, docId: string): Promise<({ s
 /** Drops the draft; the editor goes back to the live doc. */
 export async function discardDraft(eventId: string, docId: string): Promise<({ success: true } & DraftState) | Fail> {
   try {
-    await requireAdmin();
-    check(eventId, docId);
+    const admin = await requireDocEdit(eventId, docId);
     await getAdminDb().doc(paths.draft(eventId, docId)).delete();
+    await logActivity(eventId, admin, 'Discarded the draft', docId);
     return await loadDraft(eventId, docId);
   } catch (error) {
     return { success: false, error: (error as Error).message || 'Failed to discard the draft' };
@@ -172,7 +188,7 @@ export async function discardDraft(eventId: string, docId: string): Promise<({ s
 /** One version's doc, for Restore (the editor loads it into the form). */
 export async function getVersion(eventId: string, docId: string, versionId: string): Promise<({ success: true; data: DocData }) | Fail> {
   try {
-    await requireAdmin();
+    await requireEventRole(eventId);
     check(eventId, docId);
     const db = getAdminDb();
     const r = refs(db, eventId, docId);

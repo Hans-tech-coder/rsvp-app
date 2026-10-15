@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, EyeOff, Redo2, Undo2, X } from 'lucide-react';
+import { ArrowLeft, EyeOff, Loader2, Lock, Redo2, Undo2, X } from 'lucide-react';
 import { WelcomeScreenEditor } from '../content/WelcomeScreenEditor';
 import { GlobalSettingsEditor } from '../content/GlobalSettingsEditor';
 import { EntranceScreenEditor } from '../content/EntranceScreenEditor';
@@ -23,6 +23,9 @@ import { UnsavedChangesProvider, useUnsavedChangesGuard } from '../content/unsav
 import { ContentPageProvider } from '../content/contentDraft';
 import { PreviewFrame } from '../components/PreviewFrame';
 import { BuilderProvider, type BuilderLink, type EditorHandle } from './builderContext';
+import { useEditLock, type EditLockStatus } from './useEditLock';
+import { useEventAccess } from '../eventAccess';
+import { canEditDesign, DESIGN_DOC_IDS } from '@/lib/permissions';
 import { DEFAULT_EVENT_ID } from '@/lib/eventPaths';
 import { SCREEN_NAMES, SCREEN_TYPES, mergeScreens, type ScreenType } from '@/lib/screens';
 import { EMPTY_HISTORY, recordEdit, redoEntry, undoEntry } from '@/lib/builderHistory';
@@ -37,7 +40,9 @@ import type { DocData, EditableDocId } from '@/lib/contentDrafts';
 // in the preview at once (postMessage, src/app/[event]/preview/PreviewSite.tsx)
 // and is saved as a draft like on the content page. One undo / redo history
 // across all panels (src/lib/builderHistory.ts). Laptop and tablet widths;
-// phones keep the content page.
+// phones keep the content page. One person per event at a time (edit lock,
+// useEditLock.ts); a client without design rights gets no Colors & Fonts or
+// Music panel and cannot reorder sections (src/lib/permissions.ts).
 
 type Panel = { label: string; docId: EditableDocId; Editor: ComponentType<{ eventId: string }>; section?: string };
 
@@ -104,10 +109,24 @@ export default function VisualBuilderPage() {
   const pendingRestore = useRef<{ docId: EditableDocId; doc: DocData } | null>(null);
   const selectedRef = useRef(selected);
   const panelDirtyRef = useRef(panelDirty);
+  const screensDirtyRef = useRef(screensDirty);
   useEffect(() => {
     selectedRef.current = selected;
     panelDirtyRef.current = panelDirty;
+    screensDirtyRef.current = screensDirty;
   });
+
+  const design = canEditDesign(useEventAccess().rules);
+  const sitePanels = (Object.keys(SITE_PANELS) as (keyof typeof SITE_PANELS)[])
+    .filter((id) => design || !DESIGN_DOC_IDS.includes(SITE_PANELS[id].docId));
+
+  // Someone took the builder over: keep this tab's open edits as drafts, as Elementor does.
+  const saveOpenEdits = useCallback(() => {
+    if (panelDirtyRef.current) handles.current.get(PANELS[selectedRef.current].docId)?.save();
+    if (screensDirtyRef.current) handles.current.get('screens')?.save();
+  }, []);
+  const lock = useEditLock(eventId, saveOpenEdits);
+  const blocked = lock.status.state !== 'held';
 
   const post = useCallback((message: BuilderMessage, to?: Window) => {
     for (const frame of to ? [to] : frames.current) {
@@ -178,6 +197,7 @@ export default function VisualBuilderPage() {
   }, [showSection]);
 
   const step = useCallback(async (direction: 'undo' | 'redo') => {
+    if (blocked) return;
     const entry = direction === 'undo' ? undoEntry(history) : redoEntry(history);
     if (!entry) return;
     const panel = panelOfDoc(entry.docId);
@@ -185,7 +205,7 @@ export default function VisualBuilderPage() {
     if (entry.docId !== 'screens' && panel && panel !== selectedRef.current && !(await select(panel))) return;
     setHistory((h) => ({ ...h, index: h.index + (direction === 'undo' ? -1 : 1) }));
     loadIntoForm(entry.docId, direction === 'undo' ? entry.before : entry.after);
-  }, [history, select, loadIntoForm]);
+  }, [history, select, loadIntoForm, blocked]);
 
   // The preview frames: each says when it listens (also after a reload) and
   // when the admin clicks a section in it.
@@ -260,11 +280,11 @@ export default function VisualBuilderPage() {
           <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">Edits are drafts. Publish each part when it is ready.</p>
         </div>
         <div className="ml-auto hidden md:flex items-center gap-1">
-          <button onClick={() => step('undo')} disabled={!undoEntry(history)} className={toolButton} title="Undo (Ctrl+Z)">
+          <button onClick={() => step('undo')} disabled={blocked || !undoEntry(history)} className={toolButton} title="Undo (Ctrl+Z)">
             <Undo2 className="w-4 h-4" aria-hidden="true" />
             Undo
           </button>
-          <button onClick={() => step('redo')} disabled={!redoEntry(history)} className={toolButton} title="Redo (Ctrl+Shift+Z)">
+          <button onClick={() => step('redo')} disabled={blocked || !redoEntry(history)} className={toolButton} title="Redo (Ctrl+Shift+Z)">
             <Redo2 className="w-4 h-4" aria-hidden="true" />
             Redo
           </button>
@@ -279,6 +299,8 @@ export default function VisualBuilderPage() {
 
       <BuilderProvider value={link}>
         <div className="relative hidden md:flex flex-1 min-h-0">
+          {blocked && <EditLockOverlay status={lock.status} onTakeOver={lock.takeOver} onRetry={lock.retry} />}
+          <div inert={blocked} className="flex flex-1 min-w-0">
           {/* Sections + site-wide panels */}
           <aside aria-label="Sections" className="w-[22rem] shrink-0 overflow-y-auto border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 lg:px-8 pt-5">
             <UnsavedChangesProvider value={setScreensDirty}>
@@ -294,7 +316,7 @@ export default function VisualBuilderPage() {
             <div className="pb-6">
               <h3 className="text-sm font-semibold mb-2">Whole site</h3>
               <ul className="space-y-1">
-                {(Object.keys(SITE_PANELS) as (keyof typeof SITE_PANELS)[]).map((id) => (
+                {sitePanels.map((id) => (
                   <li key={id}>
                     <button
                       onClick={() => select(id)}
@@ -348,9 +370,54 @@ export default function VisualBuilderPage() {
               </section>
             )}
           </div>
+          </div>
         </div>
       </BuilderProvider>
       {dialog}
+    </div>
+  );
+}
+
+/** Over the builder while this tab does not hold the edit lock. */
+function EditLockOverlay({ status, onTakeOver, onRetry }: { status: EditLockStatus; onTakeOver: () => void; onRetry: () => void }) {
+  const primary = 'min-h-11 inline-flex items-center justify-center px-4 rounded-lg bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-sm font-medium hover:opacity-90 transition-opacity';
+  const secondary = 'min-h-11 inline-flex items-center justify-center px-4 rounded-lg border border-gray-300 dark:border-zinc-700 text-sm font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors';
+
+  if (status.state === 'checking') {
+    return (
+      <div className="absolute inset-0 z-30 flex items-center justify-center bg-gray-50/70 dark:bg-zinc-950/70" role="status">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" aria-hidden="true" />
+        <span className="sr-only">Checking who is editing</span>
+      </div>
+    );
+  }
+
+  if (status.state === 'held') return null;
+  const blocked = status.state === 'blocked' ? status : null;
+  const who = blocked?.by ?? 'Someone';
+  const title = !blocked
+    ? 'Could not check who is editing'
+    : blocked.sameUser ? 'The builder is open in another tab'
+      : blocked.lost ? `${who} took over editing` : `${who} is editing this event`;
+  const text = !blocked
+    ? 'Check the connection and try again.'
+    : blocked.lost
+      ? 'Only one person can use the builder at a time. Any unsaved edits in this tab were saved as drafts.'
+      : 'Only one person can use the builder at a time. Taking over stops them; their unsaved edits are saved as drafts.';
+
+  return (
+    <div className="absolute inset-0 z-30 flex items-center justify-center p-6 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-sm">
+      <div role="alertdialog" aria-modal="true" aria-labelledby="edit-lock-title" aria-describedby="edit-lock-text" className="w-full max-w-sm rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-xl">
+        <Lock className="w-5 h-5 text-gray-500 dark:text-zinc-400" aria-hidden="true" />
+        <h2 id="edit-lock-title" className="mt-3 text-base font-semibold">{title}</h2>
+        <p id="edit-lock-text" className="mt-1 text-sm text-gray-600 dark:text-zinc-400">{text}</p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {!blocked
+            ? <button onClick={onRetry} className={primary} autoFocus>Try again</button>
+            : <button onClick={onTakeOver} className={primary} autoFocus>Take over</button>}
+          <Link href="/admin/content" className={secondary}>Back to Content</Link>
+        </div>
+      </div>
     </div>
   );
 }

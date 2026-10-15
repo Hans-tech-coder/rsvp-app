@@ -9,8 +9,11 @@
 //   guests/{inviteCode}  invite codes and RSVPs (codes are unique per event)
 //   registryGifts/{id}
 //   giftSelections/{id}
-//   settings/{doc}       e.g. `inviteTemplate`
-// Admin accounts stay global (`admins`, `adminAllowlist`) until per-event roles.
+//   settings/{doc}       e.g. `inviteTemplate`, `permissions`, `editLock`
+//   members/{uid}        the event's team: role `organizer` | `client` (F10)
+//   auditLog/{id}        who changed what, when (F10)
+// Accounts stay global: `admins/{uid}` (sign-in; `role: 'super'` = platform
+// owner) and `adminAllowlist/{email}` (pending invites).
 
 const EVENT_ID = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
 
@@ -51,6 +54,9 @@ export const paths = {
   giftSelections: (eventId: string) => `${event(eventId)}/giftSelections`,
   giftSelection: (eventId: string, selectionId: string) => `${event(eventId)}/giftSelections/${segment(selectionId)}`,
   setting: (eventId: string, docId: string) => `${event(eventId)}/settings/${segment(docId)}`,
+  members: (eventId: string) => `${event(eventId)}/members`,
+  member: (eventId: string, uid: string) => `${event(eventId)}/members/${segment(uid)}`,
+  auditLog: (eventId: string) => `${event(eventId)}/auditLog`,
   admins: () => 'admins',
   admin: (uid: string) => `admins/${segment(uid)}`,
   adminAllowlist: () => 'adminAllowlist',

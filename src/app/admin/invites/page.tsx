@@ -1,5 +1,5 @@
 import { getAdminDb } from '@/lib/firebase/admin';
-import { requireAdminPage } from '@/lib/requireAdmin';
+import { requireEventPage } from '@/lib/requireAdmin';
 import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
 import InviteListClient from './InviteListClient';
 import { Guest } from '@/types';
@@ -9,9 +9,9 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function InvitesPage() {
-  await requireAdminPage();
   // The only event until the event switcher (F11)
   const eventId = DEFAULT_EVENT_ID;
+  await requireEventPage(eventId);
 
   const [snapshot, template] = await Promise.all([
     getAdminDb()

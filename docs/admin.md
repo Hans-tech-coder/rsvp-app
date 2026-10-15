@@ -1,6 +1,7 @@
 # Admin portal (`/admin/**`)
 
-Private dashboard for the couple. Sidebar and mobile header are in
+Private dashboard for each event's team (organizers and clients) and the
+platform owners. Sidebar and mobile header are in
 `src/app/admin/layout.tsx` (skipped on `/admin/login`). Admin UI uses plain
 Tailwind grays (`gray-*` light, `zinc-*` dark) and lucide icons — **not** the
 wedding palette.
@@ -16,48 +17,74 @@ wedding palette.
 2. `createSessionCookie` verifies the ID token (with revocation), requires
    `sign_in_provider === 'google.com'`, `email_verified`, and a sign-in within
    the last 5 minutes, claims any `adminAllowlist/{email}` entry (see
-   `docs/data-model.md`), and refuses users with no `admins/{uid}` doc ("This
-   Google account is not an admin."). Then it makes a 5-day Firebase
+   `docs/data-model.md`), and refuses an account that is neither a platform
+   owner nor a member of an event ("This Google account has no event to
+   manage."). Then it makes a 5-day Firebase
    **session cookie** named `session` (`httpOnly`, `secure`, path `/`).
 3. `src/proxy.ts` redirects `/admin/**` to `/admin/login` when the cookie is
    missing, and `/admin/login` to `/admin/dashboard` when present. It does not
-   verify the cookie; each admin server page calls `requireAdminPage()`
-   (`src/lib/requireAdmin.ts`), which sends an invalid, revoked, or non-admin
-   session to `/api/logout` (clears the cookie, then `/admin/login`).
+   verify the cookie; each admin server page calls `requireEventPage(eventId)`
+   (`src/lib/requireAdmin.ts`), which sends an invalid or revoked session, or
+   one with no access to the event, to `/api/logout` (clears the cookie, then
+   `/admin/login`).
 4. Sign out (`layout.tsx`): `auth.signOut()` + `clearSessionCookie()`.
 
-Adding an admin: `node scripts/add-admin.js <email> [--super]` (reads `FIREBASE_ADMIN_*`
-from `.env.local`, or `GOOGLE_APPLICATION_CREDENTIALS`) writes `adminAllowlist/{email}`. The person
-does not need to exist yet; they become an admin on their next Google
-sign-in. `--super` is the only way to make a super admin. See
+Every admin page and action works on one event (the default event until the
+event switcher, F11) and checks the signed-in person's role **in that event**:
+owner, organizer or client (`src/lib/permissions.ts`, details in
+`docs/security.md`). The sidebar shows the role and email above Sign Out, and
+loads it once (`getMyEventAccess`) into `EventAccessProvider`
+(`src/app/admin/eventAccess.tsx`); editors read it with `useEventAccess()` to
+hide what the role may not change. Until it has loaded they assume the least
+access, so locked controls never flash.
+
+Platform owners: `node scripts/add-admin.js <email> --super` (reads
+`FIREBASE_ADMIN_*` from `.env.local`, or `GOOGLE_APPLICATION_CREDENTIALS`).
+The same script adds an event member with `--event <id> [--role organizer|client]`,
+like the Team page. The person does not need to have signed in yet. See
 `docs/security.md` for what is and is not checked.
 
-## Manage Admins (super admins only)
+## Team (organizers and owners)
 
-Day-to-day admin changes happen in the portal, not the script. There is no
-page or route for this: a **Manage Admins** button (`ShieldCheck` icon) sits
-under the regular `navItems` in the sidebar (the same `<aside>` is the mobile
-slide-in menu). `layout.tsx` calls `getMyAdminRole()` when it mounts and again
-after leaving `/admin/login`, and renders the button only when the result is
-`'super'`. Nothing renders while the call is pending, so a regular admin never
-sees it flash.
+`/admin/team` (`team/page.tsx` server, `TeamClient.tsx`), in the sidebar as
+**Team** for organizers and owners only (a client who opens the URL goes to
+the dashboard). It replaced the super-admin "Manage Admins" modal (F10).
 
-The button opens `components/ManageAdminsModal.tsx`, which the layout mounts
-only while it is open. The modal loads `listAdmins()` each time it opens and shows:
+- **Add someone**: email + role → `addMember`. An email with an account is
+  added to `members` at once; anyone else gets an invite
+  (`adminAllowlist/{email}.events[eventId]`) and joins on their first Google
+  sign-in. Refuses platform owners and people already in the team or invited.
+- **Members**: email, date added, a role select (`changeMemberRole`) and
+  Remove (`removeMember`, confirmed in `AdminModal`). Both are disabled for
+  yourself.
+- **Invited, not signed in yet**: Cancel invite → `cancelInvite`.
+- **Clients may change the design** switch → `setClientDesign` (section
+  order, colors & fonts, music).
+- **Activity**: the last 50 audit log entries (who, what, when).
 
-- an **Add admin** email field → `addAdmin(email)` writes
-  `adminAllowlist/{email}` with `role: 'admin'`. It refuses an email that is
-  already an admin or already pending;
-- **Active** admins (email, role, date added). Each has a Remove button, which
-  is hidden for yourself and for super admins. It asks for confirmation in
-  `AdminModal`, then calls `removeAdmin(uid)`;
-- **Pending** allowlist entries, each with **Cancel** →
-  `cancelPendingAdmin(email)`. The button is hidden for pending super entries.
+Owners are not listed (they open every event); there is no UI to add or
+remove one.
 
-The modal closes on Esc (Esc closes an open confirmation first) and on a
-backdrop click. The list scrolls inside the panel on small screens. The UI
-never creates, removes, or cancels a super admin; use `add-admin.js --super`,
-or delete the doc in the Firebase console.
+## Client locks
+
+For a client without `clientDesign`: the **Colors & Fonts** and **Music** tabs
+(content page) and panels (builder) are hidden, and the Screens list has no
+drag handles or arrows (show / hide and rename stay; "The order is set by
+your organizer."). The server refuses the same changes (`saveDraft`,
+`publishDraft`, `discardDraft`).
+
+## Builder edit lock
+
+Only one browser tab per event uses the visual builder at a time
+(`builder/useEditLock.ts` + `actions/editLock.ts`). Anyone else (or the same
+person in a second tab) sees "X is editing this event" over the builder, with
+**Take over** and **Back to Content**. The tab that loses the lock saves its
+open edits as drafts and shows "X took over editing". Leaving the builder
+frees the lock (a link inside the admin: `releaseEditLock`; closing the tab
+or leaving the site: a beacon to `/api/edit-lock/release`). A tab that
+crashes or goes offline frees it after 90 s without a heartbeat; a waiting
+tab then gets it on its next check (every 30 s). Browsers slow timers in
+background tabs (about one check a minute), which stays inside the 90 s. Phones (the builder's phone message) never take the lock.
 
 ## Page pattern
 
@@ -84,6 +111,7 @@ the client checks `success` and shows the error.
 | `/admin/gifts` | Registry gift CRUD (`name`, `link`, `maxCount`); reset claims | `addRegistryGift`, `updateRegistryGift`, `deleteRegistryGift`, `resetRegistryGift` |
 | `/admin/registry` | Who claimed which gift; delete a claim (decrements the gift count) | `deleteGiftSelection` |
 | `/admin/content` | Tabbed editors for every guest screen, plus **Site Text** (every button, label, hint and error message, grouped by screen, with a search box; empty field = default) **Screens & Menu** (reorder, show/hide and rename the guest screens; `content/screens`), **Colors & Fonts** (palette presets, color pickers, readability check, font pairings, live preview; `content/theme`) and **Music** (on/off, song upload, starting volume; `content/music`) | `loadDraft`, `saveDraft`, `publishDraft`, `discardDraft`, `getVersion` (`src/app/actions/content.ts`): editors save a draft (also autosaved after 10 s idle), **Publish** makes it live and rebuilds the cached guest page, **History** restores one of the last 10 published versions. A **Preview** button shows the draft site in a phone / desktop frame (docked from 1024 px, full screen below). See "Drafts, preview and versions" in `docs/content-system.md` |
+| `/admin/team` | The event's team, invites, the client design switch and the activity log (organizers and owners) | `addMember`, `changeMemberRole`, `removeMember`, `cancelInvite`, `setClientDesign` (`src/app/actions/team.ts`) |
 | `/admin/builder` | **Visual builder** (tablet and wider; full screen): section list (pick, drag, show/hide, rename) and site-wide panels on the left, the draft site in the middle, the picked section's editor on the right. Click a section in the preview to edit it; edits show live; Undo / Redo across panels. See "Visual builder" in `docs/content-system.md` | Same as `/admin/content` (each panel is the same editor with its own Save Draft / Publish / History) |
 
 ## Adding an admin page
@@ -91,6 +119,7 @@ the client checks `success` and shows the error.
 1. Create `src/app/admin/<name>/page.tsx` (server) + `<Name>Client.tsx`.
 2. Add a nav item in `navItems` in `src/app/admin/layout.tsx`.
 3. Put new mutations in `src/app/actions/admin.ts` (return the
-   `{success, error}` shape) — and add the admin check described in
-   `docs/security.md`.
+   `{success, error}` shape) — start each with `requireEventRole(eventId, …)`
+   (see `docs/security.md`), call `requireEventPage(eventId, …)` first in the
+   page, and record the change with `logActivity`.
 4. Update `docs/FEATURE-MAP.md` and this file.

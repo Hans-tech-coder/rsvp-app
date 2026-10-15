@@ -36,6 +36,7 @@ export interface GiftSelection {
   selectedAt: Date | any; // Firestore Timestamp
 }
 
+/** An account's platform role: 'super' = platform owner (every event). Event roles: src/lib/permissions.ts. */
 export type AdminRole = 'super' | 'admin';
 
 export interface AdminUser {
@@ -43,6 +44,7 @@ export interface AdminUser {
   email: string;
   name: string;
   role?: AdminRole; // missing on docs created before roles; treat as 'admin'
+  eventIds?: string[]; // events it is a member of (events/{eventId}/members/{uid})
   addedAt: Date | any; // Firestore Timestamp
-  addedBy?: string; // UID of the super admin who added them, or 'script'
+  addedBy?: string; // UID of whoever added them, or 'script'
 }

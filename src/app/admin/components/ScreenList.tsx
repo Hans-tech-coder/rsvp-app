@@ -33,12 +33,14 @@ interface ScreenListProps {
    */
   selected?: ScreenType | null;
   onSelect?: (type: ScreenType) => void;
+  /** False hides drag and arrows (a role that may not change the order); show / hide and rename stay. */
+  reorder?: boolean;
 }
 
 // The guest screens as a list to reorder (drag or arrows), show / hide and
 // rename. Controlled: the caller owns the list and saves it (ScreensEditor.tsx,
 // also the visual builder's section list). Welcome stays first and shown.
-export function ScreenList({ screens, onChange, defaultLabels, selected = null, onSelect }: ScreenListProps) {
+export function ScreenList({ screens, onChange, defaultLabels, selected = null, onSelect, reorder = true }: ScreenListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -46,7 +48,7 @@ export function ScreenList({ screens, onChange, defaultLabels, selected = null, 
 
   // Nothing moves above the pinned first screen.
   const move = (from: number, to: number) => {
-    if (to < 1 || to >= screens.length || from < 1) return;
+    if (!reorder || to < 1 || to >= screens.length || from < 1) return;
     onChange(arrayMove(screens, from, to));
   };
 
@@ -78,6 +80,7 @@ export function ScreenList({ screens, onChange, defaultLabels, selected = null, 
               onRename={(label) => update(screen.type, { label })}
               defaultLabel={defaultLabels[screen.type]}
               select={onSelect && { selected: selected === screen.type, onSelect: () => onSelect(screen.type) }}
+              reorder={reorder}
             />
           ))}
         </ol>
@@ -89,7 +92,7 @@ export function ScreenList({ screens, onChange, defaultLabels, selected = null, 
 const iconButton =
   'p-2 rounded-lg text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-zinc-100 transition-colors disabled:opacity-30 disabled:pointer-events-none';
 
-function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onRename, defaultLabel, select }: {
+function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onRename, defaultLabel, select, reorder }: {
   screen: ScreenConfig;
   /** Position guests see it at, or null when hidden */
   step: number | null;
@@ -100,18 +103,19 @@ function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onR
   onRename: (label: string) => void;
   defaultLabel: string;
   select?: { selected: boolean; onSelect: () => void };
+  reorder: boolean;
 }) {
   const ids = useId();
   const pinned = screen.type === PINNED_SCREEN;
   const name = SCREEN_NAMES[screen.type];
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: screen.type,
-    disabled: pinned,
+    disabled: pinned || !reorder,
   });
   // In the builder only the picked row shows its arrows and menu name.
   const expanded = !select || select.selected;
 
-  const arrows = !pinned && (
+  const arrows = !pinned && reorder && (
     <>
       <button type="button" className={iconButton} disabled={!canMoveUp} onClick={() => onMove(-1)} aria-label={`Move ${name} up`}>
         <ArrowUp className="w-4 h-4" aria-hidden="true" />
@@ -137,6 +141,8 @@ function ScreenRow({ screen, step, canMoveUp, canMoveDown, onMove, onToggle, onR
           <span className="p-2 text-gray-400 dark:text-zinc-500" title="Always the first screen">
             <Pin className="w-4 h-4" aria-hidden="true" />
           </span>
+        ) : !reorder ? (
+          <span className="w-8 shrink-0" aria-hidden="true" />
         ) : (
           <button
             type="button"

@@ -35,7 +35,7 @@ platform: data and guest URLs are already per event (`/<eventId>`).
 | Who | What they do | Where |
 | --- | --- | --- |
 | **Guests** (no account) | Step through up to 10 screens (by default welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form; admins reorder, hide and rename them). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/<eventId>` (one page, screens swap in place; `/` → default event) |
-| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font, the music, and which screens show in what order on the guest site. Edits are drafts (autosaved) until Publish; a preview shows the draft site and History restores earlier published versions. A **visual builder** (tablet and wider) shows the draft site with the sections and editors around it: click a section to edit it, live, with undo / redo. Super admins also add and remove admins from **Manage Admins** in the sidebar. | `/admin/**` |
+| **Admins** (Google sign-in, by invite only; per event an **organizer** or a **client**, and platform **owners** who open every event) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font, the music, and which screens show in what order on the guest site. Edits are drafts (autosaved) until Publish; a preview shows the draft site and History restores earlier published versions. A **visual builder** (tablet and wider) shows the draft site with the sections and editors around it: click a section to edit it, live, with undo / redo. Clients cannot change the design (section order, colors & fonts, music) unless the event allows it; organizers manage the event's **Team** (members, invites, that switch, the activity log). One person at a time in the builder (Take over). | `/admin/**` |
 
 ---
 
@@ -68,7 +68,8 @@ npm test               # vitest, src/ only (lib unit tests)
 npm run sync-content   # PULL Firestore events/hans-and-czay/content -> src/data/wedding-content.json
 node scripts/migrate-to-events.js [--write [--overwrite] | --verify]   # copy root collections into the event (F3)
 node scripts/migrate-content-f5.js [--write | --verify] [--dump <file>]   # add generic content fields (hosts, groups, venues, guidelines) to old docs (F5)
-node scripts/add-admin.js <email> [--super]   # allowlist an admin; reads FIREBASE_ADMIN_* from .env.local
+node scripts/add-admin.js <email> --super | --event <id> [--role organizer|client]   # invite an owner or an event member; reads FIREBASE_ADMIN_* from .env.local
+node scripts/migrate-members-f10.js [--write | --verify] [--event <id>] [--role organizer|client]   # give pre-F10 admins and invites a role in an event (F10)
 ```
 
 ### Environment (`.env.local`, template in `.env.local.example`)
@@ -97,14 +98,16 @@ src/
     fonts.ts                 every font of every pairing (next/font), CSS variables on <html>
     not-found.tsx            404 for unknown URLs/events (default event's look)
     globals.css              Tailwind @theme colors + font roles (Wedding default) + motion tokens + reveal CSS
-    actions/                 server actions: rsvp.ts, registry.ts, admin.ts, admins.ts, auth.ts, content.ts (drafts, publish, versions)
+    actions/                 server actions: rsvp.ts, registry.ts, admin.ts, auth.ts, content.ts (drafts, publish, versions), team.ts (members, invites), editLock.ts (builder lock)
     api/download/route.ts    image download proxy (used by DetailsScreen)
     api/upload/route.ts      admin-only Vercel Blob upload token
     api/logout/route.ts      clears the session cookie, redirects to /admin/login
-    admin/                   admin portal (layout.tsx = sidebar)
-      builder/               Visual builder: page.tsx (sections, preview canvas, editor drawer, undo/redo) + builderContext (editor <-> builder link)
+    api/edit-lock/release/   frees the builder's edit lock when its tab closes (sendBeacon)
+    admin/                   admin portal (layout.tsx = sidebar; eventAccess.tsx = the role for the UI)
+      builder/               Visual builder: page.tsx (sections, preview canvas, editor drawer, undo/redo) + builderContext (editor <-> builder link) + useEditLock (one tab at a time)
+      team/                  Team: members, invites, client design switch, activity log
       content/               Content manager: page.tsx (tabs, preview) + one *Editor.tsx per screen + EditorSaveBar / contentDraft (draft, publish, history)
-      components/            AdminModal, ManageAdminsModal, TablePagination, ScreenList (reorder/show/rename screens), PreviewFrame (phone/desktop draft preview, builder canvas)
+      components/            AdminModal, TablePagination, ScreenList (reorder/show/rename screens), PreviewFrame (phone/desktop draft preview, builder canvas)
       dashboard|invites|guests|gifts|registry|login/
   components/
     screens/                 one file per guest screen (+ GiftSelectionModal, LoadingScreen)
@@ -115,11 +118,13 @@ src/
   contexts/SiteTextContext.tsx         site text (buttons, labels, errors) from [event]/page.tsx -> useSiteText()
   contexts/EditMarkersContext.tsx      preview only: useFieldMarker() puts data-field on texts for the builder
   data/wedding-content.json  default/fallback content for every screen
-  lib/eventPaths.ts          every Firestore path (events/{eventId}/content|guests|registryGifts|giftSelections|settings, admins) (+ .test.ts)
+  lib/eventPaths.ts          every Firestore path (events/{eventId}/content|guests|registryGifts|giftSelections|settings|members|auditLog, admins) (+ .test.ts)
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
   lib/blob/uploadImage.ts    compress + upload an image to Vercel Blob (all editors)
   lib/blob/uploadAudio.ts    upload a music file to Vercel Blob (Music editor)
-  lib/requireAdmin.ts        admin check for server actions and admin pages (server only)
+  lib/requireAdmin.ts        session + role-in-event check for server actions and admin pages (server only)
+  lib/permissions.ts         roles (owner / organizer / client) and what each may change (+ .test.ts)
+  lib/auditLog.ts            event activity log: logActivity, readActivity (server only)
   lib/siteText.ts            SiteText type, merge, {placeholder} fill (+ .test.ts)
   lib/theme.ts               event colors + font pairing: tokens, presets, mergeTheme, contrast (+ .test.ts); applied by components/ThemeStyle.tsx
   lib/fonts.ts               font roles (heading/elegant/body), families, pairings (+ .test.ts)
@@ -137,7 +142,7 @@ src/
   lib/email/sendRsvpConfirmation.ts   guest RSVP confirmation email via Gmail SMTP (server only)
   types/index.ts             Guest, RegistryGift, GiftSelection, AdminUser
   proxy.ts                   /admin/** redirect when no session cookie
-scripts/                     sync-content.js, add-admin.js, migrate-to-events.js, migrate-content-f5.js
+scripts/                     sync-content.js, add-admin.js, migrate-to-events.js, migrate-content-f5.js, migrate-members-f10.js
 firestore.rules, storage.rules, firebase.json   deployed with the Firebase CLI
 legacy/                      old static site — reference only, not built
 ```

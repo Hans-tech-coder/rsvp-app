@@ -7,6 +7,18 @@ service cloud.firestore {
       return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    // Platform owner (F10): `admins/{uid}` with role 'super'. Opens every event.
+    function isOwner() {
+      return request.auth != null
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.get('role', '') == 'super';
+    }
+
+    // A member of the event (`events/{eventId}/members/{uid}`, F10) or a platform owner.
+    function isMember(eventId) {
+      return request.auth != null
+        && (exists(/databases/$(database)/documents/events/$(eventId)/members/$(request.auth.uid)) || isOwner());
+    }
+
     // Admins Collection: Only readable by the authenticated user to verify their own admin status.
     match /admins/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
@@ -60,10 +72,21 @@ service cloud.firestore {
       // Event record (slug, type, status): read and written by the server only.
       allow read, write: if false;
 
-      // Screen text and images: public read, admins edit from the browser.
+      // Screen text and images: public read. Written by publishDraft only
+      // (server actions, F9); no browser writes since F10.
       match /content/{docId} {
         allow read: if true;
-        allow write: if isAdmin();
+        allow write: if false;
+      }
+
+      // The event's team (F10): server only (src/app/actions/team.ts, auth.ts).
+      match /members/{uid} {
+        allow read, write: if false;
+      }
+
+      // Activity log (F10): server only (src/lib/auditLog.ts).
+      match /auditLog/{entryId} {
+        allow read, write: if false;
       }
 
       // Guest PII: server only (firebase-admin bypasses rules).
@@ -77,13 +100,13 @@ service cloud.firestore {
         allow write: if false;
       }
 
-      // Who claimed what: admins may read; writes through server actions only.
+      // Who claimed what: the event's members may read; writes through server actions only.
       match /giftSelections/{selectionId} {
-        allow read: if isAdmin();
+        allow read: if isMember(eventId);
         allow write: if false;
       }
 
-      // Invite template etc.: server only.
+      // Invite template, permissions, editLock: server only.
       match /settings/{docId} {
         allow read, write: if false;
       }

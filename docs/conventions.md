@@ -11,9 +11,12 @@ Match the code around you. These are the patterns the codebase already uses.
 - `cookies()` is async: `const store = await cookies()`.
 - Server actions: file starts with `'use server'`, lives in `src/app/actions/`.
 - Admin data pages use `export const dynamic = 'force-dynamic'` and call
-  `await requireAdminPage()` first. Every admin server action calls
-  `await requireAdmin()` as the first line inside its `try` (see
-  `docs/security.md`).
+  `await requireEventPage(eventId, min?)` first. Every admin server action
+  calls `await requireEventRole(eventId, min?)` as the first line inside its
+  `try`, and records a mutation with `logActivity(eventId, actor, action,
+  target)` (see `docs/security.md`). Who may do what is decided in
+  `src/lib/permissions.ts` only; the admin UI reads the same functions through
+  `useEventAccess()` to hide what a role cannot change.
 - Remote images must be on a host listed in `next.config.ts`
   (`images.unsplash.com`, `firebasestorage.googleapis.com`).
 

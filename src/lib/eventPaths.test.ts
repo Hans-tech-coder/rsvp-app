@@ -7,6 +7,8 @@ describe('event paths', () => {
     expect(paths.guest('hans-and-czay', 'K7MPQ2')).toBe('events/hans-and-czay/guests/K7MPQ2');
     expect(paths.giftSelections('hans-and-czay')).toBe('events/hans-and-czay/giftSelections');
     expect(paths.setting('hans-and-czay', 'inviteTemplate')).toBe('events/hans-and-czay/settings/inviteTemplate');
+    expect(paths.member('hans-and-czay', 'uid1')).toBe('events/hans-and-czay/members/uid1');
+    expect(paths.auditLog('hans-and-czay')).toBe('events/hans-and-czay/auditLog');
   });
 
   it('keeps admin accounts global', () => {

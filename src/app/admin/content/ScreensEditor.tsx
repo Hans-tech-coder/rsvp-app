@@ -10,6 +10,8 @@ import { DEFAULT_SITE_TEXT, mergeSiteText } from '@/lib/siteText';
 import { ScreenList } from '../components/ScreenList';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
+import { useEventAccess } from '../eventAccess';
+import { canEditDesign } from '@/lib/permissions';
 import type { DocumentData } from 'firebase/firestore';
 
 // Which screens guests see, their order and their names in the menu
@@ -26,6 +28,8 @@ export function ScreensEditor({ eventId, selected, onSelect }: {
   const draft = useContentDraft(eventId, 'screens');
   const loadDraft = draft.load;
   const [defaultLabels, setDefaultLabels] = useState(DEFAULT_SITE_TEXT.menu);
+  // The order is design: a client may show, hide and rename only (saveDraft checks it too).
+  const reorder = canEditDesign(useEventAccess().rules);
 
   const [formData, setFormData] = useState<ScreenConfig[]>(DEFAULT_SCREENS);
   const [originalData, setOriginalData] = useState<ScreenConfig[]>(DEFAULT_SCREENS);
@@ -103,9 +107,10 @@ export function ScreensEditor({ eventId, selected, onSelect }: {
         <h3 className={`${onSelect ? 'text-sm' : 'text-lg'} font-semibold text-gray-900 dark:text-zinc-100`}>{onSelect ? 'Sections' : 'Screens'}</h3>
         <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
           {onSelect
-            ? 'Pick one to edit it. Drag to change the order, switch off to hide.'
-            : 'Guests go through the shown screens from top to bottom. Drag a screen or use the arrows to change the order, switch one off to hide it from the site and the menu, and rename it in the menu. Leave a name blank to keep the one in grey.'}
+            ? reorder ? 'Pick one to edit it. Drag to change the order, switch off to hide.' : 'Pick one to edit it. Switch off to hide.'
+            : `Guests go through the shown screens from top to bottom. ${reorder ? 'Drag a screen or use the arrows to change the order, switch' : 'Switch'} one off to hide it from the site and the menu, and rename it in the menu. Leave a name blank to keep the one in grey.`}
         </p>
+        {!reorder && <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1">The order is set by your organizer.</p>}
       </div>
 
       {ctaLeadsNowhere && (
@@ -115,7 +120,7 @@ export function ScreensEditor({ eventId, selected, onSelect }: {
         </p>
       )}
 
-      <ScreenList screens={formData} onChange={handleChange} defaultLabels={defaultLabels} selected={selected} onSelect={onSelect} />
+      <ScreenList screens={formData} onChange={handleChange} defaultLabels={defaultLabels} selected={selected} onSelect={onSelect} reorder={reorder} />
 
       <EditorSaveBar draft={draft} doc={{ screens: formData }} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={handleRestore} onSave={handleSave} />
     </div>

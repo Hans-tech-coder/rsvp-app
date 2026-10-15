@@ -4,34 +4,37 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { clearSessionCookie } from '@/app/actions/auth';
-import { getMyAdminRole } from '@/app/actions/admins';
-import type { AdminRole } from '@/types';
-import { ManageAdminsModal } from './components/ManageAdminsModal';
+import { getMyEventAccess } from '@/app/actions/team';
+import { DEFAULT_EVENT_ID } from '@/lib/eventPaths';
+import { ROLE_NAMES, canManageTeam } from '@/lib/permissions';
+import { EventAccessProvider, type MyEventAccess } from './eventAccess';
 import { auth } from '@/lib/firebase/client';
-import { LayoutDashboard, Users, Gift, LogOut, Key, ClipboardList, Image as ImageIcon, Menu, X, ShieldCheck, PanelsTopLeft } from 'lucide-react';
+import { LayoutDashboard, Users, Gift, LogOut, Key, ClipboardList, Image as ImageIcon, Menu, X, UsersRound, PanelsTopLeft } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [role, setRole] = useState<AdminRole | null>(null);
-  const [isManageAdminsOpen, setIsManageAdminsOpen] = useState(false);
+  const [access, setAccess] = useState<MyEventAccess | null>(null);
   const isLoginPage = pathname === '/admin/login';
+  // The only event until the event switcher (F11)
+  const eventId = DEFAULT_EVENT_ID;
 
-  // Decides whether to show "Manage Admins". UI only: the admin actions
-  // themselves check requireSuperAdmin(). Re-runs after leaving the login page,
-  // because this layout stays mounted across the sign-in navigation.
+  // The role in the event: shows "Team" and the role, and locks editors
+  // (useEventAccess). UI only: every action checks the role itself. Re-runs
+  // after leaving the login page, because this layout stays mounted across
+  // the sign-in navigation.
   useEffect(() => {
     if (isLoginPage) return;
     let cancelled = false;
-    getMyAdminRole().then((r) => {
-      if (!cancelled) setRole(r);
+    getMyEventAccess(eventId).then((a) => {
+      if (!cancelled) setAccess(a);
     });
     return () => {
       cancelled = true;
     };
-  }, [isLoginPage]);
+  }, [isLoginPage, eventId]);
 
   // If on login page, don't show the layout
   if (isLoginPage) {
@@ -39,7 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const handleLogout = async () => {
-    setRole(null);
+    setAccess(null);
     await auth.signOut();
     await clearSessionCookie();
     router.refresh();
@@ -54,6 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Registry', href: '/admin/registry', icon: ClipboardList },
     { name: 'Content', href: '/admin/content', icon: ImageIcon },
     { name: 'Visual Builder', href: '/admin/builder', icon: PanelsTopLeft },
+    ...(access && canManageTeam(access) ? [{ name: 'Team', href: '/admin/team', icon: UsersRound }] : []),
   ];
 
   return (
@@ -103,20 +107,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </Link>
             );
           })}
-          {role === 'super' && (
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                setIsManageAdminsOpen(true);
-              }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800/50 hover:text-gray-900 dark:hover:text-zinc-100"
-            >
-              <ShieldCheck className="w-5 h-5" />
-              Manage Admins
-            </button>
-          )}
         </nav>
-        <div className="p-4 border-t border-gray-200 dark:border-zinc-800 flex justify-between items-center gap-2 shrink-0">
+        {access && (
+          <p className="px-7 pt-3 text-xs text-gray-500 dark:text-zinc-400 truncate border-t border-gray-200 dark:border-zinc-800" title={access.email ?? undefined}>
+            {ROLE_NAMES[access.role]}{access.email ? ` · ${access.email}` : ''}
+          </p>
+        )}
+        <div className={`p-4 flex justify-between items-center gap-2 shrink-0 ${access ? '' : 'border-t border-gray-200 dark:border-zinc-800'}`}>
           <button
             onClick={handleLogout}
             className="flex flex-1 items-center gap-3 px-3 py-2 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
@@ -154,12 +151,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Content Area */}
         <div className="flex-1 p-4 md:p-8 overflow-y-auto">
           <div className="max-w-6xl mx-auto w-full pb-24 md:pb-8">
-            {children}
+            <EventAccessProvider value={access}>{children}</EventAccessProvider>
           </div>
         </div>
       </main>
 
-      {isManageAdminsOpen && <ManageAdminsModal onClose={() => setIsManageAdminsOpen(false)} />}
     </div>
   );
 }

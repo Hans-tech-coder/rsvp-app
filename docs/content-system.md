@@ -157,7 +157,10 @@ stays in view; phones get a link to the content page instead).
   History, autosave) as on the content page. Switching panels with unsaved
   edits saves them as that panel's draft first (never live); if that fails,
   the panel stays open. Leaving the page with unsaved edits asks first.
-- Owner-only for now (any admin); F10 adds the client locks.
+- Roles (F10): a client without design rights gets no Colors & Fonts or
+  Music panel and no drag / arrows in the section list; one tab per event at
+  a time (edit lock, "X is editing this event" + Take over). See
+  `docs/admin.md` → Client locks, Builder edit lock.
 
 The type of `content` is `WeddingContent` (`src/lib/weddingContent.ts`): the
 type of `wedding-content.json` with the generic lists typed by
@@ -376,7 +379,7 @@ current photo has a depth map (`hasDepthMap()` in `src/lib/welcomeDepthMaps.ts`)
 A new photo has none, so the 3D effect turns off until a developer adds a map.
 
 Editors save through the server actions in `src/app/actions/content.ts`
-(admin SDK, `requireAdmin`), never with the browser SDK. Other docs an editor
+(admin SDK, `requireEventRole` + the role's locks), never with the browser SDK. Other docs an editor
 only reads for legacy adapters (`siteText` in People and Screens,
 `globalSettings` in Venues) are still read live from the browser.
 

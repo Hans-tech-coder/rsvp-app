@@ -23,6 +23,8 @@ import { UnsavedChangesProvider, useUnsavedChangesGuard } from './unsavedChanges
 import { DEFAULT_EVENT_ID } from '@/lib/eventPaths';
 import { ContentPageProvider } from './contentDraft';
 import { PreviewFrame } from '../components/PreviewFrame';
+import { useEventAccess } from '../eventAccess';
+import { canEditDesign } from '@/lib/permissions';
 
 export default function ContentManagerPage() {
   // The only event until the event switcher (F11)
@@ -47,12 +49,13 @@ export default function ContentManagerPage() {
     if (id !== activeTab) guard(() => setActiveTab(id));
   };
 
+  // Colors & Fonts and Music are design: hidden for a client unless the event allows it.
+  const design = canEditDesign(useEventAccess().rules);
   const tabs = [
     { id: 'global-settings', label: 'Global Settings' },
     { id: 'screens', label: 'Screens & Menu' },
     { id: 'site-text', label: 'Site Text' },
-    { id: 'theme', label: 'Colors & Fonts' },
-    { id: 'music', label: 'Music' },
+    ...(design ? [{ id: 'theme', label: 'Colors & Fonts' }, { id: 'music', label: 'Music' }] : []),
     { id: 'welcome', label: 'Welcome Screen' },
     { id: 'entrance', label: 'Entrance Screen' },
     { id: 'our-story', label: 'Timeline (Our Story)' },
@@ -155,8 +158,8 @@ export default function ContentManagerPage() {
           {activeTab === 'rsvp-cta' && <RsvpCtaEditor eventId={eventId} />}
           {activeTab === 'rsvp-form' && <RsvpFormEditor eventId={eventId} />}
           {activeTab === 'site-text' && <SiteTextEditor eventId={eventId} />}
-          {activeTab === 'theme' && <ThemeEditor eventId={eventId} />}
-          {activeTab === 'music' && <MusicEditor eventId={eventId} />}
+          {design && activeTab === 'theme' && <ThemeEditor eventId={eventId} />}
+          {design && activeTab === 'music' && <MusicEditor eventId={eventId} />}
           {activeTab === 'screens' && <ScreensEditor eventId={eventId} />}
           
           {activeTab !== 'welcome' && activeTab !== 'global-settings' && activeTab !== 'entrance' && activeTab !== 'our-story' && activeTab !== 'entourage' && activeTab !== 'event-details' && activeTab !== 'dress-code' && activeTab !== 'gallery' && activeTab !== 'faqs' && activeTab !== 'registry' && activeTab !== 'rsvp-cta' && activeTab !== 'rsvp-form' && activeTab !== 'site-text' && activeTab !== 'theme' && activeTab !== 'music' && activeTab !== 'screens' && (
