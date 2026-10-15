@@ -2,50 +2,35 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { db } from '@/lib/firebase/client';
-import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { refreshGuestSite } from './refreshGuestSite';
 import weddingContent from '@/data/wedding-content.json';
-import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
+import type { DocumentData } from 'firebase/firestore';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 
 export function RsvpFormEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [hasBackup, setHasBackup] = useState(false);
-  const [restoring, setRestoring] = useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  
+  const draft = useContentDraft(eventId, 'rsvpForm');
+  const loadDraft = draft.load;
+
   // State for the form fields
   const [formData, setFormData] = useState(weddingContent.rsvpForm);
   const [originalData, setOriginalData] = useState(weddingContent.rsvpForm);
 
   const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
 
+  const fromDoc = (data: DocumentData) => ({ ...weddingContent.rsvpForm, ...data }) as typeof weddingContent.rsvpForm;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, paths.content(eventId, 'rsvpForm'));
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const fetchedData = {
-            ...weddingContent.rsvpForm,
-            ...docSnap.data()
-          };
-          setFormData(fetchedData as typeof weddingContent.rsvpForm);
-          setOriginalData(fetchedData as typeof weddingContent.rsvpForm);
-        }
-
-        const backupRef = doc(db, paths.content(eventId, 'rsvpForm_backup'));
-        const backupSnap = await getDoc(backupRef);
-        if (backupSnap.exists()) {
-          setHasBackup(true);
+        const data = await loadDraft();
+        if (data) {
+          const fetchedData = fromDoc(data);
+          setFormData(fetchedData);
+          setOriginalData(fetchedData);
         }
       } catch (error) {
         console.error("Error fetching content:", error);
@@ -55,7 +40,7 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [eventId]);
+  }, [loadDraft]);
 
   const handleChange = (section: string, field: string, value: string) => {
     setFormData(prev => ({
@@ -71,58 +56,23 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Create backup of current live data before saving new data
-      const docRef = doc(db, paths.content(eventId, 'rsvpForm'));
-      const backupRef = doc(db, paths.content(eventId, 'rsvpForm_backup'));
-      
-      const currentDoc = await getDoc(docRef);
-      if (currentDoc.exists()) {
-        await setDoc(backupRef, currentDoc.data());
-        setHasBackup(true);
-      } else {
-        // If no live data exists yet, backup the JSON defaults
-        await setDoc(backupRef, weddingContent.rsvpForm);
-        setHasBackup(true);
-      }
-
-      await setDoc(docRef, formData);
-      await refreshGuestSite(eventId);
+      if (!(await draft.save(formData, { merge: false }))) return false;
       setOriginalData(formData);
       setSaved(true);
-      setShowConfirmModal(false);
-      setIsSuccessModalOpen(true);
+      setTimeout(() => setSaved(false), 3000);
+      return true;
     } catch (error) {
       console.error("Error saving content:", error);
       alert("Failed to save changes. Please try again.");
+      return false;
     } finally {
       setSaving(false);
     }
   };
 
-  const handleRestore = async () => {
-    setRestoring(true);
-    try {
-      const backupRef = doc(db, paths.content(eventId, 'rsvpForm_backup'));
-      const docRef = doc(db, paths.content(eventId, 'rsvpForm'));
-      
-      const backupSnap = await getDoc(backupRef);
-      
-      if (backupSnap.exists()) {
-        const backupData = backupSnap.data() as typeof weddingContent.rsvpForm;
-        await setDoc(docRef, backupData);
-        await refreshGuestSite(eventId);
-        setFormData(backupData);
-        setOriginalData(backupData);
-        setSaved(true);
-        setIsRestoreModalOpen(false);
-        setIsSuccessModalOpen(true);
-      }
-    } catch (error: any) {
-      console.error("Error restoring backup:", error);
-      alert(`Failed to restore backup: ${error.message}`);
-    } finally {
-      setRestoring(false);
-    }
+  const handleRestore = (data: DocumentData) => {
+    setFormData(fromDoc(data));
+    setSaved(false);
   };
 
   const handleUndo = () => {
@@ -369,44 +319,7 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
 
       </div>
 
-      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
-
-      {/* Confirmation Modal */}
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        title="Publish Changes"
-        message="Are you sure you want to publish these changes? They will be immediately visible to your guests."
-        type="confirm"
-        confirmText="Publish"
-        cancelText="Cancel"
-        onConfirm={handleSave}
-      />
-
-      {/* Restore Modal */}
-      <AdminModal
-        isOpen={isRestoreModalOpen}
-        onClose={() => setIsRestoreModalOpen(false)}
-        title="Restore Backup"
-        message="Are you sure you want to restore the last published version? This will overwrite your current changes."
-        type="confirm"
-        variant="danger"
-        confirmText={restoring ? "Restoring..." : "Restore"}
-        cancelText="Cancel"
-        onConfirm={handleRestore}
-      />
-
-      {/* Success Modal */}
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        title="Success"
-        message="Your changes have been successfully published."
-        type="alert"
-        variant="success"
-        confirmText="Close"
-        onConfirm={() => setIsSuccessModalOpen(false)}
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

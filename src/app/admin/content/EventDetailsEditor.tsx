@@ -4,13 +4,13 @@ import { useState, useEffect, useRef } from 'react';
 import { Loader2, Upload, X, Plus, Trash2, GripVertical } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
-import { refreshGuestSite } from './refreshGuestSite';
+import { doc, getDoc, type DocumentData } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import { DEFAULT_CONTENT as weddingContent } from '@/lib/weddingContent';
 import { emptyVenue, readVenues, venuesFromLegacy, type Venue } from '@/lib/genericContent';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 import { nanoid } from 'nanoid';
 import {
@@ -52,11 +52,8 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [hasBackup, setHasBackup] = useState(false);
-  const [restoring, setRestoring] = useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const draft = useContentDraft(eventId, 'details');
+  const loadDraft = draft.load;
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [venueToDelete, setVenueToDelete] = useState<number | null>(null);
 
@@ -82,21 +79,16 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [docSnap, globalSnap, backupSnap] = await Promise.all([
-          getDoc(doc(db, paths.content(eventId, 'details'))),
+        const [loaded, globalSnap] = await Promise.all([
+          loadDraft(),
           getDoc(doc(db, paths.content(eventId, 'globalSettings'))),
-          getDoc(doc(db, paths.content(eventId, 'details_backup'))),
         ]);
         globalDocRef.current = globalSnap.data();
 
-        if (docSnap.exists()) {
-          const mergedData = formFromDoc(docSnap.data(), globalDocRef.current);
+        if (loaded) {
+          const mergedData = formFromDoc(loaded, globalDocRef.current);
           setData(mergedData);
           setOriginalData(mergedData);
-        }
-
-        if (backupSnap.exists()) {
-          setHasBackup(true);
         }
       } catch (error) {
         console.error("Error fetching content:", error);
@@ -106,7 +98,7 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [eventId]);
+  }, [eventId, loadDraft]);
 
   const updateVenue = (index: number, field: keyof Venue, value: string) => {
     setData(prev => ({ ...prev, venues: prev.venues.map((v, i) => (i === index ? { ...v, [field]: value } : v)) }));
@@ -140,22 +132,17 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const backupRef = doc(db, paths.content(eventId, 'details_backup'));
-      await setDoc(backupRef, originalData, { merge: true });
-
       // merge: true keeps the old ceremony / reception fields for older code
-      const docRef = doc(db, paths.content(eventId, 'details'));
-      await setDoc(docRef, data, { merge: true });
-      await refreshGuestSite(eventId);
+      if (!(await draft.save(data, { merge: true }))) return false;
 
       setOriginalData(data);
-      setHasBackup(true);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-      setShowConfirmModal(false);
+      return true;
     } catch (error: any) {
       console.error("Error saving content:", error);
       alert(`Failed to save changes: ${error.message}`);
+      return false;
     } finally {
       setSaving(false);
     }
@@ -166,22 +153,9 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
     setSaved(false);
   };
 
-  const executeRestore = async () => {
-    setRestoring(true);
-    setIsRestoreModalOpen(false);
-    try {
-      const backupRef = doc(db, paths.content(eventId, 'details_backup'));
-      const backupSnap = await getDoc(backupRef);
-      if (backupSnap.exists()) {
-        setData(formFromDoc(backupSnap.data(), globalDocRef.current));
-        setIsSuccessModalOpen(true);
-      }
-    } catch (error: any) {
-      console.error("Error restoring backup:", error);
-      alert(`Failed to restore backup: ${error.message}`);
-    } finally {
-      setRestoring(false);
-    }
+  const handleRestore = (version: DocumentData) => {
+    setData(formFromDoc(version, globalDocRef.current));
+    setSaved(false);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -371,29 +345,7 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
         </div>
       </div>
 
-      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
-
-      <AdminModal
-        isOpen={isRestoreModalOpen}
-        onClose={() => setIsRestoreModalOpen(false)}
-        onConfirm={executeRestore}
-        title="Restore Previous Save?"
-        message="This will replace all your current edits with the last saved version. This action cannot be undone."
-        type="confirm"
-        variant="warning"
-        confirmText={restoring ? "Restoring..." : "Yes, Restore"}
-      />
-
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        onConfirm={() => setIsSuccessModalOpen(false)}
-        title="Restored Successfully"
-        message="The previous save has been successfully restored."
-        type="alert"
-        variant="success"
-        confirmText="Got it"
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={isUploadingImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
 
       <AdminModal
         isOpen={venueToDelete !== null}
@@ -404,17 +356,6 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
         type="confirm"
         variant="danger"
         confirmText="Yes, remove it"
-      />
-
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleSave}
-        title="Publish Changes?"
-        message="This will update the Venues (Event Details) section on the live website immediately. A backup of the current version will be saved."
-        type="confirm"
-        variant="info"
-        confirmText="Yes, Publish Now"
       />
     </div>
   );

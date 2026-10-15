@@ -39,11 +39,13 @@ function preloadImage(src: string): Promise<unknown> {
   }
 }
 
-// Saved progress is per event, so two events in one browser don't mix.
+// Saved progress is per event, so two events in one browser don't mix; the
+// admin preview keeps its own, so previewing never moves the admin's live progress.
 const storageKey = (eventId: string, name: string) => `event:${eventId}:${name}`;
 
-function MainApp({ screens }: { screens: ScreenConfig[] }) {
+function MainApp({ screens, preview }: { screens: ScreenConfig[]; preview: boolean }) {
   const { eventId, content } = useWeddingContent();
+  const storeId = preview ? `${eventId}:preview` : eventId;
   const text = useSiteText();
   // Steps are the shown screens in the admin's order (Screens tab); the RSVP
   // form is found by type, so it stays locked wherever it sits.
@@ -65,10 +67,10 @@ function MainApp({ screens }: { screens: ScreenConfig[] }) {
     
     // Load saved state on initial client-side render
     try {
-      const savedStep = localStorage.getItem(storageKey(eventId, 'currentStep'));
-      const savedHighestStep = localStorage.getItem(storageKey(eventId, 'highestVisitedStep'));
-      const savedUnlocked = localStorage.getItem(storageKey(eventId, 'isUnlocked'));
-      const savedInviteCode = localStorage.getItem(storageKey(eventId, 'inviteCode'));
+      const savedStep = localStorage.getItem(storageKey(storeId, 'currentStep'));
+      const savedHighestStep = localStorage.getItem(storageKey(storeId, 'highestVisitedStep'));
+      const savedUnlocked = localStorage.getItem(storageKey(storeId, 'isUnlocked'));
+      const savedInviteCode = localStorage.getItem(storageKey(storeId, 'inviteCode'));
       
       // A saved step past the end (screens hidden since) resumes on the last one.
       const lastStep = steps.length - 1;
@@ -89,7 +91,7 @@ function MainApp({ screens }: { screens: ScreenConfig[] }) {
     }
     // Restores once per event; steps.length only clamps the saved step.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventId]);
+  }, [storeId]);
 
   // Keep the loader up until fonts and the first screen's hero image are ready.
   const onWelcome = steps[currentStep]?.type === 'welcome';
@@ -111,19 +113,19 @@ function MainApp({ screens }: { screens: ScreenConfig[] }) {
   useEffect(() => {
     if (mounted) {
       try {
-        localStorage.setItem(storageKey(eventId, 'currentStep'), currentStep.toString());
-        localStorage.setItem(storageKey(eventId, 'highestVisitedStep'), highestVisitedStep.toString());
-        localStorage.setItem(storageKey(eventId, 'isUnlocked'), isUnlocked.toString());
+        localStorage.setItem(storageKey(storeId, 'currentStep'), currentStep.toString());
+        localStorage.setItem(storageKey(storeId, 'highestVisitedStep'), highestVisitedStep.toString());
+        localStorage.setItem(storageKey(storeId, 'isUnlocked'), isUnlocked.toString());
         if (validatedInviteCode) {
-          localStorage.setItem(storageKey(eventId, 'inviteCode'), validatedInviteCode);
+          localStorage.setItem(storageKey(storeId, 'inviteCode'), validatedInviteCode);
         } else {
-          localStorage.removeItem(storageKey(eventId, 'inviteCode'));
+          localStorage.removeItem(storageKey(storeId, 'inviteCode'));
         }
       } catch (error) {
         console.error('Error saving to localStorage:', error);
       }
     }
-  }, [eventId, currentStep, highestVisitedStep, isUnlocked, validatedInviteCode, mounted]);
+  }, [storeId, currentStep, highestVisitedStep, isUnlocked, validatedInviteCode, mounted]);
 
   useEffect(() => {
     if (isLightboxOpen) {
@@ -372,11 +374,11 @@ function MainApp({ screens }: { screens: ScreenConfig[] }) {
   );
 }
 
-/** The guest site; src/app/[event]/page.tsx wraps it in the event's content. */
-export function GuestSite({ screens }: { screens: ScreenConfig[] }) {
+/** The guest site; src/app/[event]/EventSite.tsx wraps it in the event's content. */
+export function GuestSite({ screens, preview = false }: { screens: ScreenConfig[]; preview?: boolean }) {
   return (
     <>
-      <MainApp screens={screens} />
+      <MainApp screens={screens} preview={preview} />
       <WeddingCursor />
     </>
   );

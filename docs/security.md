@@ -22,7 +22,8 @@ denied by the rules; add a server action instead.
 | Path | Browser read | Browser write |
 | --- | --- | --- |
 | `events/{eventId}` (event record) | no | no |
-| `…/content/{doc}` | anyone | `isAdmin()` |
+| `…/content/{doc}` | anyone | `isAdmin()` (no longer used by the editors since F9; tighten in a later rules deploy) |
+| `…/drafts/{doc}`, `…/contentVersions/{doc}` | no (no rule) | no (no rule); server actions in `src/app/actions/content.ts` only |
 | `…/guests/{code}` | no | no |
 | `…/registryGifts/{id}` | anyone | no |
 | `…/giftSelections/{id}` | `isAdmin()` | no |
@@ -50,11 +51,13 @@ redirect). The real check is in `src/lib/requireAdmin.ts`:
 
 - `getAdmin()` reads the `session` cookie,
   `verifySessionCookie(cookie, true)` (signature, expiry, revocation), and
-  checks `admins/{uid}` exists. Returns `{ uid, role }` (missing `role` =
-  `'admin'`). Memoized per request with React `cache`. `getAdminUid()` returns
+  checks `admins/{uid}` exists. Returns `{ uid, role, email }` (missing `role` =
+  `'admin'`; `email` from the session, shown as "published by" in History). Memoized per request with React `cache`. `getAdminUid()` returns
   just the UID.
-- `requireAdmin()` throws `Unauthorized` (it also guards `revalidateGuestSite(eventId)`, which only regenerates cached pages and checks the ID with `isValidEventId`). **Every** function in
-  `src/app/actions/admin.ts` calls it first inside its `try`, so an
+- `requireAdmin()` throws `Unauthorized`. **Every** function in
+  `src/app/actions/admin.ts` and `src/app/actions/content.ts` (drafts,
+  publish, versions; they also check the event ID with `isValidEventId` and
+  the doc ID against `EDITABLE_DOC_IDS`) calls it first inside its `try`, so an
   unauthenticated call returns `{ success: false, error: 'Unauthorized' }`.
   Any new admin action must do the same. `requireSuperAdmin()` also throws
   `Unauthorized` unless the role is `super`. Every action in
@@ -86,8 +89,15 @@ redirect). The real check is in `src/lib/requireAdmin.ts`:
   Email/Password provider is disabled in the Firebase Console, a password
   user can still sign in to Firebase, but gets no session cookie.
 
-`/admin/content` is a client page; its writes go through Firestore rules
-(`isAdmin()`) and `/api/upload`, not through these helpers.
+`/admin/content` is a client page; its content saves go through the admin
+server actions in `src/app/actions/content.ts` (`requireAdmin`), uploads
+through `/api/upload`.
+
+**Draft preview.** `/<eventId>?preview=<token>` renders the event with its
+unpublished drafts (`src/app/[event]/preview/page.tsx`, per request,
+`noindex`). It checks `getAdmin()` itself (the proxy does not run there) and
+redirects anyone else to the live page, so drafts are never shown to guests.
+The token carries no access; only the admin session does.
 
 ## Secrets
 

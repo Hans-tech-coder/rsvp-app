@@ -2,14 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-react';
-import { db } from '@/lib/firebase/client';
-import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
-import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
+import type { DocumentData } from 'firebase/firestore';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 import { nanoid } from 'nanoid';
 import {
@@ -41,10 +38,8 @@ export function GalleryEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [hasBackup, setHasBackup] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showRestoreModal, setShowRestoreModal] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const draft = useContentDraft(eventId, 'gallery');
+  const loadDraft = draft.load;
   
   const { content: weddingContent } = useWeddingContent();
   const [header, setHeader] = useState({
@@ -55,7 +50,6 @@ export function GalleryEditor({ eventId }: { eventId: string }) {
 
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [originalGallery, setOriginalGallery] = useState<GalleryItem[]>([]);
-  const [lastBackup, setLastBackup] = useState<any>(null);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -86,19 +80,9 @@ export function GalleryEditor({ eventId }: { eventId: string }) {
 
   const fetchContent = async () => {
     try {
-      const docRef = doc(db, paths.content(eventId, 'gallery'));
-      const docSnap = await getDoc(docRef);
-      
-      const backupRef = doc(db, paths.content(eventId, 'gallery_backup'));
-      const backupSnap = await getDoc(backupRef);
-      
-      if (backupSnap.exists()) {
-        setHasBackup(true);
-        setLastBackup(backupSnap.data());
-      }
+      const data = await loadDraft();
 
-      if (docSnap.exists()) {
-        const data = docSnap.data();
+      if (data) {
         if (data.images && Array.isArray(data.images)) {
            const mappedGallery = data.images.map((url: string) => ({ id: nanoid(), url }));
            setGallery(mappedGallery);
@@ -224,69 +208,29 @@ export function GalleryEditor({ eventId }: { eventId: string }) {
       setSaving(true);
       setError(null);
 
-      // Create backup
-      const currentDocRef = doc(db, paths.content(eventId, 'gallery'));
-      const currentDocSnap = await getDoc(currentDocRef);
-      
-      if (currentDocSnap.exists()) {
-        const backupRef = doc(db, paths.content(eventId, 'gallery_backup'));
-        await setDoc(backupRef, {
-            ...currentDocSnap.data(),
-            backedUpAt: new Date().toISOString()
-        });
-        setHasBackup(true);
-        setLastBackup(currentDocSnap.data());
-      }
-
       const imageUrls = gallery.map(item => item.url).filter(url => url !== '');
-      await setDoc(currentDocRef, { images: imageUrls, header });
-      await refreshGuestSite(eventId);
+      if (!(await draft.save({ images: imageUrls, header }, { merge: false }))) return false;
       setOriginalHeader(header);
       setOriginalGallery(gallery);
 
       setSaved(true);
-      setShowConfirmModal(false);
       setTimeout(() => setSaved(false), 3000);
+      return true;
     } catch (err) {
       console.error('Error saving content:', err);
       setError('Failed to save content. Please try again.');
+      return false;
     } finally {
       setSaving(false);
     }
   };
 
-  const restoreBackup = async () => {
-    if (!lastBackup) return;
-      
-    try {
-      setSaving(true);
-      setError(null);
-        
-      const docRef = doc(db, paths.content(eventId, 'gallery'));
-      await setDoc(docRef, lastBackup);
-      await refreshGuestSite(eventId);
-        
-      const mergedData = lastBackup.images ?? weddingContent.gallery;
-      setGallery(mergedData.map((url: string) => ({ id: nanoid(), url })));
-      
-      if (lastBackup.header) {
-        setHeader(lastBackup.header);
-        setOriginalHeader(lastBackup.header);
-      } else if (weddingContent.galleryHeader) {
-        setHeader(weddingContent.galleryHeader);
-        setOriginalHeader(weddingContent.galleryHeader);
-      }
-
-      setSaved(true);
-      setShowRestoreModal(false);
-      setIsSuccessModalOpen(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
-      console.error('Error restoring backup:', err);
-      setError('Failed to restore backup');
-    } finally {
-      setSaving(false);
-    }
+  const handleRestore = (version: DocumentData) => {
+    const images = Array.isArray(version.images) ? version.images : [];
+    setGallery(images.map((url: string) => ({ id: nanoid(), url })));
+    const restoredHeader = version.header ?? weddingContent.galleryHeader;
+    if (restoredHeader) setHeader({ subtitle: restoredHeader.subtitle || "Our Memories", title: restoredHeader.title || "The Gallery" });
+    setSaved(false);
   };
 
   if (loading) {
@@ -391,40 +335,7 @@ export function GalleryEditor({ eventId }: { eventId: string }) {
       {error && (
         <p className="mt-12 text-sm text-red-500 dark:text-red-400">{error}</p>
       )}
-      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setShowRestoreModal(true)} onSave={() => setShowConfirmModal(true)} />
-
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={saveContent}
-        title="Publish Changes?"
-        message="This will update the Gallery section on the live website immediately. A backup of the current version will be saved."
-        type="confirm"
-        variant="info"
-        confirmText="Yes, Publish Now"
-      />
-
-      <AdminModal
-        isOpen={showRestoreModal}
-        onClose={() => setShowRestoreModal(false)}
-        onConfirm={restoreBackup}
-        title="Restore Previous Save?"
-        message="This will replace all your current edits with the last saved version. This action cannot be undone."
-        type="confirm"
-        variant="warning"
-        confirmText={saving ? "Restoring..." : "Yes, Restore"}
-      />
-
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        onConfirm={() => setIsSuccessModalOpen(false)}
-        title="Restored Successfully"
-        message="The previous save has been successfully restored."
-        type="alert"
-        variant="success"
-        confirmText="Got it"
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
     </div>
   );
 }

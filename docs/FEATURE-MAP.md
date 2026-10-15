@@ -33,9 +33,10 @@ All editors are in `src/app/admin/content/`.
 
 | Feature | Files |
 | --- | --- |
-| Per-event route: 404 for an unknown event, title/description/link preview (`generateMetadata`), ISR cache (`revalidate`, empty `generateStaticParams`), mounts `SiteTextProvider`, `WeddingContentProvider`, `AudioPlayer` | `src/app/[event]/page.tsx` |
+| Per-event route: 404 for an unknown event, title/description/link preview (`generateMetadata`), ISR cache (`revalidate`, empty `generateStaticParams`); renders `EventSite` (mounts `SiteTextProvider`, `ThemeStyle`, `WeddingContentProvider`, `GuestSite`, `AudioPlayer`) | `src/app/[event]/page.tsx`, `src/app/[event]/EventSite.tsx` |
+| Admin draft preview: `/<eventId>?preview=<token>` rewritten (`next.config.ts` `beforeFiles`) to a per-request, `noindex`, admins-only page that renders `EventSite` from the drafts (`getEventDraftContent`), with a "Draft preview" badge; non-admins are redirected to the live page | `src/app/[event]/preview/page.tsx`, `next.config.ts`, `src/lib/siteContentServer.ts` |
 | `/` → default event redirect | `src/app/page.tsx` |
-| Step state, back/menu buttons, screen transitions, RSVP lock, localStorage (keys `event:<eventId>:…`); `renderScreen(type)` maps a screen type to its component | `src/app/[event]/GuestSite.tsx` |
+| Step state, back/menu buttons, screen transitions, RSVP lock, localStorage (keys `event:<eventId>:…`, `event:<eventId>:preview:…` in the admin preview); `renderScreen(type)` maps a screen type to its component | `src/app/[event]/GuestSite.tsx` |
 | Screens: which screens are shown, their order and menu names per event (`content/screens`; `SCREEN_TYPES`, `mergeScreens`, `visibleScreens`, `screenLabel`, Welcome pinned, RSVP locked by type); passed as `<GuestSite screens>` | `src/lib/screens.ts` (tested by `screens.test.ts`), read in `src/lib/siteContentServer.ts`; editor `src/app/admin/content/ScreensEditor.tsx` (tab "Screens & Menu") around the reusable list `src/app/admin/components/ScreenList.tsx` (drag / arrows, show-hide switch, rename; also the future visual builder's section list) |
 | Content loading: read on the server (`getEventContent`, admin SDK), merged over the JSON defaults (`mergeWeddingContent`, `mergeGlobal`, `CONTENT_DOC_IDS`), handed to the browser with the event ID | `src/lib/siteContentServer.ts` (server only), `src/lib/weddingContent.ts`, `src/contexts/WeddingContentContext.tsx` (`useWeddingContent`), `src/data/wedding-content.json` |
 | Site text: every small guest-visible wording (buttons, labels, hints, errors, default menu names, loader, 404, link preview). Read on the server, given to all guest components by `src/app/[event]/page.tsx` (404: `not-found.tsx`); `useSiteText()` in a component | `src/lib/siteContentServer.ts` (`getEventContent` / `getSiteContent`, server only), `src/contexts/SiteTextContext.tsx` (`SiteTextProvider`, `useSiteText`), `src/lib/siteText.ts` (`SiteText` type, `mergeSiteText`, `fillText`, `fillNodes`; tested by `src/lib/siteText.test.ts`), JSON key `siteText`; editor `src/app/admin/content/SiteTextEditor.tsx` + field labels `siteTextFields.ts` |
@@ -78,7 +79,7 @@ All editors are in `src/app/admin/content/`.
 | `generateInviteCodes`, `deleteInviteCode`, `regenerateInviteCode`, `toggleInviteCopiedStatus`, `getInviteMessageTemplate`, `updateInviteMessageTemplate` | `admin.ts` | `admin/invites/*`, `admin/guests/GuestListClient.tsx` (delete) |
 | `addRegistryGift`, `updateRegistryGift`, `deleteRegistryGift`, `resetRegistryGift` | `admin.ts` | `admin/gifts/GiftsClient.tsx` |
 | `deleteGiftSelection` | `admin.ts` | `admin/registry/RegistrySelectionsClient.tsx` |
-| `revalidateGuestSite(eventId)` (rebuilds the event's cached page on its next visit; the default event also the 404) | `admin.ts` | every content editor, through `admin/content/refreshGuestSite.ts` |
+| `loadDraft`, `saveDraft` (conflict check on the draft's `updatedAt`), `publishDraft` (draft → live, version list, rebuilds the event's cached page; the default event also the 404), `discardDraft`, `getVersion`; doc shapes and pure helpers in `src/lib/contentDrafts.ts` (tested by `contentDrafts.test.ts`) | `content.ts` | every content editor, through `admin/content/contentDraft.tsx` (`useContentDraft`) and `EditorSaveBar.tsx` |
 | `getMyAdminRole` | `admins.ts` | `admin/layout.tsx` (shows Manage Admins for super admins) |
 | `listAdmins`, `addAdmin`, `cancelPendingAdmin`, `removeAdmin` (super only) | `admins.ts` | `admin/components/ManageAdminsModal.tsx` |
 
@@ -96,11 +97,12 @@ server actions and then `router.refresh()`.
 | `/admin/guests` | `src/app/admin/guests/page.tsx` | `GuestListClient.tsx` (CSV export via papaparse) | event `guests` |
 | `/admin/gifts` | `src/app/admin/gifts/page.tsx` | `GiftsClient.tsx` | event `registryGifts` |
 | `/admin/registry` | `src/app/admin/registry/page.tsx` | `RegistrySelectionsClient.tsx` | event `giftSelections` |
-| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list) | `*Editor.tsx` in same folder ("Site Text" tab = `SiteTextEditor.tsx`, "Screens & Menu" = `ScreensEditor.tsx`, "Colors & Fonts" = `ThemeEditor.tsx`, "Music" = `MusicEditor.tsx`); each takes an `eventId` prop from the page | event `content/*` + Vercel Blob |
-| Content editors' shared pieces: sticky Undo / Restore / Save row with live status (`EditorSaveBar.tsx`), "Leave without saving?" guard for tab switch, admin links and page close (`unsavedChanges.tsx`), character limits + counter (`CharCount.tsx`, `TEXT_LIMITS`) | `src/app/admin/content/page.tsx` | `EditorSaveBar.tsx`, `unsavedChanges.tsx`, `CharCount.tsx`; after each live write `refreshGuestSite.ts` | – |
+| `/admin/content` | `src/app/admin/content/page.tsx` (client, tab list, preview panel) | `*Editor.tsx` in same folder ("Site Text" tab = `SiteTextEditor.tsx`, "Screens & Menu" = `ScreensEditor.tsx`, "Colors & Fonts" = `ThemeEditor.tsx`, "Music" = `MusicEditor.tsx`); each takes an `eventId` prop from the page | event `content/*` + Vercel Blob |
+| Content editors' shared pieces: sticky Undo / History / Save Draft / Publish row with draft status, 10 s autosave to the draft, conflict prompt (`EditorSaveBar.tsx`); draft / publish / versions hook and the page context that reloads the preview or the editor (`contentDraft.tsx`); "Leave without saving?" guard for tab switch, admin links and page close (`unsavedChanges.tsx`); character limits + counter (`CharCount.tsx`, `TEXT_LIMITS`) | `src/app/admin/content/page.tsx` | `EditorSaveBar.tsx`, `contentDraft.tsx`, `unsavedChanges.tsx`, `CharCount.tsx` | `drafts/*`, `contentVersions/*` via `src/app/actions/content.ts` |
+| Draft preview frame: Preview button on the content page (docked from 1024 px, full screen below); phone / desktop / both iframes of `?preview=`, scaled to fit; reused as the F9a builder canvas (`DEVICES`, `onFrameLoad`) | `src/app/admin/content/page.tsx` | `src/app/admin/components/PreviewFrame.tsx` | – |
 | sidebar/nav | `src/app/admin/layout.tsx` | – | – |
 | Manage Admins (sidebar button, super admins only; no route) | `src/app/admin/layout.tsx` | `src/app/admin/components/ManageAdminsModal.tsx` | `admins`, `adminAllowlist` |
-| shared UI | `src/app/admin/components/AdminModal.tsx`, `TablePagination.tsx` | | |
+| shared UI | `src/app/admin/components/AdminModal.tsx`, `TablePagination.tsx`, `PreviewFrame.tsx` | | |
 
 ## Auth, rules, infrastructure
 
@@ -128,14 +130,11 @@ Read these by range (`grep -n` then read around the line), never whole.
 | Lines | File |
 | --- | --- |
 | 977 | `src/data/wedding-content.json` |
-| 711 | `src/app/admin/content/DressCodeEditor.tsx` |
-| 635 | `src/app/admin/content/EntourageEditor.tsx` |
-| 628 | `src/app/admin/content/RegistryEditor.tsx` |
-| 562 | `src/app/admin/content/OurStoryEditor.tsx` |
+| 620 | `src/app/admin/content/DressCodeEditor.tsx` |
+| 576 | `src/app/admin/content/EntourageEditor.tsx` |
 | 541 | `src/components/screens/RsvpScreen.tsx` |
-| 512 | `src/app/admin/content/GalleryEditor.tsx` |
-| 504 | `src/app/admin/content/EventDetailsEditor.tsx` |
+| 539 | `src/app/admin/content/RegistryEditor.tsx` |
+| 487 | `src/app/admin/content/OurStoryEditor.tsx` |
 | 471 | `src/components/ui/circular-image-gallery.tsx` |
-| 458 | `src/app/admin/content/FaqsEditor.tsx` |
-| 451 | `src/app/admin/content/GlobalSettingsEditor.tsx` |
-| 408 | `src/app/admin/content/RsvpFormEditor.tsx` |
+| 445 | `src/app/admin/content/EventDetailsEditor.tsx` |
+| 427 | `src/app/admin/content/GalleryEditor.tsx` |

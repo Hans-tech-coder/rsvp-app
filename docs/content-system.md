@@ -45,21 +45,74 @@ src/app/[event]/page.tsx  ->  <WeddingContentProvider content>  ->  useWeddingCo
    navigation (`LOADER_MAX_WAIT_MS`). Then the step flow mounts and
    `LoadingScreen` crossfades out over it.
 
-### Caching and refresh after a save
+### Caching and refresh after Publish
 
 - `/[event]` is generated on its first visit and cached (ISR,
   `generateStaticParams` returns `[]`). Visits after that cost no Firestore
   reads.
-- Every editor calls `refreshGuestSite(eventId)`
-  (`src/app/admin/content/refreshGuestSite.ts`) after each write to a live
-  `content` doc (save, undo/restore that writes). It calls the
-  `revalidateGuestSite(eventId)` server action: the default event revalidates
-  the whole site (`revalidatePath('/', 'layout')`, because the 404 page shows
-  it); any other event only `/<eventId>`. The next visit rebuilds the page.
-- A failed refresh is only logged (the save itself succeeded). The page also
-  rebuilds itself at most hourly (`revalidate = 3600`), which is the bound for
-  a missed refresh or a change made outside the admin (Firestore console,
-  script).
+- Only **Publish** changes a live `content` doc (see "Drafts, preview and
+  versions" below). `publishDraft` (`src/app/actions/content.ts`) then
+  revalidates: the default event the whole site (`revalidatePath('/',
+  'layout')`, because the 404 page shows it); any other event only
+  `/<eventId>`. The next visit rebuilds the page. Saving a draft changes
+  nothing guests see, so it refreshes nothing.
+- The page also rebuilds itself at most hourly (`revalidate = 3600`), which is
+  the bound for a change made outside the admin (Firestore console, script).
+
+## Drafts, preview and versions (F9)
+
+Editors never write the live doc. Each content doc has three places
+(`src/lib/contentDrafts.ts`, paths in `src/lib/eventPaths.ts`):
+
+| Path | What |
+| --- | --- |
+| `events/{eventId}/content/{doc}` | live: what guests see |
+| `events/{eventId}/drafts/{doc}` | `{ data, updatedAt, updatedBy }`: the whole doc as it will be published. No draft = nothing unpublished |
+| `events/{eventId}/contentVersions/{doc}` | `{ items: [{ id, publishedAt, publishedBy, label?, data }] }`, newest first, the last 10 publishes (fewer if they would pass ~900 KB) |
+
+All reads and writes go through the admin-only server actions in
+`src/app/actions/content.ts` (the browser has no Firestore access to drafts or
+versions):
+
+- `loadDraft(eventId, doc)` → the draft, else the live doc, else `null`
+  (editor keeps the JSON defaults), plus `hasDraft`, the draft's `updatedAt`
+  and the version list (no doc data).
+- `saveDraft(eventId, doc, data, { merge, expectedUpdatedAt, force? })`: in a
+  transaction. `merge: true` editors send only their fields; they are merged
+  over the draft (else the live doc) the way `setDoc(…, { merge: true })`
+  would (`mergeDoc`: maps key by key, arrays replaced), so the draft is always
+  the whole doc. If the draft's `updatedAt` is not the one the editor loaded
+  (saved, published or discarded in another tab or by another admin), it
+  returns `conflict` and the editor asks "Changed somewhere else": "Use my
+  edits" saves again with `force`. Returns the version list.
+- `publishDraft(eventId, doc)`: copies the draft over the live doc (`set`,
+  whole doc), puts it on top of the version list, deletes the draft,
+  revalidates the guest site. Returns the version list.
+- `discardDraft(eventId, doc)`: deletes the draft; the editor reloads from
+  the live doc.
+- `getVersion(eventId, doc, versionId)`: one version's doc, for Restore.
+
+Before a doc's first Publish its version list is made up on the fly from the
+live doc ("Before drafts") and the old `<doc>_backup` ("Older backup"), and the
+first Publish stores both, so nothing the single backup kept is lost.
+`<doc>_backup` docs are no longer written; they stay in Firestore.
+
+**Preview.** `/<eventId>?preview=<token>` is rewritten (`next.config.ts`,
+`beforeFiles`) to `src/app/[event]/preview/page.tsx`: rendered per request,
+`noindex`, admins only (anyone else is redirected to the live page). It reads
+every doc's draft over the live one (`getEventDraftContent` in
+`src/lib/siteContentServer.ts`) and renders the same `EventSite` as the live
+page, so the preview is the real guest site, with a small "Draft preview"
+badge. The token is any value; the content manager sends a fresh one to
+reload. The cached live page is untouched (it stays ISR).
+
+**Preview frame.** `src/app/admin/components/PreviewFrame.tsx` shows that URL
+in a phone (390×844) and/or desktop (1440×900) iframe, drawn at the device
+size and scaled to fit (Phone / Desktop / Both, reload, open in a new tab).
+The content page has a **Preview** button: docked beside the editor from
+1024 px wide (the tab list becomes the dropdown), full screen over it below.
+It reloads after every draft save, publish and discard. Built to be the F9a
+builder's canvas (`DEVICES`, `onFrameLoad` gives each iframe once loaded).
 
 The type of `content` is `WeddingContent` (`src/lib/weddingContent.ts`): the
 type of `wedding-content.json` with the generic lists typed by
@@ -87,7 +140,7 @@ src/app/not-found.tsx    -> its own <SiteTextProvider> + NotFoundScreen (default
 - Server-read so the text is right on first paint, also on the loading screen
   and the music hint. The root layout reads nothing from Firestore (the admin
   pages don't need event text).
-- Refresh after a save: same as the content above (`refreshGuestSite`).
+- Draft, preview and Publish: same as the content above.
 - Merge rule: `mergeSiteText()` (`src/lib/siteText.ts`): known keys only, empty
   value = default. Placeholders like `{count}` are filled with `fillText()`
   (string) or `fillNodes()` (when a value is an element, e.g. the red `*` or
@@ -130,8 +183,8 @@ it. A new pairing: add any new family to `src/app/fonts.ts` and
 `FONT_FAMILIES` (same variable name; `fonts.test.ts` checks), then the pairing
 to `FONT_PAIRINGS`.
 
-- No rebuild: the style is part of the cached page, so a save is live after
-  the usual `refreshGuestSite(eventId)`. It sits on `:root` and is unlayered,
+- No rebuild: the style is part of the cached page, so a change is live after
+  the usual Publish. It sits on `:root` and is unlayered,
   so it beats Tailwind's `@layer theme` defaults and reaches portals and the
   `body` background (`--background` = `var(--color-surface)`).
 - `mergeTheme()` keeps only the nine known keys with a `#RRGGBB` value and a
@@ -148,8 +201,8 @@ to `FONT_PAIRINGS`.
   read", 3–4.5 "Large text only"), a Fonts list (one card per pairing, each
   drawn in its own fonts), a live preview drawn with the guest site's own
   classes under the edited variables, and "Reset to template default" (colors
-  and fonts). Saves the whole doc (no `merge`) after writing `theme_backup`;
-  Restore loads the backup into the form (Save to make it live).
+  and fonts). Saves the whole doc (no `merge`) as the draft, like every
+  editor (Publish makes it live; History restores an earlier version).
 - The RSVP email uses the event's theme colors too (inlined hex, see
   `docs/guest-site.md`), but always the Classic fonts.
 - Not themed: the firefly and candle-light glows (Welcome effects
@@ -164,7 +217,7 @@ docs (`getEventContent` / `getSiteContent` → `mergeMusic()`) and passed to
 50 %. Editor `MusicEditor.tsx` (tab "Music"): on/off, upload a song
 (`uploadAudio()`, straight to Blob, no re-encoding, 10 MB cap), "Use the
 default song", a listen player, and the starting volume (10–100 %). Same
-backup/restore/save pattern as the other editors (`music_backup`).
+draft / publish / history pattern as the other editors.
 
 ## Screens and menu
 
@@ -178,7 +231,7 @@ up/down arrows to reorder, a switch to show/hide, a name field per screen
 (blank = the `siteText.menu` default, shown greyed). Welcome is pinned first
 and shown; the RSVP form keeps its invite-code lock wherever it sits; a
 warning shows while the RSVP form is hidden but its call to action is not.
-Same backup/restore/save pattern as the other editors (`screens_backup`); the
+Same draft / publish / history pattern as the other editors; the
 saved list is normalized by `mergeScreens` first. Menu names are no longer in
 the Site Text tab; `siteText.menu` stays as their defaults.
 
@@ -189,31 +242,48 @@ a new one):
 
 1. **State:** `formData` (being edited) and `originalData` (last saved), both
    seeded from `wedding-content.json`. `hasChanges` = JSON compare of the two.
-2. **Load:** `getDoc(doc(db, paths.content(eventId, '<doc>')))` (`eventId` is the editor's prop), spread over the JSON default, set
-   both states. Check whether `<doc>_backup` exists to enable "Restore".
+   `const draft = useContentDraft(eventId, '<doc>')` and `const loadDraft =
+   draft.load` (`contentDraft.tsx`; the stable `loadDraft` goes in the effect's deps).
+2. **Load:** `await loadDraft()` gives the draft, else the live doc, else
+   `null` (keep the defaults); spread it over the JSON default (or the
+   editor's `fromDoc` / `formFromDoc`) and set both states.
 3. **Upload image:** `await uploadImage(file, '<folder>/<name>')` from
    `src/lib/blob/uploadImage.ts` (compresses, uploads to Vercel Blob, returns the
-   URL; see `docs/data-model.md`), put the URL into `formData`. The image is live only after Save.
-4. **Save:** confirm modal (`AdminModal`) → write the previous values to
-   `<doc>_backup` → write `<doc>`. Most editors use
-   `setDoc(..., { merge: true })`; `FaqsEditor`, `RegistryEditor`, `SiteTextEditor` and
-   `RsvpFormEditor` write **without** `merge`, replacing the whole doc.
-5. **Undo:** reset `formData` to `originalData` (no network).
-6. **Restore backup:** differs per editor. Simple editors (Welcome, Entrance,
-   Global, RSVP CTA…) load `<doc>_backup` into the form and the admin must
-   still press Save; `GalleryEditor`, `DressCodeEditor` and `RegistryEditor`
-   write the backup straight into the live doc. Read the editor's restore
-   handler before changing this.
+   URL; see `docs/data-model.md`), put the URL into `formData`. It reaches
+   guests only after Publish. Pass the upload state as the bar's `busy` so
+   autosave waits for it.
+4. **Save (draft):** `handleSave` returns `Promise<boolean>`: `if (!(await
+   draft.save(payload, { merge }))) return false;` then set `originalData`,
+   flash `saved`, `return true`; on an error alert (or `setError`) and
+   `return false`. No confirm modal (a draft is harmless). Most editors use
+   `merge: true`; `FaqsEditor`, `RegistryEditor`, `GalleryEditor`,
+   `SiteTextEditor`, `RsvpFormEditor`, `ThemeEditor`, `MusicEditor` and
+   `ScreensEditor` send the whole doc (`merge: false`).
+5. **Undo:** reset `formData` to `originalData` (no network): back to the
+   last saved draft.
+6. **Restore:** `handleRestore(data)` puts a version's doc into the form only
+   (same transform as Load, `originalData` untouched), so it shows as unsaved
+   changes; autosave then makes it the draft, and Publish makes it live. The
+   bar fetches the version and asks first.
 7. Lists (story items, FAQs, gallery, dress-code images, banks) are sortable with
    `@dnd-kit` and get ids from `nanoid`.
-8. **Save row:** render `<EditorSaveBar hasChanges saving saved hasBackup onUndo
-   onRestore onSave />` (`EditorSaveBar.tsx`), never a hand-made button row. It
-   sticks to the bottom of the editor, says "Unsaved changes" / "Saved. Live on
-   the website now." / "All changes are live", and reports `hasChanges` to the
-   content page. While an editor has unsaved changes, `page.tsx` (through
-   `useUnsavedChangesGuard()` in `unsavedChanges.tsx`) asks "Leave without
-   saving?" before switching tabs or following a link to another admin page,
-   and the browser asks before closing or reloading. Sign Out is not guarded.
+8. **Save row:** render `<EditorSaveBar draft hasChanges saving saved busy?
+   onUndo onRestore onSave />` (`EditorSaveBar.tsx`), never a hand-made button
+   row. It sticks to the bottom of the editor and holds: the status ("Unsaved
+   changes (saved as a draft in a moment)" / "Draft saved. Not live until you
+   publish." / "Draft not published yet" / "Published. Live on the website
+   now." / "All changes are live"); Undo; **History** (the published versions,
+   newest first, the live one marked, each with Restore; "Discard the draft"
+   when there is one); **Save Draft**; **Publish** (asks first; saves pending
+   edits, then publishes). **Autosave:** unsaved edits are saved as the draft
+   after 10 s without a change (`AUTOSAVE_MS`), never published; a failed or
+   declined autosave stops until the next manual Save. The bar's modals go
+   through a portal (its `backdrop-blur` would trap `fixed` children). It
+   reports `hasChanges` to the content page: while an editor has unsaved
+   changes, `page.tsx` (through `useUnsavedChangesGuard()` in
+   `unsavedChanges.tsx`) asks "Leave without saving?" before switching tabs or
+   following a link to another admin page, and the browser asks before
+   closing or reloading. Sign Out is not guarded.
 9. **Character limits:** short display text (titles, the small heading above
    them, card titles, buttons) gets `maxLength={TEXT_LIMITS.<kind>}` and a
    `<CharCount value max />` under the input (`CharCount.tsx`). Site Text
@@ -241,11 +311,10 @@ keeps the names (two per row, or flattened back).
 current photo has a depth map (`hasDepthMap()` in `src/lib/welcomeDepthMaps.ts`).
 A new photo has none, so the 3D effect turns off until a developer adds a map.
 
-Editors write to Firestore **directly from the browser**; this works because
-the admin is signed in with the Firebase client SDK and `firestore.rules`
-allows writes to `events/{eventId}/content` for `isAdmin()`. After each write
-to a live doc an editor must call `refreshGuestSite(eventId)`, or the guest
-page keeps showing the cached version for up to an hour.
+Editors save through the server actions in `src/app/actions/content.ts`
+(admin SDK, `requireAdmin`), never with the browser SDK. Other docs an editor
+only reads for legacy adapters (`siteText` in People and Screens,
+`globalSettings` in Venues) are still read live from the browser.
 
 ## Checklist: add a new editable field
 
@@ -258,8 +327,9 @@ Example: a new `welcomeScreen.footnote` text.
    docs (`ourStory`, `entourage`, `dressCode`) need an explicit line. A new
    field on a host, person, venue or guideline goes into its type **and**
    reader in `src/lib/genericContent.ts`: the readers copy known fields only.
-3. **Editor** — add it to the initial `formData` / `originalData` and add an
-   input. A new write to a live doc is followed by `refreshGuestSite(eventId)`.
+3. **Editor** — add it to the initial `formData` / `originalData`, its
+   Load / Restore transform, and add an input. It is saved as part of the
+   editor's draft; Publish makes it live.
 4. **Screen** — read `content.<key>.<field>`, with a fallback if the value can
    be empty.
 5. **Site text** (a button, label, hint or error, not a screen's content):

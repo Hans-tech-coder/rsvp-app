@@ -33,7 +33,9 @@ shadowed by it; F11 must refuse them.
 | `…/registryGifts` | auto ID | server actions (`admin.ts`, `registry.ts`) | `getRegistryGifts`; admin gifts/dashboard |
 | `…/giftSelections` | auto ID | `claimGift`; deleted by `resetRegistryGift` / `deleteGiftSelection` | admin registry page |
 | `…/settings` | `inviteTemplate` | `updateInviteMessageTemplate` | `getInviteMessageTemplate` |
-| `…/content` | one doc per screen (below) + `<doc>_backup` | admin editors, **from the browser** | the server only (admin SDK, `src/lib/siteContentServer.ts`): all screen docs + `siteText` + `theme` + `music` + `screens` by `getEventContent(eventId)` for the cached event page and its metadata; `globalSettings` + `siteText` + `theme` + `music` by `getSiteContent(eventId)` for the 404 page and the default invite message; `globalSettings`, `details`, `dressCode`, `theme` by the RSVP email. The browser no longer reads `content` (the public read rule stays) |
+| `…/content` | one doc per screen (below) + old `<doc>_backup` (no longer written, F9) | `publishDraft` (`src/app/actions/content.ts`), copying the doc's draft. Editors no longer write it from the browser | the server only (admin SDK, `src/lib/siteContentServer.ts`): all screen docs + `siteText` + `theme` + `music` + `screens` by `getEventContent(eventId)` for the cached event page and its metadata; `globalSettings` + `siteText` + `theme` + `music` by `getSiteContent(eventId)` for the 404 page and the default invite message; `globalSettings`, `details`, `dressCode`, `theme` by the RSVP email. The browser no longer reads `content` (the public read rule stays) |
+| `…/drafts` | the content doc's ID (`EDITABLE_DOC_IDS` in `src/lib/contentDrafts.ts`) | `saveDraft` (also editor autosave); deleted by `publishDraft` / `discardDraft` | `loadDraft` (editors), `getEventDraftContent` (admin preview). Fields: `data` (the whole doc as it will be published), `updatedAt` (ms, strictly increasing; the editors' conflict check), `updatedBy` (admin email). Server only (no rule = no browser access) |
+| `…/contentVersions` | the content doc's ID | `publishDraft` (adds the published doc on top, keeps the last 10, fewer if they pass ~900 KB) | `loadDraft` / `saveDraft` / `publishDraft` return the list without data; `getVersion` one version's `data`. Field: `items[]` of `{ id, publishedAt, publishedBy, label?, data }`. Before a doc's first publish the list is made up from the live doc and `<doc>_backup` and stored on that publish. Server only |
 | `admins` (global) | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); deleted by `removeAdmin` (`admins.ts`, super only) | `firestore.rules`, `storage.rules` (`isAdmin()`), `requireAdmin.ts` |
 | `adminAllowlist` (global) | lowercased email | `scripts/add-admin.js`; `addAdmin` / `cancelPendingAdmin` (`admins.ts`, super only) | `createSessionCookie`, `listAdmins` (server only; rules deny all browser access) |
 
@@ -158,8 +160,13 @@ default. Some strings hold `{name}` placeholders filled by `fillText()` /
 editor's field hints list them. The editor saves the whole merged object
 (no `merge`), so the doc always has every key known at save time.
 
-Every editor also writes `<doc>_backup` (e.g. `welcomeScreen_backup`) with the
-previous values before saving, so the admin can restore one step back.
+Before F9 every editor wrote `<doc>_backup` (e.g. `welcomeScreen_backup`) with
+the previous values before saving. Since F9 an editor saves a draft
+(`drafts/<doc>`) and Publish keeps the last 10 published versions
+(`contentVersions/<doc>`); the old `_backup` docs are only read once, as the
+"Older backup" entry of a doc's first version list (see "Drafts, preview and
+versions" in `docs/content-system.md`). They can be deleted once every doc has
+been published at least once.
 
 **JSON quirks** (from `sync-content.js` merging Firestore docs into the file):
 the `gallery` key holds both array-index keys (`"0"`…`"7"`) and `images` /

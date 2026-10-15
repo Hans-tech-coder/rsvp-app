@@ -2,14 +2,11 @@
 
 import { useState, useEffect, useId } from 'react';
 import { Loader2, Upload, Music2, RotateCcw } from 'lucide-react';
-import { db } from '@/lib/firebase/client';
-import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { DEFAULT_MUSIC, MUSIC_MAX_BYTES, MUSIC_MIN_VOLUME, mergeMusic, musicSrc, type Music } from '@/lib/music';
 import { uploadAudio } from '@/lib/blob/uploadAudio';
-import { refreshGuestSite } from './refreshGuestSite';
-import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
+import type { DocumentData } from 'firebase/firestore';
 
 const secondaryButton =
   'inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50';
@@ -21,12 +18,9 @@ export function MusicEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const draft = useContentDraft(eventId, 'music');
+  const loadDraft = draft.load;
   const [uploading, setUploading] = useState(false);
-  const [hasBackup, setHasBackup] = useState(false);
-  const [restoring, setRestoring] = useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const ids = useId();
 
   const [formData, setFormData] = useState<Music>(DEFAULT_MUSIC);
@@ -37,14 +31,12 @@ export function MusicEditor({ eventId }: { eventId: string }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docSnap = await getDoc(doc(db, paths.content(eventId, 'music')));
-        if (docSnap.exists()) {
-          const fetchedData = mergeMusic(docSnap.data());
+        const data = await loadDraft();
+        if (data) {
+          const fetchedData = mergeMusic(data);
           setFormData(fetchedData);
           setOriginalData(fetchedData);
         }
-        const backupSnap = await getDoc(doc(db, paths.content(eventId, 'music_backup')));
-        if (backupSnap.exists()) setHasBackup(true);
       } catch (error) {
         console.error('Error fetching music:', error);
       } finally {
@@ -52,7 +44,7 @@ export function MusicEditor({ eventId }: { eventId: string }) {
       }
     };
     fetchData();
-  }, [eventId]);
+  }, [loadDraft]);
 
   const update = (patch: Partial<Music>) => {
     setFormData((prev) => ({ ...prev, ...patch }));
@@ -78,38 +70,24 @@ export function MusicEditor({ eventId }: { eventId: string }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await setDoc(doc(db, paths.content(eventId, 'music_backup')), originalData);
-      await setDoc(doc(db, paths.content(eventId, 'music')), formData);
-      await refreshGuestSite(eventId);
+      if (!(await draft.save(formData, { merge: false }))) return false;
 
       setOriginalData(formData);
-      setHasBackup(true);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-      setShowConfirmModal(false);
+      return true;
     } catch (error) {
       console.error('Error saving music:', error);
       alert(`Failed to save changes: ${error instanceof Error ? error.message : error}`);
+      return false;
     } finally {
       setSaving(false);
     }
   };
 
-  const executeRestore = async () => {
-    setRestoring(true);
-    setIsRestoreModalOpen(false);
-    try {
-      const backupSnap = await getDoc(doc(db, paths.content(eventId, 'music_backup')));
-      if (backupSnap.exists()) {
-        setFormData(mergeMusic(backupSnap.data()));
-        setIsSuccessModalOpen(true);
-      }
-    } catch (error) {
-      console.error('Error restoring music backup:', error);
-      alert(`Failed to restore backup: ${error instanceof Error ? error.message : error}`);
-    } finally {
-      setRestoring(false);
-    }
+  const handleRestore = (data: DocumentData) => {
+    setFormData(mergeMusic(data));
+    setSaved(false);
   };
 
   if (loading) {
@@ -211,40 +189,7 @@ export function MusicEditor({ eventId }: { eventId: string }) {
         </section>
       </fieldset>
 
-      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
-
-      <AdminModal
-        isOpen={isRestoreModalOpen}
-        onClose={() => setIsRestoreModalOpen(false)}
-        onConfirm={executeRestore}
-        title="Restore Previous Save?"
-        message="This will replace all your current edits with the last saved version. This action cannot be undone."
-        type="confirm"
-        variant="warning"
-        confirmText={restoring ? 'Restoring...' : 'Yes, Restore'}
-      />
-
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        onConfirm={() => setIsSuccessModalOpen(false)}
-        title="Restored Successfully"
-        message="The previous save has been loaded. Press Save to make it live."
-        type="alert"
-        variant="success"
-        confirmText="Got it"
-      />
-
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleSave}
-        title="Publish Changes?"
-        message="This will change the website's music immediately. A backup of the current music settings will be saved."
-        type="confirm"
-        variant="info"
-        confirmText="Yes, Publish Now"
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploading} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

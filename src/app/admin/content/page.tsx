@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { Eye, EyeOff, X } from 'lucide-react';
 import { WelcomeScreenEditor } from './WelcomeScreenEditor';
 import { GlobalSettingsEditor } from './GlobalSettingsEditor';
 import { EntranceScreenEditor } from './EntranceScreenEditor';
@@ -19,12 +20,26 @@ import { MusicEditor } from './MusicEditor';
 import { ScreensEditor } from './ScreensEditor';
 import { UnsavedChangesProvider, useUnsavedChangesGuard } from './unsavedChanges';
 import { DEFAULT_EVENT_ID } from '@/lib/eventPaths';
+import { ContentPageProvider } from './contentDraft';
+import { PreviewFrame } from '../components/PreviewFrame';
 
 export default function ContentManagerPage() {
   // The only event until the event switcher (F11)
   const eventId = DEFAULT_EVENT_ID;
   const [activeTab, setActiveTab] = useState('global-settings');
   const { setDirty, guard, dialog } = useUnsavedChangesGuard();
+  // Draft preview beside the editor (lg and up) or over it (smaller screens).
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewKey, setPreviewKey] = useState(0);
+  // Bumped to reload the editor from the server (after Discard draft).
+  const [editorKey, setEditorKey] = useState(0);
+
+  const togglePreview = () => setPreviewOpen((open) => !open);
+
+  const pageHooks = useMemo(() => ({
+    refreshPreview: () => setPreviewKey((k) => k + 1),
+    reloadEditor: () => setEditorKey((k) => k + 1),
+  }), []);
 
   // Switching tabs unmounts the editor, so unsaved edits are asked about first.
   const selectTab = (id: string) => {
@@ -52,18 +67,29 @@ export default function ContentManagerPage() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100">Content & Image Manager</h1>
-        <p className="text-gray-500 dark:text-zinc-400 mt-1">
-          Select a screen from the sidebar to update its images and text.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100">Content & Image Manager</h1>
+          <p className="text-gray-500 dark:text-zinc-400 mt-1">
+            Edits are saved as a draft. Check them in the preview, then Publish to show guests.
+          </p>
+        </div>
+        <button
+          onClick={togglePreview}
+          aria-pressed={previewOpen}
+          className="shrink-0 inline-flex items-center gap-2 min-h-11 px-4 rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+        >
+          {previewOpen ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
+          {previewOpen ? 'Hide preview' : 'Preview'}
+        </button>
       </div>
 
-      <div className="flex-1 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col md:flex-row">
-        {/* Sidebar Navigation */}
-        <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-gray-200 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 shrink-0">
+      <div className="flex-1 min-h-0 flex gap-4">
+      <div className={`flex-1 min-w-0 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col ${previewOpen ? '' : 'md:flex-row'}`}>
+        {/* Sidebar Navigation (a dropdown while the preview is docked beside it) */}
+        <div className={`w-full border-b border-gray-200 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 shrink-0 ${previewOpen ? '' : 'md:w-64 md:border-b-0 md:border-r'}`}>
           {/* Mobile Dropdown */}
-          <div className="p-4 md:hidden relative">
+          <div className={`p-4 relative ${previewOpen ? '' : 'md:hidden'}`}>
             <select
               value={activeTab}
               onChange={(e) => selectTab(e.target.value)}
@@ -83,7 +109,7 @@ export default function ContentManagerPage() {
           </div>
           
           {/* Desktop Sidebar */}
-          <div className="hidden md:block p-4 space-y-1 overflow-y-auto h-full">
+          <div className={`hidden p-4 space-y-1 overflow-y-auto h-full ${previewOpen ? '' : 'md:block'}`}>
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -103,6 +129,8 @@ export default function ContentManagerPage() {
         {/* Main Content Area */}
         <div className="flex-1 p-6 lg:p-8 overflow-y-auto bg-white dark:bg-zinc-900">
           <UnsavedChangesProvider value={setDirty}>
+          <ContentPageProvider value={pageHooks}>
+          <div key={editorKey}>
           {activeTab === 'global-settings' && <GlobalSettingsEditor eventId={eventId} />}
           {activeTab === 'welcome' && <WelcomeScreenEditor eventId={eventId} />}
           {activeTab === 'entrance' && <EntranceScreenEditor eventId={eventId} />}
@@ -130,8 +158,29 @@ export default function ContentManagerPage() {
               </p>
             </div>
           )}
+          </div>
+          </ContentPageProvider>
           </UnsavedChangesProvider>
         </div>
+      </div>
+
+      {/* Draft preview: docked beside the editor from lg, full screen over it below. */}
+      {previewOpen && (
+        <section
+          aria-label="Draft preview"
+          className="fixed inset-0 z-40 flex flex-col gap-3 bg-white dark:bg-zinc-900 p-4 lg:static lg:z-auto lg:w-[46%] lg:shrink-0 lg:rounded-2xl lg:border lg:border-gray-200 lg:dark:border-zinc-800 lg:shadow-sm"
+        >
+          <div className="flex items-center justify-between lg:hidden">
+            <p className="text-sm font-semibold text-gray-900 dark:text-zinc-100">Draft preview</p>
+            <button onClick={togglePreview} aria-label="Close preview" className="p-2.5 -mr-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-zinc-400 dark:hover:bg-zinc-800">
+              <X className="w-5 h-5" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="flex-1 min-h-0">
+            <PreviewFrame eventId={eventId} reloadKey={previewKey} initialMode="phone" />
+          </div>
+        </section>
+      )}
       </div>
       {dialog}
     </div>

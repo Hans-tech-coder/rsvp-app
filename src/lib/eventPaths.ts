@@ -3,7 +3,9 @@
 // SDK (`db.doc(path)` / `db.collection(path)`) both use them.
 //
 // Event data lives under `events/{eventId}`:
-//   content/{doc}        screen text and images (+ `<doc>_backup`)
+//   content/{doc}        screen text and images, live (+ old `<doc>_backup`)
+//   drafts/{doc}         unpublished edits of a content doc (F9)
+//   contentVersions/{doc} last published versions of a content doc (F9)
 //   guests/{inviteCode}  invite codes and RSVPs (codes are unique per event)
 //   registryGifts/{id}
 //   giftSelections/{id}
@@ -40,6 +42,8 @@ function event(eventId: string): string {
 export const paths = {
   event,
   content: (eventId: string, docId: string) => `${event(eventId)}/content/${segment(docId)}`,
+  draft: (eventId: string, docId: string) => `${event(eventId)}/drafts/${segment(docId)}`,
+  contentVersions: (eventId: string, docId: string) => `${event(eventId)}/contentVersions/${segment(docId)}`,
   guests: (eventId: string) => `${event(eventId)}/guests`,
   guest: (eventId: string, inviteCode: string) => `${event(eventId)}/guests/${segment(inviteCode)}`,
   registryGifts: (eventId: string) => `${event(eventId)}/registryGifts`,

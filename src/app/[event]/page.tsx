@@ -1,15 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { AudioPlayer } from '@/components/AudioPlayer';
-import { ThemeStyle } from '@/components/ThemeStyle';
-import { SiteTextProvider } from '@/contexts/SiteTextContext';
-import { WeddingContentProvider } from '@/contexts/WeddingContentContext';
 import { getEventContent, formatEventDate } from '@/lib/siteContentServer';
 import { fillText } from '@/lib/siteText';
-import { GuestSite } from './GuestSite';
+import { EventSite } from './EventSite';
 
 // One event's guest site at /<eventId>. Built on the server on the first visit
-// and cached (ISR); an admin save regenerates it via revalidateGuestSite(eventId).
+// and cached (ISR); an admin Publish regenerates it (publishDraft in
+// src/app/actions/content.ts). `?preview=<token>` is rewritten to ./preview.
 // The hourly revalidate is only a safety net for a missed refresh.
 export const revalidate = 3600;
 
@@ -54,13 +51,5 @@ export default async function EventPage({ params }: PageProps<'/[event]'>) {
   const site = await getEventContent(event);
   if (!site) notFound();
 
-  return (
-    <SiteTextProvider value={site.siteText}>
-      <ThemeStyle theme={site.theme} />
-      <WeddingContentProvider eventId={event} content={site.content}>
-        <GuestSite screens={site.screens} />
-      </WeddingContentProvider>
-      <AudioPlayer music={site.music} />
-    </SiteTextProvider>
-  );
+  return <EventSite eventId={event} site={site} />;
 }

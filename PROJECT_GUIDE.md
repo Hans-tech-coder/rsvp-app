@@ -35,7 +35,7 @@ platform: data and guest URLs are already per event (`/<eventId>`).
 | Who | What they do | Where |
 | --- | --- | --- |
 | **Guests** (no account) | Step through up to 10 screens (by default welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form; admins reorder, hide and rename them). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/<eventId>` (one page, screens swap in place; `/` → default event) |
-| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font, the music, and which screens show in what order on the guest site. Super admins also add and remove admins from **Manage Admins** in the sidebar. | `/admin/**` |
+| **Admins** (Google sign-in; UID in `admins`, role `super` or `admin`; added via the `adminAllowlist`) | Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font, the music, and which screens show in what order on the guest site. Edits are drafts (autosaved) until Publish; a preview shows the draft site and History restores earlier published versions. Super admins also add and remove admins from **Manage Admins** in the sidebar. | `/admin/**` |
 
 ---
 
@@ -64,7 +64,7 @@ platform: data and guest URLs are already per event (`/<eventId>`).
 npm run dev            # local dev server on :3000
 npm run build          # production build (the main correctness gate)
 npm run lint           # eslint
-npm test               # vitest, src/ only (download-proxy allowlist tests)
+npm test               # vitest, src/ only (lib unit tests)
 npm run sync-content   # PULL Firestore events/hans-and-czay/content -> src/data/wedding-content.json
 node scripts/migrate-to-events.js [--write [--overwrite] | --verify]   # copy root collections into the event (F3)
 node scripts/migrate-content-f5.js [--write | --verify] [--dump <file>]   # add generic content fields (hosts, groups, venues, guidelines) to old docs (F5)
@@ -90,19 +90,20 @@ without it). Never print, commit, or paste the secret values.
 src/
   app/
     page.tsx                 redirects / to the default event
-    [event]/page.tsx         one event's guest site: server read, metadata, ISR cache, providers, <AudioPlayer/>
+    [event]/page.tsx         one event's guest site: server read, metadata, ISR cache -> EventSite.tsx (providers, <AudioPlayer/>)
+    [event]/preview/page.tsx admin draft preview (/<eventId>?preview=<token>, rewritten in next.config.ts)
     [event]/GuestSite.tsx    the whole step flow, driven by the event's screens list (client component)
     layout.tsx               theme script, metadataBase, mounts fonts.ts (reads no Firestore)
     fonts.ts                 every font of every pairing (next/font), CSS variables on <html>
     not-found.tsx            404 for unknown URLs/events (default event's look)
     globals.css              Tailwind @theme colors + font roles (Wedding default) + motion tokens + reveal CSS
-    actions/                 server actions: rsvp.ts, registry.ts, admin.ts, admins.ts, auth.ts
+    actions/                 server actions: rsvp.ts, registry.ts, admin.ts, admins.ts, auth.ts, content.ts (drafts, publish, versions)
     api/download/route.ts    image download proxy (used by DetailsScreen)
     api/upload/route.ts      admin-only Vercel Blob upload token
     api/logout/route.ts      clears the session cookie, redirects to /admin/login
     admin/                   admin portal (layout.tsx = sidebar)
-      content/               Content manager: page.tsx (tabs) + one *Editor.tsx per screen
-      components/            AdminModal, ManageAdminsModal, TablePagination, ScreenList (reorder/show/rename screens)
+      content/               Content manager: page.tsx (tabs, preview) + one *Editor.tsx per screen + EditorSaveBar / contentDraft (draft, publish, history)
+      components/            AdminModal, ManageAdminsModal, TablePagination, ScreenList (reorder/show/rename screens), PreviewFrame (phone/desktop draft preview)
       dashboard|invites|guests|gifts|registry|login/
   components/
     screens/                 one file per guest screen (+ GiftSelectionModal, LoadingScreen)
@@ -122,7 +123,8 @@ src/
   lib/fonts.ts               font roles (heading/elegant/body), families, pairings (+ .test.ts)
   lib/music.ts               event background music: type, mergeMusic, default track (+ .test.ts)
   lib/screens.ts             which screens an event shows, order, menu names: SCREEN_TYPES, mergeScreens (+ .test.ts)
-  lib/siteContentServer.ts   getEventContent() (event page), getSiteContent() (404) via admin SDK (server only)
+  lib/contentDrafts.ts       content drafts + published versions: shapes, mergeDoc, version list (+ .test.ts)
+  lib/siteContentServer.ts   getEventContent() (event page), getEventDraftContent() (preview), getSiteContent() (404) via admin SDK (server only)
   lib/weddingContent.ts      JSON defaults + content docs merge (mergeWeddingContent, mergeGlobal, DEFAULT_CONTENT)
   lib/genericContent.ts      hosts / People groups / venues / guidelines: types, readers, old-shape adapters (+ .test.ts)
   lib/siteUrl.ts             getSiteUrl(), getEventUrl() for links that leave the site (server only)

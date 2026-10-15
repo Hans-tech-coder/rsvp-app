@@ -2,25 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon } from 'lucide-react';
-import { db } from '@/lib/firebase/client';
-import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
-import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
+import type { DocumentData } from 'firebase/firestore';
 
 export function EntranceScreenEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [hasBackup, setHasBackup] = useState(false);
-  const [restoring, setRestoring] = useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const draft = useContentDraft(eventId, 'entranceScreen');
+  const loadDraft = draft.load;
   
   // State for the form fields
   const [formData, setFormData] = useState({
@@ -36,22 +30,14 @@ export function EntranceScreenEditor({ eventId }: { eventId: string }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, paths.content(eventId, 'entranceScreen'));
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
+        const data = await loadDraft();
+        if (data) {
           const fetchedData = {
             ...weddingContent.entranceScreen,
-            ...docSnap.data()
+            ...data
           };
           setFormData(fetchedData);
           setOriginalData(fetchedData);
-        }
-
-        const backupRef = doc(db, paths.content(eventId, 'entranceScreen_backup'));
-        const backupSnap = await getDoc(backupRef);
-        if (backupSnap.exists()) {
-          setHasBackup(true);
         }
       } catch (error) {
         console.error("Error fetching content:", error);
@@ -61,7 +47,7 @@ export function EntranceScreenEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [eventId]);
+  }, [loadDraft]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -85,21 +71,15 @@ export function EntranceScreenEditor({ eventId }: { eventId: string }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const backupRef = doc(db, paths.content(eventId, 'entranceScreen_backup'));
-      await setDoc(backupRef, originalData, { merge: true });
-
-      const docRef = doc(db, paths.content(eventId, 'entranceScreen'));
-      await setDoc(docRef, formData, { merge: true });
-      await refreshGuestSite(eventId);
-      
+      if (!(await draft.save(formData, { merge: true }))) return false;
       setOriginalData(formData);
-      setHasBackup(true);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-      setShowConfirmModal(false);
+      return true;
     } catch (error: any) {
       console.error("Error saving content:", error);
       alert(`Failed to save changes: ${error.message}`);
+      return false;
     } finally {
       setSaving(false);
     }
@@ -110,30 +90,9 @@ export function EntranceScreenEditor({ eventId }: { eventId: string }) {
     setSaved(false);
   };
 
-  const handleRestoreBackup = async () => {
-    setIsRestoreModalOpen(true);
-  };
-
-  const executeRestore = async () => {
-    setRestoring(true);
-    setIsRestoreModalOpen(false);
-    try {
-      const backupRef = doc(db, paths.content(eventId, 'entranceScreen_backup'));
-      const backupSnap = await getDoc(backupRef);
-      if (backupSnap.exists()) {
-        const fetchedBackup = {
-          ...weddingContent.entranceScreen,
-          ...backupSnap.data()
-        };
-        setFormData(fetchedBackup);
-        setIsSuccessModalOpen(true);
-      }
-    } catch (error: any) {
-      console.error("Error restoring backup:", error);
-      alert(`Failed to restore backup: ${error.message}`);
-    } finally {
-      setRestoring(false);
-    }
+  const handleRestore = (data: DocumentData) => {
+    setFormData({ ...weddingContent.entranceScreen, ...data });
+    setSaved(false);
   };
 
   if (loading) {
@@ -198,41 +157,7 @@ export function EntranceScreenEditor({ eventId }: { eventId: string }) {
 
       <div className="w-full h-px bg-gray-200 dark:bg-zinc-800" />
 
-      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
-
-      {/* Modals for Backup Restoration */}
-      <AdminModal
-        isOpen={isRestoreModalOpen}
-        onClose={() => setIsRestoreModalOpen(false)}
-        onConfirm={executeRestore}
-        title="Restore Previous Save?"
-        message="This will replace all your current edits with the last saved version. This action cannot be undone."
-        type="confirm"
-        variant="warning"
-        confirmText={restoring ? "Restoring..." : "Yes, Restore"}
-      />
-
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        onConfirm={() => setIsSuccessModalOpen(false)}
-        title="Restored Successfully"
-        message="The previous save has been successfully restored."
-        type="alert"
-        variant="success"
-        confirmText="Got it"
-      />
-
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleSave}
-        title="Publish Changes?"
-        message="This will update the Entrance Screen section on the live website immediately. A backup of the current version will be saved."
-        type="confirm"
-        variant="info"
-        confirmText="Yes, Publish Now"
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImage} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

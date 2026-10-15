@@ -4,8 +4,7 @@ import { getAdminDb } from '@/lib/firebase/admin';
 import { requireAdmin } from '@/lib/requireAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import crypto from 'crypto';
-import { revalidatePath } from 'next/cache';
-import { DEFAULT_EVENT_ID, isValidEventId, paths } from '@/lib/eventPaths';
+import { paths } from '@/lib/eventPaths';
 import { getSiteContent } from '@/lib/siteContentServer';
 import { getEventUrl } from '@/lib/siteUrl';
 
@@ -276,21 +275,3 @@ export async function toggleInviteCopiedStatus(eventId: string, code: string, is
   }
 }
 
-
-/**
- * Rebuild an event's cached guest page (content, title, link preview) on its
- * next visit. Every content editor calls this after it writes the event's
- * content. The 404 page shows the default event, so saving that event
- * refreshes the whole site.
- */
-export async function revalidateGuestSite(eventId: string) {
-  try {
-    await requireAdmin();
-    if (!isValidEventId(eventId)) throw new Error('Invalid event');
-    if (eventId === DEFAULT_EVENT_ID) revalidatePath('/', 'layout');
-    else revalidatePath(`/${eventId}`);
-    return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || 'Failed to refresh the guest site' };
-  }
-}

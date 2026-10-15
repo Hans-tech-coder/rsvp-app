@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react';
 import { Loader2, TriangleAlert } from 'lucide-react';
 import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { DEFAULT_SCREENS, mergeScreens, type ScreenConfig, type ScreensDoc } from '@/lib/screens';
 import { DEFAULT_SITE_TEXT, mergeSiteText } from '@/lib/siteText';
-import { refreshGuestSite } from './refreshGuestSite';
-import { AdminModal } from '../components/AdminModal';
 import { ScreenList } from '../components/ScreenList';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
+import type { DocumentData } from 'firebase/firestore';
 
 // Which screens guests see, their order and their names in the menu
 // (`content/screens`). Read on the server and walked by src/app/[event]/GuestSite.tsx.
@@ -18,11 +18,8 @@ export function ScreensEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [hasBackup, setHasBackup] = useState(false);
-  const [restoring, setRestoring] = useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const draft = useContentDraft(eventId, 'screens');
+  const loadDraft = draft.load;
   const [defaultLabels, setDefaultLabels] = useState(DEFAULT_SITE_TEXT.menu);
 
   const [formData, setFormData] = useState<ScreenConfig[]>(DEFAULT_SCREENS);
@@ -33,17 +30,15 @@ export function ScreensEditor({ eventId }: { eventId: string }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [docSnap, backupSnap, siteTextSnap] = await Promise.all([
-          getDoc(doc(db, paths.content(eventId, 'screens'))),
-          getDoc(doc(db, paths.content(eventId, 'screens_backup'))),
+        const [data, siteTextSnap] = await Promise.all([
+          loadDraft(),
           getDoc(doc(db, paths.content(eventId, 'siteText'))),
         ]);
-        if (docSnap.exists()) {
-          const fetchedData = mergeScreens(docSnap.data());
+        if (data) {
+          const fetchedData = mergeScreens(data);
           setFormData(fetchedData);
           setOriginalData(fetchedData);
         }
-        if (backupSnap.exists()) setHasBackup(true);
         // Blank names fall back to the site text menu names, as on the guest site.
         setDefaultLabels(mergeSiteText(DEFAULT_SITE_TEXT, siteTextSnap.data()).menu);
       } catch (error) {
@@ -53,7 +48,7 @@ export function ScreensEditor({ eventId }: { eventId: string }) {
       }
     };
     fetchData();
-  }, [eventId]);
+  }, [eventId, loadDraft]);
 
   const handleChange = (screens: ScreenConfig[]) => {
     setFormData(screens);
@@ -65,39 +60,25 @@ export function ScreensEditor({ eventId }: { eventId: string }) {
     try {
       const next = mergeScreens({ screens: formData });
       const toDoc = (screens: ScreenConfig[]): ScreensDoc => ({ screens });
-      await setDoc(doc(db, paths.content(eventId, 'screens_backup')), toDoc(originalData));
-      await setDoc(doc(db, paths.content(eventId, 'screens')), toDoc(next));
-      await refreshGuestSite(eventId);
+      if (!(await draft.save(toDoc(next), { merge: false }))) return false;
 
       setFormData(next);
       setOriginalData(next);
-      setHasBackup(true);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-      setShowConfirmModal(false);
+      return true;
     } catch (error) {
       console.error('Error saving screens:', error);
       alert(`Failed to save changes: ${error instanceof Error ? error.message : error}`);
+      return false;
     } finally {
       setSaving(false);
     }
   };
 
-  const executeRestore = async () => {
-    setRestoring(true);
-    setIsRestoreModalOpen(false);
-    try {
-      const backupSnap = await getDoc(doc(db, paths.content(eventId, 'screens_backup')));
-      if (backupSnap.exists()) {
-        setFormData(mergeScreens(backupSnap.data()));
-        setIsSuccessModalOpen(true);
-      }
-    } catch (error) {
-      console.error('Error restoring screens backup:', error);
-      alert(`Failed to restore backup: ${error instanceof Error ? error.message : error}`);
-    } finally {
-      setRestoring(false);
-    }
+  const handleRestore = (data: DocumentData) => {
+    setFormData(mergeScreens(data));
+    setSaved(false);
   };
 
   if (loading) {
@@ -129,40 +110,7 @@ export function ScreensEditor({ eventId }: { eventId: string }) {
 
       <ScreenList screens={formData} onChange={handleChange} defaultLabels={defaultLabels} />
 
-      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
-
-      <AdminModal
-        isOpen={isRestoreModalOpen}
-        onClose={() => setIsRestoreModalOpen(false)}
-        onConfirm={executeRestore}
-        title="Restore Previous Save?"
-        message="This will replace all your current edits with the last saved version. This action cannot be undone."
-        type="confirm"
-        variant="warning"
-        confirmText={restoring ? 'Restoring...' : 'Yes, Restore'}
-      />
-
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        onConfirm={() => setIsSuccessModalOpen(false)}
-        title="Restored Successfully"
-        message="The previous save has been loaded. Press Save to make it live."
-        type="alert"
-        variant="success"
-        confirmText="Got it"
-      />
-
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleSave}
-        title="Publish Changes?"
-        message="This will change the website's screens and menu immediately. A backup of the current screen settings will be saved."
-        type="confirm"
-        variant="info"
-        confirmText="Yes, Publish Now"
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

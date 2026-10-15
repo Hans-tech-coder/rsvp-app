@@ -5,10 +5,10 @@ import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
 import { paths } from '@/lib/eventPaths';
 import type { AdminRole } from '@/types';
 
-export type AdminSession = { uid: string; role: AdminRole };
+export type AdminSession = { uid: string; role: AdminRole; email: string | null };
 
 // Server-only. Verifies the `session` cookie (signature, expiry, revocation)
-// and that `admins/{uid}` exists. Returns the admin's UID and role, or null.
+// and that `admins/{uid}` exists. Returns the admin's UID, role and email, or null.
 // A doc with no `role` (created before roles existed) counts as 'admin'.
 // Memoized per request so a page and the actions it calls verify once.
 export const getAdmin = cache(async (): Promise<AdminSession | null> => {
@@ -16,10 +16,10 @@ export const getAdmin = cache(async (): Promise<AdminSession | null> => {
   if (!session) return null;
 
   try {
-    const { uid } = await getAdminAuth().verifySessionCookie(session, true);
+    const { uid, email } = await getAdminAuth().verifySessionCookie(session, true);
     const admin = await getAdminDb().doc(paths.admin(uid)).get();
     if (!admin.exists) return null;
-    return { uid, role: admin.get('role') === 'super' ? 'super' : 'admin' };
+    return { uid, role: admin.get('role') === 'super' ? 'super' : 'admin', email: email ?? null };
   } catch {
     return null;
   }

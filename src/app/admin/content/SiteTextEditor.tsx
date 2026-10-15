@@ -2,19 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Search, ChevronDown } from 'lucide-react';
-import { db } from '@/lib/firebase/client';
-import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { refreshGuestSite } from './refreshGuestSite';
 import { DEFAULT_SITE_TEXT, mergeSiteText, type SiteText } from '@/lib/siteText';
-import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
+import type { DocumentData } from 'firebase/firestore';
 import { CharCount } from './CharCount';
 import { SITE_TEXT_GROUPS, type SiteTextField } from './siteTextFields';
 
 // Small wording on the guest site (buttons, labels, hints, error messages),
 // stored in the event's content/siteText. The guest pages read it on the server, so
-// a save also asks Next.js to regenerate them (refreshGuestSite).
+// Publish also asks Next.js to regenerate them (publishDraft).
 
 function getText(text: SiteText, path: string): string {
   return path.split('.').reduce<unknown>((node, key) => (node as Record<string, unknown>)?.[key], text) as string;
@@ -36,11 +33,8 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [hasBackup, setHasBackup] = useState(false);
-  const [restoring, setRestoring] = useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const draft = useContentDraft(eventId, 'siteText');
+  const loadDraft = draft.load;
   const [query, setQuery] = useState('');
 
   const [formData, setFormData] = useState<SiteText>(DEFAULT_SITE_TEXT);
@@ -51,16 +45,11 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docSnap = await getDoc(doc(db, paths.content(eventId, 'siteText')));
-        if (docSnap.exists()) {
-          const fetchedData = mergeSiteText(DEFAULT_SITE_TEXT, docSnap.data());
+        const data = await loadDraft();
+        if (data) {
+          const fetchedData = mergeSiteText(DEFAULT_SITE_TEXT, data);
           setFormData(fetchedData);
           setOriginalData(fetchedData);
-        }
-
-        const backupSnap = await getDoc(doc(db, paths.content(eventId, 'siteText_backup')));
-        if (backupSnap.exists()) {
-          setHasBackup(true);
         }
       } catch (error) {
         console.error("Error fetching content:", error);
@@ -70,7 +59,7 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [eventId]);
+  }, [loadDraft]);
 
   const handleChange = (path: string, value: string) => {
     setFormData(prev => setText(prev, path, value));
@@ -80,18 +69,16 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await setDoc(doc(db, paths.content(eventId, 'siteText_backup')), originalData);
-      await setDoc(doc(db, paths.content(eventId, 'siteText')), formData);
-      await refreshGuestSite(eventId);
+      if (!(await draft.save(formData, { merge: false }))) return false;
 
       setOriginalData(formData);
-      setHasBackup(true);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-      setShowConfirmModal(false);
+      return true;
     } catch (error) {
       console.error("Error saving content:", error);
       alert(`Failed to save changes: ${error instanceof Error ? error.message : error}`);
+      return false;
     } finally {
       setSaving(false);
     }
@@ -102,21 +89,9 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
     setSaved(false);
   };
 
-  const executeRestore = async () => {
-    setRestoring(true);
-    setIsRestoreModalOpen(false);
-    try {
-      const backupSnap = await getDoc(doc(db, paths.content(eventId, 'siteText_backup')));
-      if (backupSnap.exists()) {
-        setFormData(mergeSiteText(DEFAULT_SITE_TEXT, backupSnap.data()));
-        setIsSuccessModalOpen(true);
-      }
-    } catch (error) {
-      console.error("Error restoring backup:", error);
-      alert(`Failed to load previous save: ${error instanceof Error ? error.message : error}`);
-    } finally {
-      setRestoring(false);
-    }
+  const handleRestore = (data: DocumentData) => {
+    setFormData(mergeSiteText(DEFAULT_SITE_TEXT, data));
+    setSaved(false);
   };
 
   if (loading) {
@@ -227,40 +202,7 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
         )}
       </div>
 
-      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
-
-      <AdminModal
-        isOpen={isRestoreModalOpen}
-        onClose={() => setIsRestoreModalOpen(false)}
-        onConfirm={executeRestore}
-        title="Restore Previous Save?"
-        message="This will replace all your current edits with the last saved version. Press Save afterwards to publish it."
-        type="confirm"
-        variant="warning"
-        confirmText={restoring ? "Restoring..." : "Yes, Restore"}
-      />
-
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        onConfirm={() => setIsSuccessModalOpen(false)}
-        title="Restored Successfully"
-        message="The previous save is back in the form. Press Save Changes to publish it."
-        type="alert"
-        variant="success"
-        confirmText="Got it"
-      />
-
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleSave}
-        title="Publish Changes?"
-        message="This will update the site text on the live website. Guests see it on their next page load. A backup of the current version will be saved."
-        type="confirm"
-        variant="info"
-        confirmText="Yes, Publish Now"
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }

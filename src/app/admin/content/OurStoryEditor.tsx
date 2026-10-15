@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon, Plus, Trash2, GripVertical } from 'lucide-react';
-import { db } from '@/lib/firebase/client';
-import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
+import type { DocumentData } from 'firebase/firestore';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 import { nanoid } from 'nanoid';
 import {
@@ -35,12 +33,8 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploadingImageIndex, setUploadingImageIndex] = useState<number | null>(null);
-  const [hasBackup, setHasBackup] = useState(false);
-  const [restoring, setRestoring] = useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const draft = useContentDraft(eventId, 'ourStory');
+  const loadDraft = draft.load;
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<number | null>(null);
   
@@ -71,12 +65,9 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, paths.content(eventId, 'ourStory'));
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.items) {
+        const data = await loadDraft();
+        if (data) {
+          if (Array.isArray(data.items)) {
             const mappedItems = data.items.map((item: any) => ({ ...item, id: nanoid() }));
             setItems(mappedItems);
             setOriginalItems(mappedItems);
@@ -94,12 +85,6 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
             description: data.description ?? prev.description
           }));
         }
-
-        const backupRef = doc(db, paths.content(eventId, 'ourStory_backup'));
-        const backupSnap = await getDoc(backupRef);
-        if (backupSnap.exists()) {
-          setHasBackup(true);
-        }
       } catch (error) {
         console.error("Error fetching content:", error);
       } finally {
@@ -108,7 +93,7 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [eventId]);
+  }, [loadDraft]);
 
   const handleChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -201,29 +186,17 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
         description: header.description,
         items: items.map(({ id, ...rest }) => rest)
       };
-      const backupPayload = {
-        subtitle: originalHeader.subtitle,
-        title: originalHeader.title,
-        description: originalHeader.description,
-        items: originalItems.map(({ id, ...rest }) => rest)
-      };
+      if (!(await draft.save(payload, { merge: true }))) return false;
 
-      const backupRef = doc(db, paths.content(eventId, 'ourStory_backup'));
-      await setDoc(backupRef, backupPayload, { merge: true });
-
-      const docRef = doc(db, paths.content(eventId, 'ourStory'));
-      await setDoc(docRef, payload, { merge: true });
-      await refreshGuestSite(eventId);
-      
       setOriginalItems(items);
       setOriginalHeader(header);
-      setHasBackup(true);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-      setShowConfirmModal(false);
+      return true;
     } catch (error: any) {
       console.error("Error saving content:", error);
       alert(`Failed to save changes: ${error.message}`);
+      return false;
     } finally {
       setSaving(false);
     }
@@ -235,35 +208,17 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
     setSaved(false);
   };
 
-  const handleRestoreBackup = async () => {
-    setIsRestoreModalOpen(true);
-  };
-
-  const executeRestore = async () => {
-    setRestoring(true);
-    setIsRestoreModalOpen(false);
-    try {
-      const backupRef = doc(db, paths.content(eventId, 'ourStory_backup'));
-      const backupSnap = await getDoc(backupRef);
-      if (backupSnap.exists()) {
-        const data = backupSnap.data();
-        if (data.items) {
-          setItems(data.items.map((item: any) => ({ ...item, id: nanoid() })));
-        }
-        setHeader(prev => ({
-          ...prev,
-          subtitle: data.subtitle ?? prev.subtitle,
-          title: data.title ?? prev.title,
-          description: data.description ?? prev.description
-        }));
-        setIsSuccessModalOpen(true);
-      }
-    } catch (error: any) {
-      console.error("Error restoring backup:", error);
-      alert(`Failed to restore backup: ${error.message}`);
-    } finally {
-      setRestoring(false);
+  const handleRestore = (data: DocumentData) => {
+    if (Array.isArray(data.items)) {
+      setItems(data.items.map((item) => ({ ...item, id: nanoid() })));
     }
+    setHeader(prev => ({
+      ...prev,
+      subtitle: data.subtitle ?? prev.subtitle,
+      title: data.title ?? prev.title,
+      description: data.description ?? prev.description
+    }));
+    setSaved(false);
   };
 
   if (loading) {
@@ -361,29 +316,7 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
         </div>
       </DndContext>
 
-      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
-
-      <AdminModal
-        isOpen={isRestoreModalOpen}
-        onClose={() => setIsRestoreModalOpen(false)}
-        onConfirm={executeRestore}
-        title="Restore Previous Save?"
-        message="This will replace all your current edits with the last saved version. This action cannot be undone."
-        type="confirm"
-        variant="warning"
-        confirmText={restoring ? "Restoring..." : "Yes, Restore"}
-      />
-
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        onConfirm={() => setIsSuccessModalOpen(false)}
-        title="Restored Successfully"
-        message="The previous save has been successfully restored."
-        type="alert"
-        variant="success"
-        confirmText="Got it"
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImageIndex !== null} onUndo={handleUndo} onRestore={handleRestore} onSave={handleSave} />
 
       <AdminModal
         isOpen={isDeleteModalOpen}
@@ -397,17 +330,6 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
         type="confirm"
         variant="danger"
         confirmText="Yes, delete it"
-      />
-
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleSave}
-        title="Publish Changes?"
-        message="This will update the Our Story section on the live website immediately. A backup of the current version will be saved."
-        type="confirm"
-        variant="info"
-        confirmText="Yes, Publish Now"
       />
     </div>
   );

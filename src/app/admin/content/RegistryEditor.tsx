@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Trash2, GripVertical, Image as ImageIcon, Upload } from 'lucide-react';
-import { db } from '@/lib/firebase/client';
-import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
+import type { DocumentData } from 'firebase/firestore';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 import { nanoid } from 'nanoid';
 import {
@@ -34,11 +32,8 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [hasBackup, setHasBackup] = useState(false);
-  const [restoring, setRestoring] = useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const draft = useContentDraft(eventId, 'registry');
+  const loadDraft = draft.load;
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [uploadingImageIndex, setUploadingImageIndex] = useState<number | null>(null);
@@ -82,11 +77,8 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, paths.content(eventId, 'registry'));
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+        const data = await loadDraft();
+        if (data) {
           if (data.bankTransfer?.banks && Array.isArray(data.bankTransfer.banks)) {
             const mappedBanks = data.bankTransfer.banks.map((item: any) => ({ ...item, id: nanoid() }));
             setBanks(mappedBanks);
@@ -106,12 +98,6 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
             setOriginalCuratedRegistry(prev => ({ ...prev, ...data.curatedRegistry }));
           }
         }
-
-        const backupRef = doc(db, paths.content(eventId, 'registry_backup'));
-        const backupSnap = await getDoc(backupRef);
-        if (backupSnap.exists()) {
-          setHasBackup(true);
-        }
       } catch (error) {
         console.error("Error fetching content:", error);
       } finally {
@@ -120,7 +106,7 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [eventId]);
+  }, [loadDraft]);
 
   const handleBankChange = (id: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -218,93 +204,47 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
     try {
       setSaving(true);
       
-      const docRef = doc(db, paths.content(eventId, 'registry'));
-      const backupRef = doc(db, paths.content(eventId, 'registry_backup'));
-      
-      const currentDoc = await getDoc(docRef);
-      if (currentDoc.exists()) {
-        await setDoc(backupRef, {
-          ...currentDoc.data(),
-          backedUpAt: new Date().toISOString()
-        });
-        setHasBackup(true);
-      }
-      
       const banksToSave = banks.map(({ id, ...rest }) => rest);
-      await setDoc(docRef, { 
+      const ok = await draft.save({
         header,
         bankTransfer: {
           ...bankTransfer,
           banks: banksToSave
         },
         curatedRegistry,
-        updatedAt: new Date().toISOString() 
-      });
-      await refreshGuestSite(eventId);
-      
+        updatedAt: new Date().toISOString()
+      }, { merge: false });
+      if (!ok) return false;
+
       setOriginalHeader(header);
       setOriginalBankTransfer(bankTransfer);
       setOriginalCuratedRegistry(curatedRegistry);
       setOriginalBanks(banks.map(item => ({ ...item })));
-      
+
       setSaved(true);
-      setShowConfirmModal(false);
       setTimeout(() => setSaved(false), 3000);
+      return true;
     } catch (error) {
       console.error("Error saving content:", error);
       alert("Failed to save changes. Please try again.");
+      return false;
     } finally {
       setSaving(false);
     }
   };
 
-  const restoreBackup = async () => {
-    try {
-      setRestoring(true);
-      const backupRef = doc(db, paths.content(eventId, 'registry_backup'));
-      const backupSnap = await getDoc(backupRef);
-      
-      if (backupSnap.exists()) {
-        const backupData = backupSnap.data();
-        
-        if (backupData.bankTransfer?.banks && Array.isArray(backupData.bankTransfer.banks)) {
-          const mappedBanks = backupData.bankTransfer.banks.map((item: any) => ({ ...item, id: nanoid() }));
-          setBanks(mappedBanks);
-          setOriginalBanks(mappedBanks);
-        }
-        if (backupData.header) {
-          setHeader(prev => ({ ...prev, ...backupData.header }));
-          setOriginalHeader(prev => ({ ...prev, ...backupData.header }));
-        }
-        if (backupData.bankTransfer) {
-          const { banks, ...restBankTransfer } = backupData.bankTransfer;
-          setBankTransfer(prev => ({ ...prev, ...restBankTransfer }));
-          setOriginalBankTransfer(prev => ({ ...prev, ...restBankTransfer }));
-        }
-        if (backupData.curatedRegistry) {
-          setCuratedRegistry(prev => ({ ...prev, ...backupData.curatedRegistry }));
-          setOriginalCuratedRegistry(prev => ({ ...prev, ...backupData.curatedRegistry }));
-        }
-
-        const docRef = doc(db, paths.content(eventId, 'registry'));
-        await setDoc(docRef, {
-          header: backupData.header || header,
-          bankTransfer: backupData.bankTransfer || { ...bankTransfer, banks: [] },
-          curatedRegistry: backupData.curatedRegistry || curatedRegistry,
-          updatedAt: new Date().toISOString(),
-          restoredAt: new Date().toISOString()
-        });
-        await refreshGuestSite(eventId);
-
-        setIsRestoreModalOpen(false);
-        setIsSuccessModalOpen(true);
-      }
-    } catch (error) {
-      console.error("Error restoring backup:", error);
-      alert("Failed to restore backup. Please try again.");
-    } finally {
-      setRestoring(false);
+  const handleRestore = (data: DocumentData) => {
+    if (Array.isArray(data.bankTransfer?.banks)) {
+      setBanks(data.bankTransfer.banks.map((item: DocumentData) => ({ ...item, id: nanoid() })));
     }
+    if (data.header) setHeader(prev => ({ ...prev, ...data.header }));
+    if (data.bankTransfer) {
+      const restBankTransfer = { ...data.bankTransfer };
+      delete restBankTransfer.banks;
+      setBankTransfer(prev => ({ ...prev, ...restBankTransfer }));
+    }
+    if (data.curatedRegistry) setCuratedRegistry(prev => ({ ...prev, ...data.curatedRegistry }));
+    setSaved(false);
   };
 
   if (loading) {
@@ -477,18 +417,7 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
 
 
 
-      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
-
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={saveContent}
-        title="Publish Changes?"
-        message="This will update the registry section on the live website immediately. A backup of the current version will be saved."
-        type="confirm"
-        variant="info"
-        confirmText="Yes, Publish Now"
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} busy={uploadingImageIndex !== null} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
 
       <AdminModal
         isOpen={isDeleteModalOpen}
@@ -499,28 +428,6 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
         type="confirm"
         variant="danger"
         confirmText="Yes, Delete"
-      />
-
-      <AdminModal
-        isOpen={isRestoreModalOpen}
-        onClose={() => setIsRestoreModalOpen(false)}
-        onConfirm={restoreBackup}
-        title="Restore Previous Save?"
-        message="This will replace all your current edits with the last saved version. This action cannot be undone."
-        type="confirm"
-        variant="warning"
-        confirmText={restoring ? "Restoring..." : "Yes, Restore"}
-      />
-
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        onConfirm={() => setIsSuccessModalOpen(false)}
-        title="Restored Successfully"
-        message="The previous save has been successfully restored."
-        type="alert"
-        variant="success"
-        confirmText="Got it"
       />
     </div>
   );

@@ -13,28 +13,32 @@ import {
 
 // Server-only. Guest-site content is read here with the admin SDK when a page
 // is (re)generated, never from the browser. The pages are cached (ISR); an
-// admin save calls revalidateGuestSite(eventId) so the next visit rebuilds
+// admin Publish (publishDraft) revalidates them so the next visit rebuilds
 // them. Memoized per request (generateMetadata and the page share one read).
 
 export type { SiteGlobal };
 
-/**
- * Everything the event's guest page shows, or null when the event does not
- * exist. Throws when Firestore can't be read, so a cached page stays up rather
- * than being replaced by the defaults.
- */
-export const getEventContent = cache(async (eventId: string): Promise<{ content: WeddingContent; siteText: SiteText; theme: Theme; music: Music; screens: ScreenConfig[] } | null> => {
+type EventSite = { content: WeddingContent; siteText: SiteText; theme: Theme; music: Music; screens: ScreenConfig[] };
+
+const SITE_DOC_IDS = [...CONTENT_DOC_IDS, 'siteText', 'theme', 'music', 'screens'] as const;
+
+async function readEventSite(eventId: string, withDrafts: boolean): Promise<EventSite | null> {
   if (!isValidEventId(eventId)) return null;
 
   const db = getAdminDb();
   // The event first, so a made-up URL costs one read, not fifteen.
   if (!(await db.doc(paths.event(eventId)).get()).exists) return null;
 
-  const ids = [...CONTENT_DOC_IDS, 'siteText', 'theme', 'music', 'screens'] as const;
+  const ids = SITE_DOC_IDS;
   const docs = await db.getAll(...ids.map((id) => db.doc(paths.content(eventId, id))));
+  // Preview: a doc's draft (the whole doc as it will be published) replaces the live one.
+  const drafts = withDrafts ? await db.getAll(...ids.map((id) => db.doc(paths.draft(eventId, id)))) : [];
 
   // Client components only take plain objects (no Firestore Timestamps).
-  const data = Object.fromEntries(ids.map((id, i) => [id, JSON.parse(JSON.stringify(docs[i].data() ?? null)) ?? undefined]));
+  const data = Object.fromEntries(ids.map((id, i) => {
+    const doc = drafts[i]?.exists ? drafts[i].get('data') : docs[i].data();
+    return [id, JSON.parse(JSON.stringify(doc ?? null)) ?? undefined];
+  }));
 
   return {
     content: mergeWeddingContent(data as Record<ContentDocId, DocumentData | undefined>),
@@ -43,7 +47,17 @@ export const getEventContent = cache(async (eventId: string): Promise<{ content:
     music: mergeMusic(data.music),
     screens: mergeScreens(data.screens),
   };
-});
+}
+
+/**
+ * Everything the event's guest page shows, or null when the event does not
+ * exist. Throws when Firestore can't be read, so a cached page stays up rather
+ * than being replaced by the defaults.
+ */
+export const getEventContent = cache((eventId: string) => readEventSite(eventId, false));
+
+/** The same with every unpublished draft applied, for the admin preview (`/<eventId>?preview=…`). Never cached. */
+export const getEventDraftContent = cache((eventId: string) => readEventSite(eventId, true));
 
 /**
  * Only the site text, global settings, theme and music, for the 404 page. Falls back to the

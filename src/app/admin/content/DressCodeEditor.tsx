@@ -1,15 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Loader2, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-react';
-import { db } from '@/lib/firebase/client';
-import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { refreshGuestSite } from './refreshGuestSite';
 import { uploadImage } from '@/lib/blob/uploadImage';
 import { useWeddingContent } from '@/contexts/WeddingContentContext';
-import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
+import type { DocumentData } from 'firebase/firestore';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 import { guidelinesFromLegacy, readGuidelines, type Guideline } from '@/lib/genericContent';
 import { nanoid } from 'nanoid';
@@ -75,10 +72,9 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
   const [uploadingImageIndex, setUploadingImageIndex] = useState<number | null>(null);
   const [originalData, setOriginalData] = useState<DressCodeData | null>(null);
   
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showRestoreModal, setShowRestoreModal] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [lastBackup, setLastBackup] = useState<any>(null);
+  const draft = useContentDraft(eventId, 'dressCode');
+  
+  const loadDraft = draft.load;
 
   const hasChanges = !!originalData && JSON.stringify(data) !== JSON.stringify(originalData);
 
@@ -93,26 +89,26 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
     })
   );
 
+  // A saved doc (draft, live or a version) over the defaults; ids for the sortable images.
+  const fromDoc = useCallback((fetchedData: DocumentData): DressCodeData => ({
+    header: {
+      ...(weddingContent.dressCode.header || { subtitle: "The Style Guideline", title: "La Palette de l'Amour" }),
+      ...(fetchedData.header || {})
+    },
+    title: fetchedData.title ?? weddingContent.dressCode.title,
+    description: fetchedData.description ?? weddingContent.dressCode.description,
+    // Content saved before Oct 2026: ladiesGuideline / gentlemenGuideline
+    guidelines: readGuidelines(fetchedData.guidelines) ?? guidelinesFromLegacy(fetchedData) ?? weddingContent.dressCode.guidelines,
+    colors: fetchedData.colors ?? weddingContent.dressCode.colors,
+    inspirationImages: (Array.isArray(fetchedData.inspirationImages) ? fetchedData.inspirationImages : weddingContent.dressCode.inspirationImages).map((img) => ({ ...img, id: nanoid() })),
+  }), [weddingContent.dressCode]);
+
   useEffect(() => {
     async function fetchData() {
       try {
-        const docRef = doc(db, paths.content(eventId, 'dressCode'));
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const fetchedData = docSnap.data();
-          const mergedData = {
-            header: {
-              ...(weddingContent.dressCode.header || { subtitle: "The Style Guideline", title: "La Palette de l'Amour" }),
-              ...(fetchedData.header || {})
-            },
-            title: fetchedData.title ?? weddingContent.dressCode.title,
-            description: fetchedData.description ?? weddingContent.dressCode.description,
-            // Content saved before Oct 2026: ladiesGuideline / gentlemenGuideline
-            guidelines: readGuidelines(fetchedData.guidelines) ?? guidelinesFromLegacy(fetchedData) ?? weddingContent.dressCode.guidelines,
-            colors: fetchedData.colors ?? weddingContent.dressCode.colors,
-            inspirationImages: (fetchedData.inspirationImages ?? weddingContent.dressCode.inspirationImages).map((img: any) => ({ ...img, id: nanoid() })),
-          };
+        const fetchedData = await loadDraft();
+        if (fetchedData) {
+          const mergedData = fromDoc(fetchedData);
           setData(mergedData);
           setOriginalData(mergedData);
         }
@@ -123,22 +119,9 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
         setIsLoading(false);
       }
     }
-    
-    async function fetchBackup() {
-      try {
-        const backupRef = doc(db, paths.content(eventId, 'dressCode_backup'));
-        const backupSnap = await getDoc(backupRef);
-        if (backupSnap.exists()) {
-          setLastBackup(backupSnap.data());
-        }
-      } catch (err) {
-        console.error("Error fetching backup:", err);
-      }
-    }
 
     fetchData();
-    fetchBackup();
-  }, [eventId, weddingContent.dressCode]);
+  }, [loadDraft, fromDoc]);
 
   const handleUndo = () => {
     if (originalData) {
@@ -274,65 +257,24 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
         inspirationImages: data.inspirationImages.map(({ id, ...rest }) => rest)
       };
 
-      const docRef = doc(db, paths.content(eventId, 'dressCode'));
-      const currentSnap = await getDoc(docRef);
-      if (currentSnap.exists()) {
-        const backupRef = doc(db, paths.content(eventId, 'dressCode_backup'));
-        await setDoc(backupRef, {
-          ...currentSnap.data(),
-          backedUpAt: new Date().toISOString()
-        });
-        setLastBackup(currentSnap.data());
-      }
+      if (!(await draft.save(payloadToSave, { merge: true }))) return false;
 
-      await setDoc(docRef, payloadToSave, { merge: true });
-      await refreshGuestSite(eventId);
-      
       setOriginalData(data);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-      setShowConfirmModal(false);
+      return true;
     } catch (err: any) {
       console.error("Error saving dress code data:", err);
       setError("Failed to save changes. Please try again.");
+      return false;
     } finally {
       setIsSaving(false);
     }
   };
 
-  const restoreBackup = async () => {
-    if (!lastBackup) return;
-    
-    setIsSaving(true);
-    try {
-      const docRef = doc(db, paths.content(eventId, 'dressCode'));
-      await setDoc(docRef, lastBackup);
-      await refreshGuestSite(eventId);
-      
-      const mergedData = {
-        header: {
-          ...(weddingContent.dressCode.header || { subtitle: "The Style Guideline", title: "La Palette de l'Amour" }),
-          ...(lastBackup.header || {})
-        },
-        title: lastBackup.title ?? weddingContent.dressCode.title,
-        description: lastBackup.description ?? weddingContent.dressCode.description,
-        guidelines: readGuidelines(lastBackup.guidelines) ?? guidelinesFromLegacy(lastBackup) ?? weddingContent.dressCode.guidelines,
-        colors: lastBackup.colors ?? weddingContent.dressCode.colors,
-        inspirationImages: Array.isArray(lastBackup.inspirationImages) ? lastBackup.inspirationImages.map((img: any) => ({ ...img, id: nanoid() })) : data.inspirationImages
-      };
-      
-      setData(mergedData);
-      setOriginalData(mergedData);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-      setShowRestoreModal(false);
-      setIsSuccessModalOpen(true);
-    } catch (err: any) {
-      console.error("Error restoring backup:", err);
-      setError("Failed to restore backup.");
-    } finally {
-      setIsSaving(false);
-    }
+  const handleRestore = (version: DocumentData) => {
+    setData(fromDoc(version));
+    setSaved(false);
   };
 
   if (isLoading) {
@@ -563,40 +505,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
         </div>
       )}
 
-      <EditorSaveBar hasChanges={hasChanges} saving={isSaving} saved={saved} hasBackup={!!lastBackup} onUndo={handleUndo} onRestore={() => setShowRestoreModal(true)} onSave={() => setShowConfirmModal(true)} />
-
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={saveContent}
-        title="Publish Changes?"
-        message="This will update the Dress Code section on the live website immediately. A backup of the current version will be saved."
-        type="confirm"
-        variant="info"
-        confirmText="Yes, Publish Now"
-      />
-
-      <AdminModal
-        isOpen={showRestoreModal}
-        onClose={() => setShowRestoreModal(false)}
-        onConfirm={restoreBackup}
-        title="Restore Previous Save?"
-        message="This will replace all your current edits with the last saved version. This action cannot be undone."
-        type="confirm"
-        variant="warning"
-        confirmText={isSaving ? "Restoring..." : "Yes, Restore"}
-      />
-
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        onConfirm={() => setIsSuccessModalOpen(false)}
-        title="Restored Successfully"
-        message="The previous save has been successfully restored."
-        type="alert"
-        variant="success"
-        confirmText="Got it"
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={isSaving} saved={saved} busy={uploadingImageIndex !== null} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
     </div>
   );
 }

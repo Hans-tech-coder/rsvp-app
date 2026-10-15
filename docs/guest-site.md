@@ -7,7 +7,11 @@ links to the bare domain keep working. An unknown or invalid event ID is a 404.
 
 `src/app/[event]/page.tsx` (server) reads the event's content and site text,
 sets the title and link preview, and renders the cached page (see Caching in
-`docs/content-system.md`). Inside it, the guest site is **one client
+`docs/content-system.md`) through `src/app/[event]/EventSite.tsx` (providers,
+theme, `GuestSite`, music). Admins see unpublished drafts at
+`/<eventId>?preview=<token>`: the same `EventSite` with `preview`, which adds a
+"Draft preview" badge and keeps its own saved progress (see "Drafts, preview
+and versions" in `docs/content-system.md`). Inside it, the guest site is **one client
 component** (`src/app/[event]/GuestSite.tsx`) that swaps full-screen "screens"
 in place. There is no routing between screens and no URL per screen.
 
@@ -70,7 +74,9 @@ does nothing.
 ## State kept in `GuestSite.tsx`
 
 Saved keys are per event, `event:<eventId>:<name>`, so two events in one
-browser don't share progress or an unlocked RSVP.
+browser don't share progress or an unlocked RSVP. The admin preview uses
+`event:<eventId>:preview:<name>`, so previewing never moves the admin's own
+progress on the live site.
 
 | State | Purpose | Persisted in `localStorage` |
 | --- | --- | --- |

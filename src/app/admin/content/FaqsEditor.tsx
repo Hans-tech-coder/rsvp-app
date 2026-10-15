@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Trash2, GripVertical } from 'lucide-react';
-import { db } from '@/lib/firebase/client';
-import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { refreshGuestSite } from './refreshGuestSite';
 import weddingContent from '@/data/wedding-content.json';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
+import type { DocumentData } from 'firebase/firestore';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 import { nanoid } from 'nanoid';
 import {
@@ -33,11 +31,8 @@ export function FaqsEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [hasBackup, setHasBackup] = useState(false);
-  const [restoring, setRestoring] = useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const draft = useContentDraft(eventId, 'faq');
+  const loadDraft = draft.load;
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   
@@ -66,11 +61,8 @@ export function FaqsEditor({ eventId }: { eventId: string }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, paths.content(eventId, 'faq'));
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+        const data = await loadDraft();
+        if (data) {
           if (data.items && Array.isArray(data.items)) {
             const mappedItems = data.items.map((item: any) => ({ ...item, id: nanoid() }));
             setItems(mappedItems);
@@ -87,12 +79,6 @@ export function FaqsEditor({ eventId }: { eventId: string }) {
             }));
           }
         }
-
-        const backupRef = doc(db, paths.content(eventId, 'faq_backup'));
-        const backupSnap = await getDoc(backupRef);
-        if (backupSnap.exists()) {
-          setHasBackup(true);
-        }
       } catch (error) {
         console.error("Error fetching content:", error);
       } finally {
@@ -101,7 +87,7 @@ export function FaqsEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [eventId]);
+  }, [loadDraft]);
 
   const handleChange = (id: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -165,83 +151,37 @@ export function FaqsEditor({ eventId }: { eventId: string }) {
     try {
       setSaving(true);
       
-      const docRef = doc(db, paths.content(eventId, 'faq'));
-      const backupRef = doc(db, paths.content(eventId, 'faq_backup'));
-      
-      const currentDoc = await getDoc(docRef);
-      if (currentDoc.exists()) {
-        await setDoc(backupRef, {
-          ...currentDoc.data(),
-          backedUpAt: new Date().toISOString()
-        });
-        setHasBackup(true);
-      }
-      
       const dataToSave = items.map(({ id, ...rest }) => rest);
-      await setDoc(docRef, { 
+      const ok = await draft.save({
         header,
         items: dataToSave,
-        updatedAt: new Date().toISOString() 
-      });
-      await refreshGuestSite(eventId);
-      
+        updatedAt: new Date().toISOString()
+      }, { merge: false });
+      if (!ok) return false;
+
       setOriginalHeader(header);
       setOriginalItems(items.map(item => ({ ...item })));
-      
+
       setSaved(true);
-      setShowConfirmModal(false);
       setTimeout(() => setSaved(false), 3000);
+      return true;
     } catch (error) {
       console.error("Error saving content:", error);
       alert("Failed to save changes. Please try again.");
+      return false;
     } finally {
       setSaving(false);
     }
   };
 
-  const restoreBackup = async () => {
-    try {
-      setRestoring(true);
-      const backupRef = doc(db, paths.content(eventId, 'faq_backup'));
-      const backupSnap = await getDoc(backupRef);
-      
-      if (backupSnap.exists()) {
-        const backupData = backupSnap.data();
-        
-        if (backupData.items && Array.isArray(backupData.items)) {
-          const mappedItems = backupData.items.map((item: any) => ({ ...item, id: nanoid() }));
-          setItems(mappedItems);
-          setOriginalItems(mappedItems);
-        }
-        if (backupData.header) {
-          setHeader(prev => ({
-            ...prev,
-            ...backupData.header
-          }));
-          setOriginalHeader(prev => ({
-            ...prev,
-            ...backupData.header
-          }));
-        }
-
-        const docRef = doc(db, paths.content(eventId, 'faq'));
-        await setDoc(docRef, {
-          header: backupData.header || header,
-          items: backupData.items || [],
-          updatedAt: new Date().toISOString(),
-          restoredAt: new Date().toISOString()
-        });
-        await refreshGuestSite(eventId);
-
-        setIsRestoreModalOpen(false);
-        setIsSuccessModalOpen(true);
-      }
-    } catch (error) {
-      console.error("Error restoring backup:", error);
-      alert("Failed to restore backup. Please try again.");
-    } finally {
-      setRestoring(false);
+  const handleRestore = (version: DocumentData) => {
+    if (Array.isArray(version.items)) {
+      setItems(version.items.map((item) => ({ ...item, id: nanoid() })));
     }
+    if (version.header) {
+      setHeader(prev => ({ ...prev, ...version.header }));
+    }
+    setSaved(false);
   };
 
   if (loading) {
@@ -340,18 +280,7 @@ export function FaqsEditor({ eventId }: { eventId: string }) {
         </DndContext>
       </div>
 
-      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={handleUndo} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
-
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={saveContent}
-        title="Publish Changes?"
-        message="This will update the FAQs section on the live website immediately. A backup of the current version will be saved."
-        type="confirm"
-        variant="info"
-        confirmText="Yes, Publish Now"
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={handleUndo} onRestore={handleRestore} onSave={saveContent} />
 
       <AdminModal
         isOpen={isDeleteModalOpen}
@@ -362,28 +291,6 @@ export function FaqsEditor({ eventId }: { eventId: string }) {
         type="confirm"
         variant="danger"
         confirmText="Yes, Delete"
-      />
-
-      <AdminModal
-        isOpen={isRestoreModalOpen}
-        onClose={() => setIsRestoreModalOpen(false)}
-        onConfirm={restoreBackup}
-        title="Restore Previous Save?"
-        message="This will replace all your current edits with the last saved version. This action cannot be undone."
-        type="confirm"
-        variant="warning"
-        confirmText={restoring ? "Restoring..." : "Yes, Restore"}
-      />
-
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        onConfirm={() => setIsSuccessModalOpen(false)}
-        title="Restored Successfully"
-        message="The previous save has been successfully restored."
-        type="alert"
-        variant="success"
-        confirmText="Got it"
       />
     </div>
   );

@@ -2,18 +2,15 @@
 
 import { useState, useEffect, type CSSProperties } from 'react';
 import { Loader2, Check, RotateCcw, CircleAlert, CircleCheck, TriangleAlert } from 'lucide-react';
-import { db } from '@/lib/firebase/client';
-import { paths } from '@/lib/eventPaths';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import {
   CONTRAST_PAIRS, CUSTOM_PRESET_ID, DEFAULT_THEME, THEME_COLOR_INFO, THEME_COLOR_KEYS, THEME_PRESETS,
   contrastLevel, contrastRatio, deriveShades, isHexColor, mergeTheme,
   type Theme, type ThemeColorKey, type ThemeColors,
 } from '@/lib/theme';
 import { FONT_FAMILIES, FONT_PAIRINGS, FONT_ROLES, FONT_ROLE_INFO, FONT_ROLE_VARS, fontStack, getFontPairing, type FontPairing } from '@/lib/fonts';
-import { refreshGuestSite } from './refreshGuestSite';
-import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
+import { useContentDraft } from './contentDraft';
+import type { DocumentData } from 'firebase/firestore';
 
 const MAIN_KEYS = THEME_COLOR_KEYS.filter((key) => !THEME_COLOR_INFO[key].shadeOf);
 const SHADE_KEYS = THEME_COLOR_KEYS.filter((key) => THEME_COLOR_INFO[key].shadeOf);
@@ -35,11 +32,8 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [hasBackup, setHasBackup] = useState(false);
-  const [restoring, setRestoring] = useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const draft = useContentDraft(eventId, 'theme');
+  const loadDraft = draft.load;
 
   const [formData, setFormData] = useState<Theme>(DEFAULT_THEME);
   const [originalData, setOriginalData] = useState<Theme>(DEFAULT_THEME);
@@ -50,14 +44,12 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docSnap = await getDoc(doc(db, paths.content(eventId, 'theme')));
-        if (docSnap.exists()) {
-          const fetchedData = mergeTheme(docSnap.data());
+        const data = await loadDraft();
+        if (data) {
+          const fetchedData = mergeTheme(data);
           setFormData(fetchedData);
           setOriginalData(fetchedData);
         }
-        const backupSnap = await getDoc(doc(db, paths.content(eventId, 'theme_backup')));
-        if (backupSnap.exists()) setHasBackup(true);
       } catch (error) {
         console.error('Error fetching theme:', error);
       } finally {
@@ -65,7 +57,7 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
       }
     };
     fetchData();
-  }, [eventId]);
+  }, [loadDraft]);
 
   const applyPreset = (id: string) => {
     const preset = THEME_PRESETS.find((p) => p.id === id);
@@ -91,38 +83,24 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await setDoc(doc(db, paths.content(eventId, 'theme_backup')), originalData);
-      await setDoc(doc(db, paths.content(eventId, 'theme')), formData);
-      await refreshGuestSite(eventId);
+      if (!(await draft.save(formData, { merge: false }))) return false;
 
       setOriginalData(formData);
-      setHasBackup(true);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-      setShowConfirmModal(false);
+      return true;
     } catch (error) {
       console.error('Error saving theme:', error);
       alert(`Failed to save changes: ${error instanceof Error ? error.message : error}`);
+      return false;
     } finally {
       setSaving(false);
     }
   };
 
-  const executeRestore = async () => {
-    setRestoring(true);
-    setIsRestoreModalOpen(false);
-    try {
-      const backupSnap = await getDoc(doc(db, paths.content(eventId, 'theme_backup')));
-      if (backupSnap.exists()) {
-        setFormData(mergeTheme(backupSnap.data()));
-        setIsSuccessModalOpen(true);
-      }
-    } catch (error) {
-      console.error('Error restoring theme backup:', error);
-      alert(`Failed to restore backup: ${error instanceof Error ? error.message : error}`);
-    } finally {
-      setRestoring(false);
-    }
+  const handleRestore = (data: DocumentData) => {
+    setFormData(mergeTheme(data));
+    setSaved(false);
   };
 
   if (loading) {
@@ -291,40 +269,7 @@ export function ThemeEditor({ eventId }: { eventId: string }) {
         </div>
       </div>
 
-      <EditorSaveBar hasChanges={hasChanges} saving={saving} saved={saved} hasBackup={hasBackup} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={() => setIsRestoreModalOpen(true)} onSave={() => setShowConfirmModal(true)} />
-
-      <AdminModal
-        isOpen={isRestoreModalOpen}
-        onClose={() => setIsRestoreModalOpen(false)}
-        onConfirm={executeRestore}
-        title="Restore Previous Save?"
-        message="This will replace all your current edits with the last saved version. This action cannot be undone."
-        type="confirm"
-        variant="warning"
-        confirmText={restoring ? 'Restoring...' : 'Yes, Restore'}
-      />
-
-      <AdminModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        onConfirm={() => setIsSuccessModalOpen(false)}
-        title="Restored Successfully"
-        message="The previous save has been loaded. Press Save to make it live."
-        type="alert"
-        variant="success"
-        confirmText="Got it"
-      />
-
-      <AdminModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleSave}
-        title="Publish Changes?"
-        message="This will change the colors and fonts of the whole website immediately. A backup of the current look will be saved."
-        type="confirm"
-        variant="info"
-        confirmText="Yes, Publish Now"
-      />
+      <EditorSaveBar draft={draft} hasChanges={hasChanges} saving={saving} saved={saved} onUndo={() => { setFormData(originalData); setSaved(false); }} onRestore={handleRestore} onSave={handleSave} />
     </div>
   );
 }
