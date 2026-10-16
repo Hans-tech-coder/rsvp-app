@@ -6,7 +6,8 @@ import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, type DocumentData } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
-import { DEFAULT_CONTENT as weddingContent } from '@/lib/weddingContent';
+import { useContentDefaults } from './contentDefaults';
+import type { WeddingContent } from '@/lib/contentMerge';
 import { emptyVenue, readVenues, venuesFromLegacy, type Venue } from '@/lib/genericContent';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
@@ -36,11 +37,11 @@ import { CSS } from '@dnd-kit/utilities';
 // ceremony + reception whose time, location and address lived in Global
 // Settings; venuesFromLegacy() reads that shape until the first save.
 
-type DetailsForm = { header: typeof weddingContent.details.header; venues: Venue[]; orderOfEventsImage: string };
+type DetailsForm = { header: WeddingContent['details']['header']; venues: Venue[]; orderOfEventsImage: string };
 
 const inputClass = "w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all";
 
-function formFromDoc(saved: DocumentData, globalDoc: DocumentData | undefined): DetailsForm {
+function formFromDoc(weddingContent: WeddingContent, saved: DocumentData, globalDoc: DocumentData | undefined): DetailsForm {
   return {
     header: { ...weddingContent.details.header, ...(saved.header || {}) },
     venues: readVenues(saved.venues) ?? venuesFromLegacy(saved, globalDoc) ?? weddingContent.details.venues,
@@ -49,6 +50,7 @@ function formFromDoc(saved: DocumentData, globalDoc: DocumentData | undefined): 
 }
 
 export function EventDetailsEditor({ eventId }: { eventId: string }) {
+  const weddingContent = useContentDefaults().content;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -86,7 +88,7 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
         globalDocRef.current = globalSnap.data();
 
         if (loaded) {
-          const mergedData = formFromDoc(loaded, globalDocRef.current);
+          const mergedData = formFromDoc(weddingContent, loaded, globalDocRef.current);
           setData(mergedData);
           setOriginalData(mergedData);
         }
@@ -98,7 +100,7 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [eventId, loadDraft]);
+  }, [eventId, loadDraft, weddingContent]);
 
   const updateVenue = (index: number, field: keyof Venue, value: string) => {
     setData(prev => ({ ...prev, venues: prev.venues.map((v, i) => (i === index ? { ...v, [field]: value } : v)) }));
@@ -154,7 +156,7 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
   };
 
   const handleRestore = (version: DocumentData) => {
-    setData(formFromDoc(version, globalDocRef.current));
+    setData(formFromDoc(weddingContent, version, globalDocRef.current));
     setSaved(false);
   };
 

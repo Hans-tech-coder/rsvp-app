@@ -1,22 +1,21 @@
 'use client';
 
 import { useId, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, ExternalLink, Copy, Link2, Archive, ArchiveRestore, Trash2, ArrowRight } from 'lucide-react';
-import { createEvent, deleteEvent, duplicateEvent, renameEvent, setEventArchived } from '@/app/actions/events';
+import { deleteEvent, duplicateEvent, renameEvent, setEventArchived } from '@/app/actions/events';
 import { toEventId } from '@/lib/eventPaths';
 import { ROLE_NAMES } from '@/lib/permissions';
+import { eventTypeName } from '@/lib/templates/catalog';
 import type { EventSummary } from '@/lib/platformEvents';
 import { AdminModal } from './components/AdminModal';
 
 type Dialog =
-  | { kind: 'create' }
   | { kind: 'duplicate'; event: EventSummary }
   | { kind: 'rename'; event: EventSummary }
   | { kind: 'archive'; event: EventSummary }
   | { kind: 'delete'; event: EventSummary };
-
-const TYPE_NAMES: Record<string, string> = { wedding: 'Wedding' };
 
 const secondaryButton =
   'inline-flex items-center gap-1.5 min-h-10 px-3 rounded-lg text-sm font-medium text-gray-700 dark:text-zinc-300 border border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors';
@@ -74,21 +73,19 @@ export function EventsClient({
     setBusy(true);
     setError(null);
     const result =
-      dialog.kind === 'create'
-        ? await createEvent(name, link)
-        : dialog.kind === 'duplicate'
-          ? await duplicateEvent(dialog.event.id, name, link)
-          : dialog.kind === 'rename'
-            ? await renameEvent(dialog.event.id, link)
-            : dialog.kind === 'archive'
-              ? await setEventArchived(dialog.event.id, !dialog.event.archived)
-              : await deleteEvent(dialog.event.id, confirmText);
+      dialog.kind === 'duplicate'
+        ? await duplicateEvent(dialog.event.id, name, link)
+        : dialog.kind === 'rename'
+          ? await renameEvent(dialog.event.id, link)
+          : dialog.kind === 'archive'
+            ? await setEventArchived(dialog.event.id, !dialog.event.archived)
+            : await deleteEvent(dialog.event.id, confirmText);
     if (!result.success) {
       setError(result.error);
       setBusy(false);
       return;
     }
-    if ((dialog.kind === 'create' || dialog.kind === 'duplicate') && 'eventId' in result) {
+    if (dialog.kind === 'duplicate' && 'eventId' in result) {
       // Open the new event: makes it the current one and shows its dashboard.
       window.location.assign(`/admin/open/${result.eventId}`);
       return;
@@ -151,21 +148,6 @@ export function EventsClient({
   const dialogProps = (): { title: string; confirm: string; variant: 'info' | 'warning' | 'danger'; body: React.ReactNode } | null => {
     if (!dialog) return null;
     switch (dialog.kind) {
-      case 'create':
-        return {
-          title: 'New event',
-          confirm: 'Create event',
-          variant: 'info',
-          body: (
-            <>
-              {nameField}
-              {linkField}
-              <p className="text-xs text-gray-500 dark:text-zinc-500">
-                It starts with the default Wedding content; change everything in Content or the Visual Builder.
-              </p>
-            </>
-          ),
-        };
       case 'duplicate':
         return {
           title: `Duplicate “${dialog.event.name}”`,
@@ -257,14 +239,13 @@ export function EventsClient({
           </p>
         </div>
         {canCreate && (
-          <button
-            type="button"
-            onClick={() => openDialog({ kind: 'create' })}
+          <Link
+            href="/admin/new"
             className="min-h-11 px-4 rounded-xl text-sm font-semibold bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:opacity-90 transition-opacity inline-flex items-center gap-2"
           >
             <Plus className="w-4 h-4" aria-hidden="true" />
             New event
-          </button>
+          </Link>
         )}
       </div>
 
@@ -355,7 +336,7 @@ function EventCard({
         <div className="min-w-0">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 break-words">{event.name}</h2>
           <p className="text-sm text-gray-500 dark:text-zinc-400 mt-0.5 break-all">
-            /{event.id} · {TYPE_NAMES[event.type] ?? event.type} · {event.date} · {ROLE_NAMES[event.role]}
+            /{event.id} · {eventTypeName(event.type)} · {event.date} · {ROLE_NAMES[event.role]}
           </p>
         </div>
         <div className="flex flex-wrap gap-1.5">

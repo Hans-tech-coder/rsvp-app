@@ -7,11 +7,11 @@ the screen, and the checklist for adding a new editable field.
 ## How content reaches a screen
 
 ```
-src/data/wedding-content.json      (defaults, bundled at build time)
+src/data/wedding-content.json      (defaults, read on the server; never in browser JavaScript)
           +
 Firestore events/{eventId}/content/<doc>   (overrides, read on the server with the admin SDK)
           │  getEventContent(eventId) in src/lib/siteContentServer.ts
-          │  merged by mergeWeddingContent() in src/lib/weddingContent.ts
+          │  merged by mergeWeddingContent() in src/lib/weddingContent.ts (= mergeContent() in src/lib/contentMerge.ts with the JSON)
           ▼
 src/app/[event]/page.tsx  ->  <WeddingContentProvider content>  ->  useWeddingContent().content
 ```
@@ -103,7 +103,8 @@ first Publish stores both, so nothing the single backup kept is lost.
 every doc's draft over the live one (`getEventDraftDocs` in
 `src/lib/siteContentServer.ts`) and hands the raw docs to `PreviewSite.tsx`,
 which merges them in the browser with the same pure `buildEventSite`
-(`src/lib/eventSite.ts`) the live page uses on the server and renders the same
+(`src/lib/eventSite.ts`) the live page uses on the server (the page passes it
+the defaults, `CONTENT_DEFAULTS`, as a prop) and renders the same
 `EventSite`, so the preview is the real guest site, with a small "Draft preview"
 badge. Building in the browser is what lets the visual builder change it live. The token is any value; the content manager sends a fresh one to
 reload. The cached live page is untouched (it stays ISR).
@@ -162,11 +163,48 @@ stays in view; phones get a link to the content page instead).
   a time (edit lock, "X is editing this event" + Take over). See
   `docs/admin.md` → Client locks, Builder edit lock.
 
-The type of `content` is `WeddingContent` (`src/lib/weddingContent.ts`): the
-type of `wedding-content.json` with the generic lists typed by
-`genericContent.ts`. So **a key must exist in the JSON to be typed**. Code
-that needs the typed defaults imports `DEFAULT_CONTENT` from
+The type of `content` is `WeddingContent` (`src/lib/contentMerge.ts`,
+re-exported by `weddingContent.ts`): the type of `wedding-content.json` with
+the generic lists typed by `genericContent.ts`. So **a key must exist in the
+JSON to be typed**. Server code that needs the typed defaults imports
+`DEFAULT_CONTENT` / `DEFAULT_SITE_TEXT` / `CONTENT_DEFAULTS` from
 `src/lib/weddingContent.ts` rather than the JSON itself.
+
+**Browser JavaScript must not import the JSON** (2026-10-16): it is the
+first couple's content (names, Camiling / Tarlac, FAQ text), and a client
+module that imports it ships it whole in a public `/_next/static/chunks`
+file. So:
+
+- `src/lib/weddingContent.ts` (imports the JSON: `DEFAULT_CONTENT`,
+  `DEFAULT_SITE_TEXT`, `CONTENT_DEFAULTS`, and `mergeWeddingContent` /
+  `mergeGlobal` bound to them) is **server only**. Client code imports it
+  with `import type` at most.
+- The merge itself is `src/lib/contentMerge.ts` (`mergeContent`,
+  `mergeGlobalSettings`, `CONTENT_DOC_IDS`, the types): pure, no JSON, the
+  defaults are an argument. `buildEventSite(docs, defaults)` takes them too.
+- **Admin editors** read the defaults with `useContentDefaults()`
+  (`src/app/admin/content/contentDefaults.tsx`): `.content` (was
+  `weddingContent`) and `.siteText`. The server layouts
+  `src/app/admin/content/layout.tsx` and `src/app/admin/builder/layout.tsx`
+  provide `CONTENT_DEFAULTS` in the page's payload, only with an admin
+  session; the provider keeps its first copy, so the defaults are stable and
+  go in effect deps. A new editor outside those two pages needs the same
+  layout.
+- The **draft preview** page passes `CONTENT_DEFAULTS` to `PreviewSite` as a
+  prop (per request, admins only).
+- Guest pages: `WeddingContentContext` and `SiteTextContext` have no default
+  value (the hooks throw outside their provider), `src/lib/siteText.ts` takes
+  only the `SiteText` type from the JSON, and `NotFoundScreen.tsx` gets its
+  content from `/api/not-found`. If that fails twice it shows generic
+  wording typed in the file (`FALLBACK_TEXT`) in `DEFAULT_THEME`; it never
+  `import()`s `weddingContent.ts`, since even a lazy chunk is a public file.
+- Editor placeholders are neutral examples (`Maria & Jose`, `Tagaytay,
+  Cavite`), never the first couple's names, place, date or FAQ text.
+
+Check after `npm run build`: JSON-only strings (`Camiling`, `Czay`,
+`Paniqui`) are in no file under `.next/static` (check every chunk, not only
+the manifests). Generic wedding wording from the JSON (entourage group titles,
+the editors' `|| "…"` header fallbacks) may still match.
 
 ## Site text (buttons, labels, hints, errors)
 
@@ -182,7 +220,8 @@ Firestore events/{eventId}/content/siteText   (read with the admin SDK on the se
           ▼
 src/app/[event]/page.tsx -> <SiteTextProvider> -> useSiteText()   (every guest component, AudioPlayer)
                          -> generateMetadata (title, description, OG, favicon = global.logo)
-src/app/not-found.tsx    -> its own <SiteTextProvider> + NotFoundScreen (default event) + its <title>
+src/app/not-found.tsx    -> its <title>; NotFoundPage fetches /api/not-found (default event) in the browser
+                            -> its own <SiteTextProvider> + NotFoundScreen
 ```
 
 - Server-read so the text is right on first paint, also on the loading screen
@@ -289,7 +328,8 @@ All the editors follow the same pattern (copy an existing one, do not invent
 a new one):
 
 1. **State:** `formData` (being edited) and `originalData` (last saved), both
-   seeded from `wedding-content.json`. `hasChanges` = JSON compare of the two.
+   seeded from the defaults (`const weddingContent = useContentDefaults().content`,
+   never an import of the JSON; see above). `hasChanges` = JSON compare of the two.
    `const draft = useContentDraft(eventId, '<doc>')` and `const loadDraft =
    draft.load` (`contentDraft.tsx`; the stable `loadDraft` goes in the effect's deps).
 2. **Load:** `await loadDraft()` gives the draft, else the live doc, else
@@ -389,7 +429,7 @@ Example: a new `welcomeScreen.footnote` text.
 
 1. **`src/data/wedding-content.json`** — add the key with a sensible default
    (this also makes it typed).
-2. **Merge in `mergeWeddingContent()`** (`src/lib/weddingContent.ts`) —
+2. **Merge in `mergeContent()`** (`src/lib/contentMerge.ts`) —
    shallow-spread docs and `global` pick it up automatically; field-by-field
    docs (`ourStory`, `entourage`, `dressCode`) need an explicit line. A new
    field on a host, person, venue or guideline goes into its type **and**
@@ -405,9 +445,31 @@ Example: a new `welcomeScreen.footnote` text.
    No merge or provider change is needed. `src/lib/siteText.test.ts` fails if a
    key has no editor field (or the reverse).
 6. If it is a **new Firestore doc**, also add it to `CONTENT_DOC_IDS` in
-   `src/lib/weddingContent.ts`, to `docs` / `docToKeyMap` in `scripts/sync-content.js`, to the tab
+   `src/lib/contentMerge.ts`, to `docs` / `docToKeyMap` in `scripts/sync-content.js`, to the tab
    list in `src/app/admin/content/page.tsx` (and its "not implemented" guard),
    and to the table in `docs/data-model.md`.
+7. **Templates** (`src/lib/templates/<type>.ts`) — give the field a value in
+   each template that writes its doc. A doc a template writes replaces the
+   JSON default for that doc, so a field the template leaves out shows the
+   first couple's JSON value on every new event. `templates.test.ts` fails if
+   any first-couple name, place or Blob photo reaches a template's site.
+
+## Templates (F12)
+
+A new event (the New Event wizard, `/admin/new`) starts from a template:
+Wedding, Debut, Birthday / Anniversary or Corporate / Seminar. Each is
+`src/lib/templates/<type>.ts` (every content doc's starting text, sample
+names and `public/templates/` photos; `siteText` overrides only where the
+wording is wedding-only) plus its entry in `catalog.ts` (the wizard's name
+fields, suggested palettes, font pairing, screens on / off and renamed, venue
+start offsets). `buildTemplateDocs` (`index.ts`) fills the wizard's answers in:
+`{eventName}`, `{hostNames}`, `{host1}`, `{eventDate}`, `{eventDay}`,
+`{eventTime}`, `{venueName}`, `{eventCity}`, `{rsvpDate}` (30 days before) in
+any template string; `global.hosts`, `coupleNameFormat`, `targetDate`,
+`venueShort`, every venue's time / place / map / calendar, the dress code
+swatches (named from the palette), `theme` and `screens`. `createEvent`
+writes the result as the event's **live** `content/*` docs (no draft, no
+version). Editing a template changes only events created afterwards.
 
 ## `npm run sync-content`
 

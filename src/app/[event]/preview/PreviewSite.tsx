@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildEventSite, type SiteDocs } from '@/lib/eventSite';
+import type { ContentDefaults } from '@/lib/contentMerge';
 import { mergeDoc, type DocData } from '@/lib/contentDrafts';
 import { readBuilderMessage, type PreviewMessage } from '@/lib/builderMessages';
 import { SCREEN_NAMES } from '@/lib/screens';
@@ -21,12 +22,12 @@ function sectionName(section: string) {
   return section === 'entrance' ? 'Invite code screen' : (SCREEN_NAMES as Record<string, string>)[section] ?? section;
 }
 
-export function PreviewSite({ eventId, docs: initialDocs }: { eventId: string; docs: SiteDocs }) {
+export function PreviewSite({ eventId, docs: initialDocs, defaults }: { eventId: string; docs: SiteDocs; defaults: ContentDefaults }) {
   const [docs, setDocs] = useState(initialDocs);
   const gotoListeners = useRef(new Set<(section: string) => void>());
   const [builder, setBuilder] = useState(false);
   const [outline, setOutline] = useState<Outline | null>(null);
-  const site = useMemo(() => buildEventSite(docs), [docs]);
+  const site = useMemo(() => buildEventSite(docs, defaults), [docs, defaults]);
   const preview = useMemo(() => ({
     onGoto: (listener: (section: string) => void) => {
       gotoListeners.current.add(listener);

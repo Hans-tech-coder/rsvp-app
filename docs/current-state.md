@@ -10,6 +10,19 @@ when you find or fix one of these.
   gallery lightbox, background music. The 2026-09 motion work measured CLS 0
   and ≤ 1.6 % slow frames on every swap and scroll, and passed a real-phone
   check (see `docs/conventions.md` → Motion performance check).
+- No public JavaScript carries the first couple's content (2026-10-16): no
+  `/_next/static/chunks` file holds `src/data/wedding-content.json` (guest
+  pages, admin, draft preview, the 404). The merge lives in
+  `src/lib/contentMerge.ts` (no JSON; defaults are an argument),
+  `src/lib/weddingContent.ts` (imports the JSON) is server only, and the
+  editors and `PreviewSite` get `CONTENT_DEFAULTS` from the server in the
+  page's payload, for a signed-in admin only. If `/api/not-found` fails twice
+  the 404 shows a generic page (no JSON chunk any more), and the editor
+  placeholders use neutral examples (`Maria & Jose`, `Tagaytay, Cavite`, a
+  parking FAQ). Check with `docs/content-system.md` → "Browser JavaScript
+  must not import the JSON". The admin chunks still hold generic wedding
+  wording from the editors' own `|| "…"` fallbacks and entourage group
+  titles (`Principal Sponsors`), nothing naming a couple.
 - Invite-code RSVP with one-time codes (transaction-safe).
 - Curated registry with claim limits (transaction-safe) and bank-transfer info.
 - Admin: dashboard counts, invite generation + message template, RSVP list with
@@ -38,8 +51,8 @@ when you find or fix one of these.
 | Welcome 3D scene fetches the photo twice | `DepthParallaxScene.tsx` loads the raw Blob URL; the loader preloads the `next/image` srcset URL | ~220 KB extra on first visit. Feed the scene the same optimized URL to share the cache |
 | Replaced images are never deleted from Blob | all editors | Counts against the shared 1 GB Hobby Blob quota |
 | Legacy Firebase Storage URLs return 402 | Firestore `events/hans-and-czay/content/*` (and the old root `websiteContent/*` copy), `wedding-content.json` |Google billing account closed; replace by re-uploading in the admin, then `npm run sync-content`. See `docs/data-model.md` |
-| `wedding-content.json` has a mixed `gallery` key and an unused `faqs` key | `src/data/wedding-content.json` | Side effect of `sync-content.js`; see `docs/data-model.md` |
-| Content merge is hand-written per doc | `mergeWeddingContent()` in `src/lib/weddingContent.ts` | New fields in field-by-field docs need an explicit line |
+| `wedding-content.json` has a mixed `gallery` key and an unused `faqs` key | `src/data/wedding-content.json` | Side effect of `sync-content.js`; see `docs/data-model.md`. `faqs` is left out of `DEFAULT_CONTENT` (`src/lib/weddingContent.ts`), so it never reaches a page |
+| Content merge is hand-written per doc | `mergeContent()` in `src/lib/contentMerge.ts` | New fields in field-by-field docs need an explicit line |
 | `RsvpScreen` falls back to `'dev-mode'` as the code | `src/app/[event]/GuestSite.tsx` | Submission fails server-side, which is the intended outcome |
 | `npm run lint` fails (89 errors, 51 warnings, all older than the 2026-09 motion work) | mainly `react-hooks/set-state-in-effect`, `no-explicit-any`, unused vars | `npm run build` is the working gate until they are fixed |
 | Some motion ignores `prefers-reduced-motion` | `WelcomeScreen.tsx:74` and `RsvpCtaScreen.tsx:28` (background zoom), modal pop-ins in `OurStoryScreen.tsx:154`, `DetailsScreen.tsx:197`, `RegistryScreen.tsx:115`, `RsvpScreen.tsx:436`, hover lifts in `DetailsScreen.tsx:75,110` and `DressCodeScreen.tsx:71`, FAQ accordion `FaqScreen.tsx:61`, `TwinkleSparks`, the circular gallery | A `<MotionConfig reducedMotion="user">` around `<main>` would cover the Motion transforms; the canvas and GSAP need their own check |
@@ -59,7 +72,12 @@ when you find or fix one of these.
 | F10 member migration added nothing | `scripts/migrate-members-f10.js` | Ran on 2026-10-15 (`--write`, `--verify` OK): both accounts are owners. Run it again if a regular admin or invite is added with the old code before the F10 push. The F10 rules are deployed (2026-10-15, see `docs/security.md`) |
 | F10 checked with owner accounts only | `src/app/actions/team.ts`, `auth.ts` | No second (organizer / client) account has signed in: the invite claim, Team add / re-role / remove and a real client session are untried. The client UI locks were checked by forcing the role in a temporary route. Builder edit lock checked on :3000 (2026-10-15): blocked by another tab of the same account, Take over (logged), heartbeat, auto-claim after a dead lock's 90 s, release by link and by full navigation (beacon), the taken-over tab's overlay within one heartbeat. A tab closed by the browser pane's tool sent no `pagehide`, so its lock waited out the 90 s |
 | Organizers are per event, not per agency | `src/lib/permissions.ts`, `events/{eventId}/members` | The plan's "events of their agency" needs an agency record; today an organizer is added to each event on its Team page. Any organizer of any event may create events (F11), and sees only the events they are a member of |
-| A new event starts with the Wedding defaults (the Hans & Czay text and photos) | `createEvent` in `src/app/actions/events.ts`, `src/data/wedding-content.json` | No content docs are written, so the guest page shows the JSON defaults until edited. Templates per event type are F12. Duplicate copies a real event's published content instead |
+| Events created before F12 show the Wedding defaults (the Hans & Czay text and photos) | `src/data/wedding-content.json` | Since F12 a new event gets every content doc from its template (`src/lib/templates`). An event made with the F11 dialog has no content docs and still shows the JSON defaults until edited |
+| Dress Code shows "Dress Code:" before its title | `DressCodeScreen.tsx` line ~67 | A literal F0 missed; reads oddly on the Corporate template's "Attire" page. Needs a `siteText.dressCode` key + Site Text field |
+| RSVP email says "<name> Wedding" as the sender for every event type | `from` in `src/lib/email/sendRsvpConfirmation.ts` | Per-event sender settings are F13. The email's other wording is generic |
+| Corporate template: the RSVP proxy field asks for the company | `src/lib/templates/corporate.ts` (`rsvpForm.labels.proxy`) | Stored and listed as `proxy` in Guests, the CSV and the email ("Proxy") |
+| Template sample photos are small | `public/templates/*.webp` | Many are 1024 px wide (the free source's size), soft as a full-width desktop background. Replace with larger CC0 photos or the demo events' own (F14) |
+| F12 checked with one real create (Debut only) | `createEvent`, `src/app/admin/new` | Checked: 20 unit tests (every template: no first-couple text or Blob photo, known site text keys, photos exist, answers filled in), tsc, build, lint, the wizard on :3000 at 1186 px and 375 px, each template's guest site rendered from `buildTemplateDocs` in a temporary route (removed). Write test 2026-10-15 with the owner's OK (production Firestore, via the wizard on :3000): `f12-test` from the Debut template, Black & Gold; the builder opened on it with the Debut content and palette; `/f12-test` 200 with title "Ana’s Debut \| You Are Invited", template photo as og:image; All Events card "Debut · March 6, 2027"; activity "created the event · Ana’s Debut, from the Debut template". Deleted from All Events: no doc or subcollection left (read-only admin SDK check), `/f12-test` 404, `hans-and-czay` 200. Right after Delete the page showed "This page couldn’t load" because the dev server refused connections for a moment (cause not seen: its log is outside the session); a reload was fine. Not tried: an organizer creating, the Wedding / Birthday / Corporate templates through a real create |
 | Archived events still accept RSVPs and gift claims by direct call | `src/app/actions/rsvp.ts`, `registry.ts` | The guest page is a 404, so no guest reaches the forms; the actions themselves do not read `status` |
 | Change link is not atomic | `renameEvent` in `src/app/actions/events.ts` | Copy, move accounts, then delete the old ID. An RSVP written to the old ID during the move is lost; a failure after the copy leaves both IDs (the old one still works). Uploaded images keep their Blob URLs (not per event) |
 | Delete leaves the event's images in Blob | `deleteEvent` | Blob clean-up is F13 |
@@ -97,8 +115,8 @@ Remove them only when asked.
 Vercel (Node 22). Image uploads need a **public** Vercel Blob store connected
 to the project (`BLOB_READ_WRITE_TOKEN`). Firestore/Storage rules are deployed separately with the
 Firebase CLI. The Vercel project must have all `FIREBASE_ADMIN_*` and
-`NEXT_PUBLIC_FIREBASE_*` variables set at **build** time too: `not-found.tsx`
-reads Firestore when the static 404 is built, event pages when they are
+`NEXT_PUBLIC_FIREBASE_*` variables set at **build** time too: `/api/not-found`
+(the 404 page's content) reads Firestore when it is built, event pages when they are
 (re)generated, and every admin page calls the admin SDK at request time.
 Links that leave the site (link previews, invite message, RSVP email) use
 `getSiteUrl()` (`src/lib/siteUrl.ts`): `NEXT_PUBLIC_SITE_URL` if set, else

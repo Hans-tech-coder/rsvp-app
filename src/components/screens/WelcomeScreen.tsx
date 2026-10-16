@@ -11,7 +11,7 @@ import { PopInNumber } from '@/components/ui/PopInNumber';
 import { TextsReveal } from '@/components/ui/TextsReveal';
 import { MotionHint } from '@/components/ui/MotionHint';
 import { DEPTH_MAPS } from '@/lib/welcomeDepthMaps';
-import { hostNames } from '@/lib/genericContent';
+import { hostNames, joinNames } from '@/lib/genericContent';
 import { useFieldMarker } from '@/contexts/EditMarkersContext';
 
 interface WelcomeScreenProps {
@@ -22,6 +22,9 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
   const { content } = useWeddingContent();
   const text = useSiteText();
   const names = hostNames(content.global.hosts);
+  // Short names ("Hans & Czay") stay on one line at full size; a long title
+  // ("Leadership Summit 2027", three hosts) is smaller and may wrap.
+  const longNames = joinNames(names).length > 16;
   const field = useFieldMarker();
   const [timeLeft, setTimeLeft] = useState({ days: '00', hours: '00', minutes: '00', seconds: '00' });
   const [mounted, setMounted] = useState(false);
@@ -138,7 +141,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
 
         <TextsReveal isHero className="px-4 w-full max-w-4xl mt-6 lg:mt-8">
           <span {...field('topText')} className="text-sm font-elegant italic text-ink/90 tracking-widest block mb-4">{content.welcomeScreen.topText}</span>
-          <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-heading text-ink font-light tracking-widest leading-tight drop-shadow-lg whitespace-nowrap">
+          <h2 className={`font-heading text-ink font-light tracking-widest leading-tight drop-shadow-lg ${longNames ? 'text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-balance' : 'text-4xl sm:text-5xl md:text-7xl lg:text-8xl whitespace-nowrap'}`}>
             {/* "Hans & Czay"; three or more hosts: "A, B & C" */}
             {names.map((name, i) => (
               <React.Fragment key={i}>

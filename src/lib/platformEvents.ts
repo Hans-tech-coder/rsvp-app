@@ -4,7 +4,7 @@ import { DEFAULT_EVENT_ID, paths } from '@/lib/eventPaths';
 import { getEventAccess, type AdminSession } from '@/lib/requireAdmin';
 import { formatEventDate } from '@/lib/siteContentServer';
 import { mergeGlobal } from '@/lib/weddingContent';
-import { EVENT_ROLES, type AccessRole } from '@/lib/permissions';
+import { EVENT_ROLES, hasRole, type AccessRole } from '@/lib/permissions';
 
 // Server-only. The platform's events (F11) for the events list (/admin) and
 // the sidebar switcher, and the copies behind Duplicate and Change link.
@@ -63,6 +63,13 @@ async function readGlobals(db: Firestore, events: EventDoc[]) {
   if (events.length === 0) return [];
   const docs = await db.getAll(...events.map((e) => db.doc(paths.content(e.id, 'globalSettings'))));
   return docs.map((doc) => doc.data());
+}
+
+/** Owners, and organizers of at least one event, may create events (New event, Duplicate). */
+export async function canCreateEvents(admin: AdminSession): Promise<boolean> {
+  if (admin.isOwner) return true;
+  const roles = await Promise.all(admin.eventIds.map((id) => getEventAccess(id)));
+  return roles.some((access) => access !== null && hasRole(access.role, 'organizer'));
 }
 
 /** For the sidebar switcher. */

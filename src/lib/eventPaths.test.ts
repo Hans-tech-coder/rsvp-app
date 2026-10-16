@@ -32,7 +32,7 @@ describe('event paths', () => {
 
   it('refuses IDs a route would shadow', () => {
     expect(isFreeEventId('ana-18th')).toBe(true);
-    for (const taken of ['admin', 'api', 'images', 'Bad']) expect(isFreeEventId(taken)).toBe(false);
+    for (const taken of ['admin', 'api', 'images', 'templates', 'Bad']) expect(isFreeEventId(taken)).toBe(false);
   });
 
   it('suggests an ID from an event name', () => {

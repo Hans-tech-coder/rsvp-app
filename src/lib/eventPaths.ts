@@ -32,7 +32,7 @@ export const DEFAULT_EVENT_ID = isValidEventId(process.env.NEXT_PUBLIC_DEFAULT_E
   : 'hans-and-czay';
 
 /** Top-level routes and folders: an event with one of these IDs would be shadowed by them. */
-const RESERVED_EVENT_IDS = ['admin', 'api', 'images'];
+const RESERVED_EVENT_IDS = ['admin', 'api', 'images', 'templates'];
 
 /** A valid ID that no route or `public/` folder uses: allowed for a new event. */
 export function isFreeEventId(eventId: unknown): eventId is string {

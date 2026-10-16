@@ -6,7 +6,8 @@ import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc, type DocumentData } from 'firebase/firestore';
 import { uploadImage } from '@/lib/blob/uploadImage';
-import { DEFAULT_CONTENT as weddingContent } from '@/lib/weddingContent';
+import { useContentDefaults } from './contentDefaults';
+import type { WeddingContent } from '@/lib/contentMerge';
 import {
   PERSON_TITLES, emptyPerson, formatPerson, peopleGroupsFromLegacy, readPeopleGroups,
   type PeopleGroup, type PeopleLayout, type Person, type PersonPair,
@@ -68,7 +69,7 @@ function withLayout(group: PeopleGroup, layout: PeopleLayout): PeopleGroup {
   return { ...group, layout };
 }
 
-function formFromDoc(saved: DocumentData, siteText: DocumentData | undefined): PeopleForm {
+function formFromDoc(weddingContent: WeddingContent, saved: DocumentData, siteText: DocumentData | undefined): PeopleForm {
   return {
     subtitle: saved.subtitle ?? weddingContent.entourage.subtitle,
     title: saved.title ?? weddingContent.entourage.title,
@@ -79,6 +80,7 @@ function formFromDoc(saved: DocumentData, siteText: DocumentData | undefined): P
 }
 
 export function EntourageEditor({ eventId }: { eventId: string }) {
+  const weddingContent = useContentDefaults().content;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -114,7 +116,7 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
         siteTextRef.current = siteTextSnap.data();
 
         if (loaded) {
-          const mergedData = formFromDoc(loaded, siteTextRef.current);
+          const mergedData = formFromDoc(weddingContent, loaded, siteTextRef.current);
           setData(mergedData);
           setOriginalData(mergedData);
         }
@@ -126,7 +128,7 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [eventId, loadDraft]);
+  }, [eventId, loadDraft, weddingContent]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -205,7 +207,7 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
   };
 
   const handleRestore = (version: DocumentData) => {
-    setData(formFromDoc(version, siteTextRef.current));
+    setData(formFromDoc(weddingContent, version, siteTextRef.current));
     setSaved(false);
   };
 

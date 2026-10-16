@@ -10,7 +10,7 @@
 // Editors save to the draft; Publish copies the draft over the live doc and
 // deletes the draft (no draft = nothing unpublished).
 
-import { CONTENT_DOC_IDS } from './weddingContent';
+import { CONTENT_DOC_IDS } from './contentMerge';
 
 export type DocData = Record<string, unknown>;
 

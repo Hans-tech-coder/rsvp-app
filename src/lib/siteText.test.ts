@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SITE_TEXT, fillText, mergeSiteText } from './siteText';
+import { fillText, mergeSiteText } from './siteText';
+import { DEFAULT_SITE_TEXT } from './weddingContent';
 import { SITE_TEXT_GROUPS } from '../app/admin/content/siteTextFields';
 import { SCREEN_TYPES } from './screens';
 

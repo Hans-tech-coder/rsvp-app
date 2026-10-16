@@ -1,12 +1,11 @@
 import { createElement, Fragment, type ReactNode } from 'react';
-// Relative import: vitest has no '@/' alias (see siteText.test.ts)
-import weddingContent from '../data/wedding-content.json';
 
 // Guest-visible UI wording (buttons, labels, errors, hints), edited in the
 // "Site Text" admin tab and stored in the event's content/siteText. Grouped by screen.
-export type SiteText = typeof weddingContent.siteText;
-
-export const DEFAULT_SITE_TEXT: SiteText = weddingContent.siteText;
+// The defaults (DEFAULT_SITE_TEXT) live in ./weddingContent with the other JSON
+// defaults: guest screens import this file for fillText, and importing the JSON
+// here would put the first couple's content into every guest page's JavaScript.
+export type SiteText = typeof import('../data/wedding-content.json')['siteText'];
 
 /** Overlay a Firestore siteText doc on the defaults. Only keys that exist in
  *  the defaults are read; an empty or non-string value keeps the default, so

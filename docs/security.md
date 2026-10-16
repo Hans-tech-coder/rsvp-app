@@ -6,6 +6,7 @@
 | --- | --- |
 | Anyone | Read an event's `content` and `registryGifts` (`events/{eventId}/…`) from the browser (`firestore.rules`);read all uploaded images (public Vercel Blob URLs); call the guest server actions (`rsvp.ts`, `registry.ts`). **Cannot** read or write `guests` from the browser (`allow read, write: if false`); invite-code checks and RSVPs go through `verifyInviteCode` / `submitRsvp` |
 | Anyone, via `/api/download` | Download an image only from an allowed host (`isAllowedImageUrl` in `src/lib/downloadProxy.ts`): `https:`, default port, no credentials, and either a `*.public.blob.vercel-storage.com` host (`endsWith`, not `includes`) or `firebasestorage.googleapis.com` with a path under `/v0/b/${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/` (legacy URLs). Anything else gets 400 before any fetch. The fetch uses `redirect: 'error'`; a non-`image/*` reply gets 415, more than 15 MB gets 413 (by `content-length`, and by a byte count while reading when the header is missing or wrong). Upstream errors return a generic 502/500; details go to `console.error` only. `filename` is cut down to `[A-Za-z0-9._-]`, max 100 chars, fallback `download.jpg` (`sanitizeFilename`), so no header injection. Response sets `Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`. Tests: `npm test` (`src/lib/downloadProxy.test.ts`) |
+| Anyone, via `/api/not-found` | Read the default event's global settings, site text, theme and music (`getSiteContent(DEFAULT_EVENT_ID)`, cached) and the JSON's Welcome photo, which its guest page already shows. Takes no input, so it cannot read another event. The 404 page fetches it |
 | Guest with a valid unused code | Submit one RSVP (`submitRsvp` transaction flips `codeStatus` to `used`) |
 | Event **client** (`events/{eventId}/members/{uid}`, `role: 'client'`) | In that event only: every admin page, guests, invites, gifts, registry claims, and every content doc except the design. Design = section **order**, `theme` (colors & fonts) and `music`: allowed only when the event's `settings/permissions.clientDesign` is true. Showing, hiding and renaming sections are allowed. Read every content draft. Upload images and music (see below) |
 | Event **organizer** (`role: 'organizer'`) | Everything in that event, including the design and the **Team** page: add, remove and re-role members (not themselves), cancel invites, turn `clientDesign` on or off, read the activity log |
@@ -87,11 +88,13 @@ with the admin UI:
   could switch which of your events is shown (the sidebar shows it), never
   open one you have no role in.
 - Platform event actions (`src/app/actions/events.ts`): `createEvent` needs
-  an owner or an organizer of any event; `duplicateEvent` an organizer of the
+  an owner or an organizer of any event (`canCreateEvents` in
+  `src/lib/platformEvents.ts`, also the guard of `/admin/new`) and checks
+  every wizard answer again on the server (`checkNewEventDetails`); `duplicateEvent` an organizer of the
   source; `renameEvent` and `setEventArchived` an organizer of the event;
   `deleteEvent` an owner (`requireEventRole(eventId, 'owner')`) and the link
   typed back. The default event is refused by rename, archive and delete. A
-  new event ID must pass `isFreeEventId` (not `admin`, `api`, `images`), and
+  new event ID must pass `isFreeEventId` (not `admin`, `api`, `images`, `templates`), and
   `create()` refuses a taken ID. An archived event's guest page is a 404
   (`readEventDocs`); its RSVP / registry actions are not blocked yet.
 - Content locks: `saveDraft`, `publishDraft` and `discardDraft` refuse a

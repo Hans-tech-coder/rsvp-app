@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-react';
 import { uploadImage } from '@/lib/blob/uploadImage';
-import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useContentDefaults } from './contentDefaults';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
 import type { DocumentData } from 'firebase/firestore';
@@ -35,13 +35,13 @@ type GalleryItem = {
 };
 
 export function GalleryEditor({ eventId }: { eventId: string }) {
+  const weddingContent = useContentDefaults().content;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const draft = useContentDraft(eventId, 'gallery');
   const loadDraft = draft.load;
   
-  const { content: weddingContent } = useWeddingContent();
   const [header, setHeader] = useState({
     subtitle: weddingContent.galleryHeader?.subtitle || "Our Memories",
     title: weddingContent.galleryHeader?.title || "The Gallery"

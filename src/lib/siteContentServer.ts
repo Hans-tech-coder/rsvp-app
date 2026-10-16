@@ -1,12 +1,12 @@
 import { cache } from 'react';
 import { getAdminDb } from '@/lib/firebase/admin';
-import { DEFAULT_SITE_TEXT, mergeSiteText, type SiteText } from '@/lib/siteText';
+import { mergeSiteText, type SiteText } from '@/lib/siteText';
 import { isValidEventId, paths } from '@/lib/eventPaths';
 import { DEFAULT_THEME, mergeTheme, type Theme } from '@/lib/theme';
 import { DEFAULT_MUSIC, mergeMusic, type Music } from '@/lib/music';
 import { EDITABLE_DOC_IDS } from '@/lib/contentDrafts';
 import { buildEventSite, type EventSiteData, type SiteDocs } from '@/lib/eventSite';
-import { mergeGlobal, type SiteGlobal } from '@/lib/weddingContent';
+import { CONTENT_DEFAULTS, DEFAULT_SITE_TEXT, mergeGlobal, type SiteGlobal } from '@/lib/weddingContent';
 
 // Server-only. Guest-site content is read here with the admin SDK when a page
 // is (re)generated, never from the browser. The pages are cached (ISR); an
@@ -45,7 +45,7 @@ async function readEventDocs(eventId: string, withDrafts: boolean): Promise<Site
  */
 export const getEventContent = cache(async (eventId: string): Promise<EventSiteData | null> => {
   const docs = await readEventDocs(eventId, false);
-  return docs && buildEventSite(docs);
+  return docs && buildEventSite(docs, CONTENT_DEFAULTS);
 });
 
 /**

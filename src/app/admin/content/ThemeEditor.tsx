@@ -4,7 +4,7 @@ import { useState, useEffect, type CSSProperties } from 'react';
 import { Loader2, Check, RotateCcw, CircleAlert, CircleCheck, TriangleAlert } from 'lucide-react';
 import {
   CONTRAST_PAIRS, CUSTOM_PRESET_ID, DEFAULT_THEME, THEME_COLOR_INFO, THEME_COLOR_KEYS, THEME_PRESETS,
-  contrastLevel, contrastRatio, deriveShades, isHexColor, mergeTheme,
+  contrastLevel, contrastRatio, deriveShades, isHexColor, mergeTheme, themeVars as themeStyleVars,
   type Theme, type ThemeColorKey, type ThemeColors,
 } from '@/lib/theme';
 import { FONT_FAMILIES, FONT_PAIRINGS, FONT_ROLES, FONT_ROLE_INFO, FONT_ROLE_VARS, fontStack, getFontPairing, type FontPairing } from '@/lib/fonts';
@@ -20,10 +20,7 @@ const fontVars = (pairing: FontPairing) =>
   Object.fromEntries(FONT_ROLES.map((role) => [FONT_ROLE_VARS[role], fontStack(pairing, role)])) as CSSProperties;
 
 /** The colors and fonts as CSS variables, so guest-site classes (bg-surface, text-accent, font-heading…) inside follow them. */
-const themeVars = (colors: ThemeColors, pairing: FontPairing) => ({
-  ...Object.fromEntries(THEME_COLOR_KEYS.map((key) => [THEME_COLOR_INFO[key].cssVar, colors[key]])),
-  ...fontVars(pairing),
-}) as CSSProperties;
+const themeVars = (colors: ThemeColors, pairing: FontPairing) => themeStyleVars(colors, pairing) as CSSProperties;
 
 // Colors and fonts of the guest site (`content/theme`). Written as CSS
 // variables on the event page's :root at render (src/components/ThemeStyle.tsx),

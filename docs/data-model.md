@@ -27,18 +27,18 @@ Guest components get the ID from `useWeddingContent().eventId`; admin client
 components and content editors get it as an `eventId` prop. Every server
 action takes `eventId` as its first argument and checks the caller's role
 in that event (`docs/security.md`). Event IDs that equal a top-level route or `public/` folder (`admin`, `api`,
-`images`) would be shadowed by it; `isFreeEventId` refuses them for new events.
+`images`, `templates`) would be shadowed by it; `isFreeEventId` refuses them for new events.
 
 | Path | Doc ID | Written by | Read by |
 | --- | --- | --- | --- |
-| `events/{eventId}` | event ID: lowercase letters, digits, inner hyphens, max 64 (`isValidEventId`) | `scripts/migrate-to-events.js`; `createEvent`, `duplicateEvent`, `renameEvent` (new ID; the old one is deleted with every subcollection), `setEventArchived`, `deleteEvent` (`src/app/actions/events.ts`) | `readEventDocs` (exists and not archived → the event's page is served; the admin preview ignores `status`); `src/lib/platformEvents.ts` (All Events, switcher). Fields: `slug` (= the ID), `name` (list name; missing on `hans-and-czay`, which falls back to `globalSettings.coupleNameFormat`, then the ID), `type` (`'wedding'`), `status` (`'active'` or `'archived'`), `createdAt`, `createdBy` (uid), `duplicatedFrom` / `renamedFrom` (event ID) |
+| `events/{eventId}` | event ID: lowercase letters, digits, inner hyphens, max 64 (`isValidEventId`) | `scripts/migrate-to-events.js`; `createEvent`, `duplicateEvent`, `renameEvent` (new ID; the old one is deleted with every subcollection), `setEventArchived`, `deleteEvent` (`src/app/actions/events.ts`) | `readEventDocs` (exists and not archived → the event's page is served; the admin preview ignores `status`); `src/lib/platformEvents.ts` (All Events, switcher). Fields: `slug` (= the ID), `name` (list name; missing on `hans-and-czay`, which falls back to `globalSettings.coupleNameFormat`, then the ID), `type` (the template it was made from: `'wedding'`, `'debut'`, `'birthday'`, `'corporate'`; `EVENT_TYPES` in `src/lib/templates/catalog.ts`; a duplicate keeps its source's), `status` (`'active'` or `'archived'`), `createdAt`, `createdBy` (uid), `duplicatedFrom` / `renamedFrom` (event ID) |
 | `…/guests` | the invite code (e.g. `K7MPQ2`), unique per event | server actions (`admin.ts`, `rsvp.ts`) | admin pages; `verifyInviteCode` |
 | `…/registryGifts` | auto ID | server actions (`admin.ts`, `registry.ts`) | `getRegistryGifts`; admin gifts/dashboard |
 | `…/giftSelections` | auto ID | `claimGift`; deleted by `resetRegistryGift` / `deleteGiftSelection` | admin registry page |
 | `…/settings` | `inviteTemplate`, `permissions`, `editLock` | `updateInviteMessageTemplate`; `setClientDesign` (`team.ts`); `holdEditLock` / `releaseEditLock` (`editLock.ts`) | `getInviteMessageTemplate`; `getEventAccess` (`requireAdmin.ts`); `holdEditLock`. Server only |
 | `…/members` | Firebase Auth UID (F10) | `addMember`, `changeMemberRole`, `removeMember` (`team.ts`); `createSessionCookie` (claims an invite); `scripts/migrate-members-f10.js` | `getEventAccess`, the Team page. Server only |
 | `…/auditLog` | auto ID (F10) | `logActivity` (`src/lib/auditLog.ts`) after each admin mutation | `readActivity` (Team page). Server only |
-| `…/content` | one doc per screen (below) + old `<doc>_backup` (no longer written, F9) | `publishDraft` (`src/app/actions/content.ts`), copying the doc's draft. Editors no longer write it from the browser | the server only (admin SDK, `src/lib/siteContentServer.ts`): all screen docs + `siteText` + `theme` + `music` + `screens` by `getEventContent(eventId)` for the cached event page and its metadata; `globalSettings` + `siteText` + `theme` + `music` by `getSiteContent(eventId)` for the 404 page and the default invite message; `globalSettings`, `details`, `dressCode`, `theme` by the RSVP email. The browser no longer reads `content` (the public read rule stays) |
+| `…/content` | one doc per screen (below) + old `<doc>_backup` (no longer written, F9) | `publishDraft` (`src/app/actions/content.ts`), copying the doc's draft. Editors no longer write it from the browser | the server only (admin SDK, `src/lib/siteContentServer.ts`): all screen docs + `siteText` + `theme` + `music` + `screens` by `getEventContent(eventId)` for the cached event page and its metadata; `globalSettings` + `siteText` + `theme` + `music` by `getSiteContent(eventId)` for the 404 page (through `/api/not-found`) and the default invite message; `globalSettings`, `details`, `dressCode`, `theme` by the RSVP email. The browser no longer reads `content` (the public read rule stays) |
 | `…/drafts` | the content doc's ID (`EDITABLE_DOC_IDS` in `src/lib/contentDrafts.ts`) | `saveDraft` (also editor autosave); deleted by `publishDraft` / `discardDraft` | `loadDraft` (editors), `getEventDraftDocs` (admin preview). Fields: `data` (the whole doc as it will be published), `updatedAt` (ms, strictly increasing; the editors' conflict check), `updatedBy` (admin email). Server only (no rule = no browser access) |
 | `…/contentVersions` | the content doc's ID | `publishDraft` (adds the published doc on top, keeps the last 10, fewer if they pass ~900 KB) | `loadDraft` / `saveDraft` / `publishDraft` return the list without data; `getVersion` one version's `data`. Field: `items[]` of `{ id, publishedAt, publishedBy, label?, data }`. Before a doc's first publish the list is made up from the live doc and `<doc>_backup` and stored on that publish. Server only |
 | `admins` (global) | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); `eventIds` by `addMember` / `removeMember` (`team.ts`), which also deletes the doc with the last event; `scripts/migrate-members-f10.js` | `firestore.rules` (`isOwner()`, old root `isAdmin()`), `storage.rules` (`isAdmin()`), `requireAdmin.ts`, `/api/upload`, `addMember` (by email) |
@@ -188,7 +188,8 @@ its old name so saved site text and docs need no change.
 
 **`siteText` shape.** Defined by the JSON (the type is
 `typeof wedding-content.json.siteText`, exported as `SiteText` from
-`src/lib/siteText.ts`). `mergeSiteText()` overlays the doc on the JSON key by
+`src/lib/siteText.ts`; the defaults are `DEFAULT_SITE_TEXT` in
+`src/lib/weddingContent.ts` (server only; the admin editors and the draft preview get them as props), so browser JavaScript never carries the JSON). `mergeSiteText()` overlays the doc on the JSON key by
 key: unknown keys are ignored, and an empty or non-string value keeps the
 default. Some strings hold `{name}` placeholders filled by `fillText()` /
 `fillNodes()` (e.g. `rsvp.errors.checkMany` uses `{count}`); the Site Text
@@ -206,14 +207,15 @@ been published at least once.
 **JSON quirks** (from `sync-content.js` merging Firestore docs into the file):
 the `gallery` key holds both array-index keys (`"0"`…`"7"`) and `images` /
 `header`; there is an extra `faqs` key (the site reads `faq` + `faqHeader`, not
-`faqs`). Do not "fix" these by hand without checking what the screens read.
+`faqs`; `DEFAULT_CONTENT` leaves it out, so no page carries it). Do not "fix"
+these by hand without checking what the screens read.
 
 ### Generic content shapes (F5, Oct 2026)
 
 So one site can serve any event type, four parts of the content are lists.
 Types, readers and display helpers live in **`src/lib/genericContent.ts`**
 (tested by `genericContent.test.ts`); `WeddingContent` in
-`src/lib/weddingContent.ts` is the JSON's type with these lists typed.
+`src/lib/contentMerge.ts` is the JSON's type with these lists typed.
 
 | Field | Shape | Shown on |
 | --- | --- | --- |
@@ -323,4 +325,8 @@ re-uploading. `firebasestorage.googleapis.com` stays in `next.config.ts`
 `remotePatterns` until no Firestore doc or `wedding-content.json` entry
 points there.
 
-Static assets (music, SVG logo, bundled images) live in `public/`.
+Static assets (music, SVG logo, bundled images) live in `public/`. The
+templates' sample photos and neutral logo are in `public/templates/`
+(CC0 / public domain, listed in `public/templates/CREDITS.md`); a new event's
+content docs point at them as site paths (`/templates/<name>.webp`) until
+the client uploads their own.

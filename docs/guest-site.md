@@ -51,7 +51,9 @@ Wedding order below, all shown, site text names.
 
 **Any event type.** The wedding-specific parts are content lists (shapes in
 `docs/data-model.md` → Generic content shapes): Welcome / Entrance show the
-hosts' names (`global.hosts`, "A & B", "A, B & C", or one name), the loader and
+hosts' names (`global.hosts`, "A & B", "A, B & C", or one name; on Welcome a
+joined name over 16 characters, such as a seminar title, is a size smaller
+and may wrap), the loader and
 footer their initials; Entourage renders `entourage.groups` (pairs groups full
 width, list / featured groups two side by side, empty groups hidden); Details
 renders one card per `details.venues` entry (one or an odd last card centered,
@@ -286,7 +288,7 @@ click throws a gold sparkle burst. The particles are drawn on one fixed canvas
 
 ## Music
 
-`AudioPlayer` (mounted in `src/app/[event]/page.tsx` and `not-found.tsx` with
+`AudioPlayer` (mounted in `src/app/[event]/page.tsx` and the 404's `NotFoundPage` with
 the event's `content/music`, see `docs/content-system.md`) renders `<audio id="wedding-bg-music"
 src=… preload="none">` and a toggle: the event's uploaded track, or
 `/bg-music.mp3` when none. When the event turned music off it renders nothing
@@ -338,10 +340,22 @@ Any unknown URL, including an event ID that doesn't exist, renders
 `src/app/not-found.tsx` (the root `not-found`, HTTP 404, title from site text
 `notFound.pageTitle`), which shows `NotFoundScreen` for the **default event**.
 It is not a step and sits outside `WeddingContentProvider`: names, logo, venue
-and wedding date come from the default event's global settings, read on the
-server (`getSiteContent(DEFAULT_EVENT_ID)`); the Welcome photo still comes
-straight from `src/data/wedding-content.json` (shows an admin change only after
-`npm run sync-content`). `src/app/[event]/page.tsx` also calls `notFound()` in
+and wedding date come from the default event's global settings, with its site
+text, theme and music, fetched in the browser from `/api/not-found`
+(`src/app/api/not-found/route.ts`: `getSiteContent(DEFAULT_EVENT_ID)` plus the
+JSON's Welcome photo, cached like the guest pages) by `NotFoundPage` when the
+404 shows; only the backdrop shows until it arrives. If the fetch fails it
+is tried once more after a second; if that fails too, a generic page shows
+(`FALLBACK_TEXT` in `NotFoundScreen.tsx`: "Page not found", "Back to the home
+page" → `/`, `DEFAULT_THEME`, plain gold numerals, petals; no logo, photo,
+countdown, music or event name). Next sends the root
+`not-found` UI with **every** page (so a `notFound()` in the browser can show
+it), so it must carry no data, or each event's page source would hold the
+default event's names, place and date. Only its `generateMetadata` reads on the
+server (it runs only for a real 404). The Welcome photo is the one in
+`src/data/wedding-content.json` (shows an admin change only after
+`npm run sync-content`); `NotFoundScreen.tsx` is in every page's JavaScript, so
+it never imports the JSON (see `docs/content-system.md`). `src/app/[event]/page.tsx` also calls `notFound()` in
 `generateMetadata`; without it the root title replaced the 404 title after
 hydration. The days-to-wedding line is read on the client
 (`useSyncExternalStore`), because the page is prerendered. It uses the inner
@@ -352,5 +366,5 @@ drifts behind the text (24 petals, 12 on phones; seeded values so server and
 client match; transform-only CSS). Under reduced motion the petals are hidden.
 Its one action links
 to `/` (the default event), which resumes the guest's saved step from
-`localStorage`. `not-found.tsx` mounts `AudioPlayer` and its own
+`localStorage`. `NotFoundPage` mounts `AudioPlayer`, `ThemeStyle` and its own
 `SiteTextProvider`.

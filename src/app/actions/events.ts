@@ -2,17 +2,19 @@
 
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, type DocumentData } from 'firebase-admin/firestore';
 import { getAdminDb } from '@/lib/firebase/admin';
 import { DEFAULT_EVENT_ID, isFreeEventId, isValidEventId, paths } from '@/lib/eventPaths';
-import { ADMIN_EVENT_COOKIE, ADMIN_EVENT_COOKIE_OPTIONS, getAdmin, getEventAccess, requireEventRole, type AdminSession } from '@/lib/requireAdmin';
-import { copyEventData, moveEventAccounts } from '@/lib/platformEvents';
+import { ADMIN_EVENT_COOKIE, ADMIN_EVENT_COOKIE_OPTIONS, getAdmin, requireEventRole, type AdminSession } from '@/lib/requireAdmin';
+import { canCreateEvents, copyEventData, moveEventAccounts } from '@/lib/platformEvents';
 import { logActivity } from '@/lib/auditLog';
-import { hasRole } from '@/lib/permissions';
+import { buildTemplateDocs, checkNewEventDetails } from '@/lib/templates';
+import { TEMPLATES } from '@/lib/templates/catalog';
 
 // The platform's events (F11), for the events list (src/app/admin/page.tsx).
 // Who may do what:
-//   create          owners, and organizers of any event (they join the new event as its organizer)
+//   create          owners, and organizers of any event (they join the new event as its organizer);
+//                   the event starts from a template (src/lib/templates) filled with the wizard's answers
 //   duplicate       organizers of the event copied (copies its site: content + invite message + client design switch)
 //   change link     organizers of the event (moves everything to the new ID; the old URL stops working)
 //   archive/restore organizers of the event (an archived event's guest page is a 404)
@@ -48,18 +50,16 @@ function checkNewId(raw: string): string | Fail {
 /** Owners, and organizers of at least one event. */
 async function requireCreator(): Promise<AdminSession> {
   const admin = await getAdmin();
-  if (!admin) throw new Error('Unauthorized');
-  if (admin.isOwner) return admin;
-  const roles = await Promise.all(admin.eventIds.map((id) => getEventAccess(id)));
-  if (!roles.some((access) => access && hasRole(access.role, 'organizer'))) throw new Error('Unauthorized');
+  if (!admin || !(await canCreateEvents(admin))) throw new Error('Unauthorized');
   return admin;
 }
 
 /**
- * Writes the new `events/{eventId}` doc, failing when the ID is taken. A
- * creator who is not an owner becomes the event's organizer.
+ * Writes the new `events/{eventId}` doc (and `content`, its live content
+ * docs), failing when the ID is taken. A creator who is not an owner becomes
+ * the event's organizer.
  */
-async function claimEvent(me: AdminSession, eventId: string, fields: Record<string, unknown>) {
+async function claimEvent(me: AdminSession, eventId: string, fields: Record<string, unknown>, content: Record<string, DocumentData> = {}) {
   const db = getAdminDb();
   const batch = db.batch();
   batch.create(db.doc(paths.event(eventId)), {
@@ -69,6 +69,9 @@ async function claimEvent(me: AdminSession, eventId: string, fields: Record<stri
     createdAt: FieldValue.serverTimestamp(),
     createdBy: me.uid,
   });
+  for (const [docId, data] of Object.entries(content)) {
+    batch.create(db.doc(paths.content(eventId, docId)), data);
+  }
   if (!me.isOwner) {
     batch.create(db.doc(paths.member(eventId, me.uid)), {
       email: me.email,
@@ -93,23 +96,28 @@ function refreshGuestPage(eventId: string) {
   revalidatePath(`/${eventId}`);
 }
 
-/** A new event with the default (Wedding) content until templates arrive (F12). */
-export async function createEvent(rawName: string, rawId: string): Promise<{ success: true; eventId: string } | Fail> {
+/**
+ * A new event from a template (the New Event wizard, src/app/admin/new): the
+ * template's content with the names, date, venue and palette filled in,
+ * written as the live site. `details`: `NewEventDetails` in src/lib/templates.
+ */
+export async function createEvent(details: unknown, rawId: string): Promise<{ success: true; eventId: string } | Fail> {
   try {
     const me = await requireCreator();
-    const name = checkName(rawName);
-    if (typeof name !== 'string') return name;
+    const checked = checkNewEventDetails(details);
+    if (typeof checked === 'string') return { success: false, error: checked };
     const eventId = checkNewId(rawId);
     if (typeof eventId !== 'string') return eventId;
+    const { name, type } = checked;
 
     try {
-      await claimEvent(me, eventId, { name, type: 'wedding' });
+      await claimEvent(me, eventId, { name, type }, buildTemplateDocs(checked));
     } catch (error) {
       if (alreadyExists(error)) return { success: false, error: 'That link is taken. Pick another.' };
       throw error;
     }
     refreshGuestPage(eventId);
-    await logActivity(eventId, me, 'Created the event', name);
+    await logActivity(eventId, me, 'Created the event', `${name}, from the ${TEMPLATES[type].name} template`);
     return { success: true, eventId };
   } catch (error) {
     return { success: false, error: errorMessage(error, 'Failed to create the event') };

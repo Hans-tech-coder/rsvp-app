@@ -6,7 +6,8 @@ import { db } from '@/lib/firebase/client';
 import { paths } from '@/lib/eventPaths';
 import { doc, getDoc } from 'firebase/firestore';
 import { DEFAULT_SCREENS, mergeScreens, type ScreenConfig, type ScreenType, type ScreensDoc } from '@/lib/screens';
-import { DEFAULT_SITE_TEXT, mergeSiteText } from '@/lib/siteText';
+import { mergeSiteText } from '@/lib/siteText';
+import { useContentDefaults } from './contentDefaults';
 import { ScreenList } from '../components/ScreenList';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
@@ -22,12 +23,13 @@ export function ScreensEditor({ eventId, selected, onSelect }: {
   selected?: ScreenType | null;
   onSelect?: (type: ScreenType) => void;
 }) {
+  const defaultText = useContentDefaults().siteText;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const draft = useContentDraft(eventId, 'screens');
   const loadDraft = draft.load;
-  const [defaultLabels, setDefaultLabels] = useState(DEFAULT_SITE_TEXT.menu);
+  const [defaultLabels, setDefaultLabels] = useState(defaultText.menu);
   // The order is design: a client may show, hide and rename only (saveDraft checks it too).
   const reorder = canEditDesign(useEventAccess().rules);
 
@@ -49,7 +51,7 @@ export function ScreensEditor({ eventId, selected, onSelect }: {
           setOriginalData(fetchedData);
         }
         // Blank names fall back to the site text menu names, as on the guest site.
-        setDefaultLabels(mergeSiteText(DEFAULT_SITE_TEXT, siteTextSnap.data()).menu);
+        setDefaultLabels(mergeSiteText(defaultText, siteTextSnap.data()).menu);
       } catch (error) {
         console.error('Error fetching screens:', error);
       } finally {
@@ -57,7 +59,7 @@ export function ScreensEditor({ eventId, selected, onSelect }: {
       }
     };
     fetchData();
-  }, [eventId, loadDraft]);
+  }, [eventId, loadDraft, defaultText]);
 
   const handleChange = (screens: ScreenConfig[]) => {
     setFormData(screens);

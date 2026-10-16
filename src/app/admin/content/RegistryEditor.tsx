@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Trash2, GripVertical, Image as ImageIcon, Upload } from 'lucide-react';
 import { uploadImage } from '@/lib/blob/uploadImage';
-import weddingContent from '@/data/wedding-content.json';
+import { useContentDefaults } from './contentDefaults';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
@@ -29,6 +29,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 export function RegistryEditor({ eventId }: { eventId: string }) {
+  const weddingContent = useContentDefaults().content;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);

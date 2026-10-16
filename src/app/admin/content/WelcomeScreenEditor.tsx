@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon, Info, AlertTriangle } from 'lucide-react';
 import { uploadImage } from '@/lib/blob/uploadImage';
-import weddingContent from '@/data/wedding-content.json';
+import { useContentDefaults } from './contentDefaults';
 import Image from 'next/image';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
@@ -12,6 +12,7 @@ import { CharCount, TEXT_LIMITS } from './CharCount';
 import { hasDepthMap } from '@/lib/welcomeDepthMaps';
 
 export function WelcomeScreenEditor({ eventId }: { eventId: string }) {
+  const weddingContent = useContentDefaults().content;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -59,7 +60,7 @@ export function WelcomeScreenEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [loadDraft]);
+  }, [loadDraft, weddingContent]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

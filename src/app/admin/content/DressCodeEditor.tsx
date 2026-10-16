@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Loader2, Plus, Trash2, Upload, ImageIcon, GripVertical } from 'lucide-react';
 import { uploadImage } from '@/lib/blob/uploadImage';
-import { useWeddingContent } from '@/contexts/WeddingContentContext';
+import { useContentDefaults } from './contentDefaults';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
 import type { DocumentData } from 'firebase/firestore';
@@ -52,7 +52,7 @@ interface DressCodeData {
 }
 
 export function DressCodeEditor({ eventId }: { eventId: string }) {
-  const { content: weddingContent } = useWeddingContent();
+  const weddingContent = useContentDefaults().content;
   const [data, setData] = useState<DressCodeData>({
     header: {
       subtitle: weddingContent.dressCode.header?.subtitle || "The Style Guideline",
@@ -101,7 +101,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
     guidelines: readGuidelines(fetchedData.guidelines) ?? guidelinesFromLegacy(fetchedData) ?? weddingContent.dressCode.guidelines,
     colors: fetchedData.colors ?? weddingContent.dressCode.colors,
     inspirationImages: (Array.isArray(fetchedData.inspirationImages) ? fetchedData.inspirationImages : weddingContent.dressCode.inspirationImages).map((img) => ({ ...img, id: nanoid() })),
-  }), [weddingContent.dressCode]);
+  }), [weddingContent]);
 
   useEffect(() => {
     async function fetchData() {

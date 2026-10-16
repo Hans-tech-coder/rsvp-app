@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import { uploadImage } from '@/lib/blob/uploadImage';
-import weddingContent from '@/data/wedding-content.json';
+import { useContentDefaults } from './contentDefaults';
 import Image from 'next/image';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
@@ -11,6 +11,7 @@ import type { DocumentData } from 'firebase/firestore';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 
 export function RsvpCtaEditor({ eventId }: { eventId: string }) {
+  const weddingContent = useContentDefaults().content;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -58,7 +59,7 @@ export function RsvpCtaEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [loadDraft]);
+  }, [loadDraft, weddingContent]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

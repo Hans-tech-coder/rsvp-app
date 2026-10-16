@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Search, ChevronDown } from 'lucide-react';
-import { DEFAULT_SITE_TEXT, mergeSiteText, type SiteText } from '@/lib/siteText';
+import { mergeSiteText, type SiteText } from '@/lib/siteText';
+import { useContentDefaults } from './contentDefaults';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
 import type { DocumentData } from 'firebase/firestore';
@@ -30,6 +31,7 @@ const inputClass =
   'w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-zinc-100 focus:border-transparent transition-all text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-600';
 
 export function SiteTextEditor({ eventId }: { eventId: string }) {
+  const defaultText = useContentDefaults().siteText;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -37,8 +39,8 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
   const loadDraft = draft.load;
   const [query, setQuery] = useState('');
 
-  const [formData, setFormData] = useState<SiteText>(DEFAULT_SITE_TEXT);
-  const [originalData, setOriginalData] = useState<SiteText>(DEFAULT_SITE_TEXT);
+  const [formData, setFormData] = useState<SiteText>(defaultText);
+  const [originalData, setOriginalData] = useState<SiteText>(defaultText);
 
   const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
 
@@ -47,7 +49,7 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
       try {
         const data = await loadDraft();
         if (data) {
-          const fetchedData = mergeSiteText(DEFAULT_SITE_TEXT, data);
+          const fetchedData = mergeSiteText(defaultText, data);
           setFormData(fetchedData);
           setOriginalData(fetchedData);
         }
@@ -59,7 +61,7 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [loadDraft]);
+  }, [loadDraft, defaultText]);
 
   const handleChange = (path: string, value: string) => {
     setFormData(prev => setText(prev, path, value));
@@ -90,7 +92,7 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
   };
 
   const handleRestore = (data: DocumentData) => {
-    setFormData(mergeSiteText(DEFAULT_SITE_TEXT, data));
+    setFormData(mergeSiteText(defaultText, data));
     setSaved(false);
   };
 
@@ -164,7 +166,7 @@ export function SiteTextEditor({ eventId }: { eventId: string }) {
                 {group.fields.map(field => {
                   const id = `site-text-${field.path}`;
                   const value = getText(formData, field.path);
-                  const fallback = getText(DEFAULT_SITE_TEXT, field.path);
+                  const fallback = getText(defaultText, field.path);
                   return (
                     <div key={field.path} className="space-y-2">
                       <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-zinc-300">{field.label}</label>

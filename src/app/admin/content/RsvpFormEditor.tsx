@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Loader2 } from 'lucide-react';
-import weddingContent from '@/data/wedding-content.json';
+import { useContentDefaults } from './contentDefaults';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
 import type { DocumentData } from 'firebase/firestore';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 
 export function RsvpFormEditor({ eventId }: { eventId: string }) {
+  const weddingContent = useContentDefaults().content;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -21,7 +22,7 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
 
   const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
 
-  const fromDoc = (data: DocumentData) => ({ ...weddingContent.rsvpForm, ...data }) as typeof weddingContent.rsvpForm;
+  const fromDoc = useCallback((data: DocumentData) => ({ ...weddingContent.rsvpForm, ...data }) as typeof weddingContent.rsvpForm, [weddingContent]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,7 +41,7 @@ export function RsvpFormEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [loadDraft]);
+  }, [loadDraft, fromDoc]);
 
   const handleChange = (section: string, field: string, value: string) => {
     setFormData(prev => ({

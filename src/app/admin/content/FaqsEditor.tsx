@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Trash2, GripVertical } from 'lucide-react';
-import weddingContent from '@/data/wedding-content.json';
+import { useContentDefaults } from './contentDefaults';
 import { AdminModal } from '../components/AdminModal';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
@@ -28,6 +28,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 export function FaqsEditor({ eventId }: { eventId: string }) {
+  const weddingContent = useContentDefaults().content;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -347,7 +348,7 @@ function SortableFaqItem({ item, index, onChange, onRemove }: { item: any, index
             value={item.q}
             onChange={onChange}
             className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all font-medium"
-            placeholder="e.g. Can I bring a plus one?"
+            placeholder="e.g. Is there parking at the venue?"
           />
         </div>
         <div className="space-y-2">
@@ -358,7 +359,7 @@ function SortableFaqItem({ item, index, onChange, onRemove }: { item: any, index
             onChange={onChange}
             rows={4}
             className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all resize-none"
-            placeholder="e.g. To help us maintain an accurate guest count..."
+            placeholder="e.g. Yes, free parking is available next to the venue."
           />
         </div>
       </div>

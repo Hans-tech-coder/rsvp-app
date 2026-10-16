@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Trash2, Upload } from 'lucide-react';
 import { uploadImage } from '@/lib/blob/uploadImage';
-import { DEFAULT_CONTENT as weddingContent } from '@/lib/weddingContent';
+import { useContentDefaults } from './contentDefaults';
 import { hostsFromLegacy, readHosts, type Host } from '@/lib/genericContent';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
@@ -11,6 +11,7 @@ import type { DocumentData } from 'firebase/firestore';
 import { CharCount, TEXT_LIMITS } from './CharCount';
 
 export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
+  const weddingContent = useContentDefaults().content;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -275,7 +276,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
                   type="text"
                   value={host.name}
                   onChange={(e) => updateHost(index, 'name', e.target.value)}
-                  placeholder="e.g. Hans"
+                  placeholder="e.g. Maria"
                   className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
                 />
               </div>
@@ -307,7 +308,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
             name="coupleNameFormat"
             value={formData.coupleNameFormat}
             onChange={handleChange}
-            placeholder="e.g. Hans & Czay, Ana's 18th, ACME Summit 2027"
+            placeholder="e.g. Maria & Jose, Ana's 18th, ACME Summit 2027"
             className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
           />
           <p className="text-xs text-gray-500 dark:text-zinc-500">Used where the site names the event in a sentence: the link preview and browser tab, the 404 page and the RSVP confirmation email. In Site Text it is <code>{'{couple}'}</code>.</p>
@@ -330,7 +331,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
               name="venueShort"
               value={formData.venueShort}
               onChange={handleChange}
-              placeholder="e.g. Paniqui, Tarlac"
+              placeholder="e.g. Tagaytay, Cavite"
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
             />
           </div>
@@ -342,7 +343,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
               name="targetDate"
               value={formData.targetDate}
               onChange={handleChange}
-              placeholder="e.g. December 20, 2026 15:00:00"
+              placeholder="e.g. June 14, 2027 16:00:00"
               className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
             />
             <p className="text-xs text-gray-500 dark:text-zinc-500">Format: Month DD, YYYY HH:MM:SS. Used for the countdown timer on the Welcome screen and the date in the footer (shown as DD.MM.YYYY).</p>
@@ -366,7 +367,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
             name="footerTagline"
             value={formData.footerTagline}
             onChange={handleChange}
-            placeholder="e.g. Together is a beautiful place to be"
+            placeholder="e.g. Thank you for celebrating with us"
             className="w-full px-4 py-2 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg outline-none focus:border-gray-400 dark:focus:border-zinc-500 transition-all"
           />
           <CharCount value={formData.footerTagline} max={TEXT_LIMITS.cardTitle} />

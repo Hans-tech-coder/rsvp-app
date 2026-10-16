@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SCREENS, SCREEN_TYPES, mergeScreens, screenLabel, visibleScreens } from './screens';
-import { DEFAULT_SITE_TEXT } from './siteText';
+import { DEFAULT_SITE_TEXT } from './weddingContent';
 
 const types = (list: { type: string }[]) => list.map((s) => s.type);
 

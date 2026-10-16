@@ -188,6 +188,10 @@ Match the code around you. These are the patterns the codebase already uses.
 - Content editors lay out by their pane with Tailwind container queries
   (`@container` on the pane, `@lg:` / `@2xl:` / `@3xl:` in the editor), so
   one editor fits the content page and the visual builder drawer.
+- An admin preview drawn with the guest site's classes (`bg-surface`,
+  `text-accent`, `font-heading`…) takes the colors and fonts as an inline
+  style from `themeVars(colors, pairing)` in `src/lib/theme.ts` (Colors &
+  Fonts tab, New Event wizard).
 - Admin page ↔ draft preview iframe talk only by same-origin `postMessage`
   with the typed messages of `src/lib/builderMessages.ts` (read with
   `readBuilderMessage` / `readPreviewMessage`, which drop other origins).

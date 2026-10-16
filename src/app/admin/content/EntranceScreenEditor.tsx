@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import { uploadImage } from '@/lib/blob/uploadImage';
-import weddingContent from '@/data/wedding-content.json';
+import { useContentDefaults } from './contentDefaults';
 import { EditorSaveBar } from './EditorSaveBar';
 import { useContentDraft } from './contentDraft';
 import type { DocumentData } from 'firebase/firestore';
 
 export function EntranceScreenEditor({ eventId }: { eventId: string }) {
+  const weddingContent = useContentDefaults().content;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -47,7 +48,7 @@ export function EntranceScreenEditor({ eventId }: { eventId: string }) {
     };
 
     fetchData();
-  }, [loadDraft]);
+  }, [loadDraft, weddingContent]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

@@ -3,7 +3,7 @@ import { getAdminDb } from '@/lib/firebase/admin';
 import { mergeWeddingContent } from '@/lib/weddingContent';
 import type { Venue } from '@/lib/genericContent';
 import { paths } from '@/lib/eventPaths';
-import { getEventUrl } from '@/lib/siteUrl';
+import { getEventUrl, getSiteUrl } from '@/lib/siteUrl';
 import { mergeTheme, mixHex, type ThemeColors } from '@/lib/theme';
 
 // Server only. Sends the guest a confirmation of their RSVP through the
@@ -54,7 +54,8 @@ async function loadEmailContent(eventId: string) {
     couple: global.coupleNameFormat,
     date,
     venueShort: global.venueShort,
-    heroImage: global.ogImage,
+    // Template photos are site paths (/templates/...); an email needs the full address
+    heroImage: global.ogImage ? new URL(global.ogImage, getSiteUrl()).toString() : '',
     venues,
     dressCode,
     colors: theme.colors,

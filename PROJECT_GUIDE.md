@@ -35,7 +35,7 @@ platform: data and guest URLs are already per event (`/<eventId>`).
 | Who | What they do | Where |
 | --- | --- | --- |
 | **Guests** (no account) | Step through up to 10 screens (by default welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form; admins reorder, hide and rename them). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/<eventId>` (one page, screens swap in place; `/` → default event) |
-| **Admins** (Google sign-in, by invite only; per event an **organizer** or a **client**, and platform **owners** who open every event) | Pick the event to work on (sidebar switcher; **All Events** lists them with RSVP counts and creates, duplicates, re-links, archives and, for owners, deletes events). Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font, the music, and which screens show in what order on the guest site. Edits are drafts (autosaved) until Publish; a preview shows the draft site and History restores earlier published versions. A **visual builder** (tablet and wider) shows the draft site with the sections and editors around it: click a section to edit it, live, with undo / redo. Clients cannot change the design (section order, colors & fonts, music) unless the event allows it; organizers manage the event's **Team** (members, invites, that switch, the activity log). One person at a time in the builder (Take over). | `/admin/**` |
+| **Admins** (Google sign-in, by invite only; per event an **organizer** or a **client**, and platform **owners** who open every event) | Pick the event to work on (sidebar switcher; **All Events** lists them with RSVP counts and creates (a wizard: Wedding, Debut, Birthday / Anniversary or Corporate / Seminar template, names, date, venue, palette), duplicates, re-links, archives and, for owners, deletes events). Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font, the music, and which screens show in what order on the guest site. Edits are drafts (autosaved) until Publish; a preview shows the draft site and History restores earlier published versions. A **visual builder** (tablet and wider) shows the draft site with the sections and editors around it: click a section to edit it, live, with undo / redo. Clients cannot change the design (section order, colors & fonts, music) unless the event allows it; organizers manage the event's **Team** (members, invites, that switch, the activity log). One person at a time in the builder (Take over). | `/admin/**` |
 
 ---
 
@@ -100,13 +100,14 @@ src/
     globals.css              Tailwind @theme colors + font roles (Wedding default) + motion tokens + reveal CSS
     actions/                 server actions: rsvp.ts, registry.ts, admin.ts, auth.ts, content.ts (drafts, publish, versions), team.ts (members, invites), editLock.ts (builder lock), events.ts (new, duplicate, change link, archive, delete)
     api/download/route.ts    image download proxy (used by DetailsScreen)
+    api/not-found/route.ts   the 404 page's content (default event), fetched by the 404 in the browser
     api/upload/route.ts      admin-only Vercel Blob upload token
     api/logout/route.ts      clears the session cookie, redirects to /admin/login
     api/edit-lock/release/   frees the builder's edit lock when its tab closes (sendBeacon)
-    admin/                   admin portal: page.tsx = All Events (F11, EventsClient); layout.tsx (server: current event, role, events) -> AdminShell.tsx (sidebar) + EventSwitcher.tsx; eventAccess.tsx = event + role for the UI; open/[event]/route.ts = switch event
+    admin/                   admin portal: page.tsx = All Events (F11, EventsClient); new/ = New Event wizard (F12); layout.tsx (server: current event, role, events) -> AdminShell.tsx (sidebar) + EventSwitcher.tsx; eventAccess.tsx = event + role for the UI; open/[event]/route.ts = switch event
       builder/               Visual builder: page.tsx (sections, preview canvas, editor drawer, undo/redo) + builderContext (editor <-> builder link) + useEditLock (one tab at a time)
       team/                  Team: members, invites, client design switch, activity log
-      content/               Content manager: page.tsx (tabs, preview) + one *Editor.tsx per screen + EditorSaveBar / contentDraft (draft, publish, history)
+      content/               Content manager: page.tsx (tabs, preview) + one *Editor.tsx per screen + EditorSaveBar / contentDraft (draft, publish, history) + layout.tsx / contentDefaults.tsx (JSON defaults from the server)
       components/            AdminModal, TablePagination, ScreenList (reorder/show/rename screens), PreviewFrame (phone/desktop draft preview, builder canvas)
       dashboard|invites|guests|gifts|registry|login/
   components/
@@ -117,13 +118,14 @@ src/
   contexts/WeddingContentContext.tsx   server-merged content + eventId from [event]/page.tsx -> useWeddingContent()
   contexts/SiteTextContext.tsx         site text (buttons, labels, errors) from [event]/page.tsx -> useSiteText()
   contexts/EditMarkersContext.tsx      preview only: useFieldMarker() puts data-field on texts for the builder
-  data/wedding-content.json  default/fallback content for every screen
+  data/wedding-content.json  default/fallback content for every screen (first couple's; server only, admin and preview get it as props)
   lib/eventPaths.ts          every Firestore path (events/{eventId}/content|guests|registryGifts|giftSelections|settings|members|auditLog, admins) (+ .test.ts)
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
   lib/blob/uploadImage.ts    compress + upload an image to Vercel Blob (all editors)
   lib/blob/uploadAudio.ts    upload a music file to Vercel Blob (Music editor)
   lib/requireAdmin.ts        session + role-in-event check for server actions and admin pages; the current event (adminEvent cookie) (server only)
-  lib/platformEvents.ts      the platform's events: lists (All Events, switcher), copy for duplicate / change link (server only)
+  lib/platformEvents.ts      the platform's events: lists (All Events, switcher), who may create, copy for duplicate / change link (server only)
+  lib/templates/             event templates (F12): catalog.ts (types, name fields, palettes, screens), <type>.ts (starting content), index.ts (wizard answers -> content docs) (+ templates.test.ts); photos in public/templates/
   lib/permissions.ts         roles (owner / organizer / client) and what each may change (+ .test.ts)
   lib/auditLog.ts            event activity log: logActivity, readActivity (server only)
   lib/siteText.ts            SiteText type, merge, {placeholder} fill (+ .test.ts)
@@ -132,11 +134,12 @@ src/
   lib/music.ts               event background music: type, mergeMusic, default track (+ .test.ts)
   lib/screens.ts             which screens an event shows, order, menu names: SCREEN_TYPES, SCREEN_NAMES, mergeScreens (+ .test.ts)
   lib/contentDrafts.ts       content drafts + published versions: shapes, mergeDoc, version list (+ .test.ts)
-  lib/eventSite.ts           buildEventSite(): raw content docs -> everything the guest site shows (pure; server and preview)
+  lib/eventSite.ts           buildEventSite(docs, defaults): raw content docs -> everything the guest site shows (pure; server and preview)
+  lib/contentMerge.ts        content merge (mergeContent, mergeGlobalSettings, CONTENT_DOC_IDS, types); pure, no JSON, defaults are an argument
   lib/builderHistory.ts      visual builder undo / redo (+ .test.ts)
   lib/builderMessages.ts     builder <-> preview postMessage types, same-origin readers
   lib/siteContentServer.ts   getEventContent() (event page), getEventDraftDocs() (preview), getSiteContent() (404) via admin SDK (server only)
-  lib/weddingContent.ts      JSON defaults + content docs merge (mergeWeddingContent, mergeGlobal, DEFAULT_CONTENT)
+  lib/weddingContent.ts      the JSON defaults (DEFAULT_CONTENT, DEFAULT_SITE_TEXT, CONTENT_DEFAULTS) + merges bound to them; server only (client code gets CONTENT_DEFAULTS as props)
   lib/genericContent.ts      hosts / People groups / venues / guidelines: types, readers, old-shape adapters (+ .test.ts)
   lib/siteUrl.ts             getSiteUrl(), getEventUrl() for links that leave the site (server only)
   lib/downloadProxy.ts       URL allowlist + filename sanitizer for /api/download (+ .test.ts)

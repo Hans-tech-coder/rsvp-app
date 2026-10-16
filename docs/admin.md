@@ -57,10 +57,19 @@ invites; Firestore count queries). Archived events are listed apart, below.
 - **Open** / the switcher: a plain link to `/admin/open/<eventId>`
   (`open/[event]/route.ts`), which sets the `adminEvent` cookie and goes to
   the dashboard. A plain link, so the content editors' leave guard asks first.
-- **New event** (owners, and organizers of any event): name + link
-  (suggested from the name with `toEventId`, editable). It starts with the
-  default Wedding content (templates are F12). An organizer who creates one
-  becomes its organizer; then the new event opens.
+- **New event** (owners, and organizers of any event): a link to the
+  **New Event wizard** at `/admin/new` (F12, `new/page.tsx` +
+  `NewEventWizard.tsx`). Three steps: 1 a template (Wedding, Debut,
+  Birthday / Anniversary, Corporate / Seminar; each card shows its photo in
+  its fonts and colors and the sections it starts with), 2 the names the
+  template asks for (couple, debutante, celebrant(s); Corporate uses the
+  event name as the cover title), the event name (suggested from the names),
+  the link (suggested from the name with `toEventId`), date, start time,
+  venue, optional address, town / city, 3 a palette (the template's suggested
+  one first) with a live cover preview. Create writes the template's content
+  as the live site (`createEvent`, `src/lib/templates`), then the new event
+  opens in the visual builder (`/admin/open/<id>?to=builder`). An organizer
+  who creates one becomes its organizer.
 - **Duplicate** (organizers of the event): a new event with the published
   content, the invite message and the client design switch; guests, RSVPs,
   gifts, drafts, versions, team and log stay behind. Then it opens.

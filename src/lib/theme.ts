@@ -4,7 +4,7 @@
 // rebuild. The doc also holds the event's font pairing (src/lib/fonts.ts),
 // written into the same style. Pure, used by the server pages and the Theme editor.
 
-import { DEFAULT_FONT_PAIRING_ID, fontDeclarations, getFontPairing, isFontPairingId } from './fonts';
+import { DEFAULT_FONT_PAIRING_ID, FONT_ROLES, FONT_ROLE_VARS, fontDeclarations, fontStack, getFontPairing, isFontPairingId, type FontPairing } from './fonts';
 
 export const THEME_COLOR_KEYS = [
   'primary', 'accent', 'surface', 'ink',
@@ -129,6 +129,18 @@ export function themeDeclarations(colors: ThemeColors): string {
  */
 export function themeCss(theme: Theme): string {
   return `:root{${themeDeclarations(theme.colors)}${fontDeclarations(getFontPairing(theme.fontPairing))}}`;
+}
+
+/**
+ * The colors and font roles as CSS variables for an inline style, so
+ * guest-site classes inside (bg-surface, text-accent, font-heading...) follow
+ * them: the admin's previews (Colors & Fonts tab, New Event wizard).
+ */
+export function themeVars(colors: ThemeColors, pairing: FontPairing): Record<string, string> {
+  return {
+    ...Object.fromEntries(THEME_COLOR_KEYS.map((key) => [THEME_COLOR_INFO[key].cssVar, colors[key]])),
+    ...Object.fromEntries(FONT_ROLES.map((role) => [FONT_ROLE_VARS[role], fontStack(pairing, role)])),
+  };
 }
 
 // ---- color math (sRGB hex) ----
