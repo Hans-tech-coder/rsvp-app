@@ -57,7 +57,7 @@ export function MusicEditor({ eventId }: { eventId: string }) {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadAudio(file);
+      const url = await uploadAudio(eventId, file);
       update({ url, fileName: file.name });
     } catch (error) {
       console.error('Error uploading music:', error);

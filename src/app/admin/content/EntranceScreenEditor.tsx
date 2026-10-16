@@ -58,7 +58,7 @@ export function EntranceScreenEditor({ eventId }: { eventId: string }) {
     setSaved(false);
     
     try {
-      const downloadURL = await uploadImage(file, 'images/entrance-bg');
+      const downloadURL = await uploadImage(eventId, file, 'images/entrance-bg');
       
       setFormData(prev => ({ ...prev, backgroundImage: downloadURL }));
     } catch (error) {

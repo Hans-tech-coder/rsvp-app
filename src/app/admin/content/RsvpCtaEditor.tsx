@@ -75,7 +75,7 @@ export function RsvpCtaEditor({ eventId }: { eventId: string }) {
     setSaved(false);
     
     try {
-      const downloadURL = await uploadImage(file, 'images/rsvpCta-bg');
+      const downloadURL = await uploadImage(eventId, file, 'images/rsvpCta-bg');
       setFormData(prev => ({ ...prev, backgroundImage: downloadURL }));
     } catch (error) {
       console.error("Error uploading image:", error);

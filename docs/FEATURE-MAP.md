@@ -66,7 +66,9 @@ All editors are in `src/app/admin/content/`. Their defaults come from `useConten
 | Generic content shapes: hosts, People groups, venues, guidelines (types, readers, display helpers, legacy adapters for the old wedding-only fields) | `src/lib/genericContent.ts`, tested by `src/lib/genericContent.test.ts`; used by `weddingContent.ts` (merge), the four editors, the screens and `scripts/migrate-content-f5.js` |
 | Legacy principal sponsors reader (`{ninang, ninong, couple}` pairs and the older `string[]`), only for converting old content | `src/lib/principalSponsors.ts`, tested by `src/lib/principalSponsors.test.ts`; used by `genericContent.ts` |
 | Image download proxy | `src/app/api/download/route.ts` (called from `DetailsScreen.tsx`); host allowlist + filename sanitizer in `src/lib/downloadProxy.ts`, tested by `src/lib/downloadProxy.test.ts` |
-| Image upload (admin editors) | `src/lib/blob/uploadImage.ts` (compress + client upload), `src/app/api/upload/route.ts` (admin-only Blob token) |
+| Image upload (admin editors) | `src/lib/blob/uploadImage.ts` (compress + client upload into `events/<eventId>/`; `uploadToEvent` asks `getUploadProblem` why a token was refused), `src/app/api/upload/route.ts` (Blob token for the event's members, its folder only, under the storage cap) |
+| Event storage (F13): usage per event (its Blob folders), the cap, unused files across the store and their clean-up | `src/lib/blob/blobRefs.ts` (pure: folders, cap, grace, `blobPathsIn`, `pickUnused`, tested by `blobRefs.test.ts`), `src/lib/blob/eventStorage.ts` (server only: `getEventStorage`, `findUnusedFiles`, `cleanUpUnusedFiles`); daily Vercel Cron `src/app/api/cron/blob-cleanup/route.ts` (`vercel.json`, needs `CRON_SECRET`) |
+| Invite-code rate limit (wrong codes per visitor IP, used by `verifyInviteCode` and `submitRsvp`) | `src/lib/inviteRateLimit.ts`, tested by `inviteRateLimit.test.ts` |
 
 ## Server actions (`src/app/actions/`)
 
@@ -75,6 +77,7 @@ All editors are in `src/app/admin/content/`. Their defaults come from `useConten
 | `verifyInviteCode` | `rsvp.ts` | `EntranceScreen.tsx` |
 | `submitRsvp`, `getVisitorCountry` (`x-vercel-ip-country`, else `api.country.is`) | `rsvp.ts` | `RsvpScreen.tsx` |
 | `getRegistryGifts`, `claimGift` | `registry.ts` | `CuratedRegistryScreen.tsx` |
+| `saveEmailSettings`, `getUploadProblem`, `cleanUpStorage` (owners) | `settings.ts` | `admin/settings/SettingsClient.tsx`; `getUploadProblem` from `src/lib/blob/uploadImage.ts` |
 | `createSessionCookie`, `clearSessionCookie` | `auth.ts` | `admin/login/page.tsx`, `admin/AdminShell.tsx` |
 | `generateInviteCodes`, `deleteInviteCode`, `regenerateInviteCode`, `toggleInviteCopiedStatus`, `getInviteMessageTemplate`, `updateInviteMessageTemplate` | `admin.ts` | `admin/invites/*`, `admin/guests/GuestListClient.tsx` (delete) |
 | `addRegistryGift`, `updateRegistryGift`, `deleteRegistryGift`, `resetRegistryGift` | `admin.ts` | `admin/gifts/GiftsClient.tsx` |
@@ -105,8 +108,9 @@ server actions and then `router.refresh()`.
 | Visual builder (F9a): full-screen; section list (the Screens editor with `ScreenList` in pick mode) + "Whole site" panels on the left, the draft preview (`PreviewFrame`) in the middle, the picked section's editor (the same `*Editor.tsx`) in a drawer; click in the preview opens a section (and focuses a marked field), edits show live, one undo / redo across panels, unsaved edits saved as a draft when switching panels; tablet and wider (phones: a link to Content) | `src/app/admin/builder/page.tsx` | `builderContext.tsx` (editor ↔ builder link, used by `EditorSaveBar`), `src/lib/builderHistory.ts` (undo / redo, tested by `builderHistory.test.ts`), `src/lib/builderMessages.ts` (postMessage protocol), `src/app/[event]/preview/PreviewSite.tsx` | `drafts/*`, `contentVersions/*` via the editors |
 | Content editors' shared pieces: sticky Undo / History / Save Draft / Publish row with draft status, 10 s autosave to the draft, conflict prompt; `doc` / `merge` props hand the doc as it would be saved to the visual builder (`EditorSaveBar.tsx`, laid out by container queries); draft / publish / versions hook and the page context that reloads the preview or the editor (`contentDraft.tsx`); "Leave without saving?" guard for tab switch, admin links and page close (`unsavedChanges.tsx`); character limits + counter (`CharCount.tsx`, `TEXT_LIMITS`) | `src/app/admin/content/page.tsx` | `EditorSaveBar.tsx`, `contentDraft.tsx`, `unsavedChanges.tsx`, `CharCount.tsx` | `drafts/*`, `contentVersions/*` via `src/app/actions/content.ts` |
 | Draft preview frame: Preview button on the content page (docked from 1024 px, full screen below); phone / desktop / both iframes of `?preview=`, scaled to fit; also the visual builder's canvas | `src/app/admin/content/page.tsx`, `src/app/admin/builder/page.tsx` | `src/app/admin/components/PreviewFrame.tsx` | – |
-| sidebar/nav (All Events; the current event's pages only when there is one; Team for organizers and owners; role + email above Sign Out). The server layout reads the current event, the role in it and the account's events; the client shell draws them | `src/app/admin/layout.tsx` (server) | `AdminShell.tsx`, `EventSwitcher.tsx` (event picker: links to `/admin/open/<eventId>`, "Manage events"), `eventAccess.tsx` (`useEventAccess`, `useCurrentEventId`), `components/NoEvent.tsx` (content / builder with no event) | `events` + `content/globalSettings` (`listEventChoices`) |
+| sidebar/nav (All Events; the current event's pages only when there is one; Team and Settings for organizers and owners; role + email above Sign Out). The server layout reads the current event, the role in it and the account's events; the client shell draws them | `src/app/admin/layout.tsx` (server) | `AdminShell.tsx`, `EventSwitcher.tsx` (event picker: links to `/admin/open/<eventId>`, "Manage events"), `eventAccess.tsx` (`useEventAccess`, `useCurrentEventId`), `components/NoEvent.tsx` (content / builder with no event) | `events` + `content/globalSettings` (`listEventChoices`) |
 | `/admin/team`: members (role select, remove), invites (cancel), "Clients may change the design" switch, activity log | `src/app/admin/team/page.tsx` | `TeamClient.tsx` | `members`, `adminAllowlist`, `settings/permissions`, `auditLog` |
+| `/admin/settings` (F13): email sender name + reply-to with a From preview; storage used of the cap; owners: find / delete unused files of all events | `src/app/admin/settings/page.tsx` (organizers and owners) | `SettingsClient.tsx` | `settings/email`, `content/globalSettings`, Vercel Blob |
 | Client locks (no Colors & Fonts / Music, no reordering without design rights) | `src/app/admin/content/page.tsx`, `src/app/admin/builder/page.tsx` | `ScreensEditor.tsx`, `ScreenList.tsx` (`reorder`) | rules in `src/lib/permissions.ts` |
 | Builder edit lock ("X is editing this event", Take over) | `src/app/admin/builder/page.tsx` (`EditLockOverlay`) | `src/app/admin/builder/useEditLock.ts`; release beacon on tab close `src/app/api/edit-lock/release/route.ts` | `settings/editLock` |
 | shared UI | `src/app/admin/components/AdminModal.tsx`, `TablePagination.tsx`, `PreviewFrame.tsx`, `ScreenList.tsx`, `NoEvent.tsx` | | |
@@ -123,7 +127,9 @@ server actions and then `router.refresh()`.
 | Activity log: write after each admin mutation, read for the Team page | `src/lib/auditLog.ts` (`logActivity`, `readActivity`, server only) |
 | Give pre-F10 admins and invites a role in an event (dry run / `--write` / `--verify`) | `scripts/migrate-members-f10.js` |
 | Clear a bad session and go to login | `src/app/api/logout/route.ts` |
-| RSVP confirmation email to the guest (Gmail SMTP) | `src/lib/email/sendRsvpConfirmation.ts`, called via `after()` in `submitRsvp` |
+| RSVP confirmation email to the guest (sender name / reply-to from `settings/email`) | `src/lib/email/sendRsvpConfirmation.ts`, called via `after()` in `submitRsvp` |
+| Sending email (Gmail SMTP today; the one place to add a transactional provider) | `src/lib/email/sender.ts` (`sendEmail`, `senderAddress`) |
+| Event email settings: shape, reading, form check | `src/lib/email/emailSettings.ts`, tested by `emailSettings.test.ts` |
 | Firestore paths: every collection and doc path, event-scoped (`paths`, `DEFAULT_EVENT_ID` (env `NEXT_PUBLIC_DEFAULT_EVENT_ID`), `isValidEventId`, `isFreeEventId` (not a route), `toEventId` (name → link)) | `src/lib/eventPaths.ts`, tested by `src/lib/eventPaths.test.ts` |
 | Copy root collections into an event (dry run / `--write` / `--overwrite` / `--verify`) | `scripts/migrate-to-events.js` |
 | Add the generic content fields to old-shape content docs (dry run / `--write` / `--verify` / `--dump`) | `scripts/migrate-content-f5.js` |
@@ -141,10 +147,10 @@ Read these by range (`grep -n` then read around the line), never whole.
 
 | Lines | File |
 | --- | --- |
-| 977 | `src/data/wedding-content.json` |
+| 978 | `src/data/wedding-content.json` |
 | 621 | `src/app/admin/content/DressCodeEditor.tsx` |
 | 576 | `src/app/admin/content/EntourageEditor.tsx` |
-| 541 | `src/components/screens/RsvpScreen.tsx` |
+| 543 | `src/components/screens/RsvpScreen.tsx` |
 | 540 | `src/app/admin/content/RegistryEditor.tsx` |
 | 488 | `src/app/admin/content/OurStoryEditor.tsx` |
 | 471 | `src/components/ui/circular-image-gallery.tsx` |

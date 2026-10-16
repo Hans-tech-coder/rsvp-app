@@ -142,7 +142,7 @@ export function RegistryEditor({ eventId }: { eventId: string }) {
     setSaved(false);
     
     try {
-      const downloadURL = await uploadImage(file, 'images/registry-qr', { type: 'image/png' });
+      const downloadURL = await uploadImage(eventId, file, 'images/registry-qr', { type: 'image/png' });
       
       setBanks(prev => prev.map(item => item.id === id ? { ...item, qrImage: downloadURL } : item));
     } catch (error) {

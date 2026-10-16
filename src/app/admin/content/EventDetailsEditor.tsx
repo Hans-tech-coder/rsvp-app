@@ -166,7 +166,7 @@ export function EventDetailsEditor({ eventId }: { eventId: string }) {
 
     setIsUploadingImage(true);
     try {
-      const url = await uploadImage(file, 'website/order-of-events');
+      const url = await uploadImage(eventId, file, 'website/order-of-events');
 
       setData(prev => ({ ...prev, orderOfEventsImage: url }));
       setSaved(false);

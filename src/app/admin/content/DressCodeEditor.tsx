@@ -203,7 +203,7 @@ export function DressCodeEditor({ eventId }: { eventId: string }) {
     setSaved(false);
     
     try {
-      const url = await uploadImage(file, 'images/dress-code');
+      const url = await uploadImage(eventId, file, 'images/dress-code');
       
       const newImages = [...data.inspirationImages];
       newImages[index] = { ...newImages[index], url };

@@ -1,14 +1,15 @@
-import nodemailer from 'nodemailer';
 import { getAdminDb } from '@/lib/firebase/admin';
 import { mergeWeddingContent } from '@/lib/weddingContent';
 import type { Venue } from '@/lib/genericContent';
 import { paths } from '@/lib/eventPaths';
 import { getEventUrl, getSiteUrl } from '@/lib/siteUrl';
 import { mergeTheme, mixHex, type ThemeColors } from '@/lib/theme';
+import { sendEmail } from './sender';
+import { readEmailSettings } from './emailSettings';
 
-// Server only. Sends the guest a confirmation of their RSVP through the
-// couple's Gmail account (SMTP + App Password). Needs GMAIL_USER and
-// GMAIL_APP_PASSWORD; when either is missing the email is skipped.
+// Server only. Sends the guest a confirmation of their RSVP through
+// sendEmail (./sender.ts; skipped when no sender is set up), from the sender
+// name and with the reply-to of the event's settings/email.
 
 type RsvpEmailData = {
   fullName: string;
@@ -271,23 +272,24 @@ export function buildEmail(data: RsvpEmailData, content: EmailContent, siteUrl: 
 }
 
 export async function sendRsvpConfirmation(eventId: string, data: RsvpEmailData) {
-  const user = process.env.GMAIL_USER?.trim();
-  // Google shows the App Password in groups of four; the spaces are not part of it.
-  const pass = process.env.GMAIL_APP_PASSWORD?.replace(/\s/g, '');
-  if (!user || !pass) {
-    console.warn('RSVP email skipped: GMAIL_USER or GMAIL_APP_PASSWORD is not set.');
-    return;
-  }
-
-  const content = await loadEmailContent(eventId);
+  const [content, settings] = await Promise.all([loadEmailContent(eventId), loadEmailSettings(eventId)]);
   const { subject, html, text } = buildEmail(data, content, getEventUrl(eventId));
 
-  const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user, pass } });
-  await transporter.sendMail({
-    from: { name: `${content.couple} Wedding`, address: user },
+  await sendEmail({
     to: data.email,
     subject,
     html,
     text,
+    fromName: settings.senderName || content.couple,
+    replyTo: settings.replyTo,
   });
+}
+
+async function loadEmailSettings(eventId: string) {
+  try {
+    return readEmailSettings((await getAdminDb().doc(paths.setting(eventId, 'email')).get()).data());
+  } catch (error) {
+    console.error('RSVP email: default sender, settings read failed:', error);
+    return readEmailSettings(undefined);
+  }
 }

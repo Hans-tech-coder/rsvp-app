@@ -94,7 +94,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
     setSaved(false);
     
     try {
-      const downloadURL = await uploadImage(file, 'images/global-logo', { type: 'image/png', maxDimension: 800 });
+      const downloadURL = await uploadImage(eventId, file, 'images/global-logo', { type: 'image/png', maxDimension: 800 });
       setFormData(prev => ({ ...prev, logo: downloadURL }));
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -112,7 +112,7 @@ export function GlobalSettingsEditor({ eventId }: { eventId: string }) {
     setSaved(false);
     
     try {
-      const downloadURL = await uploadImage(file, 'images/global-og', { type: 'image/jpeg', maxDimension: 1200 });
+      const downloadURL = await uploadImage(eventId, file, 'images/global-og', { type: 'image/jpeg', maxDimension: 1200 });
       setFormData(prev => ({ ...prev, ogImage: downloadURL }));
     } catch (error) {
       console.error("Error uploading og image:", error);

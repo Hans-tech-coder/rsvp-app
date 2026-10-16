@@ -172,7 +172,7 @@ export function EntourageEditor({ eventId }: { eventId: string }) {
     const key = `${data.groups[groupIndex].id}:${personIndex}`;
     setUploading(key);
     try {
-      const url = await uploadImage(file, 'images/people', { maxDimension: 600 });
+      const url = await uploadImage(eventId, file, 'images/people', { maxDimension: 600 });
       updateGroup(groupIndex, g => ({ ...g, people: g.people.map((p, i) => (i === personIndex ? { ...p, photo: url } : p)) }));
     } catch (error) {
       console.error("Error uploading photo:", error);

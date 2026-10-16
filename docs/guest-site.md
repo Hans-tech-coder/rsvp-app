@@ -103,7 +103,10 @@ may now be a different screen.
 1. Going to the RSVP form step (`lockedStep`, step 9 by default) while `!isUnlocked` opens the `EntranceScreen` overlay instead.
 2. `EntranceScreen` calls `verifyInviteCode(code)` (server action). On success it
    calls `onStartUnlock` (unlocks, moves to the RSVP form step behind the overlay), then
-   `onUnlock(code)` (stores the code, closes the overlay).
+   `onUnlock(code)` (stores the code, closes the overlay). After 10 wrong codes
+   in 15 minutes from one IP it shows site text `entrance.errors.tooMany`
+   until the window ends (`src/lib/inviteRateLimit.ts`); `submitRsvp` answers
+   the same way (shown with that text on the form).
 3. `RsvpScreen` validates in the browser first (`validateRsvp`, form is
    `noValidate`): full name (two words), email, phone (country minimum digits),
    attendance (no default; the guest must pick) and the privacy box are

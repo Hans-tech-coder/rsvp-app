@@ -177,7 +177,9 @@ export async function renameEvent(eventId: string, rawNewId: string): Promise<{ 
     if (!event.exists) return { success: false, error: 'That event no longer exists.' };
 
     try {
-      await db.doc(paths.event(newId)).create({ ...event.data(), slug: newId, renamedFrom: eventId });
+      // formerIds: the event's uploads stay in their Blob folders (events/<old id>/), still counted as its storage
+      const formerIds = [...new Set([...(event.get('formerIds') ?? []), eventId])];
+      await db.doc(paths.event(newId)).create({ ...event.data(), slug: newId, renamedFrom: eventId, formerIds });
     } catch (error) {
       if (alreadyExists(error)) return { success: false, error: 'That link is taken. Pick another.' };
       throw error;

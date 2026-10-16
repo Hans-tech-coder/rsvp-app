@@ -335,9 +335,10 @@ a new one):
 2. **Load:** `await loadDraft()` gives the draft, else the live doc, else
    `null` (keep the defaults); spread it over the JSON default (or the
    editor's `fromDoc` / `formFromDoc`) and set both states.
-3. **Upload image:** `await uploadImage(file, '<folder>/<name>')` from
-   `src/lib/blob/uploadImage.ts` (compresses, uploads to Vercel Blob, returns the
-   URL; see `docs/data-model.md`), put the URL into `formData`. It reaches
+3. **Upload image:** `await uploadImage(eventId, file, '<folder>/<name>')` from
+   `src/lib/blob/uploadImage.ts` (compresses, uploads into the event's Blob
+   folder, returns the URL; a full storage or expired sign-in throws a readable
+   message; see `docs/data-model.md`), put the URL into `formData`. It reaches
    guests only after Publish. Pass the upload state as the bar's `busy` so
    autosave waits for it.
 4. **Save (draft):** `handleSave` returns `Promise<boolean>`: `if (!(await

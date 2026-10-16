@@ -31,17 +31,18 @@ in that event (`docs/security.md`). Event IDs that equal a top-level route or `p
 
 | Path | Doc ID | Written by | Read by |
 | --- | --- | --- | --- |
-| `events/{eventId}` | event ID: lowercase letters, digits, inner hyphens, max 64 (`isValidEventId`) | `scripts/migrate-to-events.js`; `createEvent`, `duplicateEvent`, `renameEvent` (new ID; the old one is deleted with every subcollection), `setEventArchived`, `deleteEvent` (`src/app/actions/events.ts`) | `readEventDocs` (exists and not archived → the event's page is served; the admin preview ignores `status`); `src/lib/platformEvents.ts` (All Events, switcher). Fields: `slug` (= the ID), `name` (list name; missing on `hans-and-czay`, which falls back to `globalSettings.coupleNameFormat`, then the ID), `type` (the template it was made from: `'wedding'`, `'debut'`, `'birthday'`, `'corporate'`; `EVENT_TYPES` in `src/lib/templates/catalog.ts`; a duplicate keeps its source's), `status` (`'active'` or `'archived'`), `createdAt`, `createdBy` (uid), `duplicatedFrom` / `renamedFrom` (event ID) |
+| `events/{eventId}` | event ID: lowercase letters, digits, inner hyphens, max 64 (`isValidEventId`) | `scripts/migrate-to-events.js`; `createEvent`, `duplicateEvent`, `renameEvent` (new ID; the old one is deleted with every subcollection), `setEventArchived`, `deleteEvent` (`src/app/actions/events.ts`) | `readEventDocs` (exists and not archived → the event's page is served; the admin preview ignores `status`); `src/lib/platformEvents.ts` (All Events, switcher). Fields: `slug` (= the ID), `name` (list name; missing on `hans-and-czay`, which falls back to `globalSettings.coupleNameFormat`, then the ID), `type` (the template it was made from: `'wedding'`, `'debut'`, `'birthday'`, `'corporate'`; `EVENT_TYPES` in `src/lib/templates/catalog.ts`; a duplicate keeps its source's), `status` (`'active'` or `'archived'`), `createdAt`, `createdBy` (uid), `duplicatedFrom` / `renamedFrom` (event ID), `formerIds` (every ID it had before a change of link, set by `renameEvent`; its uploads stay in those Blob folders and still count as its storage, F13) |
 | `…/guests` | the invite code (e.g. `K7MPQ2`), unique per event | server actions (`admin.ts`, `rsvp.ts`) | admin pages; `verifyInviteCode` |
 | `…/registryGifts` | auto ID | server actions (`admin.ts`, `registry.ts`) | `getRegistryGifts`; admin gifts/dashboard |
 | `…/giftSelections` | auto ID | `claimGift`; deleted by `resetRegistryGift` / `deleteGiftSelection` | admin registry page |
-| `…/settings` | `inviteTemplate`, `permissions`, `editLock` | `updateInviteMessageTemplate`; `setClientDesign` (`team.ts`); `holdEditLock` / `releaseEditLock` (`editLock.ts`) | `getInviteMessageTemplate`; `getEventAccess` (`requireAdmin.ts`); `holdEditLock`. Server only |
+| `…/settings` | `inviteTemplate`, `permissions`, `editLock`, `email` | `updateInviteMessageTemplate`; `setClientDesign` (`team.ts`); `holdEditLock` / `releaseEditLock` (`editLock.ts`); `saveEmailSettings` (`settings.ts`) | `getInviteMessageTemplate`; `getEventAccess` (`requireAdmin.ts`); `holdEditLock`; the Settings page and the RSVP email (`email`). Server only |
 | `…/members` | Firebase Auth UID (F10) | `addMember`, `changeMemberRole`, `removeMember` (`team.ts`); `createSessionCookie` (claims an invite); `scripts/migrate-members-f10.js` | `getEventAccess`, the Team page. Server only |
 | `…/auditLog` | auto ID (F10) | `logActivity` (`src/lib/auditLog.ts`) after each admin mutation | `readActivity` (Team page). Server only |
 | `…/content` | one doc per screen (below) + old `<doc>_backup` (no longer written, F9) | `publishDraft` (`src/app/actions/content.ts`), copying the doc's draft. Editors no longer write it from the browser | the server only (admin SDK, `src/lib/siteContentServer.ts`): all screen docs + `siteText` + `theme` + `music` + `screens` by `getEventContent(eventId)` for the cached event page and its metadata; `globalSettings` + `siteText` + `theme` + `music` by `getSiteContent(eventId)` for the 404 page (through `/api/not-found`) and the default invite message; `globalSettings`, `details`, `dressCode`, `theme` by the RSVP email. The browser no longer reads `content` (the public read rule stays) |
 | `…/drafts` | the content doc's ID (`EDITABLE_DOC_IDS` in `src/lib/contentDrafts.ts`) | `saveDraft` (also editor autosave); deleted by `publishDraft` / `discardDraft` | `loadDraft` (editors), `getEventDraftDocs` (admin preview). Fields: `data` (the whole doc as it will be published), `updatedAt` (ms, strictly increasing; the editors' conflict check), `updatedBy` (admin email). Server only (no rule = no browser access) |
 | `…/contentVersions` | the content doc's ID | `publishDraft` (adds the published doc on top, keeps the last 10, fewer if they pass ~900 KB) | `loadDraft` / `saveDraft` / `publishDraft` return the list without data; `getVersion` one version's `data`. Field: `items[]` of `{ id, publishedAt, publishedBy, label?, data }`. Before a doc's first publish the list is made up from the live doc and `<doc>_backup` and stored on that publish. Server only |
-| `admins` (global) | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); `eventIds` by `addMember` / `removeMember` (`team.ts`), which also deletes the doc with the last event; `scripts/migrate-members-f10.js` | `firestore.rules` (`isOwner()`, old root `isAdmin()`), `storage.rules` (`isAdmin()`), `requireAdmin.ts`, `/api/upload`, `addMember` (by email) |
+| `rateLimits` (global, F13) | sha256 of the visitor's IP (the IP is not stored) | `recordWrongInviteCode` (`src/lib/inviteRateLimit.ts`) on a wrong invite code | `isInviteGuessBlocked` (`verifyInviteCode`, `submitRsvp`). Fields: `failures`, `windowStart` (ms), `expiresAt` (for a Firestore TTL policy; none set up yet, so old docs stay, one tiny doc per visitor who typed a wrong code). Server only (no rule = no browser access) |
+| `admins` (global) | Firebase Auth UID | `createSessionCookie` (claims an allowlist entry); `eventIds` by `addMember` / `removeMember` (`team.ts`), which also deletes the doc with the last event; `scripts/migrate-members-f10.js` | `firestore.rules` (`isOwner()`, old root `isAdmin()`), `storage.rules` (`isAdmin()`), `requireAdmin.ts`, `/api/upload` (owner, or `eventIds` holds the event), `addMember` (by email) |
 | `adminAllowlist` (global) | lowercased email | `scripts/add-admin.js`; `addMember` / `cancelInvite` (`team.ts`); `scripts/migrate-members-f10.js` | `createSessionCookie`, the Team page (`events.<eventId>` query) (server only; rules deny all browser access) |
 
 A path helper throws on an invalid event ID or a document ID containing `/`,
@@ -148,11 +149,46 @@ without a heartbeat). Deleted when the builder closes.
 `welcomeScreen`, `Added to the team` / `a@b.co as Client`. Never edited; no
 cleanup yet (one small doc per admin change).
 
+### `settings/email` (per event, F13)
+
+`{ senderName, replyTo }`: the name guests see as the sender of the RSVP
+email (`''` = the event's name, `global.coupleNameFormat`) and where their
+replies go (`''` = the sending account). Read with `readEmailSettings`
+(`src/lib/email/emailSettings.ts`), which drops a malformed address and
+characters that would break the From header. Set on the Settings page
+(organizers and owners). No doc = both defaults.
+
 ### `settings/inviteTemplate` (per event)
 
 `{ template: string }`. `{{CODE}}` in the text is replaced with the guest's
 code by the invites page. Default text lives in `DEFAULT_INVITE_TEMPLATE`
 (`admin.ts`).
+
+## Firestore read budget (F13 check, 2026-10-16)
+
+Spark (free) allows 50,000 reads, 20,000 writes and 20,000 deletes a day.
+Counted from the code (not from the Firebase console); N = events, E = an
+account's events, G = an event's guests, F = registry gifts.
+
+| What | Reads | When |
+| --- | --- | --- |
+| Guest page `/<eventId>` | 0 from the cache; 17 on a rebuild (event doc + 16 content docs) | rebuild at most hourly per visited event, and after a Publish |
+| 404 page data `/api/not-found` | 0 cached; 4 on a rebuild | hourly at most |
+| Invite code check | 2 (rate limit + guest); a wrong code +1 read, +1 write | per try |
+| RSVP submit | 2 + 5 for the email (4 content docs + `settings/email`); 1 write | per RSVP |
+| Registry screen (`getRegistryGifts`) | F | **every time a guest opens it** (not cached) |
+| Any admin page (layout) | owner: about 4 + 2N; member: about 2 + 4E | every navigation |
+| All Events | the layout + 4 count queries per event (1 read each up to 1,000 guests) | per view |
+| Dashboard | the layout + G + F | per view |
+| Guests, Invites | the layout + G | per view |
+| Builder | edit lock: 1 read + 1 write every 30 s; drafts: ~2 reads + 1 write per save (10 s autosave) | while open |
+| Blob clean-up | 1 + about 45 per event (every doc of five collections) | daily (cron), or an owner's click |
+
+Today (2 events, under 100 guests) a busy day stays well under 5,000 reads.
+What grows first: the admin layout for owners (2N per click: with 50 events,
+about 100 reads per click), the guest lists (G per view of Dashboard, Guests
+or Invites), and the registry (F per guest view). The guest page itself is not
+a risk after F4. See `docs/current-state.md` for the follow-ups.
 
 ## `content` docs ↔ `wedding-content.json` keys
 
@@ -272,13 +308,15 @@ those titles.
 
 ## Image storage (Vercel Blob)
 
-Admin editors call `uploadImage(file, name, opts)` from
+Admin editors call `uploadImage(eventId, file, name, opts)` from
 `src/lib/blob/uploadImage.ts`. It resizes and re-encodes the image in the
 browser (default: longest side 2000px, WebP, quality 0.82; small files, SVG,
 GIF and undecodable files such as HEIC go up unchanged), then uploads straight
 to a **public** Vercel Blob store with a client token from `/api/upload`
-(admin-only, see `docs/security.md`). Blob adds a random suffix, so a path is
-`<name>-<random>.<ext>` and uploads never overwrite. The returned URL
+(the event's members only, see `docs/security.md`). Since F13 every upload
+goes into the event's folder: the path is `events/<eventId>/<name>-<random>.<ext>`
+(Blob adds the random suffix, so uploads never overwrite). Files from before
+F13 sit at `<name>-<random>.<ext>` with no event folder. The returned URL
 (`https://<store>.public.blob.vercel-storage.com/...`) is what goes into
 Firestore.
 
@@ -296,13 +334,12 @@ Firestore.
 | `website/order-of-events` | default | EventDetailsEditor |
 | `gallery/photo` | default | GalleryEditor |
 
-Music goes through `uploadAudio(file)` (`src/lib/blob/uploadAudio.ts`) as
-`music/background-<random>.<ext>`, unchanged (no re-encoding). The upload
-token gives paths under `music/` `audio/*` and a 10 MB cap (`MUSIC_MAX_BYTES`),
+Music goes through `uploadAudio(eventId, file)` (`src/lib/blob/uploadAudio.ts`) as
+`events/<eventId>/music/background-<random>.<ext>`, unchanged (no re-encoding). The upload
+token gives paths under `music/` in the event folder `audio/*` and a 10 MB cap (`MUSIC_MAX_BYTES`),
 every other path `image/*` and 20 MB. A guest downloads the track only when it
 first plays (`preload="none"`), but each play of an uploaded track is Blob
-transfer, so a smaller MP3 also saves quota. Replaced uploads stay in Blob
-(nothing deletes them, same as images).
+transfer, so a smaller MP3 also saves quota.
 
 Why compress: most guest screens (RevealImage without `sizes`, RSVP CTA,
 video covers) render these URLs with plain
@@ -315,7 +352,29 @@ Vercel Image Optimization allowance, not Blob transfer, after the first fetch. T
 storage and 10 GB Blob data transfer per month, **shared by every project in
 the account**; going over blocks Blob for up to 30 days.
 
-Old files are never deleted when an image is replaced.
+**Storage per event and clean-up (F13).** An event's storage is the files in
+its folders, `events/<eventId>/` and `events/<formerId>/` for each of its
+`formerIds` (`getEventStorage` in `src/lib/blob/eventStorage.ts`, one Blob
+`list` per folder). The cap is `EVENT_STORAGE_CAP_BYTES` (200 MB, in
+`src/lib/blob/blobRefs.ts`), a soft cap: `/api/upload` refuses a token once the
+event is at or over it, so one last file can go a little past. Pre-F13 files
+(the first wedding's `images/`, `gallery/`, `website/`) are in no folder and
+count toward no event. The Settings page shows the usage.
+
+A file is **unused** when no saved data points at it: no doc of any event's
+`content`, `drafts`, `contentVersions`, `settings` or `registryGifts`, of the
+pre-F3 root `websiteContent` and `registryGifts`, nor
+`src/data/wedding-content.json` (`blobPathsIn` finds every Blob URL in a doc).
+Versions count, so History can still restore a version's photos until it drops
+out of the last 10. Every event is read, because a duplicated event points at
+its source's files. `pickUnused` keeps any file under 24 hours old (an editor
+may hold an upload not yet in a draft) and anything outside the app's folders
+(`events/`, `images/`, `gallery/`, `website/`, `music/`). The daily Vercel Cron
+`/api/cron/blob-cleanup` (19:00 UTC, `vercel.json`, needs `CRON_SECRET`)
+deletes them; owners can also find and delete them from the Settings page.
+One failed read stops the run before anything is deleted. A run reads every
+doc of those collections (about 40–50 per event), so it is daily, not on
+every Publish.
 
 **Firebase Storage (legacy).** Until Sept 2026 uploads went to Firebase Storage
 (`images/<name>-<ts>`, `gallery/gallery-<ts>-<id>.<ext>`,

@@ -4,14 +4,16 @@
 
 | Actor | Can |
 | --- | --- |
-| Anyone | Read an event's `content` and `registryGifts` (`events/{eventId}/…`) from the browser (`firestore.rules`);read all uploaded images (public Vercel Blob URLs); call the guest server actions (`rsvp.ts`, `registry.ts`). **Cannot** read or write `guests` from the browser (`allow read, write: if false`); invite-code checks and RSVPs go through `verifyInviteCode` / `submitRsvp` |
+| Anyone | Read an event's `content` and `registryGifts` (`events/{eventId}/…`) from the browser (`firestore.rules`);read all uploaded images (public Vercel Blob URLs); call the guest server actions (`rsvp.ts`, `registry.ts`). **Cannot** read or write `guests` from the browser (`allow read, write: if false`); invite-code checks and RSVPs go through `verifyInviteCode` / `submitRsvp`, which allow a visitor (by IP, all events together) 10 wrong codes per 15 minutes, then answer `tooMany` until the window ends (`src/lib/inviteRateLimit.ts`; `rateLimits/{sha256(ip)}`, the IP is not stored; the IP is `x-real-ip`, else the first `x-forwarded-for`, both set by Vercel) |
 | Anyone, via `/api/download` | Download an image only from an allowed host (`isAllowedImageUrl` in `src/lib/downloadProxy.ts`): `https:`, default port, no credentials, and either a `*.public.blob.vercel-storage.com` host (`endsWith`, not `includes`) or `firebasestorage.googleapis.com` with a path under `/v0/b/${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/` (legacy URLs). Anything else gets 400 before any fetch. The fetch uses `redirect: 'error'`; a non-`image/*` reply gets 415, more than 15 MB gets 413 (by `content-length`, and by a byte count while reading when the header is missing or wrong). Upstream errors return a generic 502/500; details go to `console.error` only. `filename` is cut down to `[A-Za-z0-9._-]`, max 100 chars, fallback `download.jpg` (`sanitizeFilename`), so no header injection. Response sets `Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`. Tests: `npm test` (`src/lib/downloadProxy.test.ts`) |
 | Anyone, via `/api/not-found` | Read the default event's global settings, site text, theme and music (`getSiteContent(DEFAULT_EVENT_ID)`, cached) and the JSON's Welcome photo, which its guest page already shows. Takes no input, so it cannot read another event. The 404 page fetches it |
 | Guest with a valid unused code | Submit one RSVP (`submitRsvp` transaction flips `codeStatus` to `used`) |
 | Event **client** (`events/{eventId}/members/{uid}`, `role: 'client'`) | In that event only: every admin page, guests, invites, gifts, registry claims, and every content doc except the design. Design = section **order**, `theme` (colors & fonts) and `music`: allowed only when the event's `settings/permissions.clientDesign` is true. Showing, hiding and renaming sections are allowed. Read every content draft. Upload images and music (see below) |
 | Event **organizer** (`role: 'organizer'`) | Everything in that event, including the design and the **Team** page: add, remove and re-role members (not themselves), cancel invites, turn `clientDesign` on or off, read the activity log |
 | Platform **owner** (`admins/{uid}.role == 'super'`) | Everything an organizer can, in **every** event, with no membership. Made only by `scripts/add-admin.js --super` (or the Firebase console); the Team page never creates, removes or lists owners |
-| Any member or owner, uploads | Upload images (and music, paths under `music/`: `audio/*`, 10 MB) to Vercel Blob with a token from `/api/upload`, which verifies the Firebase ID token the browser sends as `clientPayload` (`verifyIdToken(…, true)`) and that `admins/{uid}` is an owner or lists at least one event in `eventIds` (Blob paths are not per event). It deliberately does not use the 5-day `session` cookie, which can expire while the admin page stays open |
+| Any member or owner, uploads | Upload images (and music, paths under `music/`: `audio/*`, 10 MB) into **that event's** Blob folder (`events/<eventId>/…`) with a token from `/api/upload`. The browser sends `{ idToken, eventId }` as `clientPayload`; the route verifies the Firebase ID token (`verifyIdToken(…, true)`), that `admins/{uid}` is an owner or lists the event in `eventIds`, that the path starts with the event's folder, and that the event is under its storage cap (`getEventStorage`). It deliberately does not use the 5-day `session` cookie, which can expire while the admin page stays open. A refused token reaches the browser only as a generic error; `getUploadProblem` (`settings.ts`, session cookie) then says why |
+| Event **organizer** or owner, Settings | Set the event's email sender name and reply-to (`saveEmailSettings`, logged) and see its storage. Owners only: find and delete unused Blob files of all events (`cleanUpStorage`) |
+| Vercel Cron | `GET /api/cron/blob-cleanup` deletes unused Blob files daily. Needs `Authorization: Bearer <CRON_SECRET>` (compared in constant time); without the `CRON_SECRET` variable every call is refused |
 | Server (firebase-admin) | Everything — admin SDK bypasses rules |
 
 Browser writes to `guests`, `registryGifts`, and `giftSelections` are denied by
@@ -178,8 +180,10 @@ read it on the Team page.
 
 ## Known gaps (not fixed yet — read before touching auth)
 
-1. **No rate limit on `verifyInviteCode`.** 32^6 ≈ 1.07 billion codes makes
-   guessing slow, but there is no throttle.
+1. **Invite-code rate limit is per IP.** Fixed since F13 (10 wrong codes per
+   15 minutes), but someone with many IPs gets 10 tries per IP. With 32^6 ≈
+   1.07 billion codes that is still slow. `claimGift` takes no code, so it is
+   not limited.
 2. `storage.rules` (Firebase Storage, no longer used for uploads) still
    allows any `admins/{uid}` to write; left as it was.
 3. The **old root** rules have overlapping `allow` lines for `registryGifts` and

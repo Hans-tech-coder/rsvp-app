@@ -146,7 +146,7 @@ export function GalleryEditor({ eventId }: { eventId: string }) {
     for (const item of newItems) {
       try {
         if (!item.file) continue;
-        const url = await uploadImage(item.file, 'gallery/photo');
+        const url = await uploadImage(eventId, item.file, 'gallery/photo');
         
         setGallery(prev => prev.map(p => p.id === item.id ? { ...p, url, isUploading: false, file: undefined } : p));
       } catch (err) {
@@ -174,7 +174,7 @@ export function GalleryEditor({ eventId }: { eventId: string }) {
     try {
       setGallery(prev => prev.map(p => p.id === id ? { ...p, isUploading: true } : p));
       
-      const url = await uploadImage(file, 'gallery/photo');
+      const url = await uploadImage(eventId, file, 'gallery/photo');
       
       setGallery(prev => prev.map(p => p.id === id ? { ...p, url, isUploading: false } : p));
       setSaved(false);

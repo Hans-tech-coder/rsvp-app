@@ -49,7 +49,7 @@ when you find or fix one of these.
 | Issue | Where | Notes |
 | --- | --- | --- |
 | Welcome 3D scene fetches the photo twice | `DepthParallaxScene.tsx` loads the raw Blob URL; the loader preloads the `next/image` srcset URL | ~220 KB extra on first visit. Feed the scene the same optimized URL to share the cache |
-| Replaced images are never deleted from Blob | all editors | Counts against the shared 1 GB Hobby Blob quota |
+| Unused Blob files are deleted only once the cron runs | `src/app/api/cron/blob-cleanup/route.ts`, `vercel.json` | Needs `CRON_SECRET` in Vercel (not set on 2026-10-16); until then only an owner's Delete on the Settings page removes them. The first dry run (2026-10-16, read only) found 4 unused files (old `images/our-story-*`, 0.4 MB) of 61; nothing was deleted |
 | Legacy Firebase Storage URLs return 402 | Firestore `events/hans-and-czay/content/*` (and the old root `websiteContent/*` copy), `wedding-content.json` |Google billing account closed; replace by re-uploading in the admin, then `npm run sync-content`. See `docs/data-model.md` |
 | `wedding-content.json` has a mixed `gallery` key and an unused `faqs` key | `src/data/wedding-content.json` | Side effect of `sync-content.js`; see `docs/data-model.md`. `faqs` is left out of `DEFAULT_CONTENT` (`src/lib/weddingContent.ts`), so it never reaches a page |
 | Content merge is hand-written per doc | `mergeContent()` in `src/lib/contentMerge.ts` | New fields in field-by-field docs need an explicit line |
@@ -74,13 +74,13 @@ when you find or fix one of these.
 | Organizers are per event, not per agency | `src/lib/permissions.ts`, `events/{eventId}/members` | The plan's "events of their agency" needs an agency record; today an organizer is added to each event on its Team page. Any organizer of any event may create events (F11), and sees only the events they are a member of |
 | Events created before F12 show the Wedding defaults (the Hans & Czay text and photos) | `src/data/wedding-content.json` | Since F12 a new event gets every content doc from its template (`src/lib/templates`). An event made with the F11 dialog has no content docs and still shows the JSON defaults until edited |
 | Dress Code shows "Dress Code:" before its title | `DressCodeScreen.tsx` line ~67 | A literal F0 missed; reads oddly on the Corporate template's "Attire" page. Needs a `siteText.dressCode` key + Site Text field |
-| RSVP email says "<name> Wedding" as the sender for every event type | `from` in `src/lib/email/sendRsvpConfirmation.ts` | Per-event sender settings are F13. The email's other wording is generic |
+| RSVP email sender changed from "<name> Wedding" to the event's name | `sendRsvpConfirmation.ts`, `settings/email` | F13: an organizer can set any sender name and a reply-to on the Settings page. Still one sending Gmail account for every event (`src/lib/email/sender.ts`) |
 | Corporate template: the RSVP proxy field asks for the company | `src/lib/templates/corporate.ts` (`rsvpForm.labels.proxy`) | Stored and listed as `proxy` in Guests, the CSV and the email ("Proxy") |
 | Template sample photos are small | `public/templates/*.webp` | Many are 1024 px wide (the free source's size), soft as a full-width desktop background. Replace with larger CC0 photos or the demo events' own (F14) |
 | F12 checked with one real create (Debut only) | `createEvent`, `src/app/admin/new` | Checked: 20 unit tests (every template: no first-couple text or Blob photo, known site text keys, photos exist, answers filled in), tsc, build, lint, the wizard on :3000 at 1186 px and 375 px, each template's guest site rendered from `buildTemplateDocs` in a temporary route (removed). Write test 2026-10-15 with the owner's OK (production Firestore, via the wizard on :3000): `f12-test` from the Debut template, Black & Gold; the builder opened on it with the Debut content and palette; `/f12-test` 200 with title "Ana’s Debut \| You Are Invited", template photo as og:image; All Events card "Debut · March 6, 2027"; activity "created the event · Ana’s Debut, from the Debut template". Deleted from All Events: no doc or subcollection left (read-only admin SDK check), `/f12-test` 404, `hans-and-czay` 200. Right after Delete the page showed "This page couldn’t load" because the dev server refused connections for a moment (cause not seen: its log is outside the session); a reload was fine. Not tried: an organizer creating, the Wedding / Birthday / Corporate templates through a real create |
 | Archived events still accept RSVPs and gift claims by direct call | `src/app/actions/rsvp.ts`, `registry.ts` | The guest page is a 404, so no guest reaches the forms; the actions themselves do not read `status` |
 | Change link is not atomic | `renameEvent` in `src/app/actions/events.ts` | Copy, move accounts, then delete the old ID. An RSVP written to the old ID during the move is lost; a failure after the copy leaves both IDs (the old one still works). Uploaded images keep their Blob URLs (not per event) |
-| Delete leaves the event's images in Blob | `deleteEvent` | Blob clean-up is F13 |
+| Delete leaves the event's images in Blob until the next clean-up | `deleteEvent` | No event points at them any more, so the daily clean-up (or an owner's Delete on Settings) removes them a day later (F13) |
 | F11 checked with an owner account only | `src/app/actions/events.ts`, `moveEventAccounts` in `src/lib/platformEvents.ts` | On 2026-10-15 on :3000 (production Firestore, owner's OK): create, duplicate (of `hans-and-czay`: 28 content docs equal, 2 settings), change link (old ID gone, every doc moved, the open event followed), archive (guest 404, Archived list) / restore (200), delete with a wrong then the right link (nothing left; `hans-and-czay` unchanged). Not tried: an organizer creating an event (joins as organizer), moving members' `eventIds` and pending invites on change link / delete (the test events had none), the production ISR cache after archive |
 | The edit lock covers the visual builder only | `src/app/actions/editLock.ts` | The content page's tab editors do not take it; two people there rely on the draft `updatedAt` check |
 | Audit log grows without a cleanup | `events/{eventId}/auditLog` | One small doc per admin change; the Team page shows the last 50 |
@@ -97,6 +97,11 @@ when you find or fix one of these.
 | Screens save not tried signed in (F8) | `ScreensEditor.tsx` | Checked: the editor reads the live doc with no false "unsaved" state, the list reorders (arrows, keyboard drag), hides and renames at phone width; the guest flow with a reordered/hidden list (temporary route, removed). Not checked: a real Save to `content/screens` and the rebuilt guest page |
 | A guest's saved step is a position, not a screen | `GuestSite.tsx` (`event:<eventId>:currentStep`, `highestVisitedStep`) | After an admin reorders or hides screens, a returning guest resumes at the same position (clamped to the last), which may be another screen; the menu unlocks by position too |
 | Circular gallery keeps the last-closed photo mounted | `circular-image-gallery.tsx` (`closing` state never resets) | Two extra SVG `<image>`s at most; harmless |
+| Pre-F13 uploads count toward no event's storage | `getEventStorage` (`src/lib/blob/eventStorage.ts`) | The first wedding's files (`images/`, `gallery/`, `website/`, about 8 MB) are in no event folder, so its Settings page shows 0 MB until new uploads. They are still cleaned up when unused |
+| A new event that takes a former link shares that folder's count | `getEventStorage` (folders `events/<id>/` + `formerIds`) | After `a` is renamed to `b`, a new event called `a` also counts `events/a/` (which `b` counts too). Rare; usage only, nothing is deleted by it |
+| Storage cap is one number for every event | `EVENT_STORAGE_CAP_BYTES` in `src/lib/blob/blobRefs.ts` | 200 MB. No per-event override yet (needed when plans differ, at the paid upgrade) |
+| `rateLimits` docs are never removed | `src/lib/inviteRateLimit.ts` | Each has `expiresAt`; set up a Firestore TTL policy on `rateLimits.expiresAt` (console) to delete them. Rate limit not tried against production Firestore (would write a doc); unit-tested only |
+| Firestore reads that grow with the platform (F13 budget check) | admin layout (`listEventChoices`: an owner reads every event + its `globalSettings` on every admin click), Dashboard / Guests / Invites (every guest doc per view), `getRegistryGifts` (every gift per guest view, not cached) | Fine today (see "Firestore read budget" in `docs/data-model.md`). Fixes when events grow: keep the event name on the event doc, count queries on the dashboard, cache the registry list |
 
 ## Unused code and dependencies
 
@@ -113,7 +118,9 @@ Remove them only when asked.
 ## Deployment
 
 Vercel (Node 22). Image uploads need a **public** Vercel Blob store connected
-to the project (`BLOB_READ_WRITE_TOKEN`). Firestore/Storage rules are deployed separately with the
+to the project (`BLOB_READ_WRITE_TOKEN`). The daily Blob clean-up (Vercel Cron in
+`vercel.json`) runs only when `CRON_SECRET` is set in the Vercel project
+(any long random string); Hobby runs it once a day at an approximate time. Firestore/Storage rules are deployed separately with the
 Firebase CLI. The Vercel project must have all `FIREBASE_ADMIN_*` and
 `NEXT_PUBLIC_FIREBASE_*` variables set at **build** time too: `/api/not-found`
 (the 404 page's content) reads Firestore when it is built, event pages when they are

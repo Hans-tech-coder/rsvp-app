@@ -1,5 +1,7 @@
 import { upload } from '@vercel/blob/client';
 import { auth } from '@/lib/firebase/client';
+import { getUploadProblem } from '@/app/actions/settings';
+import { eventFolder } from './blobRefs';
 
 type CompressOptions = {
   /** Longest side in pixels after resizing. */
@@ -49,26 +51,42 @@ async function compressImage(file: File, opts: CompressOptions): Promise<Blob> {
 }
 
 /**
- * Compress an image and upload it to Vercel Blob. Returns the public URL.
- * `name` is the path without extension, e.g. 'images/welcome-bg'; Blob adds a
- * random suffix so repeated uploads never overwrite each other.
+ * Upload a file into the event's Blob folder (`events/<eventId>/<pathname>`)
+ * with a token from /api/upload. Returns the public URL. When the token is
+ * refused, asks the server why (storage full, signed out) for the message.
  */
-export async function uploadImage(file: File, name: string, opts: CompressOptions = {}): Promise<string> {
+export async function uploadToEvent(eventId: string, pathname: string, body: Blob, contentType: string): Promise<string> {
   await auth.authStateReady();
   if (!auth.currentUser) throw new Error('Not signed in. Please log in again.');
   const idToken = await auth.currentUser.getIdToken();
 
+  try {
+    const blob = await upload(eventFolder(eventId) + pathname, body, {
+      access: 'public',
+      handleUploadUrl: '/api/upload',
+      contentType,
+      clientPayload: JSON.stringify({ idToken, eventId }),
+    });
+    return blob.url;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('client token')) {
+      throw new Error((await getUploadProblem(eventId)) ?? 'The upload was refused. Please try again.');
+    }
+    throw error;
+  }
+}
+
+/**
+ * Compress an image and upload it to the event's Blob folder. Returns the
+ * public URL. `name` is the path without extension, e.g. 'images/welcome-bg';
+ * Blob adds a random suffix so repeated uploads never overwrite each other.
+ */
+export async function uploadImage(eventId: string, file: File, name: string, opts: CompressOptions = {}): Promise<string> {
   const body = await compressImage(file, opts);
   const contentType = body.type || file.type;
   const ext = body === file
     ? file.name.split('.').pop()?.toLowerCase() || 'bin'
     : EXTENSIONS[opts.type ?? 'image/webp'];
 
-  const blob = await upload(`${name}.${ext}`, body, {
-    access: 'public',
-    handleUploadUrl: '/api/upload',
-    contentType,
-    clientPayload: idToken,
-  });
-  return blob.url;
+  return uploadToEvent(eventId, `${name}.${ext}`, body, contentType);
 }

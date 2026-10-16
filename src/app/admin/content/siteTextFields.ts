@@ -83,6 +83,7 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
       { path: 'entrance.errors.invalid', label: 'Error: code does not exist' },
       { path: 'entrance.errors.used', label: 'Error: code already used' },
       { path: 'entrance.errors.failed', label: 'Error: could not check the code' },
+      { path: 'entrance.errors.tooMany', label: 'Error: too many wrong codes (wait a few minutes)' },
     ],
   },
   {

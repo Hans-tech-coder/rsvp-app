@@ -35,7 +35,7 @@ platform: data and guest URLs are already per event (`/<eventId>`).
 | Who | What they do | Where |
 | --- | --- | --- |
 | **Guests** (no account) | Step through up to 10 screens (by default welcome → our story → entourage → details → dress code → gallery → FAQs → registry → RSVP call-to-action → RSVP form; admins reorder, hide and rename them). Unlock the RSVP form with a one-time 6-character invite code. Claim a registry gift. | `/<eventId>` (one page, screens swap in place; `/` → default event) |
-| **Admins** (Google sign-in, by invite only; per event an **organizer** or a **client**, and platform **owners** who open every event) | Pick the event to work on (sidebar switcher; **All Events** lists them with RSVP counts and creates (a wizard: Wedding, Debut, Birthday / Anniversary or Corporate / Seminar template, names, date, venue, palette), duplicates, re-links, archives and, for owners, deletes events). Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font, the music, and which screens show in what order on the guest site. Edits are drafts (autosaved) until Publish; a preview shows the draft site and History restores earlier published versions. A **visual builder** (tablet and wider) shows the draft site with the sections and editors around it: click a section to edit it, live, with undo / redo. Clients cannot change the design (section order, colors & fonts, music) unless the event allows it; organizers manage the event's **Team** (members, invites, that switch, the activity log). One person at a time in the builder (Take over). | `/admin/**` |
+| **Admins** (Google sign-in, by invite only; per event an **organizer** or a **client**, and platform **owners** who open every event) | Pick the event to work on (sidebar switcher; **All Events** lists them with RSVP counts and creates (a wizard: Wedding, Debut, Birthday / Anniversary or Corporate / Seminar template, names, date, venue, palette), duplicates, re-links, archives and, for owners, deletes events). Generate and send invite codes, see RSVPs, manage registry gifts and claims, edit every text, image, color, font, the music, and which screens show in what order on the guest site. Edits are drafts (autosaved) until Publish; a preview shows the draft site and History restores earlier published versions. A **visual builder** (tablet and wider) shows the draft site with the sections and editors around it: click a section to edit it, live, with undo / redo. Clients cannot change the design (section order, colors & fonts, music) unless the event allows it; organizers manage the event's **Team** (members, invites, that switch, the activity log) and its **Settings** (email sender name and reply-to, storage used of the 200 MB cap; owners also delete unused files). One person at a time in the builder (Take over). | `/admin/**` |
 
 ---
 
@@ -81,7 +81,8 @@ node scripts/migrate-members-f10.js [--write | --verify] [--event <id>] [--role 
 skipped without them). Optional, not secret: `NEXT_PUBLIC_DEFAULT_EVENT_ID`
 (where `/` goes; default `hans-and-czay`) and `NEXT_PUBLIC_SITE_URL` (public
 address for links that leave the site; on Vercel the production domain is used
-without it). Never print, commit, or paste the secret values.
+without it). `CRON_SECRET` (Vercel only: lets the daily Blob clean-up cron run).
+Never print, commit, or paste the secret values.
 
 ---
 
@@ -98,15 +99,17 @@ src/
     fonts.ts                 every font of every pairing (next/font), CSS variables on <html>
     not-found.tsx            404 for unknown URLs/events (default event's look)
     globals.css              Tailwind @theme colors + font roles (Wedding default) + motion tokens + reveal CSS
-    actions/                 server actions: rsvp.ts, registry.ts, admin.ts, auth.ts, content.ts (drafts, publish, versions), team.ts (members, invites), editLock.ts (builder lock), events.ts (new, duplicate, change link, archive, delete)
+    actions/                 server actions: rsvp.ts, registry.ts, admin.ts, auth.ts, content.ts (drafts, publish, versions), team.ts (members, invites), editLock.ts (builder lock), events.ts (new, duplicate, change link, archive, delete), settings.ts (email settings, upload problems, storage clean-up)
     api/download/route.ts    image download proxy (used by DetailsScreen)
     api/not-found/route.ts   the 404 page's content (default event), fetched by the 404 in the browser
-    api/upload/route.ts      admin-only Vercel Blob upload token
+    api/upload/route.ts      Vercel Blob upload token: event members, the event's folder, under its storage cap
+    api/cron/blob-cleanup/   daily Vercel Cron (vercel.json): deletes Blob files nothing uses
     api/logout/route.ts      clears the session cookie, redirects to /admin/login
     api/edit-lock/release/   frees the builder's edit lock when its tab closes (sendBeacon)
     admin/                   admin portal: page.tsx = All Events (F11, EventsClient); new/ = New Event wizard (F12); layout.tsx (server: current event, role, events) -> AdminShell.tsx (sidebar) + EventSwitcher.tsx; eventAccess.tsx = event + role for the UI; open/[event]/route.ts = switch event
       builder/               Visual builder: page.tsx (sections, preview canvas, editor drawer, undo/redo) + builderContext (editor <-> builder link) + useEditLock (one tab at a time)
       team/                  Team: members, invites, client design switch, activity log
+      settings/              Settings (F13): email sender name + reply-to, storage, owners' unused-files clean-up
       content/               Content manager: page.tsx (tabs, preview) + one *Editor.tsx per screen + EditorSaveBar / contentDraft (draft, publish, history) + layout.tsx / contentDefaults.tsx (JSON defaults from the server)
       components/            AdminModal, TablePagination, ScreenList (reorder/show/rename screens), PreviewFrame (phone/desktop draft preview, builder canvas)
       dashboard|invites|guests|gifts|registry|login/
@@ -121,8 +124,11 @@ src/
   data/wedding-content.json  default/fallback content for every screen (first couple's; server only, admin and preview get it as props)
   lib/eventPaths.ts          every Firestore path (events/{eventId}/content|guests|registryGifts|giftSelections|settings|members|auditLog, admins) (+ .test.ts)
   lib/firebase/              client.ts (browser SDK), admin.ts (admin SDK, server only)
-  lib/blob/uploadImage.ts    compress + upload an image to Vercel Blob (all editors)
-  lib/blob/uploadAudio.ts    upload a music file to Vercel Blob (Music editor)
+  lib/blob/uploadImage.ts    compress + upload an image into the event's Blob folder (all editors); uploadToEvent
+  lib/blob/uploadAudio.ts    upload a music file into the event's Blob folder (Music editor)
+  lib/blob/blobRefs.ts       storage rules: event folder, cap, grace, Blob URLs in data, unused files (pure, + .test.ts)
+  lib/blob/eventStorage.ts   event storage usage, unused-file clean-up (server only)
+  lib/inviteRateLimit.ts     wrong invite codes per visitor IP (rateLimits) (+ .test.ts)
   lib/requireAdmin.ts        session + role-in-event check for server actions and admin pages; the current event (adminEvent cookie) (server only)
   lib/platformEvents.ts      the platform's events: lists (All Events, switcher), who may create, copy for duplicate / change link (server only)
   lib/templates/             event templates (F12): catalog.ts (types, name fields, palettes, screens), <type>.ts (starting content), index.ts (wizard answers -> content docs) (+ templates.test.ts); photos in public/templates/
@@ -143,7 +149,9 @@ src/
   lib/genericContent.ts      hosts / People groups / venues / guidelines: types, readers, old-shape adapters (+ .test.ts)
   lib/siteUrl.ts             getSiteUrl(), getEventUrl() for links that leave the site (server only)
   lib/downloadProxy.ts       URL allowlist + filename sanitizer for /api/download (+ .test.ts)
-  lib/email/sendRsvpConfirmation.ts   guest RSVP confirmation email via Gmail SMTP (server only)
+  lib/email/sendRsvpConfirmation.ts   guest RSVP confirmation email (server only)
+  lib/email/sender.ts        sendEmail: Gmail SMTP today, the place for a transactional provider (server only)
+  lib/email/emailSettings.ts an event's sender name + reply-to (settings/email) (+ .test.ts)
   types/index.ts             Guest, RegistryGift, GiftSelection, AdminUser
   proxy.ts                   /admin/** redirect when no session cookie
 scripts/                     sync-content.js, add-admin.js, migrate-to-events.js, migrate-content-f5.js, migrate-members-f10.js

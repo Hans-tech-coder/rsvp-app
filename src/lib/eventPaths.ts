@@ -9,11 +9,13 @@
 //   guests/{inviteCode}  invite codes and RSVPs (codes are unique per event)
 //   registryGifts/{id}
 //   giftSelections/{id}
-//   settings/{doc}       e.g. `inviteTemplate`, `permissions`, `editLock`
+//   settings/{doc}       e.g. `inviteTemplate`, `permissions`, `editLock`, `email`
 //   members/{uid}        the event's team: role `organizer` | `client` (F10)
 //   auditLog/{id}        who changed what, when (F10)
 // Accounts stay global: `admins/{uid}` (sign-in; `role: 'super'` = platform
-// owner) and `adminAllowlist/{email}` (pending invites).
+// owner) and `adminAllowlist/{email}` (pending invites). `rateLimits/{key}`
+// counts failed invite-code tries per visitor (F13). `websiteContent` and the
+// root `registryGifts` are the pre-F3 copies, only read by the Blob clean-up.
 
 const EVENT_ID = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
 
@@ -82,4 +84,7 @@ export const paths = {
   admin: (uid: string) => `admins/${segment(uid)}`,
   adminAllowlist: () => 'adminAllowlist',
   adminAllowlistEntry: (email: string) => `adminAllowlist/${segment(email)}`,
+  rateLimit: (key: string) => `rateLimits/${segment(key)}`,
+  legacyContent: () => 'websiteContent',
+  legacyRegistryGifts: () => 'registryGifts',
 };

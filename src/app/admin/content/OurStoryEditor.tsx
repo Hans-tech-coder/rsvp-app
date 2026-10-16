@@ -120,7 +120,7 @@ export function OurStoryEditor({ eventId }: { eventId: string }) {
     setSaved(false);
     
     try {
-      const downloadURL = await uploadImage(file, 'images/our-story');
+      const downloadURL = await uploadImage(eventId, file, 'images/our-story');
       
       setItems(prev => {
         const newItems = [...prev];

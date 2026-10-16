@@ -76,7 +76,7 @@ export function WelcomeScreenEditor({ eventId }: { eventId: string }) {
     setSaved(false);
     
     try {
-      const downloadURL = await uploadImage(file, 'images/welcome-bg');
+      const downloadURL = await uploadImage(eventId, file, 'images/welcome-bg');
       
       setFormData(prev => ({ ...prev, backgroundImage: downloadURL }));
     } catch (error) {

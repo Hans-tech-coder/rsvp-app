@@ -116,6 +116,27 @@ the dashboard). It replaced the super-admin "Manage Admins" modal (F10).
 Owners are not listed (they open every event); there is no UI to add or
 remove one.
 
+## Settings (organizers and owners, F13)
+
+`/admin/settings` (`settings/page.tsx` server, `SettingsClient.tsx`), in the
+sidebar as **Settings** next to Team (a client who opens the URL goes to the
+dashboard).
+
+- **Emails to guests**: sender name (empty = the event's name) and the
+  reply-to address (empty = the sending account), with a From / Reply-to
+  preview and the sending address (or "not set up" without the Gmail
+  variables) → `saveEmailSettings` (`settings/email`, logged). Used by the
+  RSVP confirmation email.
+- **Storage**: used of the cap (200 MB per event) with a meter, file count,
+  "Full" when uploads are refused. Replaced photos and songs are deleted a
+  day after nothing uses them (daily cron, see `docs/data-model.md`).
+- **Unused files (all events)**, owners only: Find unused files
+  (`cleanUpStorage(false)`: count, size, the first 10 paths) → Delete
+  (confirmed in `AdminModal`, `cleanUpStorage(true)`).
+
+When an upload is refused (full, or signed out), the editor shows the reason
+from `getUploadProblem` instead of a generic error.
+
 ## Client locks
 
 For a client without `clientDesign`: the **Colors & Fonts** and **Music** tabs
@@ -163,6 +184,7 @@ the client checks `success` and shows the error.
 | `/admin/registry` | Who claimed which gift; delete a claim (decrements the gift count) | `deleteGiftSelection` |
 | `/admin/content` | Tabbed editors for every guest screen, plus **Site Text** (every button, label, hint and error message, grouped by screen, with a search box; empty field = default) **Screens & Menu** (reorder, show/hide and rename the guest screens; `content/screens`), **Colors & Fonts** (palette presets, color pickers, readability check, font pairings, live preview; `content/theme`) and **Music** (on/off, song upload, starting volume; `content/music`) | `loadDraft`, `saveDraft`, `publishDraft`, `discardDraft`, `getVersion` (`src/app/actions/content.ts`): editors save a draft (also autosaved after 10 s idle), **Publish** makes it live and rebuilds the cached guest page, **History** restores one of the last 10 published versions. A **Preview** button shows the draft site in a phone / desktop frame (docked from 1024 px, full screen below). See "Drafts, preview and versions" in `docs/content-system.md` |
 | `/admin/team` | The event's team, invites, the client design switch and the activity log (organizers and owners) | `addMember`, `changeMemberRole`, `removeMember`, `cancelInvite`, `setClientDesign` (`src/app/actions/team.ts`) |
+| `/admin/settings` | Email sender name and reply-to, the event's storage, owners: unused files clean-up (organizers and owners) | `saveEmailSettings`, `cleanUpStorage` (`src/app/actions/settings.ts`) |
 | `/admin/builder` | **Visual builder** (tablet and wider; full screen): section list (pick, drag, show/hide, rename) and site-wide panels on the left, the draft site in the middle, the picked section's editor on the right. Click a section in the preview to edit it; edits show live; Undo / Redo across panels. See "Visual builder" in `docs/content-system.md` | Same as `/admin/content` (each panel is the same editor with its own Save Draft / Publish / History) |
 
 ## Adding an admin page

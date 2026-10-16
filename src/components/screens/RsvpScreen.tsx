@@ -226,7 +226,7 @@ export function RsvpScreen({ inviteCode, onContinue, onSubmitSuccess }: RsvpScre
         onSubmitSuccess();
       }
     } else {
-      setError(result.code === 'invalid' ? text.rsvp.errors.codeInvalid : result.code === 'used' ? text.rsvp.errors.codeUsed : text.rsvp.errors.submitFailed);
+      setError(result.code === 'invalid' ? text.rsvp.errors.codeInvalid : result.code === 'used' ? text.rsvp.errors.codeUsed : result.code === 'tooMany' ? text.entrance.errors.tooMany : text.rsvp.errors.submitFailed);
     }
   };
 

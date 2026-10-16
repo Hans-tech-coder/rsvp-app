@@ -8,13 +8,25 @@ import { after } from 'next/server';
 import { headers } from 'next/headers';
 import { sendRsvpConfirmation } from '@/lib/email/sendRsvpConfirmation';
 import { paths } from '@/lib/eventPaths';
+import { isInviteGuessBlocked, recordWrongInviteCode, visitorIp } from '@/lib/inviteRateLimit';
+
+const TOO_MANY = 'Too many wrong codes. Please wait a few minutes and try again.';
+
+// A failed count must not turn a wrong code into "failed to verify".
+const countWrongCode = (ip: string) => recordWrongInviteCode(ip).catch((error) => console.error('Invite rate limit write failed:', error));
 
 export async function verifyInviteCode(eventId: string, inviteCode: string) {
   try {
+    const ip = visitorIp(await headers());
+    if (await isInviteGuessBlocked(ip)) {
+      return { valid: false, code: 'tooMany' as const, error: TOO_MANY };
+    }
+
     const guestRef = getAdminDb().doc(paths.guest(eventId, inviteCode));
     const guestDoc = await guestRef.get();
 
     if (!guestDoc.exists) {
+      await countWrongCode(ip);
       return { valid: false, code: 'invalid' as const, error: 'Invalid invite code.' };
     }
 
@@ -71,6 +83,12 @@ export async function submitRsvp(
   }
 ) {
   try {
+    // The same limit as verifyInviteCode: a direct call must not be a way around it.
+    const ip = visitorIp(await headers());
+    if (await isInviteGuessBlocked(ip)) {
+      return { success: false, code: 'tooMany' as const, error: TOO_MANY };
+    }
+
     // The invite code is the guest's document ID within the event
     const guestRef = getAdminDb().doc(paths.guest(eventId, inviteCode));
 
@@ -115,6 +133,7 @@ export async function submitRsvp(
     const code: 'invalid' | 'used' | 'failed' = error.message === 'Invalid invite code' ? 'invalid'
       : error.message === 'This invite code has already been used.' ? 'used'
       : 'failed';
+    if (code === 'invalid') await countWrongCode(visitorIp(await headers()));
     return { success: false, code, error: error.message || 'Failed to submit RSVP' };
   }
 }
