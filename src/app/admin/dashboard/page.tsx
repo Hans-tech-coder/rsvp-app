@@ -1,7 +1,8 @@
 import { getAdminDb } from '@/lib/firebase/admin';
 import { requireCurrentEventPage } from '@/lib/requireAdmin';
 import { paths } from '@/lib/eventPaths';
-import { Guest, RegistryGift } from '@/types';
+import { countRsvps } from '@/lib/platformEvents';
+import type { Query } from 'firebase-admin/firestore';
 import { Users, UserCheck, UserX, Gift, CheckCircle2 } from 'lucide-react';
 
 // Force dynamic since we want fresh data on each load
@@ -15,22 +16,24 @@ export default async function DashboardPage() {
   let errorMsg = null;
 
   try {
-    // Fetch Guests Data
-    const guestsSnapshot = await getAdminDb().collection(paths.guests(eventId)).get();
-    const guests = guestsSnapshot.docs.map(doc => doc.data() as Guest);
-    
-    totalCodes = guests.length;
-    const usedCodes = guests.filter(g => g.codeStatus === 'used');
-    unusedCodes = totalCodes - usedCodes.length;
-    attendingCount = usedCodes.filter(g => g.willAttend === 'Yes').length;
-    notAttendingCount = usedCodes.filter(g => g.willAttend === 'No').length;
+    // Count queries only (one read each per 1000 docs), never the guest or gift docs.
+    const db = getAdminDb();
+    const gifts = db.collection(paths.registryGifts(eventId));
+    const count = async (query: Query) => (await query.count().get()).data().count;
+    const [rsvp, giftCount, fullCount] = await Promise.all([
+      countRsvps(db, eventId),
+      count(gifts),
+      count(gifts.where('isFull', '==', true)),
+    ]);
+    if (!rsvp) throw new Error('Could not count the RSVPs.');
 
-    // Fetch Registry Data
-    const giftsSnapshot = await getAdminDb().collection(paths.registryGifts(eventId)).get();
-    const gifts = giftsSnapshot.docs.map(doc => doc.data() as RegistryGift);
-    
-    totalGifts = gifts.length;
-    fullyClaimedGifts = gifts.filter(g => g.isFull).length;
+    totalCodes = rsvp.invites;
+    unusedCodes = rsvp.invites - rsvp.responded;
+    attendingCount = rsvp.attending;
+    notAttendingCount = rsvp.notAttending;
+
+    totalGifts = giftCount;
+    fullyClaimedGifts = fullCount;
     availableGifts = totalGifts - fullyClaimedGifts;
   } catch (err: any) {
     console.error('Dashboard Error:', err);

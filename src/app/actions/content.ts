@@ -76,6 +76,20 @@ function refreshGuestSite(eventId: string) {
   else revalidatePath(`/${eventId}`);
 }
 
+/**
+ * Keeps the site's names (`coupleNameFormat`) on the event doc as `siteName`,
+ * so the admin event switcher lists the event without reading globalSettings
+ * (src/lib/platformEvents.ts). A failure only costs the switcher a read.
+ */
+async function storeSiteName(db: Firestore, eventId: string, data: DocData | null) {
+  const siteName = typeof data?.coupleNameFormat === 'string' ? data.coupleNameFormat.trim() : '';
+  try {
+    await db.doc(paths.event(eventId)).update({ siteName });
+  } catch (error) {
+    console.error(`Storing the site name failed (${eventId}):`, error);
+  }
+}
+
 export async function loadDraft(eventId: string, docId: string): Promise<({ success: true } & DraftState) | Fail> {
   try {
     await requireEventRole(eventId);
@@ -148,10 +162,12 @@ export async function publishDraft(eventId: string, docId: string): Promise<({ s
     const db = getAdminDb();
     const r = refs(db, eventId, docId);
 
+    let published: DocData | null = null;
     const versions = await db.runTransaction(async (tx) => {
       const [liveSnap, draftSnap] = await tx.getAll(r.live, r.draft);
       const draft = draftOf(draftSnap);
       if (!draft) throw new Error('Nothing to publish');
+      published = draft.data;
       const { items } = await readVersions((ref) => tx.get(ref), r, dataOf(liveSnap));
       const next = addVersion(items, {
         id: String(draft.updatedAt),
@@ -165,6 +181,7 @@ export async function publishDraft(eventId: string, docId: string): Promise<({ s
       return versionInfo(next, draft.data);
     });
 
+    if (docId === 'globalSettings') await storeSiteName(db, eventId, published);
     refreshGuestSite(eventId);
     await logActivity(eventId, admin, 'Published', docId);
     return { success: true, versions };

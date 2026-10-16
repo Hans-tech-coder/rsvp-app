@@ -6,6 +6,8 @@ import { logActivity } from '@/lib/auditLog';
 import { FieldValue } from 'firebase-admin/firestore';
 import crypto from 'crypto';
 import { paths } from '@/lib/eventPaths';
+import { updateTag } from 'next/cache';
+import { registryGiftsTag } from '@/lib/registryGifts';
 import { getSiteContent } from '@/lib/siteContentServer';
 import { getEventUrl } from '@/lib/siteUrl';
 
@@ -111,6 +113,7 @@ export async function addRegistryGift(eventId: string, data: { name: string; lin
       isFull: false,
       createdAt: FieldValue.serverTimestamp(),
     });
+    updateTag(registryGiftsTag(eventId));
     await logActivity(eventId, me, 'Added gift', data.name);
     return { success: true, id: giftRef.id };
   } catch (error: any) {
@@ -138,6 +141,7 @@ export async function updateRegistryGift(eventId: string, giftId: string, data: 
       transaction.update(giftRef, updates);
     });
 
+    updateTag(registryGiftsTag(eventId));
     await logActivity(eventId, me, 'Edited gift', data.name ?? giftId);
     return { success: true };
   } catch (error: any) {
@@ -149,6 +153,7 @@ export async function deleteRegistryGift(eventId: string, giftId: string) {
   try {
     const me = await requireEventRole(eventId);
     await getAdminDb().doc(paths.registryGift(eventId, giftId)).delete();
+    updateTag(registryGiftsTag(eventId));
     await logActivity(eventId, me, 'Deleted gift', giftId);
     return { success: true };
   } catch (error: any) {
@@ -234,6 +239,7 @@ export async function resetRegistryGift(eventId: string, giftId: string) {
     });
 
     await batch.commit();
+    updateTag(registryGiftsTag(eventId));
     await logActivity(eventId, me, 'Reset gift claims', giftId);
     return { success: true };
   } catch (error: any) {
@@ -264,6 +270,7 @@ export async function deleteGiftSelection(eventId: string, selectionId: string, 
       transaction.delete(selectionRef);
     });
 
+    updateTag(registryGiftsTag(eventId));
     await logActivity(eventId, me, 'Deleted gift claim', giftId);
     return { success: true };
   } catch (error: any) {

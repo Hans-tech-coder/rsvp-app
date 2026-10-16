@@ -10,7 +10,8 @@ import { EVENT_ROLES, hasRole, type AccessRole } from '@/lib/permissions';
 // the sidebar switcher, and the copies behind Duplicate and Change link.
 // An event is the doc `events/{eventId}`: `slug` (= the ID, = the URL),
 // `name`, `type`, `status` ('active' | 'archived'), `createdAt`, `createdBy`,
-// and for a copy `duplicatedFrom`.
+// for a copy `duplicatedFrom`, and `siteName` (the site's `coupleNameFormat`,
+// written on each globalSettings publish so the switcher need not read it).
 
 export type EventStatus = 'active' | 'archived';
 
@@ -52,9 +53,17 @@ async function readMyEvents(admin: AdminSession): Promise<EventDoc[]> {
 /** The name an event is listed by: its own, else the names on its site, else its ID. */
 function eventName(data: FirebaseFirestore.DocumentData, globalDoc: FirebaseFirestore.DocumentData | undefined, id: string) {
   const own = typeof data.name === 'string' ? data.name.trim() : '';
-  const site = typeof globalDoc?.coupleNameFormat === 'string' ? globalDoc.coupleNameFormat.trim() : '';
+  const site = hasSiteName(data) ? data.siteName.trim()
+    : typeof globalDoc?.coupleNameFormat === 'string' ? globalDoc.coupleNameFormat.trim() : '';
   return own || site || id;
 }
+
+/** The event doc holds its site's name (set on a globalSettings publish; older docs lack it). */
+const hasSiteName = (data: FirebaseFirestore.DocumentData) => typeof data.siteName === 'string';
+
+/** Whether eventName needs the event's globalSettings doc. */
+const needsGlobal = (data: FirebaseFirestore.DocumentData) =>
+  !(typeof data.name === 'string' && data.name.trim()) && !hasSiteName(data);
 
 const byName = (a: EventChoice, b: EventChoice) =>
   Number(a.archived) - Number(b.archived) || a.name.localeCompare(b.name);
@@ -72,16 +81,21 @@ export async function canCreateEvents(admin: AdminSession): Promise<boolean> {
   return roles.some((access) => access !== null && hasRole(access.role, 'organizer'));
 }
 
-/** For the sidebar switcher. */
+/**
+ * For the sidebar switcher (every admin page). Reads the event docs, and
+ * globalSettings only for old docs with neither a name nor a site name.
+ */
 export async function listEventChoices(admin: AdminSession): Promise<EventChoice[]> {
   const events = await readMyEvents(admin);
-  const globals = await readGlobals(getAdminDb(), events);
+  const missing = events.filter((e) => needsGlobal(e.data));
+  const globals = new Map((await readGlobals(getAdminDb(), missing)).map((doc, i) => [missing[i].id, doc]));
   return events
-    .map((e, i) => ({ id: e.id, name: eventName(e.data, globals[i], e.id), archived: e.data.status === 'archived' }))
+    .map((e) => ({ id: e.id, name: eventName(e.data, globals.get(e.id), e.id), archived: e.data.status === 'archived' }))
     .sort(byName);
 }
 
-async function countRsvps(db: Firestore, eventId: string): Promise<EventSummary['rsvp']> {
+/** An event's RSVP counts (4 count queries, one read each per 1000 guests); null when they could not be read. */
+export async function countRsvps(db: Firestore, eventId: string): Promise<EventSummary['rsvp']> {
   try {
     const guests = db.collection(paths.guests(eventId));
     const count = async (query: FirebaseFirestore.Query) => (await query.count().get()).data().count;

@@ -131,6 +131,7 @@ src/
   lib/inviteRateLimit.ts     wrong invite codes per visitor IP (rateLimits) (+ .test.ts)
   lib/requireAdmin.ts        session + role-in-event check for server actions and admin pages; the current event (adminEvent cookie) (server only)
   lib/platformEvents.ts      the platform's events: lists (All Events, switcher), who may create, copy for duplicate / change link (server only)
+  lib/registryGifts.ts       the guest registry list, cached per event (tag registry-gifts:<eventId>, updateTag on gift writes) (server only)
   lib/templates/             event templates (F12): catalog.ts (types, name fields, palettes, screens), <type>.ts (starting content), index.ts (wizard answers -> content docs) (+ templates.test.ts); photos in public/templates/
   lib/permissions.ts         roles (owner / organizer / client) and what each may change (+ .test.ts)
   lib/auditLog.ts            event activity log: logActivity, readActivity (server only)

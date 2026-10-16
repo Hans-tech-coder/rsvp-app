@@ -156,7 +156,8 @@ server-side (no such doc).
 ## Registry claim
 
 `RegistryScreen` shows bank-transfer info and embeds `CuratedRegistryScreen`,
-which loads gifts with `getRegistryGifts()` and claims one through
+which loads gifts with `getRegistryGifts()` (cached per event, refreshed by
+every gift change or claim: `src/lib/registryGifts.ts`) and claims one through
 `GiftSelectionModal` → `claimGift(giftId, {fullName, email, message})`. The
 transaction rejects when `currentCount >= maxCount`.
 

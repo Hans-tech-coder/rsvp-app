@@ -4,6 +4,8 @@ import { getAdminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { RegistryGift } from '@/types';
 import { paths } from '@/lib/eventPaths';
+import { updateTag } from 'next/cache';
+import { readRegistryGifts, registryGiftsTag } from '@/lib/registryGifts';
 
 export async function claimGift(
   eventId: string,
@@ -52,27 +54,23 @@ export async function claimGift(
       });
     });
 
+    updateTag(registryGiftsTag(eventId));
     return { success: true };
   } catch (error: any) {
     // The guest page shows its own (editable) wording for each code.
     const code: 'notFound' | 'full' | 'failed' = error.message === 'Gift not found' ? 'notFound'
       : error.message === 'This gift has already been fully claimed.' ? 'full'
       : 'failed';
+    // The guest's list was stale; the next read fetches the gifts again.
+    if (code !== 'failed') updateTag(registryGiftsTag(eventId));
     return { success: false, code, error: error.message || 'Failed to claim gift' };
   }
 }
 
+/** The guest registry list (cached; see src/lib/registryGifts.ts). */
 export async function getRegistryGifts(eventId: string) {
   try {
-    const snapshot = await getAdminDb().collection(paths.registryGifts(eventId)).get();
-    return snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt
-      };
-    }) as (RegistryGift & { id: string })[];
+    return await readRegistryGifts(eventId);
   } catch (error) {
     console.error('Failed to fetch registry gifts:', error);
     return [];
