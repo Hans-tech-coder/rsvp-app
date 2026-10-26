@@ -11,6 +11,7 @@ import { getFontPairing } from '@/lib/fonts';
 import { THEME_PRESETS, themeVars } from '@/lib/theme';
 import { visibleScreens, type ScreenType } from '@/lib/screens';
 import { EVENT_TYPES, TEMPLATES, type EventType, type TemplateInfo } from '@/lib/templates/catalog';
+import { demoEventId } from '@/lib/templates/demos';
 
 // The New Event wizard (F12): 1 template, 2 names / date / venue, 3 palette.
 // The preview beside steps 2 and 3 is a small cover of the guest site in the
@@ -52,7 +53,8 @@ const primaryButton =
 const secondaryButton =
   'min-h-11 px-4 rounded-xl text-sm font-medium text-gray-700 dark:text-zinc-300 border border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors inline-flex items-center gap-2';
 
-export function NewEventWizard() {
+/** `demos`: the templates whose demo event is live (F14), linked under the picker. */
+export function NewEventWizard({ demos }: { demos: EventType[] }) {
   const ids = useId();
   const top = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
@@ -187,6 +189,20 @@ export function NewEventWizard() {
               <TemplateCard key={t} template={TEMPLATES[t]} selected={t === type} name={`${ids}-type`} onSelect={() => pickType(t)} />
             ))}
           </div>
+          {demos.length > 0 && (
+            <p className="mt-4 text-sm text-gray-500 dark:text-zinc-400">
+              See a finished example:{' '}
+              {demos.map((t, i) => (
+                <span key={t}>
+                  {i > 0 && ' · '}
+                  <a href={`/${demoEventId(t)}`} target="_blank" rel="noopener noreferrer" className="font-medium text-gray-900 dark:text-zinc-100 underline underline-offset-2">
+                    {TEMPLATES[t].name}
+                    <span className="sr-only"> demo (opens in a new tab)</span>
+                  </a>
+                </span>
+              ))}
+            </p>
+          )}
         </fieldset>
       )}
 

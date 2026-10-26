@@ -9,6 +9,8 @@ import { getFontPairing } from '../fonts';
 import { visibleScreens } from '../screens';
 import { EVENT_TYPES, TEMPLATES, eventTypeName, type EventType } from './catalog';
 import { buildTemplateDocs, checkNewEventDetails, type NewEventDetails } from './index';
+import { DEMO_EVENT_IDS, DEMO_GIFTS, DEMO_GUESTS, demoDetails } from './demos';
+import { isFreeEventId } from '../eventPaths';
 
 const details = (type: EventType, extra: Partial<NewEventDetails> = {}): NewEventDetails => ({
   type,
@@ -125,5 +127,48 @@ describe('event templates', () => {
     expect(checkNewEventDetails({ ...details('birthday'), hosts: ['Lola Maria'] })).toMatchObject({ hosts: ['Lola Maria', ''] });
     expect(checkNewEventDetails({ ...details('corporate'), hosts: ['ignored'] })).toMatchObject({ hosts: [] });
     expect(checkNewEventDetails(null)).toBe('Pick a template.');
+  });
+});
+
+describe('demo events', () => {
+  const today = new Date(Date.UTC(2026, 9, 26));
+
+  it('passes the wizard check for every template, dated on a Saturday about four months ahead', () => {
+    for (const type of EVENT_TYPES) {
+      const details = demoDetails(type, today);
+      expect(checkNewEventDetails(details)).toEqual(details);
+      const start = new Date(`${details.start}:00Z`);
+      expect(start.getUTCDay()).toBe(6);
+      const days = (start.getTime() - today.getTime()) / 86_400_000;
+      expect(days).toBeGreaterThanOrEqual(120);
+      expect(days).toBeLessThan(128);
+    }
+  });
+
+  it('uses links the site does not reserve, one per template', () => {
+    expect(new Set(DEMO_EVENT_IDS).size).toBe(EVENT_TYPES.length);
+    for (const id of DEMO_EVENT_IDS) expect(isFreeEventId(id)).toBe(true);
+  });
+
+  it('has unique invite codes and gifts only where the Registry screen shows', () => {
+    const codes = DEMO_GUESTS.map((g) => g.inviteCode);
+    expect(new Set(codes).size).toBe(codes.length);
+    for (const code of codes) expect(code).toMatch(/^[A-Z0-9]{6}$/);
+    expect(DEMO_GUESTS.some((g) => !g.fullName)).toBe(true);
+
+    for (const type of EVENT_TYPES) {
+      const registry = TEMPLATES[type].screens.some((s) => s.type === 'registry' && s.enabled);
+      expect(Boolean(DEMO_GIFTS[type]?.length)).toBe(registry);
+    }
+  });
+
+  it('only lets guests who answered claim gifts, within each gift’s limit', () => {
+    const answered = new Set(DEMO_GUESTS.filter((g) => g.fullName).map((g) => g.fullName));
+    for (const gifts of Object.values(DEMO_GIFTS)) {
+      for (const gift of gifts ?? []) {
+        expect(gift.claimedBy.length).toBeLessThanOrEqual(gift.maxCount);
+        for (const name of gift.claimedBy) expect(answered.has(name)).toBe(true);
+      }
+    }
   });
 });

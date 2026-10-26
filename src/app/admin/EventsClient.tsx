@@ -3,11 +3,12 @@
 import { useId, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Plus, ExternalLink, Copy, Link2, Archive, ArchiveRestore, Trash2, ArrowRight } from 'lucide-react';
-import { deleteEvent, duplicateEvent, renameEvent, setEventArchived } from '@/app/actions/events';
+import { Plus, ExternalLink, Copy, Link2, Archive, ArchiveRestore, Trash2, ArrowRight, Presentation } from 'lucide-react';
+import { deleteEvent, duplicateEvent, renameEvent, setEventArchived, setUpDemoEvents } from '@/app/actions/events';
 import { toEventId } from '@/lib/eventPaths';
 import { ROLE_NAMES } from '@/lib/permissions';
 import { eventTypeName } from '@/lib/templates/catalog';
+import { DEMO_EVENT_IDS } from '@/lib/templates/demos';
 import type { EventSummary } from '@/lib/platformEvents';
 import { AdminModal } from './components/AdminModal';
 
@@ -15,7 +16,8 @@ type Dialog =
   | { kind: 'duplicate'; event: EventSummary }
   | { kind: 'rename'; event: EventSummary }
   | { kind: 'archive'; event: EventSummary }
-  | { kind: 'delete'; event: EventSummary };
+  | { kind: 'delete'; event: EventSummary }
+  | { kind: 'demos' };
 
 const secondaryButton =
   'inline-flex items-center gap-1.5 min-h-10 px-3 rounded-lg text-sm font-medium text-gray-700 dark:text-zinc-300 border border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors';
@@ -44,6 +46,7 @@ export function EventsClient({
   const [confirmText, setConfirmText] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const active = events.filter((e) => !e.archived);
   const archived = events.filter((e) => e.archived);
@@ -56,6 +59,7 @@ export function EventsClient({
     setLinkEdited(next.kind === 'rename');
     setConfirmText('');
     setError(null);
+    setNotice(null);
     setDialog(next);
   };
 
@@ -72,6 +76,22 @@ export function EventsClient({
     if (!dialog || busy) return;
     setBusy(true);
     setError(null);
+    if (dialog.kind === 'demos') {
+      const result = await setUpDemoEvents();
+      setBusy(false);
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      setNotice(
+        result.skipped.length
+          ? `Demo events ready. Left alone (not demo events): ${result.skipped.map((id) => `/${id}`).join(', ')}.`
+          : 'Demo events ready.',
+      );
+      setDialog(null);
+      router.refresh();
+      return;
+    }
     const result =
       dialog.kind === 'duplicate'
         ? await duplicateEvent(dialog.event.id, name, link)
@@ -197,6 +217,31 @@ export function EventsClient({
                 </p>
               ),
             };
+      case 'demos': {
+        const existing = DEMO_EVENT_IDS.filter((id) => events.some((e) => e.id === id));
+        return {
+          title: existing.length ? 'Reset demo events' : 'Create demo events',
+          confirm: existing.length ? 'Reset demos' : 'Create demos',
+          variant: existing.length ? 'warning' : 'info',
+          body: (
+            <>
+              <p className="text-sm text-gray-600 dark:text-zinc-400">
+                One sample event per template, for showing the platform to a client: {DEMO_EVENT_IDS.map((id) => `/${id}`).join(', ')}.
+                Each gets sample guests, RSVPs and gifts, dated about four months from today.
+              </p>
+              <p className="text-sm text-gray-600 dark:text-zinc-400">
+                Guests can try the RSVP form with the codes TRYME2 to TRYME5.
+              </p>
+              {existing.length > 0 && (
+                <p className="text-sm text-gray-600 dark:text-zinc-400">
+                  The demos that exist are written again from scratch: every change made in them (texts, photos, guests,
+                  RSVPs, drafts, team) is lost.
+                </p>
+              )}
+            </>
+          ),
+        };
+      }
       case 'delete':
         return {
           title: 'Delete event',
@@ -238,16 +283,34 @@ export function EventsClient({
             {isOwner ? 'Every event on the platform.' : 'The events you are a member of.'} Open one to manage it.
           </p>
         </div>
-        {canCreate && (
-          <Link
-            href="/admin/new"
-            className="min-h-11 px-4 rounded-xl text-sm font-semibold bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:opacity-90 transition-opacity inline-flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" aria-hidden="true" />
-            New event
-          </Link>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => openDialog({ kind: 'demos' })}
+              className="min-h-11 px-4 rounded-xl text-sm font-semibold text-gray-700 dark:text-zinc-300 border border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors inline-flex items-center gap-2"
+            >
+              <Presentation className="w-4 h-4" aria-hidden="true" />
+              Demo events
+            </button>
+          )}
+          {canCreate && (
+            <Link
+              href="/admin/new"
+              className="min-h-11 px-4 rounded-xl text-sm font-semibold bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:opacity-90 transition-opacity inline-flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              New event
+            </Link>
+          )}
+        </div>
       </div>
+
+      {notice && (
+        <p role="status" className="rounded-xl border border-green-200 dark:border-green-500/20 bg-green-50 dark:bg-green-500/10 px-4 py-3 text-sm text-green-800 dark:text-green-300">
+          {notice}
+        </p>
+      )}
 
       {errorMsg && (
         <div role="alert" className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-6 rounded-2xl">
@@ -342,6 +405,7 @@ function EventCard({
         <div className="flex flex-wrap gap-1.5">
           {isCurrent && <Badge tone="dark">Open now</Badge>}
           {event.isDefault && <Badge tone="blue">Home page</Badge>}
+          {event.demo && <Badge tone="amber">Demo</Badge>}
           {event.archived ? <Badge tone="gray">Archived</Badge> : <Badge tone="green">Live</Badge>}
         </div>
       </div>
@@ -410,12 +474,13 @@ function Stat({ label, value }: { label: string; value: number | undefined }) {
   );
 }
 
-function Badge({ tone, children }: { tone: 'dark' | 'blue' | 'gray' | 'green'; children: React.ReactNode }) {
+function Badge({ tone, children }: { tone: 'dark' | 'blue' | 'gray' | 'green' | 'amber'; children: React.ReactNode }) {
   const tones = {
     dark: 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900',
     blue: 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300',
     gray: 'bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300',
     green: 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-300',
+    amber: 'bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-300',
   };
   return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${tones[tone]}`}>{children}</span>;
 }

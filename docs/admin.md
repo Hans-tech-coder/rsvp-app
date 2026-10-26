@@ -50,8 +50,8 @@ link to it (`components/NoEvent.tsx`).
 `/admin` (`page.tsx` server, `EventsClient.tsx`) lists every event the
 account may open: all of them for an owner, the memberships for anyone else.
 Each card shows the name, link, type, the date the guest site shows, the
-account's role, badges (Open now, Home page = the default event, Live /
-Archived) and the RSVP counts (attending, not attending, no reply yet,
+account's role, badges (Open now, Home page = the default event, Demo,
+Live / Archived) and the RSVP counts (attending, not attending, no reply yet,
 invites; Firestore count queries). Archived events are listed apart, below.
 
 - **Open** / the switcher: a plain link to `/admin/open/<eventId>`
@@ -69,7 +69,19 @@ invites; Firestore count queries). Archived events are listed apart, below.
   one first) with a live cover preview. Create writes the template's content
   as the live site (`createEvent`, `src/lib/templates`), then the new event
   opens in the visual builder (`/admin/open/<id>?to=builder`). An organizer
-  who creates one becomes its organizer.
+  who creates one becomes its organizer. Under the template cards, "See a
+  finished example" links each live demo event (below).
+- **Demo events** (owners only, F14): one event per template with made-up
+  content, guests and gifts, for showing the platform to a prospect, at
+  `/demo-wedding`, `/demo-debut`, `/demo-birthday`, `/demo-corporate`
+  (`setUpDemoEvents`; the data is `src/lib/templates/demos.ts`). The button
+  creates the missing ones and **writes the existing ones again from scratch**
+  (every change, guest, draft and team member in them is lost), dated about
+  four months ahead so the countdown runs. Each gets 8 answered RSVPs (6
+  attending, 2 not), 4 unused codes `TRYME2`-`TRYME5` a prospect can use on the
+  guest site (reset to try again), and, for Wedding and Debut, 3 gifts with
+  claims. Marked `demo: true`; an event at a demo link without that mark is
+  left alone and named in the result.
 - **Duplicate** (organizers of the event): a new event with the published
   content, the invite message and the client design switch; guests, RSVPs,
   gifts, drafts, versions, team and log stay behind. Then it opens.
@@ -185,6 +197,7 @@ the client checks `success` and shows the error.
 | `/admin/content` | Tabbed editors for every guest screen, plus **Site Text** (every button, label, hint and error message, grouped by screen, with a search box; empty field = default) **Screens & Menu** (reorder, show/hide and rename the guest screens; `content/screens`), **Colors & Fonts** (palette presets, color pickers, readability check, font pairings, live preview; `content/theme`) and **Music** (on/off, song upload, starting volume; `content/music`) | `loadDraft`, `saveDraft`, `publishDraft`, `discardDraft`, `getVersion` (`src/app/actions/content.ts`): editors save a draft (also autosaved after 10 s idle), **Publish** makes it live and rebuilds the cached guest page, **History** restores one of the last 10 published versions. A **Preview** button shows the draft site in a phone / desktop frame (docked from 1024 px, full screen below). See "Drafts, preview and versions" in `docs/content-system.md` |
 | `/admin/team` | The event's team, invites, the client design switch and the activity log (organizers and owners) | `addMember`, `changeMemberRole`, `removeMember`, `cancelInvite`, `setClientDesign` (`src/app/actions/team.ts`) |
 | `/admin/settings` | Email sender name and reply-to, the event's storage, owners: unused files clean-up (organizers and owners) | `saveEmailSettings`, `cleanUpStorage` (`src/app/actions/settings.ts`) |
+| `/admin/guide` | **Guide** for non-technical organizers and clients (every role; also without a current event): picking the event, editing with drafts / Publish, invites, RSVPs, gifts, team and settings. Static text in `guide/page.tsx`: when a page's buttons or names change, change the guide too | – |
 | `/admin/builder` | **Visual builder** (tablet and wider; full screen): section list (pick, drag, show/hide, rename) and site-wide panels on the left, the draft site in the middle, the picked section's editor on the right. Click a section in the preview to edit it; edits show live; Undo / Redo across panels. See "Visual builder" in `docs/content-system.md` | Same as `/admin/content` (each panel is the same editor with its own Save Draft / Publish / History) |
 
 ## Adding an admin page

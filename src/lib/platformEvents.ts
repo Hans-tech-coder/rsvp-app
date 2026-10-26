@@ -23,6 +23,8 @@ export type EventSummary = EventChoice & {
   type: string;
   role: AccessRole;
   isDefault: boolean;
+  /** A demo event (F14), written again from scratch by the owners' Demo events button. */
+  demo: boolean;
   /** The event date the guest site shows, e.g. "December 20, 2026". */
   date: string;
   createdAt: string | null;
@@ -125,6 +127,7 @@ export async function listEventSummaries(admin: AdminSession): Promise<EventSumm
       type: typeof e.data.type === 'string' ? e.data.type : 'wedding',
       role: e.role,
       isDefault: e.id === DEFAULT_EVENT_ID,
+      demo: e.data.demo === true,
       date: formatEventDate(mergeGlobal(globals[i]).targetDate),
       createdAt: e.data.createdAt instanceof Timestamp ? e.data.createdAt.toDate().toISOString() : null,
       rsvp: await countRsvps(db, e.id),

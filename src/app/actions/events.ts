@@ -1,15 +1,17 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { cookies } from 'next/headers';
-import { FieldValue, type DocumentData } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp, type DocumentData } from 'firebase-admin/firestore';
 import { getAdminDb } from '@/lib/firebase/admin';
 import { DEFAULT_EVENT_ID, isFreeEventId, isValidEventId, paths } from '@/lib/eventPaths';
 import { ADMIN_EVENT_COOKIE, ADMIN_EVENT_COOKIE_OPTIONS, getAdmin, requireEventRole, type AdminSession } from '@/lib/requireAdmin';
 import { canCreateEvents, copyEventData, moveEventAccounts } from '@/lib/platformEvents';
 import { logActivity } from '@/lib/auditLog';
 import { buildTemplateDocs, checkNewEventDetails } from '@/lib/templates';
-import { TEMPLATES } from '@/lib/templates/catalog';
+import { EVENT_TYPES, TEMPLATES } from '@/lib/templates/catalog';
+import { DEMO_GIFTS, DEMO_GUESTS, demoDetails, demoEventId } from '@/lib/templates/demos';
+import { registryGiftsTag } from '@/lib/registryGifts';
 
 // The platform's events (F11), for the events list (src/app/admin/page.tsx).
 // Who may do what:
@@ -19,6 +21,7 @@ import { TEMPLATES } from '@/lib/templates/catalog';
 //   change link     organizers of the event (moves everything to the new ID; the old URL stops working)
 //   archive/restore organizers of the event (an archived event's guest page is a 404)
 //   delete          owners only
+//   demo events     owners only (create or reset the four demos, src/lib/templates/demos.ts)
 // The default event (`/` redirects to it) cannot be renamed, archived or deleted.
 
 type Fail = { success: false; error: string };
@@ -241,5 +244,84 @@ export async function deleteEvent(eventId: string, confirmId: string): Promise<{
     return { success: true };
   } catch (error) {
     return { success: false, error: errorMessage(error, 'Failed to delete the event') };
+  }
+}
+
+/**
+ * Creates the demo event of every template (src/lib/templates/demos.ts), or
+ * writes it again from scratch when it exists: content, sample guests and
+ * RSVPs, gifts and claims. Anything changed in a demo (drafts, team, log,
+ * guests) is lost. Owners only. An event at a demo's link that is not a demo
+ * is left alone and reported.
+ */
+export async function setUpDemoEvents(): Promise<{ success: true; done: string[]; skipped: string[] } | Fail> {
+  try {
+    const me = await getAdmin();
+    if (!me?.isOwner) throw new Error('Unauthorized');
+
+    const db = getAdminDb();
+    const now = new Date();
+    const done: string[] = [];
+    const skipped: string[] = [];
+
+    for (const type of EVENT_TYPES) {
+      const eventId = demoEventId(type);
+      const ref = db.doc(paths.event(eventId));
+      const existing = await ref.get();
+      if (existing.exists && existing.get('demo') !== true) {
+        skipped.push(eventId);
+        continue;
+      }
+      if (existing.exists) await db.recursiveDelete(ref);
+
+      const details = demoDetails(type, now);
+      await claimEvent(me, eventId, { name: details.name, type, demo: true }, buildTemplateDocs(details));
+      try {
+        const batch = db.batch();
+        const daysAgo = (days: number) => Timestamp.fromMillis(now.getTime() - days * 86_400_000);
+        for (const { daysAgo: days, ...guest } of DEMO_GUESTS) {
+          const answered = guest.fullName !== undefined;
+          batch.create(db.doc(paths.guest(eventId, guest.inviteCode)), {
+            ...guest,
+            codeStatus: answered ? 'used' : 'unused',
+            createdAt: daysAgo(20),
+            ...(answered ? { submittedAt: daysAgo(days ?? 0), isCopied: true } : {}),
+          });
+        }
+        for (const gift of DEMO_GIFTS[type] ?? []) {
+          const giftRef = db.collection(paths.registryGifts(eventId)).doc();
+          batch.create(giftRef, {
+            name: gift.name,
+            link: gift.link,
+            maxCount: gift.maxCount,
+            currentCount: gift.claimedBy.length,
+            isFull: gift.claimedBy.length >= gift.maxCount,
+            createdAt: daysAgo(20),
+          });
+          for (const fullName of gift.claimedBy) {
+            const guest = DEMO_GUESTS.find((g) => g.fullName === fullName);
+            batch.create(db.collection(paths.giftSelections(eventId)).doc(), {
+              giftId: giftRef.id,
+              giftName: gift.name,
+              fullName,
+              email: guest?.email ?? '',
+              message: '',
+              selectedAt: daysAgo(guest?.daysAgo ?? 0),
+            });
+          }
+        }
+        await batch.commit();
+      } catch (error) {
+        await dropEvent(me, eventId);
+        throw error;
+      }
+      updateTag(registryGiftsTag(eventId));
+      refreshGuestPage(eventId);
+      await logActivity(eventId, me, 'Set up the demo event', `${details.name}, with sample guests`);
+      done.push(eventId);
+    }
+    return { success: true, done, skipped };
+  } catch (error) {
+    return { success: false, error: errorMessage(error, 'Failed to set up the demo events') };
   }
 }

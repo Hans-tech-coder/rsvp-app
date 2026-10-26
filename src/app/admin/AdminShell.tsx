@@ -9,7 +9,7 @@ import type { EventChoice } from '@/lib/platformEvents';
 import { EventAccessProvider, type MyEventAccess } from './eventAccess';
 import { EventSwitcher } from './EventSwitcher';
 import { auth } from '@/lib/firebase/client';
-import { LayoutDashboard, Users, Gift, LogOut, Key, ClipboardList, Image as ImageIcon, Menu, X, UsersRound, PanelsTopLeft, CalendarRange, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Gift, LogOut, Key, ClipboardList, Image as ImageIcon, Menu, X, UsersRound, PanelsTopLeft, CalendarRange, Settings, BookOpen } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 // The admin chrome (sidebar, mobile header) around every admin page. The
@@ -52,6 +52,7 @@ export function AdminShell({ access, events, children }: { access: MyEventAccess
             : []),
         ]
       : []),
+    { name: 'Guide', href: '/admin/guide', icon: BookOpen },
   ];
 
   return (
